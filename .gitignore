@@ -1,0 +1,9 @@
+﻿# Salinan game komersial (hanya referensi lokal, jangan di-upload)
+LOGIC/*-AnkerGames/
+LOGIC/**/*.exe
+LOGIC/**/*.dll
+LOGIC/**/*.pak
+LOGIC/**/*.vpk
+LOGIC/**/*.assets
+LOGIC/**/*.resS
+LOGIC/**/*.bundle
