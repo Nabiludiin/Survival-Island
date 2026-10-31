@@ -1,0 +1,190 @@
+256 models/props_foliage/urban_trees_branches02_mip0
+256 models/props_foliage/urban_trees_branches03_mip0
+256 particle/fire_burning_character/fire_burning_character
+256 particle/spray1/spray1
+256 models/props_downtown/railings
+256 models/props/terror/explosive_ammopack
+256 models/props/terror/incendiary_ammopack
+256 models/v_models/weapons/pistol/v_4pistols
+256 overlays/rug001a
+256 brick/urban_brickwall_01_ssbump
+256 brick/urban_brickwall_03a
+256 buildings/composite005
+256 concrete/blacktop_ext_01_height-ssbump
+256 concrete/pavement2_height-ssbump
+256 concrete/street_overlay_crossing
+256 concrete/street_overlay_noparking
+256 decals/decalstain001a
+256 decals/plaster017a
+256 decals/trash_00
+256 decals/trashdecal04a
+256 detail/detailsprites
+256 metal/metal_plate01
+256 metal/metal_plate01_ref
+256 models/props_downtown/atm_cigarettemachine
+256 models/props_downtown/metal_door
+256 models/props_windows/window_brick01
+256 models/props_equipment/light_floodlight_on
+256 models/props_equipment/oxygentank01
+256 models/props_foliage/mall_trees_branches01
+256 models/props_foliage/mall_trees_branches02
+256 models/props_foliage/tree_trunk
+256 models/props_fortifications/barricade001
+256 metal/metalwall058a
+256 models/props_interiors/furniture_wood01
+256 models/props_interiors/lamps_off
+256 models/props_interiors/lamps_on
+256 models/props_interiors/lamps_on_mask
+256 models/props_junk/phys_objects02a
+256 models/props_junk/phys_objects02b
+256 models/props_junk/plastic_junk001a
+256 models/props_signs/pole_horizontal_01
+256 models/props_signs/sign_street_01
+256 models/props_urban/bench001
+256 models/props_urban/fence001
+256 models/props_urban/fence003
+256 models/props_urban/garbage_can001
+256 models/props_urban/porch_light003b
+256 models/props_vehicles/4carz1024
+256 models/props_vehicles/4carz1024_glass
+256 models/props_vehicles/floodlight_generator
+256 overlays/street_cover_10
+256 overlays/trash_01
+256 particle/fire_particle_4/fire_particle_4
+256 particle/goo/goo2
+256 particle/particle_flares/particle_flare_002
+256 particle/smoke1/smoke1
+256 particle/vistasmokev1/vistasmokev1
+256 plaster/urban_plasterwall_height-ssbump
+256 plaster/plaster_int_a01
+256 concrete/cindmap02-ssbump
+256 concrete/cinder-ssbump
+256 concrete/conc_map-ssbump
+256 metal/corrugated-ssbump
+256 wood/urban_woodfloor01_ssbump
+256 concrete/street_overlay_01b
+256 decals/decalstain011a
+256 decals/drainage_stain_02
+256 decals/paper01
+256 models/props/de_inferno/vine_wall1
+256 models/props_exteriors/plastic_fence001
+256 models/props_fairgrounds/foodcart
+256 models/props_interiors/furniture_wood02
+256 models/props_interiors/power_outlet_campground_ref
+256 models/props_mill/elevator_cage
+256 models/props_street/bus_stop
+256 models/props_unique/jukebox
+256 models/props_unique/jukebox_menu_glow1
+256 models/props_urban/bench002
+256 models/props_urban/carnival_sign002b
+256 models/props_urban/fridge002
+256 brick/urban_brickwall_01a
+256 models/props_urban/wood_railing001
+256 models/props_waterfront/tattootable
+256 decals/sewer_slime01_decal
+256 nature/cobweb00
+256 overlays/decomposing_puddle
+256 models/props/cs_militia/vines01
+256 skybox/urban_horizon
+256 decals/debris_exterior_01
+256 overlays/brick_bottom_02
+256 overlays/ghostsign_03
+256 overlays/urban_paintswatch_01a
+256 particle/blood_splatter/bloodsplatter
+256 particle/fire_particle_2/fire_particle_2
+256 particle/water_splash/water_splash
+256 carpet/businessfloormat
+256 decals/drainage_stain_04
+256 models/props_c17/chair_stool01a
+256 models/props_c17/hospital_cart01
+256 models/props_lighting/lightfixture02aon
+256 models/props_lighting/lightfixture02on
+256 overlays/ghostsign_02
+256 signs/sign_safety_checklist_mod01
+256 detail/detail_brick_01
+256 models/props_misc/tarps
+256 concrete/street_overlay_02
+
+512 models/infected/common/l4d2/cim_fallen_survivor
+512 models/infected/common/l4d2/ci_gradient_palette_fallen_survivor
+
+models/infected/common/l4d2/cim_head_clown 
+models/infected/common/l4d2/cim_head_jimmy 
+models/infected/common/l4d2/cim_head_mud 
+models/infected/common/l4d2/cim_ceda_full 
+models/infected/common/l4d2/cim_ceda_faceplate 
+models/infected/common/l4d2/cim_ceda_faceplate_envmapmask
+models/infected/common/l4d2/cim_clown
+models/infected/common/l4d2/cim_jimmy 
+models/infected/common/l4d2/cim_mud 
+models/infected/common/l4d2/cim_riot 
+models/infected/common/l4d2/cim_roadcrew 
+
+512 detail/detailsprites
+
+512 models/props_mall/mall_display_07
+512 models/props_fairgrounds/amp_stack
+models/props_junk/explosive_box001
+models/props_junk/explosive_box001_hinge
+512 models/props_unique/jukebox_menu_glow1
+512 models/props_unique/jukebox_menu_glow2
+512 models/props/de_nuke/truck_nuke
+
+256 models/props_unique/jukebox_menu_selection1
+256 models/props_unique/jukebox_menu_selection2
+256 models/props_unique/jukebox_menu_selection3
+256 models/props_unique/jukebox_menu_selection4
+256 models/props_unique/jukebox_menu_selection5
+256 models/props_misc/tarps
+
+512 models/props_misc/fairground_tents
+512 models/props_mill/elevator_cage
+
+models/survivors/teenangst/zoey_color
+models/survivors/teenangst/zoey_color_it
+
+models/survivors/manager/louis_color
+models/survivors/manager/louis_color_it
+
+
+models/survivors/namvet/bill_color
+models/survivors/namvet/bill_color_it
+
+models/survivors/biker/francis_color
+models/survivors/biker/francis_color_it
+
+
+512 models/props_foliage/mall_trees_branches01
+512 models/props_foliage/mall_trees_branches02
+512 models/props_foliage/urban_trees_branches02_still
+512 models/props_foliage/urban_trees_branches03
+512 models/props_foliage/urban_trees_branches03_hedges
+512 models/props_foliage/urban_trees_branches03_small
+512 models/props_foliage/urban_trees_branches03_medium
+
+256 metal/metal_ext_12
+256 decals/rubble01a
+256 de_train/train_cement_stain_01
+128 glass/glass01
+256 plaster/plaster_ext_19
+
+
+512 models/props_foliage/urban_trees_barks01
+512 models/props_foliage/urban_trees_barks01_medium
+512 models/props_foliage/urban_trees_barks01_st
+
+models/v_models/weapons/eq_cola/v_cola_glass
+models/v_models/weapons/eq_cola/v_cola_glass_normal
+models/v_models/weapons/eq_cola/v_cola_logos
+
+
+512 models/props_doors/doormetal_double_boarded01
+512 models/props_mall/mall_bench
+
+512 models/props_street/window_washer_quad
+
+512 models/props_mall/mall_counter_entrance_02
+512 models/props_windows/window_hotel001
+
+512 models/props_downtown/metal_door
+

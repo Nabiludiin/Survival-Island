@@ -1,0 +1,4 @@
+media/valve_l4d2_rating_RATINGBOARD.bik
+media/valve_xbox_legals.bik
+media/l4d2_intro.bik
+

@@ -1,0 +1,209 @@
+//
+// DO NOT MODIFY!!! UNLESS YOU ARE AN XLSP ADMIN
+//
+
+"XLSPTitleServers"
+{
+	// The title servers will heartbeat to all these
+	// The title servers only read this entry
+	"MasterServers"
+	{
+		"Server1"	"xlsp-master2:27011"
+	}
+
+	// The following represents each SecureGateway (SG)
+	// The "Header" is emitted largely as-is
+	// The "Servers" denotes the Master Servers and the Title Servers
+
+	// Each SecureGateway has one of these entries, which build out the SG's sgconfig.ini
+	// Critical syntax, SecureGateway**<name> denotes the prefix for the "UserData"
+	// <name> must be kept under 32 alphanum characters, shorter is better
+	"SecureGateway**L4D2_Internal_1"
+	{
+		// Each SecureGateway needs one of these entries, it identifies the unique portion
+		// The portions of this "header" are emitted as is after the common "header"
+		// You may have Config_2...Config_N
+		"Config_1"
+		{
+			"OutputFile"	"\\sg01\lsproot\sg\sgconfig.ini"
+
+			"Header"
+			{
+				"NetworkInterface"
+				{ 
+					Type                Internet		 		    // Interface is connected to the Internet
+					Ip                  67.132.200.131			    // Static IP address of this interface
+					IpMask              255.255.255.192                         // Subnet mask of this interface
+					IpGateway           67.132.200.129                          // Gateway of this interface
+					Nic                 0030487E1F5C 			    // 6 byte mac address of the NIC
+				}
+
+				"NetworkInterface"
+				{
+					Id                  7                                      // Id of the interface.
+					Type                Datacenter                             // Interface is connected to the Datacenter
+					Ip                  172.16.1.58                            // Static IP address of this interface
+					IpEnd               172.16.1.58                            // Static IP address of this interface
+					IpMask              255.255.248.0                          // Subnet mask of this interface
+					IpGateway           172.16.0.1                             // Gateway of this interface
+					Nic                 0030487E1F5D 			   // 6 byte mac address of the NIC.  No '-'.
+				}
+			}
+		}
+
+		"Header"
+		{
+			TraceToStdOut	1
+			TraceFile		c:\lsproot\tracefile.txt
+			ClientLimit		2047
+			ClientPortLimit 32
+
+			// Debugging tags
+			"TraceTags"
+			{
+				ChalTrace 				0
+				ClientStats 			0
+				ClientStatsFlow			0
+				Config 					1
+				Event 					1
+				KerbVerbose 			1
+				KerbWarn				1
+				Lock					0
+				LSPRefresh				1
+				ParseExpr				0
+				RecvArp					0
+				RecvDiscard				1
+				RecvEnet				0
+				RecvIgnore				0
+				RecvIp					0
+				RecvKeyEx				0
+				RecvSecMsg				0
+				RecvXsp					0
+				ScratchMemoryAlloc		0
+				ScratchMemoryVerbose	0
+				SgSvc					0
+				SgSvcNotification		0
+				SpiFlag					0
+				SpiFlow					1
+				SpiTrace				0
+				Timer					0
+				UdpEcho					0
+				Warning 				1
+				Wiretap					0
+				Xmit					0
+				XmitKeyEx				0
+				XmitXsp					0
+			}		
+			
+			"LspProxy"
+			{
+				Ip                  172.16.1.60	// IP address of the LSP proxy
+				Port                80
+				SiteId              0x45410880
+			}
+
+			"Service"
+			{
+				Id                  0x45410880
+				Name                L4D_Hosting
+			}
+
+			"Title"
+			{
+				// L4D
+				TitleId             0x45410830
+				UserData		0
+			}
+
+			"Title"
+			{
+
+				// L4D2
+				TitleId             0x454108D4
+				UserData			0
+			}
+				
+			// ----------------------------------------------------------------------------------------
+			// The following section will enable NT event throttling for all events by
+			// default. It prevents the SG from choking on its own events.
+			// ----------------------------------------------------------------------------------------			
+			"Event" 
+			{
+				Id                  default
+				IntervalSecs        1
+			}
+		}
+			
+		"Servers"
+		{
+			Service             L4D_Hosting
+			InterfaceId			7
+			Protocol            VDP
+			
+			"MasterServers"
+			{
+				2000				xlsp-master2:27011
+			}
+			
+			"TitleServers"
+			{
+				1008				l4d-linux:27015
+				1009				l4d-linux:27016
+				1010				l4d-linux:27017
+				1011				l4d-linux:27018
+
+				1012				xlsp5:27060
+				1013				xlsp5:27061
+				1014				xlsp5:27062
+				1015				xlsp5:27063
+				1016				xlsp5:27064
+				1017				xlsp5:27065
+				1018				xlsp5:27066
+				1019				xlsp5:27067
+				1020				xlsp5:27068
+				1021				xlsp5:27069
+				1022				xlsp5:27070
+				1023				xlsp5:27071
+				1024				xlsp5:27072
+				1025				xlsp5:27073
+				1026				xlsp5:27074
+				1027				xlsp5:27075
+				1028				xlsp5:27076
+				1029				xlsp5:27077	
+				1030				xlsp5:27078	
+				1031				xlsp5:27079	
+
+				1032				milton-vista64:27015
+				1033				vitaliy:27015
+				1034				vitaliy:27016
+				1035				vitaliy:27017
+				1036				vitaliy:27018
+				1037				vitaliy:27019
+				1038				vitaliy:27020
+				1039				kerry:27015			
+
+				1040				xlsp5:27080
+				1041				xlsp5:27081
+				1042				xlsp5:27082
+				1043				xlsp5:27083
+				1044				xlsp5:27084
+				1045				xlsp5:27085
+				1046				xlsp5:27086
+				1047				xlsp5:27087
+				1048				xlsp5:27088
+				1049				xlsp5:27089
+				1050				xlsp5:27090
+				1051				xlsp5:27091
+				1052				xlsp5:27092
+				1053				xlsp5:27093
+				1054				xlsp5:27094
+				1055				xlsp5:27095
+				1056				xlsp5:27096
+				1057				xlsp5:27097	
+				1058				xlsp5:27098	
+				1059				xlsp5:27099	
+			}
+
+		}
+	}
+}

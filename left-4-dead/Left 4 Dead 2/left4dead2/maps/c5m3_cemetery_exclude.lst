@@ -1,0 +1,21 @@
+models/props_doors/doormain_skin02
+models/props_doors/doormain_skin03
+models/props_doors/doormain_skin04
+models/props_fortifications/police_barrier001b
+
+512  liquids/flow_identity
+256  models/props_interiors/lamps_off
+256  models/props_interiors/lamps_on
+128  models/props_interiors/lamps_on_mask
+256  models/props_urban/garden_hose001
+256  models/props_urban/chimneys001
+512  materials/concrete/charred_rubble
+256  models/props_urban/oil_drum001_normal
+256  models/props_urban/plastic_flamingo001
+256  models/props_urban/plastic_flamingo001_normal
+256  models/props_urban/mailbox001
+256  models/props_urban/porch_light001
+256  models/props_urban/porch_light002
+256  models/props_urban/telephone_pole_addons001
+256  models/props_urban/tire001
+256  models/props_urban/tire001_normal

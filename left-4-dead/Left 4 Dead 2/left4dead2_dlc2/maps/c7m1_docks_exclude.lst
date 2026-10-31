@@ -1,0 +1,160 @@
+detail/detailsprites
+dev/dev_measurewall01d
+models/gibs/hgibs/skull1
+models/gibs/hgibs/skull1_normal
+models/props_equipment/oxygentank01
+models/props_urban/curbs002
+
+tools/toolsskybox
+tools/toolsareaportal-dx10
+tools/toolsclip-dx10
+tools/toolshint-dx10
+tools/toolsinvisible-dx10
+tools/toolsskip-dx10
+tools/toolstrigger-dx10
+tools/toolsnodraw
+tools/toolsclip
+tools/toolshint
+tools/toolsinvisible
+tools/toolsskip
+tools/toolstrigger
+
+models/survivors/coach/coach_body_color
+models/survivors/coach/coach_body_normal
+models/survivors/coach/coach_head_wrp
+models/survivors/gambler/gambler_body
+models/survivors/gambler/gambler_body_normal
+models/survivors/gambler/gambler_head_wrp
+models/survivors/mechanic/mechanic_body_color
+models/survivors/mechanic/mechanic_body_normal
+models/survivors/producer/producer_body_color
+models/survivors/producer/producer_body_normal
+
+512 models/survivors/biker/francis_color
+512 models/survivors/biker/francis_normal
+512 models/survivors/biker/francis_head_normal
+512 models/survivors/teenangst/zoey_color
+512 models/survivors/teenangst/zoey_normal
+512 models/survivors/teenangst/zoey_head_normal
+512 models/survivors/manager/louis_color
+512 models/survivors/manager/louis_normal
+512 models/survivors/manager/louis_head_normal
+512 models/survivors/namvet/bill_color
+512 models/survivors/namvet/bill_normal
+512 models/survivors/namvet/bill_head_normal
+
+1024 models/infected/boomer/boomer
+512 models/infected/boomer/boomer_normal
+1024 models/infected/hunter/hunter_01
+512 models/infected/hulk/hulk_01_normal
+1024 models/infected/smoker/smoker
+512 models/infected/smoker/smoker_normal
+1024 models/infected/witch/witch
+512 models/infected/witch/witch_hair
+512 models/infected/witch/witch_normal
+
+512 models/v_models/infected/v_hulk
+512 models/v_models/weapons/autoshot/m4super
+512 models/v_models/weapons/pistol/v_pistol_reference
+512 models/v_models/weapons/rifle/m16a2
+512 models/v_models/weapons/shotgun/v_pump_shotgun_reference
+512 models/v_models/weapons/smg/uzi
+512 models/v_models/weapons/sniper/v_sniper_reference
+
+512 decals/decals_mod2x
+64 decals/fire_barricade_docks
+64 decals/burn03
+256 glass/glasswindow048b_height-ssbump
+512 models/deadbodies/deadbodies_fresh_super
+512 models/deadbodies/deadbodies_super
+128 models/props/cs_assault/ventilationduct02
+128 models/props/cs_assault/ventilationduct02_ref
+128 models/props_interiors/power_outlet_campground
+256 models/props_vehicles/4carz1024_glass
+256 models/props/de_nuke/skylight01_bottom
+256 models/props/de_nuke/skylight01_top
+512 models/props/cs_assault/forklift
+256 models/props/cs_assault/forklift_ref
+64 models/props/cs_office/light_security
+256 models/props_c17/fence_alpha
+256 models/props_c17/lamppost03a
+64 models/props_buildings/hmap_citycenter_hill
+128 models/props_debris/paintbucket01
+512 models/props_docks/canal_docks01a
+512 models/props_doors/checkpoint door
+512 models/props_equipment/cargo_container01
+128 models/props_equipment/cart_utility_01
+256 models/props_equipment/toolchest_01
+128 models/props_exteriors/guardrail_ref
+128 models/props_exteriors/guardshack_ref
+256 models/props_foliage/urban_trees_barks01
+512 models/props_foliage/urban_trees_branches02_mip0
+512 models/props_foliage/urban_trees_branches03_mip0
+512 models/props_fortifications/burning_barricade_01
+512 models/props_industrial/brick_conveyor01
+256 models/props_industrial/pallet_barrel_water01
+512 models/props_industrial/warehouse_shelves
+128 models/props_interiors/chair_cafeteria_atrium
+128 models/props_interiors/chair_office2
+64 models/props_interiors/dish_soap
+256 models/props_interiors/furniture_wood01
+256 models/props_interiors/refrigerator02
+128 models/props_interiors/woodfurniture01
+256 models/props_junk/physics_trash_hospital
+128 models/props_lighting/lightfixture04off
+64 models/props_lighting/lightfixture04off_ref
+256 models/props_office/filecabinet01
+512 models/props_pipes/tunnelkiln_pipeworks_01
+256 models/props_rooftop/acunit01
+256 models/props_rooftop/acvent04
+256 models/props_rooftop/billboard01_main
+256 models/props_rooftop/rooftopcluster06a
+256 models/props_signs/boatyard_sign
+256 models/props_signs/raisedbillboard_frame
+256 models/props_signs/raisedbillboard_main
+256 models/props_signs/sign_armed_forces_reserve01
+256 models/props_street/electrical_boxes
+256 models/props_street/police_barricade
+512 models/props_street/railway_overpass01
+256 models/props_street/shutters_blue
+64 models/props_street/trashbin01
+64 models/props_street/trashbin01_ref
+256 models/props_street/warehouse_vent_pipes
+256 models/props_unique/ltrain_rails
+512 models/props_unique/underpassrocks
+256 models/props_urban/fire_escape
+512 models/props_vehicles/4carz1024
+256 models/props_vehicles/4carz1024_glass
+512 models/props_vehicles/army_truck
+512 models/props_vehicles/boat_cabin35
+512 models/props_vehicles/boat_covered
+256 models/props_vehicles/boxcar_tanktrap_exterior_01_ref
+512 models/props_vehicles/boxcar_tanktrap_interior_01
+256 models/props_vehicles/boxcar_tanktrap_interior_01_ref
+512 models/props_vehicles/front_loader01
+512 models/props_vehicles/pickuptruck
+512 models/props_vehicles/train_box
+512 models/props_vehicles/train_enginecar_military
+512 models/props_vehicles/train_flatcar
+256 models/props_vehicles/flatnose_truck_glass
+256 models/props_vehicles/train_flatcar
+512 models/props_vehicles/train_flatcar_spec
+256 models/props_wasteland/fence_sheet01
+256 models/props_wasteland/fence_sheet02
+256 models/props_windows/windows_urban01
+
+512 models/infected/common/common_male_lower_01
+512 models/infected/common/common_male_upper_05
+512 models/infected/common/female_01/common_female_casual_lower_01
+512 models/infected/common/female_01/common_female_casual_upper_01
+512 models/infected/common/military_national_guard/common_military_lower_01
+512 models/infected/common/military_national_guard/common_military_upper_01
+512 models/infected/common/rural/common_rural_upper_01
+512 models/infected/common/worker/common_worker_male_lower_01
+512 models/infected/common/worker/common_worker_male_upper_01
+512 models/infected/common/worker/common_worker_male_upper_02
+256 models/infected/gibs/gibs
+
+
+128 wood/urban_woodcabinets02a
+64 wood/urban_woodcabinets02b

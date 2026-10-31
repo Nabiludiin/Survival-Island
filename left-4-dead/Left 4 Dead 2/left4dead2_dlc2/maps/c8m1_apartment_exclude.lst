@@ -1,0 +1,134 @@
+detail/detailsprites
+models/props_doors/doormain_skin02
+models/props_doors/doormain_skin03
+models/props_equipment/oxygentank01
+models/props_interiors/painting_landscape_a
+models/props_interiors/painting_landscape_b
+models/props_interiors/painting_landscape_c
+models/props_interiors/painting_landscape_d
+models/props_interiors/painting_landscape_e
+models/props_interiors/painting_landscape_f
+models/props_interiors/painting_landscape_g
+models/props_interiors/painting_portrait_a
+models/props_interiors/painting_portrait_b
+models/props_interiors/painting_portrait_c
+models/props_interiors/painting_portrait_d
+models/props_interiors/painting_portrait_e
+models/props_interiors/painting_portrait_f
+models/props_interiors/painting_portrait_k
+models/props_interiors/painting_portrait_l
+models/v_models/weapons/eq_cola/v_cola_logos
+models/v_models/weapons/eq_cola/v_cola_glass
+models/v_models/weapons/eq_cola/v_cola_glass_normal
+
+models/survivors/coach/coach_body_color
+models/survivors/coach/coach_body_normal
+models/survivors/coach/coach_head_wrp
+models/survivors/gambler/gambler_body
+models/survivors/gambler/gambler_body_normal
+models/survivors/gambler/gambler_head_wrp
+models/survivors/mechanic/mechanic_body_color
+models/survivors/mechanic/mechanic_body_normal
+models/survivors/producer/producer_body_color
+models/survivors/producer/producer_body_normal
+
+512 models/survivors/biker/francis_color
+512 models/survivors/biker/francis_normal
+512 models/survivors/biker/francis_head_normal
+512 models/survivors/teenangst/zoey_color
+512 models/survivors/teenangst/zoey_normal
+512 models/survivors/teenangst/zoey_head_normal
+512 models/survivors/manager/louis_color
+512 models/survivors/manager/louis_normal
+512 models/survivors/manager/louis_head_normal
+512 models/survivors/namvet/bill_color
+512 models/survivors/namvet/bill_normal
+512 models/survivors/namvet/bill_head_normal
+
+512 concrete/urban_concretefloor_01_ssbump
+256 decals/decalplaster002a
+256 decals/decalstain001a
+256 decals/decalstain011a
+512 decals/sos01
+512 models/deadbodies/deadbodies_super
+512 models/deadbodies/dead_military_police_super
+512 models/hybridphysx/helicopter_news_adj
+256 models/props_c17/lamppost03a
+256 models/props_debris/composite_debris
+256 models/props_debris/concretedebris_chunk01
+512 models/props_doors/checkpoint door
+256 models/props_doors/doormain_skin04
+256 models/props_doors/door_urban_48_118
+512 models/props_industrial/warehouse_shelves
+256 models/props_interiors/furniture_wood01
+256 models/props_interiors/furniture_wood02
+256 models/props_interiors/woodfurniture01
+256 models/props_junk/cardboard_boxes001a
+256 models/props_junk/garbage003a_01
+256 models/props_junk/woodcrates01a
+256 models/props_lab/lab_objects02
+512 models/props_junk/physics_trash_hospital
+256 models/props_lab/monitor02
+512 models/props_office/vending_machine01
+256 models/props_rooftop/acvent01
+256 models/props_rooftop/acvent02
+512 models/props_rooftop/acunit01
+256 models/props_rooftop/billboard03_main
+512 models/props_rooftop/billboard06_main
+256 models/props_street/bay_window01
+256 models/props_street/bollards
+256 models/props_street/electrical_boxes
+256 models/props_street/watertower01
+512 models/props_urban/skylight
+512 models/props_vehicles/4carz1024
+256 models/props_vehicles/4carz1024_glass
+256 models/props_vehicles/4carz1024_glass_alarm_illum_mask
+512 models/props_vehicles/flatnose_truck
+256 models/props_vehicles/flatnose_truck_glass
+256 models/props_vehicles/helicopter_news2
+128 models/props_vehicles/helicopter_news2_ref
+512 models/props_vehicles/tanker_wrecked
+256 models/props_wasteland/fence_sheet01
+128 models/props_wasteland/light_spotlight01a
+256 models/props_wasteland/light_spotlight01b
+256 models/props_windows/windows_urban01
+256 models/props_windows/windows_urban02
+512 plaster/roofbump-ssbump
+512 plaster/rooffloor_tar01
+256 signs/urban_building_sign001
+256 sprites/lightning001
+256 sprites/lightning002
+256 sprites/lightning003
+256 tile/urban_countertop01b
+/*
+512 models/infected/boomer/boomer_color
+512 models/infected/boomer/boomer_exploded_01
+512 models/infected/boomer/boomer_normal
+1024 models/infected/hulk/tank_color
+512 models/infected/hulk/tank_normal
+1024 models/infected/hunter/hunter_01
+512 models/infected/smoker/smoker
+512 models/infected/smoker/smoker_normal
+512 models/infected/witch/witch
+512 models/infected/witch/witch_normal
+
+512 models/v_models/weapons/autoshot/m4super
+256 models/v_models/weapons/eq_molotov/v_eq_molotov_bottle_normal
+512 models/v_models/weapons/rifle/m16a2
+512 models/v_models/weapons/shotgun/v_pump_shotgun_reference
+512 models/v_models/weapons/smg/uzi
+512 models/v_models/weapons/sniper/v_sniper_reference
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,17 @@
+models/props_doors/doormain_skin02
+models/props_doors/doormain_skin03
+models/props_doors/doormain_skin04
+models/props_fortifications/police_barrier001b
+
+1024 models/infected/common/l4d2/cim_riot 
+1024 models/props_unique/jukebox 
+1024 models/props_vehicles/boat_rescue_tug
+
+256  models/props_interiors/lamps_off
+256  models/props_interiors/lamps_on
+128  models/props_interiors/lamps_on_mask
+256  models/props_urban/garden_hose001
+256  models/props_urban/buoy
+256  models/props_rooftop/cupola_01
+512  models/props_unique/zombiebreakwallbrick01
+512  models/props_vehicles/police_cab_ref
