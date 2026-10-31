@@ -1,4 +1,13 @@
-﻿# Salinan game komersial (hanya referensi lokal, jangan di-upload)
+# Dependencies
+node_modules/
+package-lock.json
+
+# OS & Temp files
+.DS_Store
+Thumbs.db
+*.log
+
+# Salinan game komersial (hanya referensi lokal, jangan di-upload)
 LOGIC/*-AnkerGames/
 LOGIC/**/*.exe
 LOGIC/**/*.dll
@@ -7,3 +16,7 @@ LOGIC/**/*.vpk
 LOGIC/**/*.assets
 LOGIC/**/*.resS
 LOGIC/**/*.bundle
+*.zip
+*.rar
+*.7z
+*.bik
