@@ -1,11 +1,12 @@
 import * as THREE from '../../libs/three.module.js';
 
 export class EventManager {
-    constructor(scene, audio, status, luckyMachine) {
+    constructor(scene, audio, status, luckyMachine, building = null) {
         this.scene = scene;
         this.audio = audio;
         this.status = status;
         this.luckyMachine = luckyMachine;
+        this.building = building; // Meteor bisa merusak bangunan markas
 
         this.eventActive = false;
         this.eventType = null;
@@ -17,19 +18,29 @@ export class EventManager {
 
         this.crateMat = new THREE.MeshStandardMaterial({ color: 0xb58900, roughness: 0.6, metalness: 0.2 });
         this.meteorMat = new THREE.MeshBasicMaterial({ color: 0xff3300 });
+        // Shared geometry so crates and meteors don't allocate new buffers each spawn
+        this.crateGeo = new THREE.BoxGeometry(1.2, 0.9, 1.2);
+        this.meteorGeo = new THREE.DodecahedronGeometry(0.8);
+
+        this.meteorRadius = 4.0;       // Radius ledakan batu pijar
+        this.meteorDamage = 20;        // Damage ke pemain
+        this.meteorStructureDamage = 60;
     }
 
-    update(dt) {
+    // Returns notification messages for main.js to show as toasts
+    update(dt, playerPos = null, heightFunc = null) {
+        const messages = [];
+
         // Check weekly supply drop on Day 7, 14, 21, etc.
         const day = this.status.currentDay;
         if (day !== this.lastCheckedDay) {
             this.lastCheckedDay = day;
             if (day % 7 === 0) {
-                this.spawnWeeklyBeachSupply();
+                messages.push(this.spawnWeeklyBeachSupply());
             }
-            // 20% chance of sudden event every 2 days
+            // 35% chance of sudden event every 2 days
             if (day > 1 && day % 2 === 0 && Math.random() < 0.35 && !this.eventActive) {
-                this.triggerVolcanoEruption();
+                messages.push(this.triggerVolcanoEruption());
             }
         }
 
@@ -37,12 +48,15 @@ export class EventManager {
         if (this.eventActive) {
             this.eventTimer -= dt;
             if (this.eventType === 'volcano') {
-                this.updateMeteors(dt);
+                messages.push(...this.updateMeteors(dt, playerPos, heightFunc));
             }
             if (this.eventTimer <= 0) {
                 this.endEvent();
+                messages.push("🌋 Letusan gunung berapi mereda.");
             }
         }
+
+        return messages;
     }
 
     spawnWeeklyBeachSupply() {
@@ -59,8 +73,7 @@ export class EventManager {
             const x = Math.cos(angle) * radius;
             const z = Math.sin(angle) * radius;
 
-            const geo = new THREE.BoxGeometry(1.2, 0.9, 1.2);
-            const crate = new THREE.Mesh(geo, this.crateMat);
+            const crate = new THREE.Mesh(this.crateGeo, this.crateMat);
             crate.position.set(x, 1.0, z);
             crate.isInteractable = true;
             crate.isBeachCrate = true;
@@ -110,11 +123,12 @@ export class EventManager {
         return "🌋 BENCANA ALAM: GUNUNG BERAPI REGION 1 MELETUS! Batu pijar berjatuhan! Mesin Keberuntungan aktif gratis!";
     }
 
-    updateMeteors(dt) {
+    updateMeteors(dt, playerPos, heightFunc) {
+        const messages = [];
+
         // Spawn falling burning rocks
         if (Math.random() < 0.25 && this.meteors.length < 8) {
-            const geo = new THREE.DodecahedronGeometry(0.8);
-            const meteor = new THREE.Mesh(geo, this.meteorMat);
+            const meteor = new THREE.Mesh(this.meteorGeo, this.meteorMat);
             meteor.position.set(
                 (Math.random() - 0.5) * 80 - 40,
                 35,
@@ -129,12 +143,44 @@ export class EventManager {
         for (let i = this.meteors.length - 1; i >= 0; i--) {
             const m = this.meteors[i];
             m.position.addScaledVector(m.velocity, dt);
-            if (m.position.y <= 0) {
+            const groundY = heightFunc ? heightFunc(m.position.x, m.position.z) : 0;
+            if (m.position.y <= groundY) {
                 if (this.audio) this.audio.playHit();
+                messages.push(...this.applyMeteorImpact(m.position, playerPos));
                 this.scene.remove(m);
                 this.meteors.splice(i, 1);
             }
         }
+
+        return messages;
+    }
+
+    applyMeteorImpact(impactPos, playerPos) {
+        const messages = [];
+        const r = this.meteorRadius;
+
+        if (playerPos) {
+            const dx = playerPos.x - impactPos.x;
+            const dz = playerPos.z - impactPos.z;
+            if (dx * dx + dz * dz <= r * r) {
+                this.status.takeDamage(this.meteorDamage, "Tertimpa batu pijar gunung berapi");
+                messages.push(`☄️ Tertimpa batu pijar! -${this.meteorDamage} HP`);
+            }
+        }
+
+        if (this.building) {
+            // Copy: damageStructure removes destroyed items from the array
+            for (const s of [...this.building.structures]) {
+                const dx = s.position.x - impactPos.x;
+                const dz = s.position.z - impactPos.z;
+                if (dx * dx + dz * dz <= r * r) {
+                    const res = this.building.damageStructure(s, this.meteorStructureDamage);
+                    if (res.destroyed) messages.push("🔥 Batu pijar menghancurkan salah satu bangunanmu!");
+                }
+            }
+        }
+
+        return messages;
     }
 
     endEvent() {

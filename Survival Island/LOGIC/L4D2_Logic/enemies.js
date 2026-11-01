@@ -1,10 +1,11 @@
 import * as THREE from '../../libs/three.module.js';
 
 export class EnemyManager {
-    constructor(scene, audio, status) {
+    constructor(scene, audio, status, building = null) {
         this.scene = scene;
         this.audio = audio;
         this.status = status;
+        this.building = building; // BaseBuilding: zombie menyerang dinding markas
         this.enemies = [];
 
         // Materials
@@ -15,6 +16,8 @@ export class EnemyManager {
         this.wolfMat = new THREE.MeshStandardMaterial({ color: 0x737984, roughness: 0.8 });
         this.bearMat = new THREE.MeshStandardMaterial({ color: 0xf0f0f5, roughness: 0.7 });
         this.jaguarMat = new THREE.MeshStandardMaterial({ color: 0xd4a048, roughness: 0.8 });
+        // Material terbakar terpisah, supaya material zombie bersama tidak ikut berubah merah
+        this.zombieBurnMat = new THREE.MeshStandardMaterial({ color: 0xff3300, emissive: 0x661100, roughness: 0.7 });
 
         this.spawnTimer = 0;
     }
@@ -58,7 +61,7 @@ export class EnemyManager {
         group.add(head);
 
         group.position.copy(position);
-        group.castShadow = true;
+        this.enableShadows(group);
 
         group.enemyType = 'beast';
         group.subType = type;
@@ -132,7 +135,7 @@ export class EnemyManager {
         group.add(rightLeg);
 
         group.position.copy(position);
-        group.castShadow = true;
+        this.enableShadows(group);
 
         group.enemyType = 'zombie';
         group.subType = subType;
@@ -151,6 +154,7 @@ export class EnemyManager {
     }
 
     update(dt, playerPos, isDay, currentRegion) {
+        const messages = [];
         this.spawnTimer += dt;
 
         // Auto spawn enemies according to Day/Night and Region
@@ -165,15 +169,17 @@ export class EnemyManager {
 
             // 1. GDD SPEC: Zombie terbakar dan mati di bawah sinar matahari siang!
             if (enemy.enemyType === 'zombie' && isDay) {
-                enemy.isBurning = true;
+                if (!enemy.isBurning) {
+                    enemy.isBurning = true;
+                    enemy.children.forEach(c => {
+                        if (c.isMesh) c.material = this.zombieBurnMat;
+                    });
+                }
                 enemy.hp -= dt * 35.0; // Burn to ash in ~2 seconds!
-                // Red/orange flickering
-                enemy.children.forEach(c => {
-                    if (c.material) c.material.color.setHex(0xff3300);
-                });
 
                 if (enemy.hp <= 0) {
-                    this.killEnemy(i, "Zombie terbakar musnah oleh sinar matahari siang!");
+                    // Mati karena matahari: tidak ada loot gratis
+                    this.killEnemy(i, "Zombie terbakar musnah oleh sinar matahari siang!", false);
                     continue;
                 }
             }
@@ -181,25 +187,43 @@ export class EnemyManager {
             // 2. Daytime beasts return to den at night
             if (enemy.enemyType === 'beast' && !isDay) {
                 // Despawn beast at night
-                this.scene.remove(enemy);
-                this.enemies.splice(i, 1);
+                this.removeEnemyAt(i);
                 continue;
             }
 
-            // Move towards player
+            // Move towards player, unless a wall of the base blocks the way
             const toPlayer = new THREE.Vector3().subVectors(playerPos, enemy.position);
             toPlayer.y = 0;
             const dist = toPlayer.length();
+            enemy.targetStructure = null;
 
             if (dist > 1.2) {
                 toPlayer.normalize();
-                enemy.position.addScaledVector(toPlayer, enemy.speed * dt);
+                const step = enemy.speed * dt;
+                const blocker = this.findBlockingStructure(
+                    enemy.position.x + toPlayer.x * step,
+                    enemy.position.z + toPlayer.z * step
+                );
+                if (blocker) {
+                    enemy.targetStructure = blocker;
+                } else {
+                    enemy.position.addScaledVector(toPlayer, step);
+                }
                 enemy.lookAt(playerPos.x, enemy.position.y, playerPos.z);
             }
 
-            // Attack player
+            // Attack wall (zombie only) or player
             if (enemy.attackCooldown > 0) {
                 enemy.attackCooldown -= dt;
+            } else if (enemy.targetStructure) {
+                if (enemy.enemyType === 'zombie') {
+                    const res = this.building.damageStructure(enemy.targetStructure, enemy.damage);
+                    if (res.destroyed) {
+                        messages.push("🧟 Horde zombie menghancurkan dinding markasmu!");
+                    }
+                    if (this.audio) this.audio.playHit();
+                    enemy.attackCooldown = 1.4;
+                }
             } else if (dist <= 2.2) {
                 // Strike player
                 this.status.takeDamage(enemy.damage, `Diserang oleh ${enemy.subType}`);
@@ -213,6 +237,28 @@ export class EnemyManager {
                 enemy.attackCooldown = 1.4;
             }
         }
+
+        return messages;
+    }
+
+    findBlockingStructure(x, z) {
+        if (!this.building) return null;
+        const margin = 0.5;
+        for (const s of this.building.structures) {
+            if (!s.blocksMovement || !s.bounds) continue;
+            const b = s.bounds;
+            if (x >= b.min.x - margin && x <= b.max.x + margin &&
+                z >= b.min.z - margin && z <= b.max.z + margin) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    enableShadows(group) {
+        group.traverse(c => {
+            if (c.isMesh) c.castShadow = true;
+        });
     }
 
     spawnContextualEnemy(playerPos, isDay, region) {
@@ -251,12 +297,12 @@ export class EnemyManager {
         }
     }
 
-    damageEnemy(enemy, damage) {
+    damageEnemy(enemy, damage, isBullet = false) {
         const idx = this.enemies.indexOf(enemy);
         if (idx === -1) return null;
 
-        // Apply armor if military zombie
-        const effectiveDamage = enemy.armor ? damage * (1 - enemy.armor) : damage;
+        // Rompi anti-peluru zombie militer hanya mengurangi damage peluru
+        const effectiveDamage = (isBullet && enemy.armor) ? damage * (1 - enemy.armor) : damage;
         enemy.hp -= effectiveDamage;
 
         if (this.audio) this.audio.playHit();
@@ -267,15 +313,16 @@ export class EnemyManager {
         return { killed: false, hp: enemy.hp };
     }
 
-    killEnemy(index, msg) {
+    killEnemy(index, msg, giveLoot = true) {
         const enemy = this.enemies[index];
-        this.scene.remove(enemy);
-        this.enemies.splice(index, 1);
+        this.removeEnemyAt(index);
 
         // Chance to drop resources
         const dropChance = Math.random();
         let drop = null;
-        if (enemy.enemyType === 'beast') {
+        if (!giveLoot) {
+            // no drop
+        } else if (enemy.enemyType === 'beast') {
             this.status.inventory.food += 1;
             drop = "+1 Daging Segar";
         } else if (enemy.subType === 'military') {
@@ -289,10 +336,19 @@ export class EnemyManager {
         return { killed: true, enemy, drop, msg };
     }
 
+    removeEnemyAt(index) {
+        const enemy = this.enemies[index];
+        this.scene.remove(enemy);
+        this.enemies.splice(index, 1);
+        // Geometry is created per enemy; materials are shared and stay alive
+        enemy.traverse(c => {
+            if (c.geometry) c.geometry.dispose();
+        });
+    }
+
     clear() {
-        for (const e of this.enemies) {
-            this.scene.remove(e);
+        for (let i = this.enemies.length - 1; i >= 0; i--) {
+            this.removeEnemyAt(i);
         }
-        this.enemies = [];
     }
 }

@@ -37,11 +37,11 @@ class GameApp {
         this.status = new SurvivalStatus();
         this.crafting = new GatheringCrafting(this.status, this.audio);
         this.building = new BaseBuilding(this.scene, this.audio);
-        this.enemies = new EnemyManager(this.scene, this.audio, this.status);
+        this.enemies = new EnemyManager(this.scene, this.audio, this.status, this.building);
         this.combat = new CombatHorde(this.scene, this.camera, this.player, this.audio, this.status, this.enemies);
         this.diary = new DiarySystem();
         this.lucky = new LuckyMachine(this.status, this.audio);
-        this.events = new EventManager(this.scene, this.audio, this.status, this.lucky);
+        this.events = new EventManager(this.scene, this.audio, this.status, this.lucky, this.building);
 
         this.world = null;
         this.scavenge = null;
@@ -158,6 +158,8 @@ class GameApp {
                     this.handleResourceHit(res.object);
                 } else if (res.action === 'hitEnemy' && res.drop) {
                     this.showToast(res.drop);
+                } else if (res.action === 'empty') {
+                    this.showToast(res.msg);
                 }
             }
             this.updateUI();
@@ -562,10 +564,16 @@ class GameApp {
             this.combat.update(dt);
 
             // Enemies update
-            this.enemies.update(dt, this.player.position, this.status.isDay, currentReg);
+            const enemyMsgs = this.enemies.update(dt, this.player.position, this.status.isDay, currentReg);
 
             // Natural Events & Supply Drops
-            this.events.update(dt);
+            const eventMsgs = this.events.update(dt, this.player.position, heightFunc);
+
+            // Gabungkan supaya pesan di frame yang sama tidak saling menimpa
+            const frameMsgs = [...enemyMsgs, ...eventMsgs];
+            if (frameMsgs.length > 0) {
+                this.showToast(frameMsgs.join('\n'));
+            }
 
             // Lighting cycle update (Sun moves across sky)
             if (this.world.sunLight) {

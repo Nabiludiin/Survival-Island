@@ -105,13 +105,31 @@ export class BaseBuilding {
         mesh.receiveShadow = true;
         mesh.isStructure = true;
         mesh.isCampfire = isCampfire;
+        mesh.blocksMovement = (this.currentBuildType === 'wall'); // Dinding menghalangi musuh
         this.scene.add(mesh);
+        mesh.updateMatrixWorld(true);
+        mesh.bounds = new THREE.Box3().setFromObject(mesh);
         this.structures.push(mesh);
 
         if (this.audio) this.audio.playCraft();
         this.cancelPlacing();
 
         return { success: true, msg: "Bangunan berhasil didirikan di atas daratan!" };
+    }
+
+    damageStructure(structure, amount) {
+        const idx = this.structures.indexOf(structure);
+        if (idx === -1) return { destroyed: false };
+
+        structure.hp -= amount;
+        if (structure.hp > 0) return { destroyed: false, hp: structure.hp };
+
+        this.scene.remove(structure);
+        this.structures.splice(idx, 1);
+        structure.traverse(c => {
+            if (c.geometry) c.geometry.dispose();
+        });
+        return { destroyed: true };
     }
 
     isNearCampfire(playerPos) {

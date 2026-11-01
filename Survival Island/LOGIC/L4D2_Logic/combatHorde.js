@@ -102,8 +102,9 @@ export class CombatHorde {
 
     shootPistol(interactiveTargets) {
         if (this.magAmmo <= 0) {
-            this.reload();
-            return { action: 'empty', msg: "Amunisi habis! Menekan reload..." };
+            const res = this.reload();
+            const msg = (res && !res.success) ? res.msg : "Amunisi habis! Menekan reload...";
+            return { action: 'empty', msg };
         }
 
         this.magAmmo--;
@@ -140,7 +141,7 @@ export class CombatHorde {
         if (hits.length > 0) {
             const hit = hits[0];
             if (hit.object.rootEnemy) {
-                const res = this.enemyManager.damageEnemy(hit.object.rootEnemy, 40);
+                const res = this.enemyManager.damageEnemy(hit.object.rootEnemy, 40, true);
                 return { action: 'hitEnemy', ...res };
             }
             if (hit.object.isResource) {
