@@ -1,0 +1,32 @@
+1024 models/survivors/teenangst/zoey_color
+512 models/survivors/teenangst/zoey_normal
+1024 models/survivors/biker/francis_color
+512 models/survivors/biker/francis_normal
+1024 models/survivors/manager/louis_color
+512 models/survivors/manager/louis_normal
+1024 models/survivors/namvet/bill_color
+512 models/survivors/namvet/bill_normal
+
+512 models/infected/common/l4d2/cim_fallen_survivor
+512 models/infected/common/l4d2/ci_gradient_palette_fallen_survivor
+
+models/infected/common/l4d2/cim_head_clown 
+models/infected/common/l4d2/cim_head_jimmy 
+models/infected/common/l4d2/cim_head_mud 
+models/infected/common/l4d2/cim_ceda_full 
+models/infected/common/l4d2/cim_ceda_faceplate 
+models/infected/common/l4d2/cim_ceda_faceplate_envmapmask
+models/infected/common/l4d2/cim_clown
+models/infected/common/l4d2/cim_jimmy 
+models/infected/common/l4d2/cim_mud 
+models/infected/common/l4d2/cim_riot 
+models/infected/common/l4d2/cim_roadcrew 
+
+models/v_models/weapons/eq_cola/v_cola_logos.vtf
+models/v_models/weapons/eq_cola/v_cola_glass_normal.vtf
+models/v_models/weapons/eq_cola/v_cola_glass.vtf
+
+512 models/weapons/melee/gnome.vtf
+
+512 models/props_vehicles/flatnose_truck.vtf
+512 models/props_vehicles/police_cab_city.vtf

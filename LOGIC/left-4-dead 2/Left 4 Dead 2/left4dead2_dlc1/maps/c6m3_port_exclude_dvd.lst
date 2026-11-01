@@ -1,0 +1,112 @@
+256 models/props_downtown/railings
+256 brick/urban_brickwall_01_ssbump
+256 brick/urban_brickwall_03a
+256 concrete/blacktop_ext_01_height-ssbump
+256 concrete/pavement2_height-ssbump
+256 concrete/street_overlay_crossing
+256 decals/decalstain001a
+256 decals/trash_00
+256 metal/metal_plate01
+256 metal/metal_plate01_ref
+256 metal/metalwall058a
+256 models/props_downtown/atm_cigarettemachine
+256 models/props_downtown/metal_door
+256 concrete/cindmap02-ssbump
+256 models/props_equipment/oxygentank01
+256 models/props_foliage/mall_trees_branches01
+256 models/props_foliage/mall_trees_branches02
+256 models/props_foliage/tree_trunk
+256 models/props_foliage/urban_trees_branches02_mip0
+256 models/props_foliage/urban_trees_branches03_mip0
+256 models/props_fortifications/barricade001
+256 models/props_junk/explosive_box001
+256 models/props_junk/phys_objects02a
+256 models/props_junk/phys_objects02b
+256 plaster/urban_plasterwall_height-ssbump
+256 models/props_junk/plastic_junk001a
+256 models/props_misc/tarps
+256 models/props_signs/pole_horizontal_01
+256 models/props_signs/sign_street_01
+256 models/props_unique/jukebox_menu_selection1
+256 models/props_unique/jukebox_menu_selection2
+256 models/props_unique/jukebox_menu_selection3
+256 models/props_unique/jukebox_menu_selection4
+256 models/props_unique/jukebox_menu_selection5
+256 models/props_urban/bench001
+256 models/props_urban/fence001
+256 models/props_urban/garbage_can001
+256 models/props_urban/porch_light003b
+256 models/props_vehicles/4carz1024
+256 models/props_vehicles/4carz1024_glass
+256 models/props_vehicles/floodlight_generator
+256 models/weapons/v_chainsaw/chainsaw
+256 particle/fire_burning_character/fire_burning_character
+256 particle/spray1/spray1
+256 decals/decalstain011a
+256 decals/drainage_stain_02
+256 models/props/de_inferno/vine_wall1
+256 models/props_unique/jukebox
+256 models/props_unique/jukebox_menu_glow1
+256 models/props_urban/bench002
+256 overlays/street_cover_10
+256 overlays/trash_01
+256 particle/fire_particle_4/fire_particle_4
+256 particle/goo/goo2
+256 particle/particle_flares/particle_flare_002
+256 particle/smoke1/smoke1
+256 particle/vistasmokev1/vistasmokev1
+256 concrete/floor002_normal
+256 metal/metalfloor001a_normal
+256 plaster/plaster_int_12_height-ssbump
+256 de_train/train_largemetal_door_01_normal
+256 decals/trashdecal01a
+256 detail/detailsprites_overgrown
+256 models/props_downtown/windows_interior
+256 models/props_equipment/snack_machine
+256 models/props_misc/fairground_tents
+256 models/props_street/trafficlight01_main
+256 models/props_urban/fence002
+256 models/props_urban/flood_light001_on
+256 models/props_urban/plastic_table_set001
+256 models/props_vehicles/flatnose_truck
+256 models/props_vehicles/pickup_trucks
+256 models/props_vehicles/pickup_trucks_glass
+256 models/props_vehicles/pickuptruck
+256 models/props_vehicles/police_cab_city
+256 models/props_vehicles/police_cab_city_glass
+256 models/props_vehicles/racecar
+256 models/props_vehicles/racecar_damaged
+256 models/props_vehicles/racecar_damaged_glass
+
+1024 models/survivors/teenangst/zoey_color
+512 models/survivors/teenangst/zoey_normal
+1024 models/survivors/biker/francis_color
+512 models/survivors/biker/francis_normal
+1024 models/survivors/manager/louis_color
+512 models/survivors/manager/louis_normal
+1024 models/survivors/namvet/bill_color
+512 models/survivors/namvet/bill_normal
+
+512 models/infected/common/l4d2/cim_fallen_survivor
+512 models/infected/common/l4d2/ci_gradient_palette_fallen_survivor
+
+models/infected/common/l4d2/cim_head_clown 
+models/infected/common/l4d2/cim_head_jimmy 
+models/infected/common/l4d2/cim_head_mud 
+models/infected/common/l4d2/cim_ceda_full 
+models/infected/common/l4d2/cim_ceda_faceplate 
+models/infected/common/l4d2/cim_ceda_faceplate_envmapmask
+models/infected/common/l4d2/cim_clown
+models/infected/common/l4d2/cim_jimmy 
+models/infected/common/l4d2/cim_mud 
+models/infected/common/l4d2/cim_riot 
+models/infected/common/l4d2/cim_roadcrew 
+
+models/v_models/weapons/eq_cola/v_cola_logos.vtf
+models/v_models/weapons/eq_cola/v_cola_glass_normal.vtf
+models/v_models/weapons/eq_cola/v_cola_glass.vtf
+
+512 models/weapons/melee/gnome.vtf
+
+512 models/props_vehicles/flatnose_truck.vtf
+512 models/props_vehicles/police_cab_city.vtf

@@ -1,0 +1,121 @@
+detail/detailsprites
+models/props/cs_assault/floodlight03
+models/props_doors/doormain_skin02
+models/props_doors/doormain_skin03
+models/props_doors/doormain_skin04
+models/props_foliage/tree_trunk
+models/props_interiors/painting_landscape_c
+models/props_interiors/painting_landscape_d
+models/props_interiors/painting_landscape_f
+models/props_interiors/painting_landscape_g
+models/props_interiors/painting_landscape_h
+models/props_interiors/painting_landscape_i
+models/props_interiors/painting_landscape_j
+models/props_interiors/painting_landscape_k
+models/props_interiors/painting_landscape_l
+models/props_interiors/painting_portrait_b
+models/props_interiors/painting_portrait_g
+models/props_interiors/painting_portrait_h
+models/props_interiors/painting_portrait_i
+models/props_interiors/painting_portrait_j
+models/props_interiors/painting_portrait_k
+models/props_interiors/painting_portrait_l
+models/props_interiors/tvebstest
+models/props_junk/explosive_box001
+models/props_unique/zombiebreakwallcement01_dm_b
+models/v_models/weapons/eq_cola/v_cola_logos
+models/v_models/weapons/eq_cola/v_cola_glass
+models/v_models/weapons/eq_cola/v_cola_glass_normal
+
+models/survivors/coach/coach_body_color
+models/survivors/coach/coach_body_normal
+models/survivors/coach/coach_head_wrp
+models/survivors/gambler/gambler_body
+models/survivors/gambler/gambler_body_normal
+models/survivors/gambler/gambler_head_wrp
+models/survivors/mechanic/mechanic_body_color
+models/survivors/mechanic/mechanic_body_normal
+models/survivors/producer/producer_body_color
+models/survivors/producer/producer_body_normal
+
+512 models/survivors/biker/francis_color
+512 models/survivors/biker/francis_normal
+512 models/survivors/biker/francis_head_normal
+512 models/survivors/teenangst/zoey_color
+512 models/survivors/teenangst/zoey_normal
+512 models/survivors/teenangst/zoey_head_normal
+512 models/survivors/manager/louis_color
+512 models/survivors/manager/louis_normal
+512 models/survivors/manager/louis_head_normal
+512 models/survivors/namvet/bill_color
+512 models/survivors/namvet/bill_normal
+512 models/survivors/namvet/bill_head_normal
+
+512 decals/bloodstain_003
+256 decals/debris_concrete001a
+512 decals/logo_mercyhospital
+256 decals/proddirta
+256 decals/trashdecal05a
+256 de_train/train_cement_stain_01
+256 metal/door02
+256 metal/door03
+256 metal/metal_ibeam01
+256 metal/metalhull003a
+256 metal/prodventa
+128 metal/prodventa_normal
+256 metal/xray_board
+256 metal/xray_board_off
+
+512 models/deadbodies/deadbodies_super
+512 models/deadbodies/dead_military_police_super
+
+512 models/hybridphysx/buildingtexture
+
+512 models/props/cs_assault/forklift
+256 models/props/cs_assault/forklift_ref
+256 models/props/de_inferno/walkingplywood
+256 models/props/de_nuke/skylight01_bottom
+256 models/props/de_nuke/skylight01_top
+256 models/props/de_train/ladderaluminium
+256 models/props_c17/hospital_cart01
+512 "models/props_doors/checkpoint door"
+256 models/props_equipment/light_floodlight
+256 models/props_equipment/light_floodlight_on
+256 models/props_equipment/fountain_drinks
+512 models/props_fortifications/indoor_fortification
+512 models/props_industrial/warehouse_shelves
+256 models/props_industrial/wire_spool_01
+512 models/props_interiors/constructionwall_super
+256 models/props_interiors/handrail01_hospital
+512 models/props_interiors/kitchen_props_industrial01
+256 models/props_interiors/refrigerator02
+128 models/props_interiors/styrofoam_cups
+128 models/props_interiors/table_cafeteria_ref
+128 models/props_interiors/tvanimstatic
+256 models/props_junk/wheelbarrowo1a
+256 models/props_junk/woodcrates01a
+256 models/props_lab/powerbox001
+128 models/props_lighting/light_construction
+128 models/props_lighting/light_construction_on
+512 models/props_office/vending_machine01
+256 models/props_pipes/interiorpipe002a
+256 models/props_pipes/pipeset02d_512_001a
+256 models/props_plants/plantairport01_super
+256 models/props_rooftop/acvent01
+256 models/props_street/garbage_can
+256 models/props_unique/counterweightrails
+256 models/props_unique/handrail_foodcourt01
+256 models/props_unique/hospital/iv_pole
+256 models/props_unique/hospital/iv_pole_ref
+256 models/props_unique/wheelchair01
+256 models/props_unique/zombiebreakwall2x4core_steel
+256 models/props_vents/ventbreakable01
+
+512 plaster/blue02
+256 plaster/ceiling_insulation02-ssbump
+256 plaster/ceiling_popcorn02
+256 plaster/ceilingtiles-ssbump
+256 plaster/sheetrockdepth01-ssbump
+256 plaster/urban_plasterwall_height-ssbump
+256 wood/cabinets_side01b
+256 wood/plywood01

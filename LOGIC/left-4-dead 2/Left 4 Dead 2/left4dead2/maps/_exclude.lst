@@ -1,0 +1,405 @@
+models/weapons/melee/electric_guitar
+models/weapons/melee/4melee_weapons_exponent
+models/v_models/weapons/pistol/v_pistol_reference
+models/v_models/weapons/deserteagle/deserteagle_normal
+models/w_models/minigun/w_minigun
+
+tools/fogvolume
+tools/toolsareaportal-dx10
+tools/toolsclip-dx10
+tools/toolshint-dx10
+tools/toolsinvisible-dx10
+tools/toolsnodraw
+tools/toolsskip-dx10
+tools/toolsskybox
+tools/toolstrigger-dx10
+
+detail/detailsprites
+
+dev/reflectivity_70
+
+models/survivors/biker/francis_color
+models/survivors/biker/francis_normal
+models/survivors/manager/louis_color
+models/survivors/manager/louis_normal
+models/survivors/namvet/bill_color
+models/survivors/namvet/bill_normal
+models/survivors/teenangst/zoey_color
+models/survivors/teenangst/zoey_normal
+
+models/infected/common/l4d2/cim_fallen_survivor
+models/infected/common/l4d2/ci_gradient_palette_fallen_survivor
+
+1024 models/survivors/coach/coach_body_color
+512  models/survivors/coach/coach_body_normal
+512  models/survivors/coach/coach_head
+512  models/survivors/coach/coach_head_normal
+512  models/survivors/coach/coach_head_exp
+512  models/survivors/coach/coach_head_compress
+1024 models/survivors/gambler/gambler_body
+512  models/survivors/gambler/gambler_body_normal
+512  models/survivors/gambler/gambler_head_color
+512  models/survivors/gambler/gambler_head_normal
+512  models/survivors/gambler/gambler_hair
+512  models/survivors/gambler/gambler_head_compress
+1024 models/survivors/mechanic/mechanic_body_color
+512  models/survivors/mechanic/mechanic_body_normal
+512  models/survivors/mechanic/mechanic_head_color
+512  models/survivors/mechanic/mechanic_head_normal
+512  models/survivors/mechanic/mechanic_head_compress
+256  models/survivors/mechanic/mechanic_hair_color
+1024 models/survivors/producer/producer_body_color
+512  models/survivors/producer/producer_body_normal
+512  models/survivors/producer/producer_head_color
+512  models/survivors/producer/producer_head_normal
+512  models/survivors/producer/producer_head_exp
+512  models/survivors/producer/producer_head_compress
+256  models/survivors/producer/producer_hair_color
+
+1024 models/infected/boomer/boomer
+512  models/infected/boomer/boomer_normal
+512  models/infected/boomer/boomer_exploded_01
+1024 models/infected/boomer/boomette_color
+512  models/infected/boomer/boomette_normal
+512  models/infected/boomer/boomette_exponent
+512  models/infected/boomer/boomette_exploded
+1024 models/infected/charger/charger_diffuse
+512  models/infected/charger/charger_normal
+512  models/infected/charger/charger_body_exponent
+1024 models/infected/hulk/tank_color
+512  models/infected/hulk/tank_normal
+512  models/infected/hunter/hunter_01
+512  models/infected/hunter/hunter_normal 
+512  models/infected/hunter/hunter_exponent
+1024 models/infected/jockey/jockey_body_color
+512  models/infected/jockey/jockey_body_normal
+512  models/infected/jockey/jockey_exponent
+1024 models/infected/smoker/smoker
+512  models/infected/smoker/smoker_normal
+512  models/infected/smoker/smoker_tongue 
+256  models/infected/smoker/smoker_tongue_normal 
+512  models/infected/smoker/smokerexponent
+1024 models/infected/spitter/spitter_color
+512  models/infected/spitter/spitter_normal
+512  models/infected/spitter/spitter_exponent
+1024 models/infected/witch/witch
+512  models/infected/witch/witch_normal
+256  models/infected/witch/witch_hair
+
+512  models/v_models/infected/v_boomer_hands
+256  models/v_models/infected/v_boomer_hands_normal
+512  models/v_models/infected/v_hulk
+512  models/v_models/infected/v_hunter_hands
+
+512  models/infected/common/body_wounds/combined_gib_normal
+512  models/infected/common/body_wounds/fullbodyanatomy_col
+512  models/infected/common/body_wounds/fullbodyanatomy_normal
+512  models/infected/common/body_wounds/master_wound_cmap
+512  models/infected/common/body_wounds/master_wound_normal
+512  models/infected/common/body_wounds/torso_gib1_normal2
+512  models/infected/common/body_wounds/torso_gib2_normal
+512  models/infected/common/l4d2/detail/ci_detail_dirt
+512  models/infected/common/l4d2/detail/ci_detail_mud
+
+256  models/props/terror/exploding_ammo
+256  models/props/terror/incendiary_ammo
+512  models/props_junk/explosive_box001
+1024 models/v_models/weapons/autoshot/m4super
+512  models/v_models/weapons/autoshot/shotgun_spas_exp
+256  models/v_models/weapons/eq_bile_flask/v_bile_flask
+512  models/v_models/weapons/eq_bile_flask/v_bile_flask_cap
+512  models/v_models/weapons/eq_cola/v_cola_logos
+512  models/v_models/weapons/eq_cola/v_cola_glass_normal
+512  models/v_models/weapons/eq_cola/v_cola_glass
+512  models/v_models/weapons/eq_defibrillator/defibrillator
+512  models/v_models/weapons/deserteagle/deserteagle
+1024 models/v_models/weapons/grenade_launcher/grenade_launcher
+512  models/v_models/weapons/grenade_launcher/grenade_launcher_exponent
+512  models/v_models/weapons/pistol/v_4pistols_exp
+512  models/v_models/weapons/pistol/v_pistol_reference
+512  models/v_models/weapons/rifle/ak47_exp
+1024 models/v_models/weapons/rifle/m16a2
+512  models/v_models/weapons/rifle/rifle_b 
+512  models/v_models/weapons/shotgun/v_shotgun_wood
+1024 models/v_models/weapons/shotgun/v_shotgun_wood_exp
+512  models/v_models/weapons/shotgun/v_shotgun_a_exp
+512  models/v_models/weapons/smg/smg_a 
+1024 models/v_models/weapons/smg/uzi
+512  models/v_models/weapons/sniper/v_sniper_exp
+1024 models/v_models/weapons/sniper/v_sniper_reference
+512  models/weapons/melee/4melee_weapons
+512  models/weapons/melee/4melee_weapons_normal
+1024 models/weapons/melee/bat
+512  models/weapons/melee/bat_normal
+512  models/weapons/melee/cricket_bat
+512  models/weapons/melee/cricket_bat_normal
+1024 models/weapons/melee/crowbar
+512  models/weapons/melee/crowbar_normal 
+512  models/weapons/melee/electric_guitar
+512  models/weapons/melee/electric_guitar_normal
+512  models/weapons/melee/katana
+512  models/weapons/melee/katana_normal
+1024 models/weapons/melee/machete
+512  models/weapons/melee/machete_normal
+1024 models/weapons/melee/tonfa
+512  models/weapons/melee/tonfa_normal 
+1024 models/weapons/v_chainsaw/chainsaw
+512  models/weapons/v_chainsaw/chainsaw_exp
+256  models/w_models/eq_laser_sights/w_laser_sights
+2    models/w_models/w_he_grenade/w_he_grenade 
+2    models/w_models/w_he_grenade/w_he_grenade_normal
+
+256  effects/flashlight001
+
+512  decals/blood_splatter
+
+1024 particle/headshot/headshot
+1024 particle/blood_mist/blood_mist
+1024 particle/droplets/droplets
+
+1024 vgui/ghost_title_bg
+1024 vgui/menu_backgroud_bottom 
+1024 vgui/menu_backgroud_top 
+512  vgui/Left4Dead2Logo
+
+1024 skybox/urban_horizon 
+
+1024 models/props_misc/tarps 
+
+
+
+__COMMENT__/below_are_1024_DXT5s_in_priority_order
+__COMMENT__/these_may_get_downresed_from_the_bottom_depending_on_memory
+
+1024 particle/spray1/spray1
+1024 particle/fire_burning_character/fire_burning_character
+1024 models/props_foliage/urban_trees_branches01
+1024 models/props_foliage/urban_trees_branches02
+1024 models/props_foliage/urban_trees_branches03
+1024 models/weapons/v_chainsaw/chainsaw
+1024 models/v_models/weapons/grenade_launcher/grenade_launcher
+1024 models/weapons/melee/4melee_weapons
+1024 models/v_models/weapons/sniper/v_sniper_a
+1024 models/props/terror/explosive_ammopack
+1024 models/props/terror/incendiary_ammopack
+1024 models/v_models/weapons/rifle/ak47
+1024 models/v_models/weapons/autoshot/shotgun_spas
+1024 models/v_models/weapons/shotgun/v_shotgun_a
+1024 models/v_models/weapons/pistol/v_4pistols
+1024 models/v_models/weapons/pistol/v_4pistols_exp
+1024 models/weapons/v_chainsaw/chainsaw_exp
+1024 models/v_models/weapons/sniper/v_sniper_exp
+1024 models/v_models/weapons/rifle/ak47_exp
+1024 models/v_models/weapons/shotgun/v_shotgun_a_exp
+1024 models/weapons/melee/machete
+1024 models/weapons/melee/machete_exponent
+1024 models/weapons/melee/cricket_bat
+1024 models/weapons/v_chainsaw/chainsaw_chain
+1024 models/props_vehicles/bus01_a_2
+1024 particle/vistasmokev1/vistasmokev1
+1024 models/infected/common/body_wounds/master_wound_cmap
+1024 models/infected/common/body_wounds/master_wound_normal
+1024 models/infected/common/body_wounds/fullBodyAnatomy_normal
+1024 models/infected/common/body_wounds/wound_combined_cull_texture
+
+
+
+__COMMENT__/below_are_map_specific_1024_DXT5s
+__COMMENT__/we_upres_these_in_map_specific_exclude_lists
+
+512  concrete/pavement2_height-ssbump
+
+512  decals/helipad 
+
+512  models/infected/common/l4d2/cim_ceda_full 
+512  models/infected/common/l4d2/cim_clown
+512  models/infected/common/l4d2/cim_jimmy 
+512  models/infected/common/l4d2/cim_mud 
+512  models/infected/common/l4d2/cim_riot 
+512  models/infected/common/l4d2/cim_roadcrew 
+
+512  models/w_models/50cal/50cal 
+
+512  models/c1m1_environment/skyboxplate_compiled_2k_rgba 
+512  models/destruction_tanker/destruction_tanker_interior 
+512  models/destruction_tanker/destruction_tanker_trailer 
+512  models/props_fairgrounds/drum_riser 
+512  models/props_fairgrounds/fairgrounds_banner01
+512  models/props_fairgrounds/fairgrounds_banner01a
+512  models/props_fairgrounds/fairgrounds_banner01b
+512  models/props_fairgrounds/fairgrounds_banner01c
+512  models/props_fairgrounds/foodcart 
+512  models/props_fairgrounds/gallery_panels
+512  models/props_fairgrounds/strongman_moustachio_cutout001 
+512  models/props_fairgrounds/strongman_moustachio_off 
+512  models/props_fairgrounds/strongman_moustachio_on1 
+512  models/props_fairgrounds/strongman_moustachio_on2 
+512  models/props_fairgrounds/strongman_moustachio_on3 
+512  models/props_fairgrounds/strongman_tower 
+512  models/props_foliage/branchesfarm01_mip0 
+512  models/props_foliage/cane_field01_mip0 
+512  models/props_foliage/mall_trees_branches01 
+512  models/props_foliage/mall_trees_branches02 
+512  models/props_foliage/swamp_branches
+512  models/props_foliage/swamp_shrubwall01
+512  models/props_foliage/swamp_trees_branches01 
+512  models/props_interiors/ceda_easel01 
+512  models/props_interiors/ceda_easel01b 
+512  models/props_mall/mall_column_large 
+512  models/props_mall/mall_display_06 
+512  models/props_misc/fairground_tents
+512  models/props_misc/triage_tent 
+512  models/props_shacks/screen01_mip0 
+512  models/props_signs/gas_station_banner 
+512  models/props_signs/witch_banner 
+512  models/props_unique/jukebox 
+512  models/props_urban/hotel_sign001 
+512  models/props_vehicles/army_truck 
+512  models/props_vehicles/boat_rescue_tug 
+512  models/props_vehicles/ceda_trailer 
+512  models/props_vehicles/helicopter_concert 
+512  models/props_vehicles/racecar 
+512  models/props_vehicles/racecar_damaged 
+512  models/props_vehicles/racecar_stage 
+512  models/props_vehicles/train_box 
+512  models/props_windows/window_brick01 
+512  models/props_windows/window_hotel001_glass 
+
+512  nature/roots01-ssbump 
+
+512  overlays/road_cracked_00 
+
+512  signs/sign_swamp_01 
+
+
+
+__COMMENT__/below_are_low_priority_1024_DXT5s
+__COMMENT__/they_are_reduced_to_512_due_to_limited_memory
+
+512  particle/fire_explosion_1/fire_explosion_1
+512  particle/fire_particle_4/fire_particle_4
+512  particle/fluidexplosions/fluidexplosion
+512  particle/fire_particle_2/fire_particle_2
+
+512  models/infected/common/body_wounds/fullBodyAnatomy_col
+512  models/infected/common/body_wounds/combined_gib_col
+512  models/infected/common/body_wounds/combined_gib_normal
+
+512  models/infected/common/l4d2/detail/ci_detail_dirt 
+512  models/infected/common/l4d2/detail/ci_detail_mud 
+
+512  models/infected/common/l4d2/cim_head_clown 
+512  models/infected/common/l4d2/cim_head_jimmy 
+512  models/infected/common/l4d2/cim_head_mud 
+
+512  models/infected/common/l4d2/bphf_tshirt_skirt 
+512  models/infected/common/l4d2/bphm_dressshirt_jeans 
+512  models/infected/common/l4d2/bphm_tshirt_cargos 
+512  models/infected/common/l4d2/cif_tanktop_jeans 
+512  models/infected/common/l4d2/cif_tanktop_jeans_rain 
+512  models/infected/common/l4d2/cif_tshirt_skirt 
+512  models/infected/common/l4d2/cif_tshirt_skirt_swamp 
+512  models/infected/common/l4d2/cim_deepsouth 
+512  models/infected/common/l4d2/cim_deepsouth_rain 
+512  models/infected/common/l4d2/cim_deepsouth_swamp 
+512  models/infected/common/l4d2/cim_dressshirt_jeans 
+512  models/infected/common/l4d2/cim_tanktop_jeans 
+512  models/infected/common/l4d2/cim_tanktop_jeans_rain 
+512  models/infected/common/l4d2/cim_tshirt_cargos 
+512  models/infected/common/l4d2/cim_tshirt_cargos_swamp 
+512  models/infected/common/l4d2/bphf_head_bangs 
+512  models/infected/common/l4d2/bphf_head_longhair 
+512  models/infected/common/l4d2/bphf_tanktop_jeans 
+512  models/infected/common/l4d2/bphm_head_bald 
+512  models/infected/common/l4d2/bphm_head_centurion 
+512  models/infected/common/l4d2/ci_burning 
+512  models/infected/common/l4d2/cif_head_bangs 
+512  models/infected/common/l4d2/cif_head_bangs_rain 
+512  models/infected/common/l4d2/cif_head_longhair 
+512  models/infected/common/l4d2/cif_head_longhair_rain 
+512  models/infected/common/l4d2/cim_head_bald 
+512  models/infected/common/l4d2/cim_head_bald_rain 
+512  models/infected/common/l4d2/cim_head_centurion 
+512  models/infected/common/l4d2/cim_head_centurion_rain 
+512  models/infected/common/l4d2/cim_head_mullet 
+512  models/infected/common/l4d2/cim_head_shaggy 
+512  models/infected/common/l4d2/cim_head_shaggy_rain 
+512  models/infected/common/l4d2/cim_polo_jeans 
+
+512  models/props_downtown/horse_statue_normal 
+512  models/props_downtown/metal_door 
+512  models/props_downtown/metal_window 
+512  models/props_downtown/railings 
+512  models/props_downtown/shutters
+512  models/props_fairgrounds/kiddyland_ridetrain 
+512  models/props_fairgrounds/kiddyland_ridecar 
+512  models/props_fairgrounds/bumpercar 
+512  models/props_fairgrounds/entrance_sign 
+512  models/props_fairgrounds/kiddyland_riderocket 
+512  models/props_fairgrounds/fairgrounds_banner01 
+512  models/props_fairgrounds/fairgrounds_banner01a 
+512  models/props_fairgrounds/fairgrounds_banner01b 
+512  models/props_fairgrounds/fairgrounds_banner01c 
+512  models/props_fairgrounds/stage_scaffold 
+512  models/props_fortifications/barricade001 
+512  models/props_furniture/conduit_128 
+512  models/props_furniture/hotel_chair 
+512  models/props_junk/explosive_box001 
+512  models/props_junk/phys_objects04a 
+512  models/props_mill/company_sign01 
+512  models/props_mill/elevator_cage 
+512  models/props_mill/elevator_framework 
+512  models/props_mill/rollup_door01 
+512  models/props_mill/stalk01 
+512  models/props_mill/walkways01 
+512  models/props_shacks/fishing_net01 
+512  models/props_signs/clipps_classic_cuts 
+512  models/props_signs/disco_pants 
+512  models/props_signs/gas_station_banner_normal 
+512  models/props_signs/kappels_store_exterior 
+512  models/props_swamp/parachute01 
+512  models/props_trailers/door01_trailer 
+512  models/props_trailers/roof03_set 
+512  models/props_trailers/roof_overhang_trim01 
+512  models/props_trailers/trailer_small
+512  models/props_unique/haybails_farmhouse 
+512  models/props_unique/jukebox_menu_glow1 
+512  models/props_unique/jukebox_menu_selection1 
+512  models/props_unique/jukebox_menu_selection2 
+512  models/props_unique/jukebox_menu_selection3 
+512  models/props_unique/jukebox_menu_selection4 
+512  models/props_unique/jukebox_menu_selection5 
+512  models/props_vehicles/4carz1024 
+512  models/props_vehicles/bus01_a_ref
+512  models/props_vehicles/bus01_b_2
+512  models/props_vehicles/bus01_b_ref
+512  models/props_vehicles/churchbus01_a 
+512  models/props_vehicles/flatnose_truck 
+512  models/props_vehicles/pickup_trucks 
+512  models/props_vehicles/police_cab_city 
+512  models/props_vehicles/police_cab_rural 
+
+512  overlays/ghostsign_01 
+512  overlays/ghostsign_02 
+
+512  decals/railroadties 
+512  decals/swampleaves_decal01 
+512  decals/trash01 
+
+512  metal/fence_barbed 
+
+512  nature/swamp_trees_card01 
+512  nature/swamp_trees_card02 
+512  nature/swamp_trees_card02_end 
+512  nature/swamp_trees_card02a 
+512  nature/swamp_trees_card03 
+512  nature/trees_card01 
+512  nature/urban_trees_card01 
+512  nature/urban_trees_card02 
+
+512  plaster/roofbump-ssbump 
+
+512  signs/jackson 
+512  signs/sign_building_01 
+512  signs/sign_building_07 
+512  signs/sign_stadium_00 

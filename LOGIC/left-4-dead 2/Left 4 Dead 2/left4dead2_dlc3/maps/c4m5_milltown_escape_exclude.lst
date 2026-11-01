@@ -1,0 +1,37 @@
+models/props_interiors/lamps_on
+models/props_interiors/lamps_on_mask
+models/props_interiors/painting_landscape_b
+models/props_interiors/painting_landscape_a
+models/props_interiors/painting_landscape_d
+models/props_interiors/painting_landscape_g
+models/props_interiors/painting_landscape_f
+models/props_interiors/painting_landscape_e
+models/props_interiors/painting_portrait_d
+models/props_interiors/painting_portrait_f
+models/props_interiors/painting_portrait_e
+models/props_interiors/painting_portrait_a
+models/props_interiors/painting_landscape_c
+models/props_interiors/painting_portrait_c
+
+512 models/infected/common/l4d2/cim_roadcrew 
+512 models/props_foliage/swamp_shrubwall01
+512 concrete/pavement2_height-ssbump
+512 models/props_misc/tarps
+512 buildings/roof07
+512 concrete/silo_concrete01
+512 models/props_debris/woodset01
+512 models/props_swamp/boardwalks01
+512 models/props_trailers/roof02_set
+512 models/props_trailers/windows05to08
+512 models/props_yard/playrgound_structure
+512 models/props_urban/outhouse001
+512 models/weapons/melee/gnome
+512 models/props_junk/physics_trash
+512 models/props_vehicles/pickup_trucks_ref
+512 models/props_foliage/urban_trees_branches01_mip0
+512 models/props_foliage/urban_trees_branches02_mip0
+512 models/props_foliage/urban_trees_branches03_mip0
+512 models/props_doors/checkpoint door
+512 models/v_models/weapons/pistol/v_4pistols
+512 models/props/terror/explosive_ammopack
+512 models/props/terror/incendiary_ammopack

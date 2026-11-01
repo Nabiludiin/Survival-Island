@@ -1,0 +1,810 @@
+[
+  {
+    "name": "ACH_HONK_A_CLOWNS_NOSE",
+    "displayName": "CL0WND",
+    "description": "Honk the noses of 10 Clowns.",
+    "hidden": "0",
+    "icon": "images/ACH_HONK_A_CLOWNS_NOSE.jpg",
+    "icongray": "images/ACH_HONK_A_CLOWNS_NOSE_gray.jpg"
+  },
+  {
+    "name": "ACH_INCENDIARY_CLOWN_POSSE",
+    "displayName": "FRIED PIPER",
+    "description": "Using a Molotov, burn a Clown leading at least 10 Common Infected. ",
+    "hidden": "0",
+    "icon": "images/ACH_INCENDIARY_CLOWN_POSSE.jpg",
+    "icongray": "images/ACH_INCENDIARY_CLOWN_POSSE_gray.jpg"
+  },
+  {
+    "name": "ACH_MELEE_A_CHARGER",
+    "displayName": "LEVEL A CHARGE",
+    "description": "Kill a Charger with a melee weapon while they are charging.",
+    "hidden": "0",
+    "icon": "images/ACH_MELEE_A_CHARGER.jpg",
+    "icongray": "images/ACH_MELEE_A_CHARGER_gray.jpg"
+  },
+  {
+    "name": "ACH_KILL_SPITTER_FAST",
+    "displayName": "ACID REFLEX",
+    "description": "Kill a Spitter before she is able to spit.",
+    "hidden": "0",
+    "icon": "images/ACH_KILL_SPITTER_FAST.jpg",
+    "icongray": "images/ACH_KILL_SPITTER_FAST_gray.jpg"
+  },
+  {
+    "name": "ACH_FINISH_CAMPAIGN_MELEE_ONLY",
+    "displayName": "CONFEDERACY OF CRUNCHES",
+    "description": "Finish a campaign using only melee weapons.",
+    "hidden": "0",
+    "icon": "images/ACH_FINISH_CAMPAIGN_MELEE_ONLY.jpg",
+    "icongray": "images/ACH_FINISH_CAMPAIGN_MELEE_ONLY_gray.jpg"
+  },
+  {
+    "name": "ACH_KILL_EVERY_UNCOMMON_INFECTED",
+    "displayName": "CRASS MENAGERIE",
+    "description": "Kill one of each Uncommon Infected.",
+    "hidden": "0",
+    "icon": "images/ACH_KILL_EVERY_UNCOMMON_INFECTED.jpg",
+    "icongray": "images/ACH_KILL_EVERY_UNCOMMON_INFECTED_gray.jpg"
+  },
+  {
+    "name": "ACH_SAVE_PLAYER_FROM_JOCKEY_FAST",
+    "displayName": "A RIDE DENIED",
+    "description": "Kill a Jockey within 2 seconds of it jumping on a Survivor.",
+    "hidden": "0",
+    "icon": "images/ACH_SAVE_PLAYER_FROM_JOCKEY_FAST.jpg",
+    "icongray": "images/ACH_SAVE_PLAYER_FROM_JOCKEY_FAST_gray.jpg"
+  },
+  {
+    "name": "ACH_CUT_OFF_HEADS_MELEE",
+    "displayName": "HEAD HONCHO",
+    "description": "Decapitate 200 Infected with a melee weapon.",
+    "hidden": "0",
+    "icon": "images/ACH_CUT_OFF_HEADS_MELEE.jpg",
+    "icongray": "images/ACH_CUT_OFF_HEADS_MELEE_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_LEAVE_SAFE_ROOM_DEFIB_TEAMMATE",
+    "displayName": "HEARTWARMER",
+    "description": "In a Versus round, leave the saferoom to defibrillate a dead teammate.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_LEAVE_SAFE_ROOM_DEFIB_TEAMMATE.jpg",
+    "icongray": "images/ACH_VS_LEAVE_SAFE_ROOM_DEFIB_TEAMMATE_gray.jpg"
+  },
+  {
+    "name": "ACH_BEAT_CAMPAIGNS_EXPERT_MODE",
+    "displayName": "STILL SOMETHING TO PROVE",
+    "description": "Survive all campaigns on Expert.",
+    "hidden": "0",
+    "icon": "images/ACH_BEAT_CAMPAIGNS_EXPERT_MODE.jpg",
+    "icongray": "images/ACH_BEAT_CAMPAIGNS_EXPERT_MODE_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVE_EXPERT_REALISM",
+    "displayName": "THE REAL DEAL",
+    "description": "Survive a campaign on Expert skill with Realism mode enabled.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVE_EXPERT_REALISM.jpg",
+    "icongray": "images/ACH_SURVIVE_EXPERT_REALISM_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_FORM_PARTY_AND_WIN_4V4",
+    "displayName": "STRENGTH IN NUMBERS",
+    "description": "Form a team and beat an enemy team in 4v4 Versus or Scavenge.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_FORM_PARTY_AND_WIN_4V4.jpg",
+    "icongray": "images/ACH_VS_FORM_PARTY_AND_WIN_4V4_gray.jpg"
+  },
+  {
+    "name": "ACH_KILL_SUBMERGED_MUDMEN",
+    "displayName": "DEAD IN THE WATER",
+    "description": "Kill 10 swampy Mudmen while they are in the water.",
+    "hidden": "0",
+    "icon": "images/ACH_KILL_SUBMERGED_MUDMEN.jpg",
+    "icongray": "images/ACH_KILL_SUBMERGED_MUDMEN_gray.jpg"
+  },
+  {
+    "name": "ACH_COLLECT_CEDA_VIALS",
+    "displayName": "ROBBED ZOMBIE",
+    "description": "Collect 10 vials of Boomer vomit from infected CEDA agents you have killed.",
+    "hidden": "0",
+    "icon": "images/ACH_COLLECT_CEDA_VIALS.jpg",
+    "icongray": "images/ACH_COLLECT_CEDA_VIALS_gray.jpg"
+  },
+  {
+    "name": "ACH_KILL_ZOMBIES_GRENADE_BLAST",
+    "displayName": "DISMEMBERMENT PLAN",
+    "description": "Kill 15 Infected with a single grenade launcher blast.",
+    "hidden": "0",
+    "icon": "images/ACH_KILL_ZOMBIES_GRENADE_BLAST.jpg",
+    "icongray": "images/ACH_KILL_ZOMBIES_GRENADE_BLAST_gray.jpg"
+  },
+  {
+    "name": "ACH_IGNITE_INFECTED_FIRE_AMMO",
+    "displayName": "BURNING SENSATION",
+    "description": "Ignite 50 Common Infected with incendiary ammo.",
+    "hidden": "0",
+    "icon": "images/ACH_IGNITE_INFECTED_FIRE_AMMO.jpg",
+    "icongray": "images/ACH_IGNITE_INFECTED_FIRE_AMMO_gray.jpg"
+  },
+  {
+    "name": "ACH_DEPLOY_AMMO_UPGRADE",
+    "displayName": "ARMORY OF ONE",
+    "description": "Deploy an ammo upgrade and have your team use it.",
+    "hidden": "0",
+    "icon": "images/ACH_DEPLOY_AMMO_UPGRADE.jpg",
+    "icongray": "images/ACH_DEPLOY_AMMO_UPGRADE_gray.jpg"
+  },
+  {
+    "name": "ACH_RES_SURVIVORS_WITH_DEFIB",
+    "displayName": "SHOCK JOCK",
+    "description": "Revive 10 dead Survivors with the defibrillator.",
+    "hidden": "0",
+    "icon": "images/ACH_RES_SURVIVORS_WITH_DEFIB.jpg",
+    "icongray": "images/ACH_RES_SURVIVORS_WITH_DEFIB_gray.jpg"
+  },
+  {
+    "name": "ACH_SPEED_REVIVE_WITH_ADRENALINE",
+    "displayName": "THE QUICK AND THE DEAD",
+    "description": "Revive 10 incapacitated Survivors while under the speed-boosting effects of adrenaline.",
+    "hidden": "0",
+    "icon": "images/ACH_SPEED_REVIVE_WITH_ADRENALINE.jpg",
+    "icongray": "images/ACH_SPEED_REVIVE_WITH_ADRENALINE_gray.jpg"
+  },
+  {
+    "name": "ACH_KILL_INFECTED_WITH_CHAINSAW",
+    "displayName": "CHAIN OF COMMAND",
+    "description": "Kill 100 Common Infected with the chainsaw.",
+    "hidden": "0",
+    "icon": "images/ACH_KILL_INFECTED_WITH_CHAINSAW.jpg",
+    "icongray": "images/ACH_KILL_INFECTED_WITH_CHAINSAW_gray.jpg"
+  },
+  {
+    "name": "ACH_BILE_A_TANK",
+    "displayName": "SEPTIC TANK",
+    "description": "Use a bile bomb on a Tank.",
+    "hidden": "0",
+    "icon": "images/ACH_BILE_A_TANK.jpg",
+    "icongray": "images/ACH_BILE_A_TANK_gray.jpg"
+  },
+  {
+    "name": "ACH_KILL_WITH_EVERY_MELEE",
+    "displayName": "CLUB DEAD",
+    "description": "Use every melee weapon to kill Common Infected.",
+    "hidden": "0",
+    "icon": "images/ACH_KILL_WITH_EVERY_MELEE.jpg",
+    "icongray": "images/ACH_KILL_WITH_EVERY_MELEE_gray.jpg"
+  },
+  {
+    "name": "ACH_KILL_TANK_MELEE_ONLY",
+    "displayName": "TANK BURGER",
+    "description": "Kill a Tank with melee weapons.",
+    "hidden": "0",
+    "icon": "images/ACH_KILL_TANK_MELEE_ONLY.jpg",
+    "icongray": "images/ACH_KILL_TANK_MELEE_ONLY_gray.jpg"
+  },
+  {
+    "name": "ACH_BRIDGE_TIMED_RUN",
+    "displayName": "BRIDGE OVER TREBLED SLAUGHTER",
+    "description": "Cross the bridge finale in less than three minutes.",
+    "hidden": "0",
+    "icon": "images/ACH_BRIDGE_TIMED_RUN.jpg",
+    "icongray": "images/ACH_BRIDGE_TIMED_RUN_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVE_MALL",
+    "displayName": "PRICE CHOPPER",
+    "description": "Survive the Dead Center campaign.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVE_MALL.jpg",
+    "icongray": "images/ACH_SURVIVE_MALL_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVE_ROAD",
+    "displayName": "MIDNIGHT RIDER",
+    "description": "Survive the Dark Carnival campaign.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVE_ROAD.jpg",
+    "icongray": "images/ACH_SURVIVE_ROAD_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVE_SWAMP",
+    "displayName": "RAGIN' CAJUN",
+    "description": "Survive the Swamp Fever campaign.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVE_SWAMP.jpg",
+    "icongray": "images/ACH_SURVIVE_SWAMP_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVE_TOWN",
+    "displayName": "WEATHERMAN",
+    "description": "Survive the Hard Rain campaign.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVE_TOWN.jpg",
+    "icongray": "images/ACH_SURVIVE_TOWN_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVE_BRIDGE",
+    "displayName": "BRIDGE BURNER",
+    "description": "Survive the Parish campaign.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVE_BRIDGE.jpg",
+    "icongray": "images/ACH_SURVIVE_BRIDGE_gray.jpg"
+  },
+  {
+    "name": "ACH_IMPOUND_LOT_NO_ALARMS",
+    "displayName": "VIOLENCE IN SILENCE",
+    "description": "Navigate the impound lot and reach the cemetery safe room without tripping any alarms.",
+    "hidden": "0",
+    "icon": "images/ACH_IMPOUND_LOT_NO_ALARMS.jpg",
+    "icongray": "images/ACH_IMPOUND_LOT_NO_ALARMS_gray.jpg"
+  },
+  {
+    "name": "ACH_GNOME_RESCUE",
+    "displayName": "GUARDIN' GNOME",
+    "description": "Rescue Gnome Chompski from the Carnival.",
+    "hidden": "0",
+    "icon": "images/ACH_GNOME_RESCUE.jpg",
+    "icongray": "images/ACH_GNOME_RESCUE_gray.jpg"
+  },
+  {
+    "name": "ACH_WITCH_TOWN_NO_WITCH_KILLS",
+    "displayName": "SOB STORY",
+    "description": "Navigate the sugar mill and reach the safe room without killing any Witches.",
+    "hidden": "0",
+    "icon": "images/ACH_WITCH_TOWN_NO_WITCH_KILLS.jpg",
+    "icongray": "images/ACH_WITCH_TOWN_NO_WITCH_KILLS_gray.jpg"
+  },
+  {
+    "name": "ACH_AIRLINE_FINALE_NO_DAMAGE",
+    "displayName": "WING AND A PRAYER",
+    "description": "Defend yourself at the crashed airliner without taking damage.",
+    "hidden": "0",
+    "icon": "images/ACH_AIRLINE_FINALE_NO_DAMAGE.jpg",
+    "icongray": "images/ACH_AIRLINE_FINALE_NO_DAMAGE_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_JOCKEY_LONG_RIDE",
+    "displayName": "QUALIFIED RIDE",
+    "description": "As the Jockey, ride a Survivor for more than 12 seconds.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_JOCKEY_LONG_RIDE.jpg",
+    "icongray": "images/ACH_VS_JOCKEY_LONG_RIDE_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_JOCKEY_TWO_PLAYERS",
+    "displayName": "BACK IN THE SADDLE",
+    "description": "As the Jockey, ride the Survivors twice in a single life.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_JOCKEY_TWO_PLAYERS.jpg",
+    "icongray": "images/ACH_VS_JOCKEY_TWO_PLAYERS_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_JOCKEY_INTO_ACID",
+    "displayName": "RODE HARD, PUT AWAY WET",
+    "description": "As the Jockey, ride a Survivor and steer them into a Spitter's acid patch.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_JOCKEY_INTO_ACID.jpg",
+    "icongray": "images/ACH_VS_JOCKEY_INTO_ACID_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_SPIT_ON_ENEMY_TEAM",
+    "displayName": "GREAT EXPECTORATIONS",
+    "description": "As the Spitter, hit every Survivor with a single acid patch.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_SPIT_ON_ENEMY_TEAM.jpg",
+    "icongray": "images/ACH_VS_SPIT_ON_ENEMY_TEAM_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_SPIT_ON_SMOKERED_PLAYER",
+    "displayName": "A SPITTLE HELP FROM MY FRIENDS",
+    "description": "As the Spitter, spit on a Survivor being choked by a Smoker.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_SPIT_ON_SMOKERED_PLAYER.jpg",
+    "icongray": "images/ACH_VS_SPIT_ON_SMOKERED_PLAYER_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_BOWL_ENEMY_TEAM",
+    "displayName": "SCATTERING RAM",
+    "description": "As the Charger, bowl through the entire enemy team in a single charge.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_BOWL_ENEMY_TEAM.jpg",
+    "icongray": "images/ACH_VS_BOWL_ENEMY_TEAM_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_CHARGER_GROUND_SMASH",
+    "displayName": "MEAT TENDERIZER",
+    "description": "As the Charger, grab a Survivor and smash them into the ground for a solid 15 seconds.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_CHARGER_GROUND_SMASH.jpg",
+    "icongray": "images/ACH_VS_CHARGER_GROUND_SMASH_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_CHARGER_LONG_CARRY",
+    "displayName": "LONG DISTANCE CARRIER",
+    "description": "As the Charger, grab a Survivor and carry them over 80 feet.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_CHARGER_LONG_CARRY.jpg",
+    "icongray": "images/ACH_VS_CHARGER_LONG_CARRY_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVAL_GET_MEDAL_MELEE_ONLY",
+    "displayName": "BEAT THE RUSH",
+    "description": "In a Survival round, get a medal only using melee weapons.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVAL_GET_MEDAL_MELEE_ONLY.jpg",
+    "icongray": "images/ACH_SURVIVAL_GET_MEDAL_MELEE_ONLY_gray.jpg"
+  },
+  {
+    "name": "ACH_SCAVENGE_WIN_A_GAME",
+    "displayName": "HUNTING PARTY",
+    "description": "Win a game of Scavenge.",
+    "hidden": "0",
+    "icon": "images/ACH_SCAVENGE_WIN_A_GAME.jpg",
+    "icongray": "images/ACH_SCAVENGE_WIN_A_GAME_gray.jpg"
+  },
+  {
+    "name": "ACH_SCAVENGE_COLLECT_CAN_GRIND",
+    "displayName": "GAS GUZZLER",
+    "description": "Collect 100 gas cans in Scavenge.",
+    "hidden": "0",
+    "icon": "images/ACH_SCAVENGE_COLLECT_CAN_GRIND.jpg",
+    "icongray": "images/ACH_SCAVENGE_COLLECT_CAN_GRIND_gray.jpg"
+  },
+  {
+    "name": "ACH_SCAVENGE_COLLECT_ALL_CANS",
+    "displayName": "CACHE AND CARRY",
+    "description": "Collect 15 gas cans in a single Scavenge round.",
+    "hidden": "0",
+    "icon": "images/ACH_SCAVENGE_COLLECT_ALL_CANS.jpg",
+    "icongray": "images/ACH_SCAVENGE_COLLECT_ALL_CANS_gray.jpg"
+  },
+  {
+    "name": "ACH_SCAVENGE_SHUT_OUT",
+    "displayName": "SCAVENGE HUNT",
+    "description": "Stop the enemy team from collecting any gas cans during a Scavenge round.",
+    "hidden": "0",
+    "icon": "images/ACH_SCAVENGE_SHUT_OUT.jpg",
+    "icongray": "images/ACH_SCAVENGE_SHUT_OUT_gray.jpg"
+  },
+  {
+    "name": "ACH_STRONGMAN_GAME",
+    "displayName": "GONG SHOW",
+    "description": "Prove you are stronger than Moustachio.",
+    "hidden": "0",
+    "icon": "images/ACH_STRONGMAN_GAME.jpg",
+    "icongray": "images/ACH_STRONGMAN_GAME_gray.jpg"
+  },
+  {
+    "name": "ACH_SCAVENGE_MAKE_SURVIVOR_DROP_CAN",
+    "displayName": "FUEL CRISIS",
+    "description": "Make a Survivor drop a gas can during overtime.",
+    "hidden": "0",
+    "icon": "images/ACH_SCAVENGE_MAKE_SURVIVOR_DROP_CAN.jpg",
+    "icongray": "images/ACH_SCAVENGE_MAKE_SURVIVOR_DROP_CAN_gray.jpg"
+  },
+  {
+    "name": "ACH_SCAVENGE_CAN_DROP_GRIND",
+    "displayName": "GAS SHORTAGE",
+    "description": "Cause 25 gas can drops as a Special Infected.",
+    "hidden": "0",
+    "icon": "images/ACH_SCAVENGE_CAN_DROP_GRIND.jpg",
+    "icongray": "images/ACH_SCAVENGE_CAN_DROP_GRIND_gray.jpg"
+  },
+  {
+    "name": "ACH_STASH_WHACKER",
+    "displayName": "STACHE WHACKER",
+    "description": "Prove you are faster than Moustachio.",
+    "hidden": "0",
+    "icon": "images/ACH_STASH_WHACKER.jpg",
+    "icongray": "images/ACH_STASH_WHACKER_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVE_THE_PASSING",
+    "displayName": "TORCH BEARER",
+    "description": "Survive The Passing Campaign.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVE_THE_PASSING.jpg",
+    "icongray": "images/ACH_SURVIVE_THE_PASSING_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_CHARGE_THROUGH_CHAIRS",
+    "displayName": "WEDDING CRASHER",
+    "description": "As the Charger, grab a Survivor and crash them through 8 chairs at the wedding.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_CHARGE_THROUGH_CHAIRS.jpg",
+    "icongray": "images/ACH_VS_CHARGE_THROUGH_CHAIRS_gray.jpg"
+  },
+  {
+    "name": "ACH_KILLS_WITH_M60",
+    "displayName": "TIL IT GOES CLICK",
+    "description": "Using the M60, kill 25 infected without letting go of the trigger.",
+    "hidden": "0",
+    "icon": "images/ACH_KILLS_WITH_M60.jpg",
+    "icongray": "images/ACH_KILLS_WITH_M60_gray.jpg"
+  },
+  {
+    "name": "ACH_SCAVENGE_FALLEN_SURVIVOR",
+    "displayName": "GRAVE ROBBER",
+    "description": "Collect 10 items dropped by a Fallen Survivor.",
+    "hidden": "0",
+    "icon": "images/ACH_SCAVENGE_FALLEN_SURVIVOR.jpg",
+    "icongray": "images/ACH_SCAVENGE_FALLEN_SURVIVOR_gray.jpg"
+  },
+  {
+    "name": "ACH_COMPLETE_CHALLENGE_MODES",
+    "displayName": "MUTANT OVERLORD",
+    "description": "Play 6 Mutations.",
+    "hidden": "0",
+    "icon": "images/ACH_COMPLETE_CHALLENGE_MODES.jpg",
+    "icongray": "images/ACH_COMPLETE_CHALLENGE_MODES_gray.jpg"
+  },
+  {
+    "name": "ACH_HEADS_WITH_GOLF_CLUB",
+    "displayName": "FORE!",
+    "description": "Knock off the heads of 18 infected with the golf club.",
+    "hidden": "0",
+    "icon": "images/ACH_HEADS_WITH_GOLF_CLUB.jpg",
+    "icongray": "images/ACH_HEADS_WITH_GOLF_CLUB_gray.jpg"
+  },
+  {
+    "name": "ACH_HEAR_BALLAD",
+    "displayName": "KILLING THEM SWIFTLY TO THIS SONG",
+    "description": "Play the new Midnight Riders song on a jukebox.",
+    "hidden": "0",
+    "icon": "images/ACH_HEAR_BALLAD.jpg",
+    "icongray": "images/ACH_HEAR_BALLAD_gray.jpg"
+  },
+  {
+    "name": "ACH_KILL_TANK_L4D1_ONLY",
+    "displayName": "KITE LIKE A MAN",
+    "description": "Kill a Tank only with damage from the original Survivors.",
+    "hidden": "0",
+    "icon": "images/ACH_KILL_TANK_L4D1_ONLY.jpg",
+    "icongray": "images/ACH_KILL_TANK_L4D1_ONLY_gray.jpg"
+  },
+  {
+    "name": "ACH_OPEN_FOOT_LOCKERS",
+    "displayName": "CACHE GRAB",
+    "description": "Open 5 foot lockers.",
+    "hidden": "0",
+    "icon": "images/ACH_OPEN_FOOT_LOCKERS.jpg",
+    "icongray": "images/ACH_OPEN_FOOT_LOCKERS_gray.jpg"
+  },
+  {
+    "name": "ACH_SCAVENGE_PLAY_C6_FINALE",
+    "displayName": "PORT OF SCAVENGE",
+    "description": "Play 5 full games of Scavenge on The Port.",
+    "hidden": "0",
+    "icon": "images/ACH_SCAVENGE_PLAY_C6_FINALE.jpg",
+    "icongray": "images/ACH_SCAVENGE_PLAY_C6_FINALE_gray.jpg"
+  },
+  {
+    "name": "ACH_COMPLETE_THE_SACRIFICE",
+    "displayName": "SUPREME SACRIFICE",
+    "description": "Complete \"The Sacrifice\".",
+    "hidden": "0",
+    "icon": "images/ACH_COMPLETE_THE_SACRIFICE.jpg",
+    "icongray": ""
+  },
+  {
+    "name": "ACH_SACRIFICE_BILL",
+    "displayName": "KILL BILL",
+    "description": "Have Bill sacrifice himself for the team.",
+    "hidden": "0",
+    "icon": "images/ACH_SACRIFICE_BILL.jpg",
+    "icongray": "images/ACH_SACRIFICE_BILL_gray.jpg"
+  },
+  {
+    "name": "ACH_KILL_SPECIAL_WITH_BARREL",
+    "displayName": "BARREL ROLLED",
+    "description": "Kill a Special Infected with an exploding barrel.",
+    "hidden": "0",
+    "icon": "images/ACH_KILL_SPECIAL_WITH_BARREL.jpg",
+    "icongray": "images/ACH_KILL_SPECIAL_WITH_BARREL_gray.jpg"
+  },
+  {
+    "name": "ACH_RUN_ALL_GENERATORS",
+    "displayName": "CHAOS GENERATOR",
+    "description": "Have all 3 generators running at once in \"The Sacrifice\" finale.",
+    "hidden": "0",
+    "icon": "images/ACH_RUN_ALL_GENERATORS.jpg",
+    "icongray": "images/ACH_RUN_ALL_GENERATORS_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_PREVENT_SACRIFICE",
+    "displayName": "SACRIFIZZLE",
+    "description": "As a Special Infected, incap someone who is trying to sacrifice themselves.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_PREVENT_SACRIFICE.jpg",
+    "icongray": "images/ACH_VS_PREVENT_SACRIFICE_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVE_COLD_STREAM",
+    "displayName": "STREAM CROSSER",
+    "description": "Survive the Cold Stream campaign on any difficulty.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVE_COLD_STREAM.jpg",
+    "icongray": "images/ACH_SURVIVE_COLD_STREAM_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_COMPLETE_DEAD_AIR",
+    "displayName": "CONNECTING FIGHTS",
+    "description": "Play a Versus game on Dead Air from start to finish.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_COMPLETE_DEAD_AIR.jpg",
+    "icongray": "images/ACH_VS_COMPLETE_DEAD_AIR_gray.jpg"
+  },
+  {
+    "name": "ACH_COLLECT_HOLIDAY_GIFTS",
+    "displayName": "Valve Gift Grab 2011 \u2013 L4D2",
+    "description": "Collect three gifts dropped by Special Infected in Versus Mode.",
+    "hidden": "0",
+    "icon": "images/ACH_COLLECT_HOLIDAY_GIFTS.jpg",
+    "icongray": "images/ACH_COLLECT_HOLIDAY_GIFTS_gray.jpg"
+  },
+  {
+    "name": "ACH_HELP_FREE_PLAYER_SURVIVE",
+    "displayName": "GOOD GUY NICK",
+    "description": "Plays games with free weekend players and helps them survive a campaign.",
+    "hidden": "0",
+    "icon": "images/ACH_HELP_FREE_PLAYER_SURVIVE.jpg",
+    "icongray": "images/ACH_HELP_FREE_PLAYER_SURVIVE_gray.jpg"
+  },
+  {
+    "name": "ACH_HELP_FREE_CHRISTMAS_PLAYER_SURVIVE",
+    "displayName": "GHOST OF CHRISTMAS PRESENT",
+    "description": "Spread cheer by helping a free holiday player survive a campaign.",
+    "hidden": "0",
+    "icon": "images/ACH_HELP_FREE_CHRISTMAS_PLAYER_SURVIVE.jpg",
+    "icongray": "images/ACH_HELP_FREE_CHRISTMAS_PLAYER_SURVIVE_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVAL_BRONZE_MEDAL",
+    "displayName": "GETTING STARTED",
+    "description": "Earn a bronze medal on any official Survival map.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVAL_BRONZE_MEDAL.jpg",
+    "icongray": "images/ACH_SURVIVAL_BRONZE_MEDAL_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVAL_SILVER_MEDAL",
+    "displayName": "ON OUR WAY",
+    "description": "Earn a silver medal on any official survival map.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVAL_SILVER_MEDAL.jpg",
+    "icongray": "images/ACH_SURVIVAL_SILVER_MEDAL_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVAL_GOLD_MEDAL",
+    "displayName": "THIS IS WHERE THE FUN BEGINS",
+    "description": "Earn a gold medal on any official survival map.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVAL_GOLD_MEDAL.jpg",
+    "icongray": "images/ACH_SURVIVAL_GOLD_MEDAL_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVE_LIGHTHOUSE",
+    "displayName": "STILL STANDING",
+    "description": "Survive The Last Stand campaign on any difficulty.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVE_LIGHTHOUSE.jpg",
+    "icongray": ""
+  },
+  {
+    "name": "ACH_SURVIVE_LIGHTHOUSE_EXPERT_REALISM",
+    "displayName": "THE LAST FRONTIER",
+    "description": "Survive The Last Stand campaign on Expert Realism.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVE_LIGHTHOUSE_EXPERT_REALISM.jpg",
+    "icongray": "images/ACH_SURVIVE_LIGHTHOUSE_EXPERT_REALISM_gray.jpg"
+  },
+  {
+    "name": "ACH_COLLECT_GOLDEN_CROWBARS",
+    "displayName": "GOLDEN FREEMAN",
+    "description": "Find the golden crowbars hidden in the Left 4 Dead 1 survival maps.",
+    "hidden": "0",
+    "icon": "images/ACH_COLLECT_GOLDEN_CROWBARS.jpg",
+    "icongray": "images/ACH_COLLECT_GOLDEN_CROWBARS_gray.jpg"
+  },
+  {
+    "name": "ACH_REVIVE_WITH_ACTIVE_TANK",
+    "displayName": "ELEPHANT IN THE ROOM",
+    "description": "Revive an incapacitated teammate while a Tank is nearby.",
+    "hidden": "0",
+    "icon": "images/ACH_REVIVE_WITH_ACTIVE_TANK.jpg",
+    "icongray": "images/ACH_REVIVE_WITH_ACTIVE_TANK_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_SPIT_ON_CHARGED_PLAYER",
+    "displayName": "I SPIT ON YOUR GRAVE",
+    "description": "As the Spitter, spit on a Survivor who is pinned by a Charger.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_SPIT_ON_CHARGED_PLAYER.jpg",
+    "icongray": "images/ACH_VS_SPIT_ON_CHARGED_PLAYER_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_SPIT_ON_POUNCED_PLAYER",
+    "displayName": "ACID BATH",
+    "description": "As the Spitter, spit on a Survivor who is pinned by a Hunter.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_SPIT_ON_POUNCED_PLAYER.jpg",
+    "icongray": "images/ACH_VS_SPIT_ON_POUNCED_PLAYER_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_SPIT_ON_GAS_CANS",
+    "displayName": "SPITFIRE",
+    "description": "Destroy 20 gascans as the Spitter.",
+    "hidden": "0",
+    "icon": "",
+    "icongray": "images/ACH_VS_SPIT_ON_GAS_CANS_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_CHARGER_INSTANT_KILL",
+    "displayName": "FLIGHT DECK",
+    "description": "Instantly kill a Survivor as the Charger.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_CHARGER_INSTANT_KILL.jpg",
+    "icongray": "images/ACH_VS_CHARGER_INSTANT_KILL_gray.jpg"
+  },
+  {
+    "name": "ACH_VS_BILE_PLAYER_NO_LINE_OF_SIGHT",
+    "displayName": "FAT NINJA",
+    "description": "As the Boomer, vomit on a Survivor without having direct line of sight with them.",
+    "hidden": "0",
+    "icon": "images/ACH_VS_BILE_PLAYER_NO_LINE_OF_SIGHT.jpg",
+    "icongray": "images/ACH_VS_BILE_PLAYER_NO_LINE_OF_SIGHT_gray.jpg"
+  },
+  {
+    "name": "ACH_RESCUE_X_PLAYERS_TOGETHER",
+    "displayName": "THREE\u2019S A CROWD",
+    "description": "Rescue three Survivors from a single rescue closet.",
+    "hidden": "0",
+    "icon": "images/ACH_RESCUE_X_PLAYERS_TOGETHER.jpg",
+    "icongray": ""
+  },
+  {
+    "name": "ACH_FREE_SELF_FROM_SMOKER_WITH_MELEE",
+    "displayName": "LICKETY-SPLIT",
+    "description": "With a sharp melee weapon, cut a Smoker's tongue before he ensnares you.",
+    "hidden": "0",
+    "icon": "images/ACH_FREE_SELF_FROM_SMOKER_WITH_MELEE.jpg",
+    "icongray": "images/ACH_FREE_SELF_FROM_SMOKER_WITH_MELEE_gray.jpg"
+  },
+  {
+    "name": "ACH_KILL_LEAPING_HUNTER_WITH_SHOTGUN",
+    "displayName": "GET SKEETED ON",
+    "description": "Kill a pouncing Hunter with a shotgun.",
+    "hidden": "0",
+    "icon": "images/ACH_KILL_LEAPING_HUNTER_WITH_SHOTGUN.jpg",
+    "icongray": "images/ACH_KILL_LEAPING_HUNTER_WITH_SHOTGUN_gray.jpg"
+  },
+  {
+    "name": "ACH_DESTROY_TANK_ROCK",
+    "displayName": "ROCKY HORROR PICTURE THROW",
+    "description": "Destroy a Tank's rock in mid-air.",
+    "hidden": "0",
+    "icon": "images/ACH_DESTROY_TANK_ROCK.jpg",
+    "icongray": "images/ACH_DESTROY_TANK_ROCK_gray.jpg"
+  },
+  {
+    "name": "ACH_ONE_SHOT_KILL_WITCH_BRIDE",
+    "displayName": "SHOTGUN WEDDING",
+    "description": "Kill the Witch bride with a single shotgun blast on expert difficulty.",
+    "hidden": "0",
+    "icon": "images/ACH_ONE_SHOT_KILL_WITCH_BRIDE.jpg",
+    "icongray": "images/ACH_ONE_SHOT_KILL_WITCH_BRIDE_gray.jpg"
+  },
+  {
+    "name": "ACH_CAUSE_X_POUNCE_DAMAGE",
+    "displayName": "ONE HIT WONDER",
+    "description": "As the Hunter, land a 25 damage pounce.",
+    "hidden": "0",
+    "icon": "images/ACH_CAUSE_X_POUNCE_DAMAGE.jpg",
+    "icongray": "images/ACH_CAUSE_X_POUNCE_DAMAGE_gray.jpg"
+  },
+  {
+    "name": "ACH_KILL_X_JOCKEYS_WITH_MELEE",
+    "displayName": "PURE SATISFACTION",
+    "description": "Kill 20 Jockeys with the shovel or pitchfork.",
+    "hidden": "0",
+    "icon": "images/ACH_KILL_X_JOCKEYS_WITH_MELEE.jpg",
+    "icongray": "images/ACH_KILL_X_JOCKEYS_WITH_MELEE_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVAL_VERSUS_X_MINUTES",
+    "displayName": "THE BIG TEN",
+    "description": "Survive for 10 minutes on any official map in Versus Survival.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVAL_VERSUS_X_MINUTES.jpg",
+    "icongray": "images/ACH_SURVIVAL_VERSUS_X_MINUTES_gray.jpg"
+  },
+  {
+    "name": "ACH_KILL_X_INFECTED_LIFETIME",
+    "displayName": "Z-GENOCIDEST 2: EPISODE 2",
+    "description": "Kill 53,599 infected. You made sure the dead won't rise anymore!",
+    "hidden": "0",
+    "icon": "images/ACH_KILL_X_INFECTED_LIFETIME.jpg",
+    "icongray": "images/ACH_KILL_X_INFECTED_LIFETIME_gray.jpg"
+  },
+  {
+    "name": "ACH_ESCAPE_MALL_FINALE_NO_TANKS",
+    "displayName": "POLE POSITION",
+    "description": "Escape Liberty Mall's Atrium before the first Tank appears",
+    "hidden": "0",
+    "icon": "images/ACH_ESCAPE_MALL_FINALE_NO_TANKS.jpg",
+    "icongray": "images/ACH_ESCAPE_MALL_FINALE_NO_TANKS_gray.jpg"
+  },
+  {
+    "name": "ACH_FIND_LIGHTHOUSE_HIDDEN_ROOM",
+    "displayName": "HOUSEHOLD NAMES",
+    "description": "Discover the hidden room in the Last Stand campaign",
+    "hidden": "0",
+    "icon": "images/ACH_FIND_LIGHTHOUSE_HIDDEN_ROOM.jpg",
+    "icongray": "images/ACH_FIND_LIGHTHOUSE_HIDDEN_ROOM_gray.jpg"
+  },
+  {
+    "name": "ACH_EARN_ALL_BRONZE_MEDALS",
+    "displayName": "A LITTLE HACK AND SLASH",
+    "description": "Earn a bronze medal on every official survival map",
+    "hidden": "0",
+    "icon": "images/ACH_EARN_ALL_BRONZE_MEDALS.jpg",
+    "icongray": "images/ACH_EARN_ALL_BRONZE_MEDALS_gray.jpg"
+  },
+  {
+    "name": "ACH_EARN_ALL_SILVER_MEDALS",
+    "displayName": "LIKE LAMBS TO THE SLAUGHTER",
+    "description": "Earn a silver medal on every official survival map.",
+    "hidden": "0",
+    "icon": "images/ACH_EARN_ALL_SILVER_MEDALS.jpg",
+    "icongray": "images/ACH_EARN_ALL_SILVER_MEDALS_gray.jpg"
+  },
+  {
+    "name": "ACH_EARN_ALL_GOLD_MEDALS",
+    "displayName": "KILLING SPREE",
+    "description": "Earn a gold medal on every official survival map.",
+    "hidden": "0",
+    "icon": "images/ACH_EARN_ALL_GOLD_MEDALS.jpg",
+    "icongray": "images/ACH_EARN_ALL_GOLD_MEDALS_gray.jpg"
+  },
+  {
+    "name": "ACH_SURVIVAL_X_MINUTES",
+    "displayName": "SUPREME SURVIVALIST",
+    "description": "Survive for 30 minutes on any official survival map.",
+    "hidden": "0",
+    "icon": "images/ACH_SURVIVAL_X_MINUTES.jpg",
+    "icongray": "images/ACH_SURVIVAL_X_MINUTES_gray.jpg"
+  },
+  {
+    "name": "ACH_KILL_WITCH_MELEE_ONLY",
+    "displayName": "NEW HAIRCUT",
+    "description": "Kill a Witch using only a sharp melee weapon, without anyone getting incapacitated or killed.",
+    "hidden": "0",
+    "icon": "images/ACH_KILL_WITCH_MELEE_ONLY.jpg",
+    "icongray": "images/ACH_KILL_WITCH_MELEE_ONLY_gray.jpg"
+  },
+  {
+    "name": "ACH_CONCERT_FINALE_DONT_LEAVE_STAGE",
+    "displayName": "THE MAIN ATTRACTION",
+    "description": "On the concert finale, survive until the helicopter arrives without leaving the stage",
+    "hidden": "0",
+    "icon": "images/ACH_CONCERT_FINALE_DONT_LEAVE_STAGE.jpg",
+    "icongray": "images/ACH_CONCERT_FINALE_DONT_LEAVE_STAGE_gray.jpg"
+  },
+  {
+    "name": "ACH_LAST_STAND_TIMED",
+    "displayName": "THE LAST DASH",
+    "description": "Complete The Last Stand campaign in 13 minutes or less, without any Survivors dying.",
+    "hidden": "0",
+    "icon": "images/ACH_LAST_STAND_TIMED.jpg",
+    "icongray": "images/ACH_LAST_STAND_TIMED_gray.jpg"
+  },
+  {
+    "name": "GLOBAL_GNOME_ALONE",
+    "displayName": "GNOME ALONE",
+    "description": "If you are reading this achievement, Gabe Newell has successfully launched Gnome Chompski into space.",
+    "hidden": "0",
+    "icon": "images/GLOBAL_GNOME_ALONE.jpg",
+    "icongray": "images/GLOBAL_GNOME_ALONE_gray.jpg"
+  }
+]

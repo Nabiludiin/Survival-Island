@@ -1,0 +1,50 @@
+256 models/survivors/teenangst/zoey_color
+256 models/survivors/teenangst/zoey_normal
+256 models/survivors/teenangst/zoey_head_compress
+256 models/survivors/teenangst/zoey_head_normal
+256 models/survivors/teenangst/zoey_head
+256 models/survivors/biker/francis_color
+256 models/survivors/biker/francis_normal
+256 models/survivors/biker/francis_head_compress
+256 models/survivors/biker/francis_head_normal
+256 models/survivors/biker/francis_head
+
+models/props_junk/explosive_box001
+
+512 models/infected/common/l4d2/cim_fallen_survivor
+512 models/infected/common/l4d2/ci_gradient_palette_fallen_survivor
+
+models/v_models/weapons/eq_cola/v_cola_logos
+models/v_models/weapons/eq_cola/v_cola_glass_normal
+models/v_models/weapons/eq_cola/v_cola_glass
+
+512 models/props_vehicles/racecar_damaged
+
+512 models/infected/common/cif_formal
+512 models/infected/common/cim_formal
+
+512 models/props_fairgrounds/amp_stack
+512 models/props_fairgrounds/monitor_speaker
+512 models/props_downtown/railings
+256 buildings/roof07
+256 models/props_waterfront/souvenirs_sign_selfillum
+256 models/props_waterfront/souvenirs_sign
+256 models/props_waterfront/awning
+256 models/props_waterfront/historic_tour_sign
+512 models/props_foliage/urban_trees_barks01
+512 models/props_waterfront/footlocker01
+512 models/props_downtown/roof_trim_mansion01
+512 concrete/pavement2_height-ssbump
+512 models/props_misc/tarps
+512 models/props_misc/fairground_tents
+512 models/props_misc/triage_tent
+256 models/props_windows/window_brick01
+512 models/props_downtown/metal_door
+256 models/infected/witch/witch_bride_dress
+512 models/props_downtown/balcony_underside
+512 models/props_downtown/column_details_mansion
+256 models/props_industrial/sluicegate_col
+512 models/props_junk/physics_trash
+512 models/props_urban/outhouse001
+512 models/props_office/vending_machine01
+512 models/props_debris/woodset01

@@ -1,0 +1,84 @@
+512 models/infected/common/l4d2/cim_fallen_survivor
+512 models/infected/common/l4d2/ci_gradient_palette_fallen_survivor
+
+models/infected/common/l4d2/cim_head_clown 
+models/infected/common/l4d2/cim_head_jimmy 
+models/infected/common/l4d2/cim_head_mud 
+models/infected/common/l4d2/cim_ceda_full 
+models/infected/common/l4d2/cim_ceda_faceplate 
+models/infected/common/l4d2/cim_ceda_faceplate_envmapmask
+models/infected/common/l4d2/cim_clown
+models/infected/common/l4d2/cim_jimmy 
+models/infected/common/l4d2/cim_mud 
+models/infected/common/l4d2/cim_riot 
+models/infected/common/l4d2/cim_roadcrew 
+
+512 detail/detailsprites
+
+512 models/props_mall/mall_display_07
+512 models/props_fairgrounds/amp_stack
+models/props_junk/explosive_box001
+models/props_junk/explosive_box001_hinge
+512 models/props_unique/jukebox_menu_glow1
+512 models/props_unique/jukebox_menu_glow2
+512 models/props/de_nuke/truck_nuke
+
+256 models/props_unique/jukebox_menu_selection1
+256 models/props_unique/jukebox_menu_selection2
+256 models/props_unique/jukebox_menu_selection3
+256 models/props_unique/jukebox_menu_selection4
+256 models/props_unique/jukebox_menu_selection5
+256 models/props_misc/tarps
+
+512 models/props_misc/fairground_tents
+512 models/props_mill/elevator_cage
+
+models/survivors/teenangst/zoey_color
+models/survivors/teenangst/zoey_color_it
+
+models/survivors/manager/louis_color
+models/survivors/manager/louis_color_it
+
+
+models/survivors/namvet/bill_color
+models/survivors/namvet/bill_color_it
+
+models/survivors/biker/francis_color
+models/survivors/biker/francis_color_it
+
+
+512 models/props_foliage/mall_trees_branches01
+512 models/props_foliage/mall_trees_branches02
+512 models/props_foliage/urban_trees_branches02_still
+512 models/props_foliage/urban_trees_branches03
+512 models/props_foliage/urban_trees_branches03_hedges
+512 models/props_foliage/urban_trees_branches03_small
+512 models/props_foliage/urban_trees_branches03_medium
+
+256 metal/metal_ext_12
+256 decals/rubble01a
+256 de_train/train_cement_stain_01
+128 glass/glass01
+256 plaster/plaster_ext_19
+
+
+512 models/props_foliage/urban_trees_barks01
+512 models/props_foliage/urban_trees_barks01_medium
+512 models/props_foliage/urban_trees_barks01_st
+
+models/v_models/weapons/eq_cola/v_cola_glass
+models/v_models/weapons/eq_cola/v_cola_glass_normal
+models/v_models/weapons/eq_cola/v_cola_logos
+
+
+512 models/props_doors/doormetal_double_boarded01
+512 models/props_mall/mall_bench
+
+512 models/props_street/window_washer_quad
+
+512 models/props_mall/mall_counter_entrance_02
+512 models/props_windows/window_hotel001
+
+512 models/props_downtown/metal_door
+
+

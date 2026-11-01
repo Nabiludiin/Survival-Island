@@ -1,0 +1,61 @@
+models/survivors/coach/coach_body_color
+models/survivors/coach/coach_body_normal
+models/survivors/gambler/gambler_body
+models/survivors/gambler/gambler_body_normal
+models/survivors/mechanic/mechanic_body_color
+models/survivors/mechanic/mechanic_body_normal
+models/survivors/producer/producer_body_color
+models/survivors/producer/producer_body_normal
+
+models/props_junk/explosive_box001
+models/v_models/weapons/eq_cola/v_cola_logos
+models/v_models/weapons/eq_cola/v_cola_glass
+models/v_models/weapons/eq_cola/v_cola_glass_normal
+models/weapons/melee/gnome
+
+512 models/infected/common/l4d2/cim_riot 
+
+512 models/infected/common/l4d2/cim_tanktop_jeans
+512 models/infected/common/l4d2/cim_tshirt_cargos
+512 models/infected/common/l4d2/cim_dressshirt_jeans
+512 models/infected/common/l4d2/cif_tshirt_skirt
+512 models/infected/common/l4d2/cif_tanktop_jeans
+512 models/survivors/namvet/bill_normal
+512 models/infected/common/female_01/common_female_casual_upper_01
+512 models/infected/common/rural/common_rural_upper_01
+
+512 models/survivors/biker/francis_color
+512 models/survivors/biker/francis_normal
+512 models/survivors/biker/francis_head_normal
+512 models/survivors/teenangst/zoey_color
+512 models/survivors/teenangst/zoey_normal
+512 models/survivors/teenangst/zoey_head_normal
+512 models/survivors/manager/louis_color
+512 models/survivors/manager/louis_normal
+512 models/survivors/manager/louis_head_normal
+512 models/survivors/namvet/bill_color
+512 models/survivors/namvet/bill_normal
+512 models/survivors/namvet/bill_head_normal
+
+512 models/infected/boomer/boomer_color
+512 models/infected/boomer/boomer_exploded_01
+512 models/infected/boomer/boomer_normal
+512 models/infected/hulk/tank_color
+512 models/infected/hulk/tank_normal
+512 models/infected/hunter/hunter_01
+512 models/infected/smoker/smoker
+512 models/infected/smoker/smoker_normal
+512 models/infected/witch/witch
+512 models/infected/witch/witch_normal
+
+512 models/v_models/weapons/autoshot/m4super
+256 models/v_models/weapons/eq_molotov/v_eq_molotov_bottle_normal
+512 models/v_models/weapons/rifle/m16a2
+512 models/v_models/weapons/shotgun/v_pump_shotgun_reference
+512 models/v_models/weapons/smg/uzi
+512 models/v_models/weapons/sniper/v_sniper_reference
+512 models/weapons/v_chainsaw/chainsaw
+512 models/weapons/v_chainsaw/chainsaw_exp
+
+512 models/w_models/minigun/w_minigun 
+256 models/w_models/minigun/w_minigun_glow 
