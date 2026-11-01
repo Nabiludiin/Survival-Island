@@ -1,38 +1,69 @@
-# Survival Island 🏝️🧟‍♂️
+# 🏝️ Survival Island - Project Repository & AI Developer Workflow
 
-**Survival Island** adalah proyek game *First-Person Survival Action* yang menggabungkan elemen *scavenging* berbatas waktu, *base-building*, dan pertempuran intens melawan *horde* zombie. Pemain harus bertahan hidup selama 60 hari di sebuah pulau misterius yang terbagi menjadi 4 region, mengumpulkan *resource*, menghadapi hewan buas di siang hari dan zombie di malam hari, serta merakit helikopter untuk melarikan diri.
+Selamat datang di repositori proyek **Survival Island**. File `README.md` ini adalah gerbang utama dan panduan alur kerja (workflow) khusus yang dirancang untuk AI Assistant (Claude) dalam merakit, menyatukan, dan menulis kode untuk game ini.
 
-Repositori ini disusun secara modular untuk memudahkan AI (seperti Claude) dalam membaca dan merakit kode. Logika utama game dipecah ke dalam folder `LOGIC` yang mereferensikan mekanik dari tiga game populer.
+Jika Anda adalah Claude, **baca dokumen ini dengan sangat teliti sebelum mengeksekusi atau menulis kode apapun.**
 
-## 📂 Struktur Folder `LOGIC`
+## 📍 Struktur Direktori Utama
 
-Arsitektur kode dalam proyek ini dipisahkan berdasarkan tiga pilar mekanik utama. AI diharapkan membaca ketiga folder ini untuk menggabungkan logika permainan secara utuh.
+Direktori ini memuat file-file desain dokumen dan folder sumber (source) yang memecah logika game berdasarkan referensi game populer.
 
-### 1. `LOGIC/60_Seconds_Logic/` (Fase Scavenging)
-Diadaptasi dari logika game *60 Seconds!*. Folder ini menangani fase awal permainan di mana pemain berada di kapal yang sedang tenggelam.
-*   **Mekanik:** *Timer* hitung mundur 60 detik.
-*   **Sistem Sistem:** Pengambilan barang (*looting* peluru, makanan), manajemen kapasitas inventori awal, dan interaksi untuk menyelamatkan NPC sebelum waktu habis.
-*   **Transisi:** Membawa *state* barang bawaan dan NPC yang diselamatkan ke dalam fase pulau utama (Fase 2).
+## ⚙️ AI Developer Workflow (Alur Kerja Claude)
 
-### 2. `LOGIC/Raft_Logic/` (Fase Survival & Crafting)
-Diadaptasi dari logika game *Raft*. Folder ini mengatur bagaimana pemain bertahan hidup dari nol di pulau.
-*   **Manajemen Status:** Pengurangan bar Lapar (*Hunger*), Haus, dan Infeksi (*Infection*) seiring waktu.
-*   **Gathering & Crafting:** Sistem menebang pohon, menambang, memancing menggunakan kail (*Base Item*), dan resep *crafting* untuk membuat dinding, lantai, atau stasiun kerja (*workbench*).
-*   **Base Building:** Restriksi penempatan objek (tidak boleh di pasir pantai) dan sistem ketahanan bangunan terhadap bencana alam atau serangan.
+Untuk merakit game ini dengan benar tanpa kehilangan konteks naratif dan mekanik, Anda (Claude) **DIWAJIBKAN** mengikuti urutan kerja berikut secara berurutan:
 
-### 3. `LOGIC/L4D2_Logic/` (Fase Combat & Horde)
-Diadaptasi dari logika game *Left 4 Dead 2*. Folder ini mengendalikan sistem pertempuran, AI musuh, dan *gunplay*.
-*   **Siklus Siang/Malam (Dual Threat):** 
-    *   *Siang:* *Spawn* hewan buas teritorial (Serigala, Jaguar, Beruang). Zombie tidak *spawn* (mati terbakar matahari).
-    *   *Malam:* Mekanik *Horde*. Zombie muncul dalam jumlah banyak, mengejar pemain, dan menyerang markas.
-*   **Gunplay & Senjata:** Mekanik menembak menggunakan Pistol (*Base Item*), peluru, *recoil*, dan *damage* area.
-*   **Special Infected:** Pengaturan *behavior* zombie khusus di setiap region (Zombie Terbakar, Zombie Lumut, Zombie Militer Berarmor, Zombie Lapar).
+### TAHAP 1: Inisialisasi & Pemahaman Konteks (Baca File Dasar)
 
-## 🚀 Alur Kerja untuk AI (Claude)
+Sebelum menyentuh folder kode atau logika, Anda harus membaca tiga file utama berikut agar memahami dunia game dan batasan-batasannya:
 
-Jika Anda adalah AI yang bertugas men-generate *script* untuk game ini, ikuti langkah berikut:
-1.  Baca spesifikasi lengkap dunia, region, dan *lore* pada file `GDD.md`.
-2.  Analisis *script* pergerakan dan interaksi awal di `LOGIC/60_Seconds_Logic/` untuk membangun transisi *scene* dari Kapal ke Pulau.
-3.  Implementasikan sistem inventori dan *crafting* dari `LOGIC/Raft_Logic/` sebagai fondasi utama di *scene* Pulau.
-4.  Integrasikan sistem *combat*, AI musuh siang/malam, dan *Sudden Events* (bencana alam) dari `LOGIC/L4D2_Logic/` untuk memberikan tekanan (hambatan) pada pemain saat mereka melakukan *grinding*.
-5.  Pastikan sistem *quest* logistik (memindahkan *parts* helikopter dari Region 4 ke Region 3) menjadi kondisi penyelesaian (*Win Condition*) pada Hari ke-60.
+1. **`README.md` (File ini):** Memahami alur kerja, struktur folder, dan instruksi penulisan kode.
+
+2. **`GDD.md` (Game Design Document):** Dokumen paling krusial. Berisi seluruh aturan game, narasi (insiden kapal, diary), mekanik 4 Region (Gunung Berapi, Amazon, Es, Desa), mekanik siang/malam (Hewan vs Zombie terbakar), dan *Win Condition* (merakit Helikopter di Hari ke-60).
+
+3. **`Claude.md`:** Berisi *prompt* spesifik, perintah eksekusi, dan instruksi *workflow* tambahan dari developer (muham) untuk Anda patuhi selama proses *generate* kode.
+
+### TAHAP 2: Ekstraksi Logika dari Referensi (Baca Folder Sumber)
+
+Game ini menggabungkan tiga pilar mekanik utama. Anda harus masuk ke dalam sub-folder referensi (di dalam folder LOGIC awal, jika ada) dan mengadopsi logika berikut ke dalam *script* C# (Unity):
+
+* **A. Logika "60 Seconds!" (Fase Awal/Scavenging)**
+
+  * **Yang harus diekstrak:** Sistem *timer* (hitung mundur 60 detik di kapal), logika *looting* cepat (ambil peluru, makanan), pembatasan slot *inventory* awal, dan interaksi memilih/menyelamatkan NPC.
+
+  * **Tujuan:** Membuat transisi *state* yang sempurna dari kapal tenggelam menuju pantai pulau dengan membawa barang *default* (Kail & Pistol) beserta barang ekstra hasil *looting*.
+
+* **B. Logika "Raft" (Fase Survival, Status, & Crafting)**
+
+  * **Yang harus diekstrak:** Sistem degradasi bar *Hunger* (lapar) dan *Thirst/Infection*, sistem *gathering* (menebang kayu, menambang batu), memancing menggunakan kail, dan sistem *Base-Building* modular (penempatan lantai, dinding, meja *crafting*).
+
+  * **Aturan Khusus:** Implementasikan restriksi penempatan *collider* di mana pemain tidak bisa membangun struktur *base* di area pasir pantai.
+
+* **C. Logika "Left 4 Dead 2" (Fase Combat & Horde)**
+
+  * **Yang harus diekstrak:** Mekanik FPS *gunplay* (menembak, *recoil*, *reload*), sistem AI musuh (Pathfinding, *aggro*), dan sistem *spawn manager* dinamis.
+
+  * **Aturan Khusus:** Implementasikan siklus Siang & Malam.
+
+    * *Siang:* *Spawn* Hewan Buas (Serigala, Jaguar, dll). Hancurkan (bakar) *GameObject* zombie jika terkena cahaya matahari.
+
+    * *Malam:* Hentikan *spawn* hewan, picu *Horde System* di mana gerombolan zombie dengan *class* berbeda (*Special Infected* per region) akan memburu pemain.
+
+### TAHAP 3: Sintesis & Penyatuan Kode (Output Eksekusi)
+
+Setelah memahami *GDD* dan mengambil sari pati logika dari ketiga referensi game di atas, tugas utama Anda adalah menyatukan semuanya ke dalam satu arsitektur kode (*Script* Unity) yang saling terhubung.
+
+* **Lokasi Output / Penyatuan File:**
+  Semua *script* hasil rakitan dan penggabungan logika dari Tahap 2 **HARUS** disatukan dan di-*generate* untuk disimpan ke dalam folder utama:
+  👉 `C:\Users\muham\Downloads\Survival Island\Survival Island\LOGIC`
+
+* **Standar Penulisan:**
+
+  * Buatlah arsitektur berbasis *Manager* (misal: `GameManager.cs`, `SurvivalManager.cs`, `DayNightManager.cs`, `HordeManager.cs`).
+
+  * Pastikan variabel antar skrip bisa saling berkomunikasi (contoh: `DayNightManager` harus memberitahu `HordeManager` kapan matahari terbit agar zombie terbakar).
+
+  * Beri komentar pada baris kode yang mengimplementasikan fitur spesifik dari *GDD* (contoh: `// Mekanik Region 4: Spawn Zombie Lapar`).
+
+## 🎯 Pesan Konfirmasi
+
+Jika Anda (Claude) telah membaca `README.md` ini, konfirmasikan pemahaman Anda dengan mengatakan: *"Saya telah memahami alur kerja Survival Island. Saya akan merujuk pada GDD.md dan Claude.md, menyerap logika dari 60 Seconds, Raft, dan L4D2, lalu menyatukan seluruh kode ke dalam folder \\Survival Island\\Survival Island\\LOGIC."*
