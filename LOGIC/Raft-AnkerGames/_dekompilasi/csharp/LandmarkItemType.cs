@@ -1,0 +1,25 @@
+internal enum LandmarkItemType
+{
+	Carry,
+	ChallengePipe,
+	CharacterUnlock,
+	ClawChallenge,
+	ComputerChallenge,
+	Container,
+	Elevator,
+	JusticeScale,
+	Keypad,
+	PickupItem,
+	QuestEvent,
+	QuestEventOneWay,
+	SeleneFight,
+	SnowmobileShed,
+	StarChallenge,
+	TangaroaCockpitLaunch,
+	TradingPost,
+	VendingMachine,
+	WaterLoggedHatch,
+	WaterWell,
+	AchievementUnlocker,
+	Normal
+}

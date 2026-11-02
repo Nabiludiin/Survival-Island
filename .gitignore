@@ -1,22 +1,78 @@
-# Dependencies
+# Dependencies & Build outputs
 node_modules/
 package-lock.json
+**/obj/
 
 # OS & Temp files
 .DS_Store
 Thumbs.db
 *.log
+*.url
 
-# Salinan game komersial (hanya referensi lokal, jangan di-upload)
-LOGIC/*-AnkerGames/
-LOGIC/**/*.exe
-LOGIC/**/*.dll
-LOGIC/**/*.pak
-LOGIC/**/*.vpk
-LOGIC/**/*.assets
-LOGIC/**/*.resS
-LOGIC/**/*.bundle
+# Archives
 *.zip
 *.rar
 *.7z
-*.bik
+
+# =====================================================================
+# /LOGIC/ - Hanya track kode dekompilasi, catatan mekanik, script & config
+# (Aset biner game mentah, installer, backup, & tools di-skip)
+# =====================================================================
+/LOGIC/**/*
+!/LOGIC/**/
+
+# Allow source code, hasil dekompilasi, catatan analisis, & konfigurasi teks
+!/LOGIC/**/*.cs
+!/LOGIC/**/*.csproj
+!/LOGIC/**/*.sln
+!/LOGIC/**/*.editorconfig
+!/LOGIC/**/*.c
+!/LOGIC/**/*.h
+!/LOGIC/**/*.cpp
+!/LOGIC/**/*.py
+!/LOGIC/**/*.ps1
+!/LOGIC/**/*.tsv
+!/LOGIC/**/*.il
+!/LOGIC/**/*.md
+!/LOGIC/**/*.cfg
+!/LOGIC/**/*.txt
+!/LOGIC/**/*.json
+!/LOGIC/**/*.xml
+!/LOGIC/**/*.ini
+!/LOGIC/**/*.config
+!/LOGIC/**/*.info
+!/LOGIC/**/*.vmt
+!/LOGIC/**/*.qc
+!/LOGIC/**/*.res
+!/LOGIC/**/*.ctx
+!/LOGIC/**/*.vdf
+!/LOGIC/**/*.scr
+!/LOGIC/**/*.rc
+
+# Skip folder installer, runtime, tools, backup, Ghidra DB, peta mentah, & bahasa asing
+/LOGIC/**/Redist/
+/LOGIC/**/_CommonRedist/
+/LOGIC/**/MonoBleedingEdge/
+/LOGIC/**/_backup_sebelum_ganti_teks/
+/LOGIC/**/_cadangan_sebelum_rename/
+/LOGIC/**/_dekompilasi/alat/
+/LOGIC/**/_dekompilasi/peta/
+/LOGIC/**/_proyek_ghidra/
+/LOGIC/Zombie-Nabil/**/hl2/
+/LOGIC/Zombie-Nabil/**/platform/
+/LOGIC/Zombie-Nabil/**/bin/
+/LOGIC/Zombie-Nabil/**/zombie_danish/
+/LOGIC/Zombie-Nabil/**/zombie_dutch/
+/LOGIC/Zombie-Nabil/**/zombie_finnish/
+/LOGIC/Zombie-Nabil/**/zombie_italian/
+/LOGIC/Zombie-Nabil/**/zombie_japanese/
+/LOGIC/Zombie-Nabil/**/zombie_korean/
+/LOGIC/Zombie-Nabil/**/zombie_norwegian/
+/LOGIC/Zombie-Nabil/**/zombie_polish/
+/LOGIC/Zombie-Nabil/**/zombie_schinese/
+/LOGIC/Zombie-Nabil/**/zombie_swedish/
+/LOGIC/Zombie-Nabil/**/zombie_tchinese/
+
+# Skip file lokalisasi non-Inggris L4D (~110MB teks terjemahan duplikat)
+/LOGIC/Zombie-Nabil/**/resource/*_*.txt
+!/LOGIC/Zombie-Nabil/**/resource/*_english.txt

@@ -1,0 +1,3 @@
+public class QuestInteractableComponent_TriggerVoiceLine : QuestInteractableComponentBase<QuestInteractable_ComponentData_VoiceLine>
+{
+}

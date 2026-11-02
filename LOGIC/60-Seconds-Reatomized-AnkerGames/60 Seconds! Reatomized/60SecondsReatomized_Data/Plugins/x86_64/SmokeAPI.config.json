@@ -1,0 +1,17 @@
+{
+  "$version": 4,
+  "logging": false,
+  "log_steam_http": false,
+  "default_app_status": "unlocked",
+  "override_app_status": {},
+  "override_dlc_status": {},
+  "auto_inject_inventory": true,
+  "extra_inventory_items": [],
+  "extra_dlcs": {
+    "1012880": {
+      "dlcs": {
+        "1012883": "Depot 1012883 (empty depot)"
+      }
+    }
+  }
+}

@@ -1,0 +1,3 @@
+public class QuestInteractableComponent_Ragdoll : QuestInteractableComponentBase<QuestInteractable_ComponentData_RagdollComponent>
+{
+}

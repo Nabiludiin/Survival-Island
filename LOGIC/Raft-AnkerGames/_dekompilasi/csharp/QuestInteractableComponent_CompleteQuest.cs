@@ -1,0 +1,3 @@
+public class QuestInteractableComponent_CompleteQuest : QuestInteractableComponentBase<QuestInteractable_ComponentData_Quest>
+{
+}

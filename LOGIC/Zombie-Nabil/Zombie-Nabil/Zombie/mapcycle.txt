@@ -1,0 +1,4 @@
+zombie_farm01_hilltop
+zombie_airport01_greenhouse
+zombie_smalltown01_caves
+zombie_hospital01_apartment

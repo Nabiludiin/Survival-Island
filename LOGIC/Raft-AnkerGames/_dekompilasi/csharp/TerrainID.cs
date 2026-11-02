@@ -1,0 +1,15 @@
+public enum TerrainID
+{
+	GRASS,
+	DIRT,
+	ROCK,
+	SAND,
+	GRAVEL,
+	ALPHAMAP,
+	SANDDIRT,
+	STONE,
+	SNOW,
+	SHALLOWSNOW,
+	ICE,
+	NONE
+}

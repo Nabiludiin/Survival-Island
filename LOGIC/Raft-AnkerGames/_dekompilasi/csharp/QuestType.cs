@@ -1,0 +1,27 @@
+public enum QuestType
+{
+	None = -1,
+	RadioTowerReached = 2,
+	MamaBearLurePlaced = 3,
+	MamaBearKilled = 4,
+	BalboaRelayStation1 = 5,
+	BalboaRelayStation2 = 6,
+	BalboaRelayStation3 = 7,
+	TangaroaGeneratorRepaired = 8,
+	TangaroaFloodStarted = 9,
+	VarunaCraneKey = 10,
+	VarunaBossGateEntered = 11,
+	VarunaBossKilled = 17,
+	TemperanceCoolingRodsInserted = 12,
+	TemperanceCoolingLeverPulled = 13,
+	TemperanceReactorComplete = 14,
+	Utopia_People_Rescued = 15,
+	Utopia_LarsKilled = 16,
+	Utopia_HyenaRoomComplete = 19,
+	Utopia_OlofFall = 18,
+	Utopia_Boss_Started = 20,
+	Varuna_Boss_Started = 21,
+	Utopia_Market_Started = 22,
+	Utopia_Market_Finish = 23,
+	Utopia_HyenaRoom_Started = 24
+}

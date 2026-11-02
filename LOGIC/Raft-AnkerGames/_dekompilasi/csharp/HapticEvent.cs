@@ -1,0 +1,42 @@
+using System;
+
+[Serializable]
+public enum HapticEvent
+{
+	SharkBitesRaft_0,
+	SharkBitesRaft_1,
+	SharkBitesRaft_2,
+	SharkBitesRaft_3,
+	SharkBitesRaft_4,
+	TakeDamage,
+	FishOnHook,
+	DamageEnemy,
+	Hit,
+	Hungry,
+	Thirsty,
+	Drowning,
+	LowAir,
+	Zipline,
+	VasagatanBomb,
+	BalboaBridge,
+	CaravanRocket,
+	VarunaBossSmashWall,
+	VarunaBossRumble,
+	UtopiaHookLaunch,
+	TangaroaLidOpen,
+	ContainerDropped,
+	TangaroaDoor,
+	TangaroaCockpitLaunch,
+	IceBreak,
+	SeleneDoor,
+	ReactorError,
+	Snowmobile,
+	AlfaLand,
+	Dynamite_0,
+	Dynamite_1,
+	Dynamite_2,
+	HookHit,
+	Splash,
+	Build,
+	Rumble
+}

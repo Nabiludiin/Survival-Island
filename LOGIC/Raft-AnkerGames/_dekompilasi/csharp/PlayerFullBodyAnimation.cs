@@ -1,0 +1,21 @@
+public enum PlayerFullBodyAnimation
+{
+	None_0,
+	Sitting_1,
+	BoarCarried_2,
+	UsingInstrument_3,
+	Ziplining_4,
+	Hammock_5,
+	HammockCeiling_6,
+	Bed_7,
+	SnowMobilePassenger1_8,
+	SnowMobilePassenger2_9,
+	SnowMobile_10,
+	SittingArmchair_11,
+	SittingSofa_12,
+	SittingStoolHigh_13,
+	SittingStoolLow_14,
+	Bathtub_15,
+	SittingSofaCorner_16,
+	HyenaDrag_17
+}

@@ -1,0 +1,10 @@
+vertexlitGeneric
+{
+$baseTexture "models/props_misc/fairground_tents"
+$model 1
+$envmap env_cubemap
+$envmapmask "models/props_urban/envmapmask"
+$envmaptint "[ .5 .5 .5 ]"
+$envmapcontrast ".6"
+$envmapsaturation ".3"
+}

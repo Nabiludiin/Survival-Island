@@ -1,0 +1,27 @@
+public enum ObjectOfInterestType
+{
+	None = 0,
+	MamaBear_Lure = 1,
+	MamaBear_Cave = 2,
+	Varuna_Boss_Floor_1 = 3,
+	Varuna_Boss_Floor_2 = 4,
+	Varuna_Boss_Floor_3 = 5,
+	Varuna_Boss_WaypointHandler_1 = 6,
+	Varuna_Boss_WaypointHandler_2 = 7,
+	Varuna_Boss_WaypointHandler_3 = 8,
+	Temperance_FightChallenge_RallyPoint = 9,
+	Utopia_Cogwheel_LiftJumpPuzzle = 10,
+	Utopia_Cogwheel_SmallJusticeScale = 11,
+	Utopia_Cogwheel_BigJusticeScale = 19,
+	Utopia_Cogwheel_BrokenElevator = 12,
+	Utopia_Cogwheel_DrawBridge = 16,
+	Utopia_Cogwheel_Stairs = 20,
+	Utopia_Waypoint_1 = 13,
+	Utopia_Waypoint_2 = 14,
+	Utopia_Waypoint_3 = 15,
+	Utopia_JusticeScaleWeight = 17,
+	Utopia_BossOlofPart2 = 18,
+	Utopia_HyenaBossAreaZone = 21,
+	Varuna_Boss_AreaZone_AllowedTarget = 22,
+	Varuna_Boss_HelperScript = 23
+}

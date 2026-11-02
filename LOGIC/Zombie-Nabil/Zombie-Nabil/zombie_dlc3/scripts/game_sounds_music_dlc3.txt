@@ -1,0 +1,166 @@
+"Event.MissionStart_River"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.78"
+	"soundlevel"	"SNDLVL_NONE"
+
+	"rndwave"
+	{
+		"wave"			"@#music/stmusic/thesacrifice.wav"
+	}
+	GameData
+	{
+		"MusicTrack"            "checkpoint"
+		"MusicAutoQueue"        "Event.MissionStart_BaseLoop_River"
+		"MusicPriority"			"MEDIUM"
+		"MusicParameters"		"AFTER_DEATH"
+		"MusicMaster"           "PLAY_TO_END"	
+		"MusicMasterTags"
+		{
+//			"loopStart" "78.373"
+			"loopStart" "107.252"
+		}
+	}
+}
+"Event.MissionStart_BaseLoop_River"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.65"
+	"soundlevel"	"SNDLVL_NONE"
+
+	"rndwave"
+	{
+		"wave"			"@#music/cpmusic/prayfordeath.wav"
+	}
+	GameData
+	{
+		"MusicPriority"			"MEDIUM"
+		"MusicTrack"            "checkpoint"
+		"MusicTagTrack"         "checkpoint"
+		"MusicFadeOut"         	"5.0"
+	}
+}
+"Event.CheckPointIntro_River"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.78"
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"			"@#music/stmusic/youhadbetterpray.wav"
+
+	GameData
+	{
+		"MusicTrack"            "checkpoint"
+		"MusicAutoQueue"        "Event.CheckPointBaseLoop_River"
+		"MusicPriority"			"MEDIUM"
+		"MusicParameters"		"NO_INTENSITY_TRACK"
+		"MusicMaster"           "PLAY_TO_END"
+		"MusicMasterTags"
+		{
+			"loopStart" "1.95"
+		}
+	}
+}
+
+"Event.CheckPointBaseLoop_River"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.65"
+	"soundlevel"	"SNDLVL_NONE"
+
+	"wave"			"@#music/cpmusic/prayfordeath.wav"
+
+	GameData
+	{
+		"MusicPriority"			"MEDIUM"
+		"MusicTrack"            "checkpoint"
+		"MusicTagTrack"         "checkpoint"
+		"MusicFadeOut"         	"5.0"
+	}
+}
+"Event.LeavingSafety_River"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.4, 0.4"
+	"soundlevel"	"SNDLVL_NONE"
+	"rndwave"
+	{
+ 		"wave"	"@#music/mob/GermS1a.wav"
+ 		"wave"	"@#music/mob/GermS1b.wav"
+	}
+
+	GameData
+	{
+		"MusicDelayTime"        "2.0"
+		"MusicPriority"			"LOW"
+		"MusicTrack"            "overdub"	
+	}
+}
+"Event.StartAtmosphere_River"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.6, 0.8"
+	"soundlevel"	"SNDLVL_NONE"
+	"rndwave"
+	{
+		"wave" "@#music/contagion/NM_Quarantine_01.wav"
+		"wave" "@#music/contagion/NM_Quarantine_02.wav"
+		"wave" "@#music/contagion/NM_Quarantine_03.wav"
+	}
+
+	GameData
+	{
+		"MusicPriority"			"LOW"
+		"MusicTrack"            "safeAmbient"	
+	}
+}
+"Event.SafeAtmosphere_River"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.6, 0.8"
+	"soundlevel"	"SNDLVL_NONE"
+	"rndwave"
+	{
+		"wave" "@#music/contagion/NM_Quarantine_01.wav"
+		"wave" "@#music/contagion/NM_Quarantine_02.wav"
+		"wave" "@#music/contagion/NM_Quarantine_03.wav"
+	}
+
+	GameData
+	{
+		"MusicPriority"			"LOW"
+		"MusicTrack"            "safeAmbient"	
+		"MusicParameters"		"INTENSITY_CELING"
+		"MusicFadeOut"         	"1.0"
+
+	}
+}
+// danger
+"Event.DangerAtmosphere_River"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.6, 0.8"
+	"soundlevel"	"SNDLVL_NONE"
+	"rndwave"
+	{
+
+		"wave" "@#music/contagion/ZOMBIE_Rabies_01.wav"
+		"wave" "@#music/contagion/ZOMBIE_Rabies_02.wav"
+		"wave" "@#music/contagion/ZOMBIE_Rabies_03.wav"
+		"wave" "@#music/contagion/ZOMBIE_Rabies_04.wav"
+		"wave" "@#music/contagion/ZOMBIE_Rabies_05.wav"
+		"wave" "@#music/contagion/ZOMBIE_Rabies_06.wav"
+		"wave" "@#music/contagion/ZOMBIE_Rabies_07.wav"
+		"wave" "@#music/contagion/ZOMBIE_Rabies_08.wav"
+		"wave" "@#music/contagion/ZOMBIE_Rabies_09.wav"
+		"wave" "@#music/contagion/ZOMBIE_Rabies_10.wav"
+	}
+
+	GameData
+	{
+		"MusicPriority"			"LOW"
+		"MusicTrack"            "ambient"	
+		"MusicFadeOut"         	"1.0"
+
+	}
+}

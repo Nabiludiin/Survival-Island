@@ -1,0 +1,3 @@
+public class QuestInteractableComponent_Achievement : QuestInteractableComponentBase<QuestInteractable_ComponentData_Achievement>
+{
+}

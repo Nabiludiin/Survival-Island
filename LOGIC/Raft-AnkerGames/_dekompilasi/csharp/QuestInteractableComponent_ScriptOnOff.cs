@@ -1,0 +1,3 @@
+public class QuestInteractableComponent_ScriptOnOff : QuestInteractableComponentBase<QuestInteractable_ComponentData_ScriptOnOff>
+{
+}

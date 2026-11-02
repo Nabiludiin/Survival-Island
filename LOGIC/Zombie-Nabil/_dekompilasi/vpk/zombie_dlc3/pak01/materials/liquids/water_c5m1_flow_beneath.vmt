@@ -1,0 +1,28 @@
+Water
+{
+$normalmap "liquids/water_river_normal_sharp"
+
+
+
+
+
+
+
+
+
+
+$refract 1
+$refractamount "0.25"
+$refracttint "{ 151 135 34 }"
+$abovewater 0
+$fogenable 1
+$fogstart 0
+$fogend 30
+
+
+$fogcolor "{ 9 7 1 }"
+
+"%compilewater" 1
+"%tooltexture" "nature/water_frame01_normal"
+$surfaceprop water
+}

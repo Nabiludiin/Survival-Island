@@ -1,0 +1,9 @@
+VertexLitGeneric
+{
+$baseTexture "models/props_fortifications/concrete_post001.vtf"
+$phong 1
+$phongexponent 150
+$phongboost 1
+$phongfresnelranges "[.7 15 20]"
+$bumpmap "effects/flat_normal"
+}

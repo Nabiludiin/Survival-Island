@@ -1,0 +1,3 @@
+public class QuestInteractableComponent_UnlockCharacter : QuestInteractableComponentBase<QuestInteractable_ComponentData_UnlockCharacter>
+{
+}
