@@ -13,7 +13,7 @@ Kapal tenggelam, dan kamu harus mengumpulkan barang seadanya sebelum air menelan
 Game ini menantang pemain dalam dua fase permainan yang brutal:
 
 ### Fase 1: 60 Detik Menuju Kehancuran
-Kapal miring dan air mulai masuk. Kamu memiliki waktu **tepat 60 detik** untuk berlari di koridor kapal, mengambil makanan kaleng, peluru, dan menyelamatkan penyintas lain. Pilihanmu di 60 detik pertama ini akan sangat menentukan seberapa menderita kamu di pulau nanti. Kamu hanya berbekal **Kail Pancing** dan sepucuk **Pistol**.
+Kapal miring dan air mulai masuk. Kamu memiliki waktu **tepat 60 detik** untuk berlari di koridor kapal, mengambil makanan kaleng, peluru, dan menyelamatkan penyintas lain. Pilihanmu di 60 detik pertama ini akan sangat menentukan seberapa menderita kamu di pulau nanti. Kamu hanya berbekal **Kail Pancing** dan sepucuk **Pistol** dan sebuah **Pisau**.
 
 ### Fase 2: Bertahan 60 Hari
 Terdampar di pulau, kamu harus bertahan hidup, mengelola rasa lapar, dan menahan infeksi virus. Target utamamu: **Merakit Helikopter di puncak gunung es dan kabur sebelum Hari ke-60.** 

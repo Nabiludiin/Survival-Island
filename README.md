@@ -54,7 +54,7 @@ Setelah memahami *GDD* dan mengambil sari pati logika dari ketiga referensi game
 
 * **Lokasi Output / Penyatuan File:**
   Semua *script* hasil rakitan dan penggabungan logika dari Tahap 2 **HARUS** disatukan dan di-*generate* untuk disimpan ke dalam folder utama:
-  👉 `C:\Users\muham\Downloads\Survival Island\Survival Island\LOGIC`
+  👉 `Survival-Island\Survival Island\LOGIC`
 
 * **Standar Penulisan:**
 
@@ -66,4 +66,4 @@ Setelah memahami *GDD* dan mengambil sari pati logika dari ketiga referensi game
 
 ## 🎯 Pesan Konfirmasi
 
-Jika Anda (Claude) telah membaca `README.md` ini, konfirmasikan pemahaman Anda dengan mengatakan: *"Saya telah memahami alur kerja Survival Island. Saya akan merujuk pada GDD.md dan Claude.md, menyerap logika dari 60 Seconds, Raft, dan L4D2, lalu menyatukan seluruh kode ke dalam folder \\Survival Island\\Survival Island\\LOGIC."*
+Jika Anda (Claude) telah membaca `README.md` ini, konfirmasikan pemahaman Anda dengan mengatakan: *"Saya telah memahami alur kerja Survival Island. Saya akan merujuk pada GDD.md dan Claude.md, menyerap logika dari 60 Seconds, Raft, dan L4D, lalu menyatukan seluruh kode ke dalam folder \\Survival-Island\\Survival Island\\LOGIC."*

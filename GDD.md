@@ -15,7 +15,7 @@ Game dibagi menjadi dua fase utama yang saling berkesinambungan.
 
 **Fase 1: The 60-Second Scavenge (Kapal Sinking)**
 -   **Mekanik:** MC memiliki waktu persis 60 detik di dalam kapal yang miring dan dipenuhi air/zombie untuk mengambil *loot*.
--   **Base Item:** MC otomatis memulai dengan membawa **Kail (seperti di game Raft)** dan **Pistol**.
+-   **Base Item:** MC otomatis memulai dengan membawa **Kail (seperti di game Raft)** dan **Pistol** dan **Pisau**.
 -   **Prioritas:** Mencari peluru, makanan kaleng, dan menyelamatkan NPC (yang masing-masing punya *skill* khusus, misal: mempercepat *crafting* atau ahli medis).
 
 **Fase 2: The Island Survival (60 Days Target)**
