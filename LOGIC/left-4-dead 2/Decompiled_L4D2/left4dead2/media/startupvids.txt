@@ -1,3 +1,0 @@
-media/valve.bik
-media/l4d2_intro.bik
-
