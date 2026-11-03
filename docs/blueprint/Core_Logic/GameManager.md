@@ -1,5 +1,5 @@
 # Blueprint: GameManager.cs
-**Lokasi:** `LOGIC/Core_Logic/GameManager.md`
+**Lokasi:** `docs/blueprint/Core_Logic/GameManager.md`
 **Deskripsi Utama:** *Singleton* absolut yang hidup di semua *Scene* (`DontDestroyOnLoad`). Menjembatani data dari Kapal (Fase 1) ke Pulau (Fase 2), dan mengecek kondisi Menang/Kalah (Permadeath).
 
 ## 1. Arsitektur & Variabel Utama

@@ -1,5 +1,5 @@
 # Blueprint: InventoryManager.cs
-**Lokasi:** `LOGIC/Core_Logic/InventoryManager.md`
+**Lokasi:** `docs/blueprint/Core_Logic/InventoryManager.md`
 **Deskripsi Utama:** Sistem manajemen slot dinamis. Mengatur UI Grid, penyimpanan *resource*, dan transfer data awal saat pemain baru mendarat di pulau.
 
 ## 1. Arsitektur & Variabel Utama

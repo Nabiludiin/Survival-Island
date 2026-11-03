@@ -22,7 +22,7 @@ Survival-Island/
 │       ├── left-4-dead/          # Siklus ancaman, AI musuh, spawn, dan gunplay
 │       ├── Core_Logic/           # Sistem yang dipakai lintas fase
 │       └── Island_Logic/         # Sistem khusus Fase 2 di pulau
-├── LOGIC/                        # Bahan referensi game asli, bukan kode proyek
+├── LOGIC/                        # Bahan referensi game asli, hanya ada di komputer lokal (tidak ada di repo)
 └── Survival Island/
     ├── README.md                 # Cerita, feel, dan gambaran game
     └── LOGIC/                    # Lokasi output script C# nantinya
@@ -49,7 +49,7 @@ Kalau dua dokumen berbeda, ikuti urutan ini:
 | 3 | `docs/blueprint/` | Rancangan logika tiap sistem, harus mengikuti GDD |
 | 4 | Issue GitHub | Daftar pekerjaan dan batas tiap pekerjaan |
 | 5 | `docs/CATATAN_MEKANIK.md`, `docs/REFERENSI_MUSUH_L4D.md` | Bahan referensi dan usulan, bukan aturan |
-| 6 | `LOGIC/` | Bahan analisis |
+| 6 | `LOGIC/` | Bahan analisis lokal, tidak ada di repo |
 
 Jangan memutuskan sendiri kalau aturannya bertentangan. Catat di [issue #85](https://github.com/Nabiludiin/Survival-Island/issues/85), lalu minta keputusan developer.
 
@@ -81,7 +81,7 @@ Saat diminta membuat issue saja, berhenti setelah issue terbit. Jangan langsung 
 
 ### TAHAP 3: Ekstraksi Logika dari Referensi
 
-Game ini menggabungkan tiga pilar mekanik utama. Baca `docs/CATATAN_MEKANIK.md` dulu, lalu buka sub-folder di `LOGIC/` hanya kalau butuh detail tambahan.
+Game ini menggabungkan tiga pilar mekanik utama. Baca `docs/CATATAN_MEKANIK.md` dulu, lalu buka sub-folder di `LOGIC/` hanya kalau butuh detail tambahan. Folder itu hanya ada di komputer lokal dan tidak ikut saat repo di-clone. Kalau tidak ada, cukup pakai catatan di `docs/`. Jangan memasukkan isinya ke repo.
 
 **Tulis ulang logikanya dengan kata-kata sendiri. Jangan menyalin kode atau asset dari game asli.**
 

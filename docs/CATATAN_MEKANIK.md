@@ -8,7 +8,7 @@ Rangkuman cara kerja mekanik di 60 Seconds! Reatomized, Raft, dan Left 4 Dead, d
 |---|---|
 | **Dari kode** | Dibaca langsung dari hasil dekompilasi |
 | **Default kode** | Nilai awal di script. Nilai saat bermain bisa berbeda karena diatur di prefab atau asset |
-| **Dari analisis lokal** | Dari catatan `BEDAH_*.md` di `LOGIC/` yang belum diuji di dalam game |
+| **Dari analisis lokal** | Dari catatan `BEDAH_*.md` di `LOGIC/` (hanya ada di komputer lokal, tidak ada di repo) yang belum diuji di dalam game |
 | **Usulan** | Saran untuk Survival Island, bukan aturan dari game referensi atau GDD |
 
 Nilai L4D memakai unit Source. Sebagai perkiraan kasar, 1 unit sekitar 2 cm, jadi perlu disetel ulang di Unity.

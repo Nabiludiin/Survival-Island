@@ -1,5 +1,5 @@
 # Blueprint: ObjectPooler.cs
-**Lokasi:** `LOGIC/Core_Logic/ObjectPooler.md`
+**Lokasi:** `docs/blueprint/Core_Logic/ObjectPooler.md`
 **Deskripsi Utama:** Penyelamat FPS/RAM. Zombie dan Peluru tidak boleh di-Instantiate berulang. Skrip ini membuat "Gudang" objek pasif yang bisa dipanggil dan dimatikan secara instan.
 
 ## 1. Arsitektur & Variabel Utama

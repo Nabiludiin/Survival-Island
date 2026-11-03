@@ -23,7 +23,7 @@ Baca juga sesuai tugas:
 - **Bedakan aturan dan usulan.** Ide yang belum ada di GDD harus ditulis sebagai usulan.
 - **Kerjakan yang diminta saja.** Permintaan membuat issue tidak berarti mengerjakan blueprint-nya.
 - **Jangan commit, push, membuat Pull Request, atau menutup issue** tanpa perintah developer.
-- **Jangan menyalin kode atau asset dari `LOGIC/`.** Tulis ulang logikanya dengan kata-kata sendiri.
+- **Jangan menyalin kode atau asset dari `LOGIC/`.** Tulis ulang logikanya dengan kata-kata sendiri. Folder itu hanya ada di komputer lokal dan diabaikan git, jadi jangan memasukkannya kembali ke repo.
 - **Tulis dokumen dan issue dalam Bahasa Indonesia.** Nama kelas, fungsi, dan istilah Unity tetap memakai bahasa aslinya.
 - **Laporkan hasil apa adanya,** termasuk yang belum selesai atau belum diuji.
 
