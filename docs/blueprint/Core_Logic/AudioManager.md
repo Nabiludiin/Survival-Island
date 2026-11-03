@@ -1,5 +1,5 @@
 # Blueprint: AudioManager.cs
-**Lokasi:** `LOGIC/Core_Logic/AudioManager.md`
+**Lokasi:** `docs/blueprint/Core_Logic/AudioManager.md`
 **Deskripsi Utama:** Pusat kendali sistem suara global. Mengelola musik latar (BGM) dinamis untuk siang/malam, efek suara (SFX) global, dan pengaturan volume master/spesifik.
 
 ## 1. Arsitektur & Variabel Utama
