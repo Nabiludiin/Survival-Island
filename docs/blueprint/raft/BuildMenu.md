@@ -143,7 +143,7 @@ Menu dibuka dengan sekali klik, bukan ditahan. `UIFocusStack` mematikan Action M
 - `OnFocusGained` memindahkan kursor ke tengah layar lewat `Mouse.WarpCursorPosition`.
 - Waktu tetap berjalan saat menu terbuka, sesuai tabel panel di `UIFocusStack.md`.
 
-**`public void SelectMode(HammerMode mode, BuildableData data)`** mengatur `Mode` dan `Selected`, menyalakan atau mematikan hologram, lalu menerbitkan `BuildModeChangedEvent`.
+**`public void SelectMode(HammerMode mode, BuildableData data)`** mengatur `Mode` dan `Selected`, menyalakan atau mematikan hologram, lalu menerbitkan `BuildModeChangedEvent { mode, buildableId }`. `buildableId` kosong kalau `data` bernilai `null`.
 
 ### Klik kiri palu
 

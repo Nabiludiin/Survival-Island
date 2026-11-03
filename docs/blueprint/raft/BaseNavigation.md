@@ -38,7 +38,7 @@
 ```csharp
 public enum DoorState { Closed, Open, Locked }
 
-public class BaseDoor : MonoBehaviour, IInteractable, ISaveable
+public class BaseDoor : MonoBehaviour, IInteractable   // Status disimpan lewat StructureRecord.extraJson (#79), bukan ISaveable
 {
     public Transform leafPivot;            // Daun pintu yang berputar
     public NavMeshObstacle leafObstacle;   // Menutup lubang pintu

@@ -22,7 +22,7 @@ public enum SleepBlockReason
     None, NotNight, EnemyNearby, DisasterActive, BloodMoon, Freezing, VitalsTooLow, RecentlyWoken
 }
 
-public enum SleepWakeReason { Daybreak, Manual, Attacked, EnemyNear, Interrupted, Disaster, TideRising, VitalEmpty, BedDestroyed, RunEnded }
+public enum SleepWakeReason { None, Daybreak, Manual, Attacked, EnemyNear, Interrupted, Disaster, TideRising, VitalEmpty, BedDestroyed, RunEnded }
 ```
 
 ### Kasur sebagai struktur

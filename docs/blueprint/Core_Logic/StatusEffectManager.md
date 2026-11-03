@@ -180,7 +180,7 @@ Semua efek yang aktif dikalikan, sehingga urutan pemberian efek tidak mengubah h
 - **Objek pool:** tidak memakai pool. Efek bukan `GameObject`, dan ikon HUD dipakai ulang dari daftar tetap sejumlah `maxActive`.
 - **Game dijeda:** `Time.deltaTime` bernilai 0 dan `TotalGameHours` berhenti, jadi durasi dan damage tidak berjalan. Panel tanpa jeda, seperti inventori, tetap menjalankan waktu.
 - **Permadeath:** semua efek hilang bersama scene dan save run (#82). Nilai penalti `StatusEffect` kembali ke 1, karena `SurvivalStats` baru dibuat.
-- **Save dan load:** `SaveId = player_status_effects`. Disimpan daftar `{ effectId, sourceId, stacks, remainingSeconds, endGameHour }`. `RestoreState` berjalan setelah `DayNightDirector`, lalu memanggil `Recalculate()`. `effectId` yang tidak ditemukan dibuang, dengan peringatan.
+- **Save dan load:** `SaveId = player_effects`, sesuai `WorldStateSave.md`. Disimpan daftar `{ effectId, sourceId, stacks, remainingSeconds, endGameHour }`. `RestoreState` berjalan setelah `DayNightDirector`, lalu memanggil `Recalculate()`. `effectId` yang tidak ditemukan dibuang, dengan peringatan.
 - **Mati saat efek berjalan:** `PlayerDiedEvent` menghentikan `Update`, sehingga damage tidak berjalan setelah mati.
 - **Efek habis tepat saat dimuat:** efek `GameHours` yang sudah lewat dihapus pada frame pertama.
 - **Kecepatan melebihi batas:** `moveSpeedMultiplier` tetap dikalikan dengan pengali Heavy Item di `PlayerSpeedModifiers`. Membawa Heavy Item dengan suplemen menghasilkan 0,5 x 1,2 = 0,6.
