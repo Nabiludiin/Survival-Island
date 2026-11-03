@@ -76,12 +76,12 @@ Kalau diminta membuat Pull Request, pakai branch `fitur-<nama-sistem>` dari `mai
 
 ## 🏗️ TAHAP 2: STATE MANAGEMENT & DATA STRUCTURE (UNITY PATTERNS)
 Gunakan pendekatan `Singleton` untuk Manager dan `ScriptableObjects` untuk data item agar rapi.
-- **GameManager.cs:** Mengatur `CurrentPhase` (Enum: `SINKING_SHIP`, `ISLAND_SURVIVAL`), `DayCounter`, dan transisi *scene*.
-- **PlayerStats.cs (MonoBehaviour):** Mengatur `HP` (100), `Stamina` (100), `Hunger` (100 - turun via `Update()` atau Coroutine), `Infection` (0 - naik jika kena *hit* zombie).
-- **InventoryManager.cs:** List dinamis. Selalu simpan *item* inti: `Base_Kail` dan `Base_Pistol`.
-- **TimeManager.cs:** Mengatur *TimeOfDay* (0.0 - 24.0), menggerakkan rotasi `Directional Light` (Matahari/Bulan), dan memicu *event* pergantian hari.
+- **GameManager.cs:** Mengatur `currentPhase` (Enum `GamePhase`: `SinkingShip`, `IslandSurvival`), `currentDay`, dan transisi *scene*.
+- **SurvivalStats.cs (MonoBehaviour):** Mengatur `HP` (100), `Stamina` (100), `Hunger` (100 - turun via `Update()` atau Coroutine), `Thirst` (100 - turun via `Update()` atau Coroutine), `Infection` (0 - naik jika kena *hit* zombie).
+- **InventoryManager.cs:** List dinamis. Selalu simpan *item* inti: `Base_Kail`, `Base_Pistol`, dan `Base_Pisau`.
+- **DayNightDirector.cs:** Mengatur *TimeOfDay* (0.0 - 24.0), menggerakkan rotasi `Directional Light` (Matahari/Bulan), dan memicu *event* pergantian hari.
 
-**Catatan:** Blueprint memakai nama `SurvivalStats` dan `DayNightDirector`. Pisau juga belum diputuskan sebagai item inti. Keduanya dibahas di issue #85.
+**Catatan:** Nama resmi ada di `docs/blueprint/GLOSSARY.md`. Keputusan desain lain yang masih terbuka dicatat di issue #85.
 
 ---
 
@@ -89,13 +89,13 @@ Gunakan pendekatan `Singleton` untuk Manager dan `ScriptableObjects` untuk data 
 
 ### Pilar 1: The "60 Seconds!" Logic (Fase 1 - Kapal Tenggelam)
 - **Mekanik:** `UI Timer` statis dari 60 ke 0 menggunakan `Time.deltaTime`.
-- **Interaksi:** Gunakan `Physics.Raycast` dari tengah kamera (*First-Person*) dengan `LayerMask` khusus *Interactable*. Klik kiri untuk mengambil *loot* atau NPC.
-- **Transisi:** Saat *Timer* <= 0, simpan data ke `GameManager` (bisa lewat `DontDestroyOnLoad`), lakukan *Fade to Black*, dan panggil `SceneManager.LoadScene("IslandPhase")`.
+- **Interaksi:** Gunakan `Physics.Raycast` dari tengah kamera (*First-Person*) dengan `LayerMask` khusus *Interactable*. Tekan `E` untuk mengambil *loot* atau NPC.
+- **Transisi:** Saat *Timer* <= 0, simpan data ke `GameManager` (bisa lewat `DontDestroyOnLoad`), lakukan *Fade to Black*, dan muat scene `IslandPhase` lewat `RunLifecycle`.
 
-**Catatan:** Tombol interaksi dan nama *scene* dibahas di issue #85. Titik aman dibahas di issue #74.
+**Catatan:** Tombol interaksi dan nama *scene* sudah diputuskan di issue #85. Titik aman dibahas di issue #74.
 
 ### Pilar 2: The "Raft" Logic (Fase 2 - Survival & Base Building)
-- **Sistem Lapar & Infeksi:** Coroutine yang mengurangi `Hunger` setiap x detik.
+- **Sistem Lapar, Haus & Infeksi:** Coroutine yang mengurangi `Hunger` dan `Thirst` setiap x detik.
 - **Sistem Crafting & Building:** 
   - Gunakan *Grid Snapping* (pembulatan vektor posisi) saat mode *Build* aktif.
   - **RESTRIKSI PANTAI:** Gunakan `Physics.Raycast` ke bawah. Jika menyentuh tanah dengan `LayerMask` "Sand/Beach", ubah material *hologram* bangunan menjadi merah dan batalkan instansiasi (*prevent building*).
@@ -117,11 +117,11 @@ Gunakan pendekatan `Singleton` untuk Manager dan `ScriptableObjects` untuk data 
 ## 🗺️ TAHAP 4: ARSITEKTUR 4 REGION & EVENT DINAMIS
 Gunakan *BoxCollider* (IsTrigger) raksasa sebagai pengenal zona (`ZoneTrigger.cs`):
 1. **Region 1 (Gunung Berapi):** Zona awal. *Sudden Event:* Instansiasi prefab *Fireball* dari langit dengan koordinat acak di sekitar pemain.
-2. **Region 2 (Amazon Tropis):** Gelap (*Fog density* tinggi). Syarat akses: Cek kondisi inventori (`Kayu >= 500`). Jika ya, aktifkan *GameObject* Jembatan.
-3. **Region 3 (Es & Helipad):** Coroutine `FrostbiteTick()`. Kurangi HP per detik jika pemain tidak memiliki atribut *Warmth*.
+2. **Region 2 (Amazon Tropis):** Gelap (*Fog density* tinggi). Syarat akses: Setor kayu sebanyak `GameBalanceConfig.region.bridgeWoodCost` (nilai awal 500). Jika cukup, aktifkan *GameObject* Jembatan.
+3. **Region 3 (Es & Helipad):** Coroutine `FrostbiteTick()`. Kurangi Stamina per detik jika pemain tidak memiliki atribut *Warmth*, lalu kurangi HP setelah Stamina habis.
 4. **Region 4 (Desa Logistik):** Tempat mengambil *Heavy Items* (Prefab Suku Cadang). Saat digenggam, kecepatan pemain menjadi setengah, disable tombol *Sprint* dan *Jump*.
 
-**Catatan:** Blueprint memakai nama `ZoneManager`. Rincian tiap region dibahas di issue #68, #65, #69, #70, dan #92.
+**Catatan:** Nama resminya `ZoneManager`. Rincian tiap region dibahas di issue #68, #65, #69, #70, dan #92.
 
 ---
 

@@ -6,7 +6,7 @@
 *   Implementasikan interface: `public class ShipInteractable : MonoBehaviour, IInteractable`
 *   `[Header("Item Properties")]`
     *   `public string ItemID;` (Gunakan ID unik seperti "itm_ammo_01", "npc_medic" untuk database).
-    *   `public ItemType type;` (Enum: `Weapon`, `Consumable`, `Material`, `NPC`).
+    *   `public ShipInteractableKind kind;` (Enum: `Item`, `NPC`). Jenis item dibaca dari `ItemData.ItemType`.
     *   `public int weightCost = 1;` (Berat item. Makanan = 1, Senjata = 2, NPC = 4).
 *   `[Header("Visual Feedback")]`
     *   `[SerializeField] private Material outlineMaterial;` (Material khusus shader glow).
@@ -23,10 +23,10 @@
 *   **`public void OnHoverExit()`**
     *   Kembalikan array material ke `originalMaterials`.
     *   Panggil `UIManager.Instance.HideTooltip();`
-*   **`public bool Interact(PlayerInventory inv)`**
-    *   **Validasi Kapasitas:** `if (inv.currentWeight + weightCost > inv.maxWeight) return false;`
+*   **`public bool Interact(InventoryManager inv)`**
+    *   **Validasi Kapasitas:** `if (inv.ShipHandWeight + weightCost > inv.ShipHandCapacity) return false;`
     *   **Eksekusi:** 
-        *   Panggil fungsi *pickup* di inventory: `inv.AddItem(this.ItemID, this.weightCost);`
+        *   Panggil fungsi *pickup* di inventory: `inv.AddShipHandItem(this.ItemID, this.weightCost);`
         *   Mainkan *Particle System* debu kecil dan *AudioSource* *loot*.
         *   Matikan collider dan mesh renderer, tunggu audio selesai, lalu `Destroy(gameObject);`.
         *   `return true;`

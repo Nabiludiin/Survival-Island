@@ -16,7 +16,6 @@
     *   `public float swaySpeed = 1f;`
 *   `[Header("Interaction System (Crosshair)")]`
     *   `public float interactRange = 3f;`
-    *   `public LayerMask interactLayer;`
     *   `private IInteractable currentHoveredObject;`
 
 ## 2. Detail Logika & Fungsi
@@ -45,8 +44,8 @@
         *   `controller.Move(move * moveSpeed * Time.deltaTime);`
     *   **4. Crosshair Interaction (Raycast dari Mata):**
         *   Selalu tembakkan `Raycast` dari posisi dan arah kamera:
-            `Physics.Raycast(firstPersonCamera.transform.position, firstPersonCamera.transform.forward, out RaycastHit hit, interactRange, interactLayer);`
-        *   Jika mengenai objek `IInteractable`, ubah UI Crosshair di tengah layar menjadi ikon tangan terbuka, dan tunggu *Input Klik Kiri* untuk mengambil.
+            `PhysicsQuery.Raycast(ray, out RaycastHit hit, interactRange, PhysicsMasks.Interact);`
+        *   Jika mengenai objek `IInteractable`, ubah UI Crosshair di tengah layar menjadi ikon tangan terbuka, dan tunggu tombol `E` untuk mengambil.
 
 ## 3. Catatan Khusus untuk AI (Claude)
 *   **Raycast Origin:** Pastikan raycast interaksi *selalu* ditembakkan dari `firstPersonCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0))` yang merupakan titik tengah layar persis, bukan dari posisi dada pemain.

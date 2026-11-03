@@ -12,12 +12,12 @@
     *   `public float maxBuildDistance = 6f;`
 *   `[Header("Layer Masks")]`
     *   `public LayerMask buildableSurfaceMask;` (Tanah biasa).
-    *   `public LayerMask restrictedMask;` (Pasir Pantai, Region C).
+    *   Pantai tidak lagi memakai LayerMask. Deteksi lewat `SurfaceDetection.GetSurfaceAt()` (#86).
     *   `public LayerMask obstacleMask;` (Pohon, Batu, Zombie).
 
 ## 2. Detail Logika & Fungsi
 *   **`void UpdateGhostPosition()`**
-    *   Gunakan `Physics.Raycast(camera.position, camera.forward, out RaycastHit hit, maxBuildDistance)`.
+    *   Gunakan `PhysicsQuery.Raycast(ray, out RaycastHit hit, maxBuildDistance, PhysicsMasks.BuildSurface)`, supaya raycast tidak mengenai pemain, trigger, atau musuh.
     *   **Grid Math:** 
         `Vector3 snapPos;`
         `snapPos.x = Mathf.Round(hit.point.x / gridSize) * gridSize;`
@@ -25,8 +25,8 @@
         `snapPos.y = hit.point.y;` (Y disesuaikan dengan *terrain height*).
     *   Set posisi `ghostObject` ke `snapPos`.
 *   **`bool ValidatePlacement(Vector3 pos)`**
-    *   **Aturan 1 (Anti-Pantai):** Lakukan `Physics.SphereCast` ke bawah. Jika mengenai `restrictedMask`, return `false`.
-    *   **Aturan 2 (Overlap):** Gunakan `Physics.OverlapBox(pos, ghostObject.bounds.extents, Quaternion.identity, obstacleMask)`. Jika array hasil > 0 (berarti ada objek menabrak struktur), return `false`.
+    *   **Aturan 1 (Anti-Pantai):** Jika `SurfaceDetection.GetSurfaceAt(pos)` bernilai `Pasir`, return `false`.
+    *   **Aturan 2 (Overlap):** Gunakan `Physics.OverlapBox(pos, ghostCollider.bounds.extents, Quaternion.identity, PhysicsMasks.BuildOverlap, QueryTriggerInteraction.Ignore)` (`ghostCollider` adalah `Collider` milik `ghostObject`, karena `GameObject` tidak punya `bounds`). Jika array hasil > 0 (berarti ada objek menabrak struktur), return `false`.
     *   **Aturan 3 (Ketergantungan Struktur):** Jika sedang membangun "Atap", pastikan *Raycast* ke bawah mengenai objek dengan *Tag* `BaseWall`. Jika tidak ada dinding di bawahnya, atap melayang tidak diizinkan. return `false`.
 *   **`void ExecuteBuild()`**
     *   Jika `ValidatePlacement` bernilai true dan `Inventory.HasItems(woodCost, stoneCost)`:

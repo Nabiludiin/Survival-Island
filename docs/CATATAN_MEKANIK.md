@@ -184,18 +184,18 @@ Darahnya 4000 di Normal, dengan pengali 0,75 di Easy dan 2 di Hard serta Expert.
 
 ---
 
-## 4. Yang perlu diputuskan sebelum coding
+## 4. Keputusan sebelum coding
 
-Beberapa aturan di dokumen proyek belum sejalan:
+Bagian ini sudah ditutup. Keputusannya ada di `docs/blueprint/GLOSSARY.md` bagian 1, dan usulan yang masih terbuka dicatat di issue #85.
 
-| Topik | Yang tertulis | Perlu keputusan |
-|---|---|---|
-| Item awal | GDD: Kail, Pistol, Pisau. `Claude.md` dan `README.md` hanya Kail dan Pistol | Apakah Pisau ikut jadi item inti? |
-| Zombie saat fajar | `Claude.md` menyebut `Destroy`, tapi Tahap 6 melarang `Destroy` berulang untuk zombie | Disarankan kembali ke pool |
-| Status haus | `README.md` menyebut Thirst, dan GDD punya kargo Air Minum, tapi tidak ada status haus | Ada status haus atau tidak? |
-| Frostbite | GDD: stamina dan HP. `Claude.md`: HP saja | Apa saja yang berkurang? |
-| Syarat jembatan | GDD: ratusan kayu. `Claude.md`: `Kayu >= 500` | Apakah 500 sudah final? |
-| Referensi combat | `Claude.md` memakai L4D di Pilar 3, tapi masih L4D2 di Langkah 5. `README.md` juga masih L4D2 | Samakan penamaan |
+| Topik | Keputusan |
+|---|---|
+| Item awal | Kail, Pistol, dan Pisau |
+| Zombie saat fajar | Terbakar, lalu kembali ke pool |
+| Status haus | Ada |
+| Frostbite | Stamina dulu, lalu HP |
+| Syarat jembatan | Nilai awal 500 kayu, dan bisa disetel |
+| Referensi combat | L4D saja |
 
 ## 5. Yang belum tercakup
 

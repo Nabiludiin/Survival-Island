@@ -1,4 +1,4 @@
-# 🧟‍♂️ Left 4 Dead 2 Logic - Combat, Horde & AI Director
+# 🧟‍♂️ Left 4 Dead Logic - Combat, Horde & AI Director
 
 ## 📌 Deskripsi Modul
 Folder ini berisi injeksi adrenalin dan aksi ke dalam game, mengambil referensi mekanik pertarungan dan *horde* dari **Left 4 Dead (L4D)**. 
@@ -29,7 +29,7 @@ Modul ini mengubah game *survival-crafting* biasa menjadi *Action-Horror* yang m
 
 ## 📂 Rekomendasi Script (Untuk Claude)
 Saat mengerjakan folder ini, Claude harus fokus membuat *script* berikut:
-1.  `DayNightSpawner.cs`: Mengontrol transisi waktu, memanggil *Wave* zombie malam, dan menghapus zombie siang hari.
+1.  `SpawnManager.cs`: Mengontrol transisi waktu, memanggil *Wave* zombie malam, dan menghapus zombie siang hari.
 2.  `EnemyAI.cs`: State machine (Wander, Chase, AttackBuilding, Die) menggunakan `NavMeshAgent`.
 3.  `GunController.cs`: Mengatur peluru, *fire rate*, *recoil* kamera, dan hitungan *damage raycast*.
 4.  `ObjectPooler.cs`: (Sangat Wajib) Untuk mendaurnya peluru dan zombie agar game tidak mengalami penurunan FPS.

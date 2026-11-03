@@ -1,5 +1,5 @@
 # Blueprint: GameManager.cs
-**Lokasi:** `LOGIC/Core_Logic/GameManager.md`
+**Lokasi:** `docs/blueprint/Core_Logic/GameManager.md`
 **Deskripsi Utama:** *Singleton* absolut yang hidup di semua *Scene* (`DontDestroyOnLoad`). Menjembatani data dari Kapal (Fase 1) ke Pulau (Fase 2), dan mengecek kondisi Menang/Kalah (Permadeath).
 
 ## 1. Arsitektur & Variabel Utama
@@ -8,7 +8,8 @@
     *   `public enum GamePhase { SinkingShip, IslandSurvival }`
     *   `public GamePhase currentPhase;`
     *   `public int currentDay = 1;`
-    *   `public bool isHelicopterBuilt = false;`
+    *   `public bool hasEscaped = false;` (Helikopter sudah lepas landas).
+    *   `public const int MaxDay = 60;`
 *   `[Header("Cross-Phase Data")]`
     *   `public List<SavedItemData> savedShipLoot = new List<SavedItemData>();` (Data item yang berhasil dibawa dari Fase 1).
 
@@ -17,11 +18,13 @@
     *   Implementasi Singleton murni: `if (Instance != null && Instance != this) Destroy(this); else { Instance = this; DontDestroyOnLoad(gameObject); }`
 *   **`public void SaveFase1Loot(List<Item> lootedItems)`**
     *   Ubah data item dari kapal menjadi format serialisasi (ID Item) dan simpan ke `savedShipLoot`.
+*   **`public void AdvanceDay()`**
+    *   Dipanggil `DayNightDirector` saat jam melewati 24:00. Naikkan `currentDay`, kirim `DayChangedEvent`, lalu panggil `CheckDay60Milestone()`.
 *   **`public void CheckDay60Milestone()`**
-    *   Dipanggil oleh `DayNightDirector` setiap pergantian hari.
-    *   Jika `currentDay == 60`:
-        *   Jika `isHelicopterBuilt == true` -> Panggil `TriggerWinSequence()`.
-        *   Jika `isHelicopterBuilt == false` -> Panggil `TriggerGameOver("The Rescue Helicopter arrived, but you had no flare or ride. You are left behind.")`.
+    *   Tanpa parameter, karena hari dibaca dari `currentDay`.
+    *   Jika `currentDay > MaxDay` dan `hasEscaped == false`, hari ke-60 sudah berakhir: panggil `TriggerGameOver(DeathReason.TimeExpired)`.
+*   **`public void TriggerWinSequence()`**
+    *   Dipanggil `RescueEventManager` (#14) saat helikopter lepas landas sebelum hari ke-60 berakhir. Set `hasEscaped = true`.
 *   **`public void ResetGameAndReturnToShip()` (Permadeath)**
     *   Hapus data pulau. Bersihkan `savedShipLoot`. Set `currentDay = 1`.
     *   Muat ulang *Scene* Kapal: `SceneManager.LoadScene("ShipPhase");`

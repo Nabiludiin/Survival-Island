@@ -4,7 +4,7 @@ Selamat datang di repositori proyek **Survival Island**. File `README.md` ini ad
 
 Jika Anda adalah Claude, **baca dokumen ini dengan sangat teliti sebelum mengeksekusi atau menulis kode apapun.**
 
-**Status proyek:** tahap desain. Logika game ditulis dulu sebagai blueprint `.md` mengikuti `GDD.md`. Proyek Unity dan *script* C# belum dibuat.
+**Status proyek:** tahap desain. Logika game ditulis dulu sebagai blueprint `.md` mengikuti `GDD.md`. Proyek Unity dan *script* C# belum dibuat. Nama resmi tercatat di `docs/blueprint/GLOSSARY.md`.
 
 ## 📍 Struktur Direktori Utama
 
@@ -237,7 +237,7 @@ Blueprint lama memakai bagian 1 dan 2 saja. Lengkapi bagian lainnya saat bluepri
 
 - [ ] Sesuai dengan aturan `GDD.md`, atau jelas ditandai sebagai usulan.
 - [ ] Semua poin checklist issue sudah dikerjakan.
-- [ ] Nama kelas, scene, tag, dan enum mengikuti nama resmi dari issue #85.
+- [ ] Nama kelas, scene, tag, dan enum mengikuti `docs/blueprint/GLOSSARY.md`.
 - [ ] Semua sistem yang dipanggil punya blueprint atau issue.
 - [ ] Musuh, peluru, dan objek yang sering muncul memakai `ObjectPooler`.
 - [ ] Reset status saat objek dipakai ulang dari pool sudah dijelaskan.

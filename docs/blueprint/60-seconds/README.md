@@ -21,7 +21,7 @@ Tujuan utama dari modul ini adalah memberikan tekanan waktu (Time Pressure) kepa
 
 ### 3. Limited Starting Inventory
 *   **Logika:** Pemain hanya memiliki jumlah *slot* inventori yang sangat terbatas di fase ini (menggambarkan kepanikan dan kapasitas tangan kosong).
-*   **Base Item:** Pemain secara *default* sudah membawa **Kail** dan **Pistol** terlepas dari apa yang mereka pungut.
+*   **Base Item:** Pemain secara *default* sudah membawa **Kail**, **Pistol**, dan **Pisau** terlepas dari apa yang mereka pungut.
 
 ## 📂 Rekomendasi Script (Untuk Claude)
 Saat mengerjakan folder ini, Claude harus fokus membuat *script* berikut:

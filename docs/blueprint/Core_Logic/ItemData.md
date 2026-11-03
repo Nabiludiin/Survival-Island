@@ -11,7 +11,7 @@
     *   `public Sprite icon;`
     *   `public GameObject prefab;`
 *   `[Header("Item Type")]`
-    *   `public enum ItemType { Material, Consumable, Weapon, KeyItem }`
+    *   `public enum ItemType { Material, Consumable, Weapon, Tool, KeyItem }`
     *   `public ItemType type;`
 *   `[Header("Specific Attributes")]`
     *   `public float healAmount;` (Jika Consumable).

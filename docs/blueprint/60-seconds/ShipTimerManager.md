@@ -35,5 +35,5 @@
     *   Jalankan Coroutine `FadeToBlackAndLoad()`.
 *   **`IEnumerator FadeToBlackAndLoad()`**
     *   Gunakan `Mathf.Lerp` di dalam blok `while (fadePanel.color.a < 1)` untuk transisi *fade-out* selama 2.5 detik.
-    *   **Data Persistence:** Ambil data dari `InventoryController` pemain, lalu simpan ke `GameManager.Instance.CrossPhaseInventory` (menggunakan *Singleton* dan `DontDestroyOnLoad`).
-    *   Muat scene selanjutnya dengan `SceneManager.LoadSceneAsync("IslandSurvivalPhase");` (Gunakan *Async* agar tidak *freeze*).
+    *   **Data Persistence:** Ambil data dari `InventoryManager`, lalu simpan ke `GameManager.Instance.savedShipLoot` (menggunakan *Singleton* dan `DontDestroyOnLoad`).
+    *   Muat scene `IslandPhase` lewat `RunLifecycle` (#82), yang memakai *Async* agar tidak *freeze*.

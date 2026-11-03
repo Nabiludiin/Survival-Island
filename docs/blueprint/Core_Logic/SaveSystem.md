@@ -12,6 +12,8 @@
             `public int currentDay;`
             `public Vector3 playerPosition;`
             `public float playerHealth;`
+            `public float playerHunger;`
+            `public float playerThirst;`
             `public float playerInfection;`
             `public List<string> inventoryItemIDs;`
         `}`

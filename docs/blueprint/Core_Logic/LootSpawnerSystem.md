@@ -12,6 +12,6 @@
     *   Panggil `SpawnLootAcrossMap()`.
 *   **`public void SpawnLootAcrossMap()`**
     *   Lakukan perulangan (`foreach`) untuk setiap titik di `spawnPoints`.
-    *   Tentukan apakah titik ini akan memunculkan item: `if (Random.value > 0.5f) return;` (50% titik dibiarkan kosong agar realistis).
+    *   Tentukan apakah titik ini akan memunculkan item: `if (Random.value > 0.5f) continue;` (50% titik dibiarkan kosong agar realistis, dan titik berikutnya tetap diproses).
     *   Jika berhasil lolos, acak item dari `availableLoot` berdasarkan `dropChance`.
     *   `Instantiate(selectedItem.prefab, point.position, Quaternion.identity);`

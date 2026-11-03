@@ -1,5 +1,5 @@
 # Blueprint: InventoryManager.cs
-**Lokasi:** `LOGIC/Core_Logic/InventoryManager.md`
+**Lokasi:** `docs/blueprint/Core_Logic/InventoryManager.md`
 **Deskripsi Utama:** Sistem manajemen slot dinamis. Mengatur UI Grid, penyimpanan *resource*, dan transfer data awal saat pemain baru mendarat di pulau.
 
 ## 1. Arsitektur & Variabel Utama
@@ -14,7 +14,7 @@
 ## 2. Detail Logika & Fungsi
 *   **`void Start()`**
     *   Jika `GameManager.Instance.currentPhase == IslandSurvival`:
-        *   Panggil `LoadLootFromGameManager()` untuk mengisi inventory dengan barang yang diselamatkan dari kapal (Penting: Tambahkan item permanen `Base_Kail` dan `Base_Pistol`).
+        *   Panggil `LoadLootFromGameManager()` untuk mengisi inventory dengan barang yang diselamatkan dari kapal (Penting: Tambahkan item permanen `Base_Kail`, `Base_Pistol`, dan `Base_Pisau`).
 *   **`public bool AddItem(ItemData item, int amount)`**
     *   Cari slot yang memiliki item sama dan belum penuh (*Stacking*). Jika ada, tambahkan *amount*.
     *   Jika tidak ada *stack*, cari slot kosong pertama. Jika tidak ada slot, return `false` (Inventory Full).

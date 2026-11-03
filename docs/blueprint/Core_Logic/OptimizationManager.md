@@ -8,6 +8,9 @@
 *   `private List<GameObject> activeEnemies;`
 
 ## 2. Detail Logika & Fungsi
-*   **`void Update()`**
-    *   Gunakan `InvokeRepeating` (setiap 1 detik, bukan setiap frame) untuk mengecek jarak setiap musuh di `activeEnemies` terhadap `player.position`.
+*   **`void OnEnable()` / `void OnDisable()`**
+    *   Mulai Coroutine `CullingLoop()` di `OnEnable`, dan hentikan di `OnDisable`.
+*   **`IEnumerator CullingLoop()`**
+    *   Setiap 1 detik (bukan setiap frame), cek jarak setiap musuh di `activeEnemies` terhadap `player.position`.
     *   Jika jarak > `cullingDistance`, nonaktifkan `Animator` dan `NavMeshAgent` musuh untuk menghemat CPU.
+    *   Jika jarak <= `cullingDistance` dan komponen sedang nonaktif, nyalakan kembali `Animator` dan `NavMeshAgent`, lalu perbarui tujuan musuh.

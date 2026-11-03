@@ -21,13 +21,14 @@ Game dibagi menjadi dua fase utama yang saling berkesinambungan.
 **Fase 2: The Island Survival (60 Days Target)**
 -   **Manajemen Status:** 
     *   **Lapar:** Harus diisi dengan memancing (pakai Kail), berburu hewan, atau *looting*.
+    *   **Haus:** Harus diisi dengan Air Minum Bersih, kelapa, atau air hujan yang ditampung. Air kotor bisa diminum dengan risiko sakit.
     *   **Infeksi:** Terkena serangan zombie akan meningkatkan meteran infeksi. MC memulai dengan formula vaksin dan stok vaksin yang sangat sedikit. Vaksin baru hanya bisa dirakit menggunakan material dari Region 2.
 -   **Siklus Siang & Malam (Ancaman Ganda):**
     *   **Siang Hari:** **Zombie akan terbakar dan mati jika terkena sinar matahari.** Oleh karena itu, tidak ada zombie yang berkeliaran di siang hari. Ancaman utama di siang hari murni berasal dari **Hewan Buas** yang agresif menjaga teritori dan *resource*.
     *   **Malam Hari:** Matahari terbenam dan hewan buas kembali ke sarang. Gelapnya malam memicu **Horde Zombie** keluar dari persembunyiannya untuk memburu MC dan menyerang *base*.
 -   **Syarat Menang & Game Over (Permadeath):** 
     *   **Menang:** Menyelesaikan rakitan Helikopter di Region 3 dan lepas landas sebelum batas waktu 60 hari habis.
-    *   **Kalah / Game Over:** Jika MC **mati** (HP habis karena diserang, lapar, atau infeksi) ATAU **gagal kabur** saat batas waktu 60 hari habis, **maka game akan mengulang dari awal (Reset).** Pemain akan kembali ke Fase 1 (berada di dalam kapal pesiar yang tenggelam) dan harus mengambil barang-barang (looting) dari nol lagi.
+    *   **Kalah / Game Over:** Jika MC **mati** (HP habis karena diserang, lapar, haus, atau infeksi) ATAU **gagal kabur** saat batas waktu 60 hari habis, **maka game akan mengulang dari awal (Reset).** Pemain akan kembali ke Fase 1 (berada di dalam kapal pesiar yang tenggelam) dan harus mengambil barang-barang (looting) dari nol lagi.
 
 ## 4. Mekanik Base Building & Sistem Diary (Tutorial)
 **Aturan Shelter:**
@@ -51,7 +52,7 @@ Pulau terbagi menjadi 4 Region. Pemain harus membuka aksesnya secara bertahap.
 -   **Sudden Event:** Erupsi Gunung Berapi. Langit menjadi merah dan batu pijar jatuh menghancurkan area sekitar, memaksa MC berlindung.
 
 **Region 2: Hutan Tropis Lebat (Amazon-style)**
--   **Syarat Akses:** MC harus mengumpulkan ratusan kayu dari Region 1 untuk membangun jembatan gantung panjang melewati jurang.
+-   **Syarat Akses:** MC harus mengumpulkan ratusan kayu (nilai awal 500, bisa disetel) dari Region 1 untuk membangun jembatan gantung panjang melewati jurang.
 -   **Deskripsi:** Hutan sangat rapat, gelap meski di siang hari, dan penuh tumbuhan rambat.
 -   **Ancaman Siang:** Macan Tutul (Jaguar) yang menyergap dari pohon, dan Ular Berbisa.
 -   **Ancaman Malam:** Zombie Suku/Tribal, Zombie Lumut (bisa berkamuflase dengan semak-semak) dan zombie standar.
@@ -61,7 +62,7 @@ Pulau terbagi menjadi 4 Region. Pemain harus membuka aksesnya secara bertahap.
 -   **Deskripsi:** Area bersalju dengan suhu ekstrem. Di puncaknya terdapat Pangkalan Militer dan **Landasan Helikopter (Helipad)** beserta kerangka helikopter yang belum selesai.
 -   **Ancaman Siang:** Beruang Kutub dan Serigala Salju.
 -   **Ancaman Malam:** Zombie Militer (mengenakan armor anti-peluru, sangat tebal), Zombie Beku dan zombie standar.
--   **Mekanik Khusus:** MC harus menggunakan pakaian hangat atau membawa obor, jika tidak stamina dan HP akan terkuras karena *Frostbite*.
+-   **Mekanik Khusus:** MC harus menggunakan pakaian hangat atau membawa obor, jika tidak stamina akan terkuras lebih dulu, lalu HP, karena *Frostbite*.
 -   **Aktivitas Utama:** Area ini adalah tempat MC harus merakit helikopter, namun *parts*-nya tidak ada di sini.
 
 **Region 4: Reruntuhan Desa (Pusat Lore & Resource Heli)**

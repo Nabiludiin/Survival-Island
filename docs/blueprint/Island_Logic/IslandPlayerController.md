@@ -6,7 +6,7 @@
 *   `[Header("Movement & Stamina")]`
     *   `public float walkSpeed = 5f, sprintSpeed = 8f;`
     *   `public float jumpHeight = 2f, gravity = -9.81f;`
-    *   `public float maxStamina = 100f, currentStamina;`
+    *   Stamina dibaca dan dikurangi lewat `SurvivalStats` (#111).
 *   `[Header("Encumbrance (Region 4 Mechanic)")]`
     *   `public bool isCarryingHeavyItem = false;`
 
@@ -15,7 +15,7 @@
     *   **Encumbrance Check:** 
         *   Jika `isCarryingHeavyItem == true`: Paksa `currentSpeed = walkSpeed * 0.5f`. Disable fungsi *Jump* dan *Sprint*.
     *   **Sprint & Stamina:**
-        *   Jika input `Left Shift` ditekan dan `currentStamina > 0` dan `!isCarryingHeavyItem`: Set `currentSpeed = sprintSpeed`, kurangi `currentStamina -= 10f * Time.deltaTime`.
+        *   Jika input `Left Shift` ditekan dan `SurvivalStats.Stamina > 0` dan `!isCarryingHeavyItem`: Set `currentSpeed = sprintSpeed`, kurangi stamina lewat `SurvivalStats.SpendStamina(...)`.
         *   Jika tidak lari, *Regenerate* stamina.
     *   **Gravity & Jump:**
         *   Cek tanah menggunakan `Physics.CheckSphere(groundCheck.position, groundDistance, groundMask)`.
