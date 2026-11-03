@@ -1,7 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "signs/terminalc"
-$translucent 1
-$decal 1
-$decalscale "0.500000"
-}

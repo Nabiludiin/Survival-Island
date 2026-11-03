@@ -1,3 +1,0 @@
-public class QuestInteractableComponent_ChangeMesh : QuestInteractableComponentBase<QuestInteractable_ComponentData_ChangeMesh>
-{
-}

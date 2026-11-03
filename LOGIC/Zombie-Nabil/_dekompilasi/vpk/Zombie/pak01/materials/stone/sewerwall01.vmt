@@ -1,7 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "stone/sewerwall01"
-$bumpmap "stone\sewerwall01_normal"
-$surfaceprop brick
-
-}

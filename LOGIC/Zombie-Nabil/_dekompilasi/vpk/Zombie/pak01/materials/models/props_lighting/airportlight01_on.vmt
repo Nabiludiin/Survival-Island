@@ -1,5 +1,0 @@
-VertexLitGeneric
-{
-$baseTexture "models\Props_Lighting/AirportLight01_On"
-$selfillum 1
-}

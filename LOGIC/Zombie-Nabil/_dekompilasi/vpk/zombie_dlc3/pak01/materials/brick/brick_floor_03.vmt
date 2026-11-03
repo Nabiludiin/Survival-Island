@@ -1,9 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "brick/brick_floor_03"
-$surfaceprop brick
-$ssbump 1
-$bumpmap "brick/brick_floor_03_height-ssbump"
-
-"%keywords" l4d2
-}

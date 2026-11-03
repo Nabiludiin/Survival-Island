@@ -1,5 +1,0 @@
-VertexLitGeneric
-{
-$baseTexture "models\props_interiors/Patio_ChairWhite"
-$alphatest 1
-}

@@ -1,9 +1,0 @@
-modes
-{
-	// Map a game mode to a context value
-
-	"coop"     "0" //CONTEXT_ZOMBIE_GAME_MODE_COOPERATIVE 0
-	"versus"   "1" //CONTEXT_ZOMBIE_GAME_MODE_VERSUS      1
-	"survival" "2" //CONTEXT_ZOMBIE_GAME_MODE_HOLDOUTCOOP 2
-}
-

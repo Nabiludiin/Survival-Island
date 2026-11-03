@@ -1,5 +1,0 @@
-VertexLitGeneric
-{
-$basetexture "Models/props_normandy/haybale"
-$bumpmap "Models/props_normandy/haybale_normal"
-}

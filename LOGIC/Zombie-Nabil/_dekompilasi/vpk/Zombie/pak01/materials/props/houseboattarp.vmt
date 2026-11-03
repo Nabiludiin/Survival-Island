@@ -1,6 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "props/houseboattarp"
-$alphatest 1
-$surfaceprop cloth
-}

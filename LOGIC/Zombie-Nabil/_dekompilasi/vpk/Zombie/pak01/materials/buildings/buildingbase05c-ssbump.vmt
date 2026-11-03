@@ -1,7 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "buildings/buildingbase05c"
-$Surfaceprop concrete
-$ssbump 1
-$bumpmap "buildings/buildingbase05c-ssbump"
-}

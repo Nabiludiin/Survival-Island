@@ -1,7 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "buildings/asph_shingles03"
-$bumpmap "buildings/asph_shingles03_ssbump"
-$ssbump 1
-$surfaceprop rubber
-}

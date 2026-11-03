@@ -1,7 +1,0 @@
-lightmappedGeneric
-{
-$baseTexture "plaster/plasterwall04"
-"%keywords" dod
-$surfaceprop plaster
-
-}

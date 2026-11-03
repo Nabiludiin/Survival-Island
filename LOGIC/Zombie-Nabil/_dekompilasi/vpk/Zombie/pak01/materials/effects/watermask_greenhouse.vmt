@@ -1,6 +1,0 @@
-UnlitGeneric
-{
-$baseTexture "effects/watermask_greenhouse"
-$Translucent 1
-$color "[ .54 .54 .54 ]"
-}

@@ -1,5 +1,0 @@
-VertexLitGeneric
-{
-$baseTexture "models\props_exteriors/Sandbags"
-$bumpmap "models\props_exteriors/Sandbags_normal"
-}

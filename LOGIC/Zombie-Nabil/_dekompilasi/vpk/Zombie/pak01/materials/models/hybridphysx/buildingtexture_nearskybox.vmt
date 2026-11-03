@@ -1,6 +1,0 @@
-unlitGeneric
-{
-$basetexture "Models/hybridPhysx/buildingTexture_nearSkyBox"
-$color2 "[0.6 0.6 0.6]"
-$selfillum 0
-}

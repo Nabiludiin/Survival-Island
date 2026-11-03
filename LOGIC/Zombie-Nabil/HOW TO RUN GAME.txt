@@ -1,2 +1,0 @@
-Game is offline by default , online fix is included separately 
-If you want to play online just extract the Online-Fix zip and copy the bin folder inside and paste it inside zombie folder thereby replacing the files

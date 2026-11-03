@@ -1,6 +1,0 @@
-LightMappedGeneric
-{
-$basetexture "signs/sign_evacuation_notice_mercyhospital"
-$surfaceprop default
-$decal 1
-}

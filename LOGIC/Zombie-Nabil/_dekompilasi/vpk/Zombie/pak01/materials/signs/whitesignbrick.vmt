@@ -1,7 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "signs/whitesignbrick"
-$Translucent 1
-$Decal 1
-$DecalScale 1
-}

@@ -1,8 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "decals/Pump_N_Run"
-$translucent 1
-$decal 1
-$vertexcolor 1
-$vertexalpha 1
-}

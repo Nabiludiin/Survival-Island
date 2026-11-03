@@ -1,6 +1,0 @@
-LightmappedGeneric
-{
-$basetexture "concrete\concretefloor038a"
-$surfaceprop concrete
-"%compileNoShadows" 1
-}

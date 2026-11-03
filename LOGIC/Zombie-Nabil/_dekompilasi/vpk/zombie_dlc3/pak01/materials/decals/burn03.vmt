@@ -1,7 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "decals/burn03"
-$translucent 1
-$decal 1
-$decalscale "0.250000"
-}

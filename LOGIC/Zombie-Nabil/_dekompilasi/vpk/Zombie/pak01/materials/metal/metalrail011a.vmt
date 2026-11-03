@@ -1,6 +1,0 @@
-LightmappedGeneric
-{
-$basetexture "Metal/metalrail011a"
-$surfaceprop metalgrate
-$translucent 1
-}

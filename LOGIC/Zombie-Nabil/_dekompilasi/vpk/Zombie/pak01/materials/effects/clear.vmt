@@ -1,5 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "effects/clear"
-$alphatest 1
-}

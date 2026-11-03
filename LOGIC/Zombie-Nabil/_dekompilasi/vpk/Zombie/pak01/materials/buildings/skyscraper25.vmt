@@ -1,7 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "buildings/skyscraper25"
-$envmap env_cubemap
-$envmapmask "buildings\skyscraper25_ref"
-$surfaceprop glass
-}

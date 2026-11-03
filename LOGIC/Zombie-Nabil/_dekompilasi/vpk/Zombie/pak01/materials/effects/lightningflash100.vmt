@@ -1,5 +1,0 @@
-UnlitGeneric
-{
-$baseTexture "effects/lightningflash100"
-$additive 1
-}

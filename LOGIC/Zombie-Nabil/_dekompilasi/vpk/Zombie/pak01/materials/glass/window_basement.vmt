@@ -1,6 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "glass/window_basement"
-$translucent 1
-$surfaceprop glass
-}

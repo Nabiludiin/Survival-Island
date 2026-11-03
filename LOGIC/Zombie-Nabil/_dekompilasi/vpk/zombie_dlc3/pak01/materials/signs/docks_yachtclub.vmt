@@ -1,7 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "signs/docks_yachtclub"
-$Translucent 1
-$Decal 1
-$DecalScale "0.50000"
-}

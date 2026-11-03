@@ -1,7 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "ads/adgroup_01b"
-$selfillum 1
-$surfaceprop glass
-$selfillumtint "[.1 .1 .1]"
-}

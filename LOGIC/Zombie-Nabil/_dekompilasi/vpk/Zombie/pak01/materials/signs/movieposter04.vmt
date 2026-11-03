@@ -1,7 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "signs/movieposter04"
-$envmap env_cubemap
-$envmapmask "signs\movieposter01_ref"
-$surfaceprop glass
-}

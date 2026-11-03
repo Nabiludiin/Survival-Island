@@ -1,6 +1,0 @@
-LightmappedGeneric
-{
-$basetexture "Metal/metalrail006a"
-$surfaceprop metalvent
-$alphatest 1
-}

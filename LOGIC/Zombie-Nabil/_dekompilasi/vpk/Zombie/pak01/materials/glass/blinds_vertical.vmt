@@ -1,7 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "glass/blinds_vertical"
-$selfillum 1
-$selfillumtint "[ .04 .04 .04 ]"
-$surfaceprop plastic
-}

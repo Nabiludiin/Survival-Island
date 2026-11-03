@@ -1,6 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "nature/docks_gravel"
-$color "[.55 .50 .48]"
-$surfaceprop dirt
-}

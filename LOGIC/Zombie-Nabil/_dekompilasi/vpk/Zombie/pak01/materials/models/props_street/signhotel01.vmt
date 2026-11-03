@@ -1,5 +1,0 @@
-VertexLitGeneric
-{
-$baseTexture "models\props_street/SignHotel01"
-$selfillum 1
-}

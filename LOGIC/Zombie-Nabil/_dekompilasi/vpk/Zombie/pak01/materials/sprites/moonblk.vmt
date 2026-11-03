@@ -1,6 +1,0 @@
-UnlitGeneric
-{
-$baseTexture "sprites/moonblk"
-$nofog 1
-$translucent 1
-}

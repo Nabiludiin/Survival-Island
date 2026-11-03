@@ -1,5 +1,0 @@
-VertexLitGeneric
-{
-$basetexture "Models/props_interiors/handrail01_hospital"
-$surfaceprop default
-}

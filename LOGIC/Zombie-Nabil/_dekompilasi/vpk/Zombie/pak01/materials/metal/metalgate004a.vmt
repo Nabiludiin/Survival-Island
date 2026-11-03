@@ -1,9 +1,0 @@
-LightmappedGeneric
-{
-$basetexture "Metal/metalgate004a"
-$alphatest 1
-$alphatestreference ".4"
-"%compilepassbullets" 1
-$surfaceprop metal
-"%keywords" "c17downtown,c17industrial,wasteland"
-}

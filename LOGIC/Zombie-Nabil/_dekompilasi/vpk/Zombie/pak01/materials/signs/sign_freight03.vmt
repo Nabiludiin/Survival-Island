@@ -1,6 +1,0 @@
-LightMappedGeneric
-{
-$basetexture "signs/sign_freight03"
-$surfaceprop default
-$translucent 1
-}

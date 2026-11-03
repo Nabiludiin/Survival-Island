@@ -1,9 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "decals/days02"
-$translucent 1
-$decal 1
-$decalscale "0.150000"
-$vertexcolor 1
-$vertexalpha 1
-}

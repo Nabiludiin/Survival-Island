@@ -1,5 +1,0 @@
-unlitgeneric
-{
-$baseTexture "buildings/city_night01_ground"
-$nofog 1
-}

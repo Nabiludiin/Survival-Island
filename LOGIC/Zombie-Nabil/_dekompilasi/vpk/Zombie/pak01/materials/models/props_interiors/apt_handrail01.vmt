@@ -1,5 +1,0 @@
-VertexLitGeneric
-{
-$baseTexture "models\props_interiors/apt_handrail01"
-$surfaceprop Wood
-}

@@ -1,6 +1,0 @@
-LightMappedGeneric
-{
-$basetexture "signs/sign_evacuation_notice_districts"
-$surfaceprop default
-$decal 1
-}

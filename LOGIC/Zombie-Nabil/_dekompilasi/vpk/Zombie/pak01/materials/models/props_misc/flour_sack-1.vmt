@@ -1,5 +1,0 @@
-vertexlitGeneric
-{
-$baseTexture "models/props_misc/flour_sack-1"
-$surfaceprop wood
-}

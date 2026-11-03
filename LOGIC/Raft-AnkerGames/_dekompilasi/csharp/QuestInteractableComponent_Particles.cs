@@ -1,3 +1,0 @@
-public class QuestInteractableComponent_Particles : QuestInteractableComponentBase<QuestInteractable_ComponentData_Particles>
-{
-}

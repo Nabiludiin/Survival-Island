@@ -1,6 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "decals/light_fluorescent01"
-$selfillum 1
-$surfaceprop glass
-}

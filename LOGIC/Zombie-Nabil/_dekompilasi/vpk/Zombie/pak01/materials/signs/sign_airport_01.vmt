@@ -1,6 +1,0 @@
-LightMappedGeneric
-{
-$basetexture "signs/sign_airport_01"
-$surfaceprop default
-$decal 1
-}

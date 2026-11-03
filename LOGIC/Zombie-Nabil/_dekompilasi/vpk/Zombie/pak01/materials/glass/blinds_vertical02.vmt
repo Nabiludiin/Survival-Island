@@ -1,6 +1,0 @@
-LightmappedGeneric
-{
-$baseTexture "glass/blinds_vertical02"
-$translucent 1
-$surfaceprop plastic
-}

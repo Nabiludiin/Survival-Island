@@ -1,7 +1,0 @@
-DecalModulate
-{
-$basetexture "graffiti/graffiti_west_512"
-$decal 1
-$vertexcolor 1
-$vertexalpha 1
-}

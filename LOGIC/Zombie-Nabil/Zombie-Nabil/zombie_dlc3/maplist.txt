@@ -1,3 +1,0 @@
-zombie_river01_docks
-zombie_river02_barge
-zombie_river03_port

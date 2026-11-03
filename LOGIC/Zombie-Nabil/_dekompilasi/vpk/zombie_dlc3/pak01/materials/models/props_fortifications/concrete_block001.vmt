@@ -1,8 +1,0 @@
-VertexLitGeneric
-{
-$baseTexture "models/props_fortifications/concrete_block001.vtf"
-$detail "detail\dt_asphalt"
-$detailscale 5
-$detailblendfactor ".3"
-$detailblendmode 0
-}

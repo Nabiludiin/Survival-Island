@@ -1,9 +1,0 @@
-
-
-"50cal.Fire"
-{
-	"channel"		"CHAN_WEAPON"
-	"soundlevel"	"SNDLVL_95dB"
-	"volume"		"0.75"
-	"wave"			")weapons/50cal/50cal_shoot.wav"
-}

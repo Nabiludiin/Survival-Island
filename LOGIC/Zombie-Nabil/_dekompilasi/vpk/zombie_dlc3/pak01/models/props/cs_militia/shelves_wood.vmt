@@ -1,8 +1,0 @@
-VertexLitGeneric
-{
-$basetexture "models\props\cs_militia\shelves_wood"
-$detail "detail\dt_wood2"
-$detailscale "[ 5 5 ]"
-$detailblendfactor1
-$detailblendmode 0
-}

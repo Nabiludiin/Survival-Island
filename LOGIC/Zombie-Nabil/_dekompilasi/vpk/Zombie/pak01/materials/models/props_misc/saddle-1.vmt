@@ -1,8 +1,0 @@
-vertexlitGeneric
-{
-$baseTexture "models/props_misc/saddle-1"
-$envmapmask "models\props_misc\saddle-1_envmask"
-$envmap env_cubemap
-
-
-}

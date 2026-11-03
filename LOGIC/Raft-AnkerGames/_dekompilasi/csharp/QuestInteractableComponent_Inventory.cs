@@ -1,3 +1,0 @@
-public class QuestInteractableComponent_Inventory : QuestInteractableComponentBase<QuestInteractable_ComponentData_Inventory>
-{
-}

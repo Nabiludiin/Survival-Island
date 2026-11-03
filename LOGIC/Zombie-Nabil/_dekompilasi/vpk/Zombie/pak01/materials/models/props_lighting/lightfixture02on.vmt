@@ -1,5 +1,0 @@
-VertexLitGeneric
-{
-$baseTexture "models\Props_Lighting/LightFixture02On"
-$selfillum 1
-}

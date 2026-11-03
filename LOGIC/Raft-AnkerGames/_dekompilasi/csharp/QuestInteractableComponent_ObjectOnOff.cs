@@ -1,3 +1,0 @@
-public class QuestInteractableComponent_ObjectOnOff : QuestInteractableComponentBase<QuestInteractable_ComponentData_ObjectOnOff>
-{
-}
