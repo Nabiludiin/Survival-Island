@@ -263,7 +263,7 @@ interruptAtGameHour = startGameHour + HoursUntilDaybreak() * progress;
 
 **`private void TriggerInterrupt()`**:
 
-1. `count = ambushBaseCount + currentDay / 10 * ambushCountPerTenDays`.
+1. `count = Round((ambushBaseCount + currentDay / 10 * ambushCountPerTenDays) * AIDirector.Instance.GetPostTargetCountMultiplier(currentDay))`, sesuai keputusan developer di `AIDirector.md`.
 2. `SpawnManager.Instance.RequestAmbush(posisiPemain, count, inBase ? ambushRadiusInBase : ambushRadiusExposed)`.
 3. Panggil `EndSleep(Interrupted)`, dengan notifikasi `Ada suara di luar`.
 
@@ -332,7 +332,7 @@ interruptAtGameHour = startGameHour + HoursUntilDaybreak() * progress;
 - Jam dimajukan per langkah kecil, supaya event batas tidak terlewat.
 - `EndSleep` menjadi satu jalur bangun.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Syarat tidur:** hanya malam, tanpa musuh aktif dalam 25 meter, tanpa bencana, bukan Blood Moon, tidak membeku, dan lapar serta haus minimal 10.
 2. **Harus di dalam base:** tidak wajib. Rekomendasi: pakai, supaya pemain baru tetap bisa tidur, tetapi base jelas lebih aman.
@@ -365,3 +365,4 @@ interruptAtGameHour = startGameHour + HoursUntilDaybreak() * progress;
 19. Tidur saat `Infection` 60. **Hasil:** HP tidak bertambah dari tidur.
 20. Mati saat tidur. **Hasil:** alur akhir run berjalan, `SleepPanel` tertutup, dan `timeMultiplier` run baru kembali ke nilai dasar.
 21. Tutup jendela saat tidur, lalu lanjutkan. **Hasil:** jam mengikuti waktu penyimpanan, dan pemain dalam keadaan terjaga.
+22. `setday 70`, lalu paksa gangguan tidur. **Hasil:** jumlah penyergap 13, yaitu (4 + 7) x 1,2 dibulatkan, dengan HP 1,2 kali dan damage 1,1 kali.

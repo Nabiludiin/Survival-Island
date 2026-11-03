@@ -1,8 +1,8 @@
 # Blueprint: SunlightExposure.cs & HidingSpot.cs
 **Lokasi:** `docs/blueprint/left-4-dead/SunlightExposure.md`
-**Deskripsi Utama:** Aturan zombie terbakar sinar matahari, beserta pengecualian Zombie Desa yang bersembunyi di air atau lumpur Region 4 pada siang hari.
+**Deskripsi Utama:** Aturan zombie terbakar sinar matahari, beserta pengecualian Zombie Desa yang bersembunyi di air atau lumpur Region 4 dan zombie sarang di ruang gelap (#112) pada siang hari.
 **Issue:** #63
-**Rujukan GDD:** Bagian 3 (zombie terbakar dan mati di bawah matahari) dan bagian 5 (Region 2 gelap, dan Zombie Desa berendam atau terkubur lalu naik secara massal saat malam).
+**Rujukan GDD:** Bagian 3 (zombie terbakar dan mati di bawah matahari, tidak berkeliaran di luar ruangan saat siang, dan sebagian bersembunyi diam di ruang gelap) dan bagian 5 (Region 2 gelap, dan Zombie Desa berendam atau terkubur lalu naik secara massal saat malam).
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -19,7 +19,7 @@ Blueprint ini menggantikan `EnemyAI.TriggerDaybreakDeath()`. Pencarian lewat tag
 | Variabel | Tipe | Nilai awal | Fungsi |
 |---|---|---|---|
 | `IsBurning` | `bool` | `false` | Dibaca #95 dan `EnemyAI` |
-| `IsProtected` | `bool` | `false` | `true` saat `Submerged` atau `Dormant` (#112) |
+| `IsProtected` | `bool` | `false` | `true` saat `Submerged`, atau untuk zombie sarang di dalam `InteriorZone` (#112) |
 | `shelteredTimer` | `float` | 0 | Lama berada di tempat tertutup saat siang |
 | `baseScale` | `Vector3` | Dari `Awake` | Skala asli untuk reset |
 | `burnEffect` | `ParticleSystem` | Prefab | Api |
@@ -65,14 +65,15 @@ Total kapasitas semua titik di Region 4 minimal sama dengan ukuran pool `zombie_
 
 ### Aturan sinar
 
-Lihat rekomendasi di bagian 5. Ringkasnya, semua zombie mati pada siang hari. Sinar langsung membakar, sedangkan tempat tertutup hanya menunda sampai `maxShelteredSeconds`.
+Lihat rekomendasi di bagian 5. Ringkasnya, tidak ada zombie yang tersisa di luar ruangan pada siang hari. Sinar langsung membakar, sedangkan tempat tertutup hanya menunda sampai `maxShelteredSeconds`. Pengecualiannya zombie yang bersembunyi: `Submerged`, dan zombie sarang di ruang gelap (GDD bagian 3).
 
 | Keadaan | Akibat |
 |---|---|
 | Terkena sinar langsung | Terbakar |
 | Kanopi Region 2, bangunan, atau bayangan gunung | Tertunda paling lama 60 detik |
 | Badai dan hujan | Tidak melindungi, karena `RegionalWeather` tidak ikut dihitung |
-| `Submerged`, atau `Dormant` di `InteriorZone` (#112) | Terlindungi |
+| `Submerged`, atau zombie sarang (`EnemyAI.lair != null`) di `InteriorZone` (#112), baik `Dormant` maupun sudah bangun | Terlindungi |
+| Zombie horde di dalam `InteriorZone` (`EnemyAI.lair` kosong) | Tidak terlindungi. Mengikuti baris sinar dan tempat tertutup di atas |
 
 ### Pengecekan berkala
 
@@ -86,7 +87,7 @@ Lihat rekomendasi di bagian 5. Ringkasnya, semua zombie mati pada siang hari. Si
 
 **`private void CheckExposure()`:**
 
-1. Kalau `InteriorZone.Contains(posisi)` (#112) bernilai `true`, `IsProtected = true`, lalu selesai. Kalau zombie sudah keluar dari zona, `IsProtected = false`.
+1. Kalau `EnemyAI.lair != null` dan `InteriorZone.Contains(posisi)` (#112) bernilai `true`, `IsProtected = true`, lalu selesai. Kalau tidak, `IsProtected = false`, lalu lanjut. Zombie yang sudah keluar dari zona, atau zombie horde yang masuk zona, tidak terlindungi.
 2. `dir = DayNightDirector.Instance.SunDirection`, dengan elevasi dinaikkan ke minimal `minSunElevationDeg`. Tanpa batas ini, matahari yang masih rendah akan membuat bukit melindungi hampir semua zombie.
 3. `PhysicsQuery.Raycast` dari atas kepala dengan `dir`, sepanjang `rayLength`, memakai `PhysicsMasks.Sunlight`.
 4. Kalau tidak kena apa pun, panggil `StartBurn()`.
@@ -190,7 +191,7 @@ Saat `Submerged`, zombie tidak terlihat dan tidak bisa diserang, karena `Rendere
 | `DamagePipeline` (#59) | Jalur damage `Fire` |
 | `EnemyHitReaction` (#95) | Melewati mayat kalau `IsBurning` |
 | `SpecialZombieAI` (#25) | `hidesFromSun` dan `moveSpeed` |
-| `ZombieLair` (#112) | Mengatur `IsProtected` di `InteriorZone` |
+| `ZombieLair` (#112) | Menyediakan `InteriorZone.Contains` dan `EnemyAI.lair`, yang dibaca `CheckExposure` untuk mengisi `IsProtected` |
 | `AIDirector` (#27) | Mendengar `EnemyKilledEvent`, membaca `byPlayer`, dan menerima `AddExternalSpawn` |
 | `PhysicsQuery`, `PhysicsMasks` (#87) | Mask `Sunlight` |
 
@@ -211,7 +212,7 @@ Saat `Submerged`, zombie tidak terlihat dan tidak bisa diserang, karena `Rendere
 
 ## 5. Keputusan Desain
 
-**Sudah ditetapkan dokumen lain:** zombie terbakar dan tidak berkeliaran saat siang, serta Zombie Desa berendam atau terkubur (GDD bagian 3 dan 5). State `SeekHiding`, `Submerged`, `Emerging`, dan `BurnToAshes` (`GLOSSARY.md`). Mask `Sunlight` (#87).
+**Sudah ditetapkan dokumen lain:** zombie terbakar dan tidak berkeliaran di luar ruangan saat siang, sebagian zombie diam di ruang gelap, serta Zombie Desa berendam atau terkubur (GDD bagian 3 dan 5). State `SeekHiding`, `Submerged`, `Emerging`, dan `BurnToAshes` (`GLOSSARY.md`). Mask `Sunlight` (#87).
 
 **Keputusan teknis di blueprint ini:**
 
@@ -219,10 +220,10 @@ Saat `Submerged`, zombie tidak terlihat dan tidak bisa diserang, karena `Rendere
 - `EnemyAI.TriggerDaybreakDeath()` dihapus, dan digantikan `SunlightExposure`.
 - Saat `Submerged`, FSM dan agen mati, sehingga zombie itu hampir tanpa beban.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
-1. **Aturan fajar.** Rekomendasi: raycast ke arah matahari, dengan batas `maxShelteredSeconds`. Hasilnya sinar langsung membakar, dan tetap tidak ada zombie berkeliaran pada siang hari, sesuai GDD.
-2. **Kanopi Region 2, bangunan, dan badai.** Rekomendasi: kanopi dan bangunan hanya menunda paling lama 60 detik, sedangkan badai tidak melindungi. GDD menyebut Region 2 gelap sebagai suasana, bukan pengecualian. Zombie di dalam `InteriorZone` mengikuti keputusan #112.
+1. **Aturan fajar.** Rekomendasi: raycast ke arah matahari, dengan batas `maxShelteredSeconds`. Hasilnya sinar langsung membakar, dan tetap tidak ada zombie berkeliaran di luar ruangan pada siang hari, sesuai GDD.
+2. **Kanopi Region 2, bangunan, dan badai.** Rekomendasi: kanopi dan bangunan hanya menunda paling lama 60 detik, sedangkan badai tidak melindungi. GDD menyebut Region 2 gelap sebagai suasana, bukan pengecualian. Pengecualian ruang gelap hanya untuk zombie sarang di dalam `InteriorZone` (#112), dan bukan usulan, karena sudah ada di GDD bagian 3.
 3. **Akibat Zombie Desa terlambat.** Rekomendasi: terbakar seperti zombie lain.
 4. **Zombie yang sedang sembunyi.** Rekomendasi: tidak terlihat dan tidak bisa diserang, tetapi ada tanda gelembung atau lumpur.
 5. **Kapasitas `HidingSpot`.** Rekomendasi: air 8, lumpur 4, dan total minimal 30.
@@ -243,3 +244,6 @@ Saat `Submerged`, zombie tidak terlihat dan tidak bisa diserang, karena `Rendere
 11. Pakai ulang zombie yang terbakar sebanyak 20 kali. **Hasil:** skala normal, agen di NavMesh, partikel bersih, dan `IsBurning = false`.
 12. Pantau 50 zombie saat fajar di Profiler. **Hasil:** tidak ada lonjakan ray dalam satu frame, dan beban malam hari nol.
 13. Lepas Region 4 saat siang, lalu muat kembali. **Hasil:** tidak ada kebocoran penghuni, dan titik terisi ulang.
+14. Majukan jam ke 06:00 saat zombie sarang `Dormant` dan yang sudah bangun berada di dalam `InteriorZone`. **Hasil:** keduanya `IsProtected = true`, tidak terbakar, dan tetap ada setelah 60 detik.
+15. Dorong zombie sarang keluar dari zona saat siang. **Hasil:** `IsProtected = false`, dan terbakar saat pengecekan berikutnya.
+16. Taruh zombie horde di dalam `InteriorZone` saat fajar. **Hasil:** tidak terlindungi, dan terbakar paling lama setelah 60 detik.

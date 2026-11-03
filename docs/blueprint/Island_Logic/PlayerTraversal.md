@@ -331,7 +331,7 @@ Tidak ada vault atau memanjat tepian di versi awal. Lihat bagian 5.
 - Pengali kecepatan memakai array per `SpeedModifierId`.
 - Damage jatuh memakai kecepatan, bukan tinggi.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Vault dan memanjat tepian:** **tidak ada di versi awal.** Fitur itu menambah animasi, membuka celah masuk ke base, dan mengacaukan rute jurang. Bisa ditambah nanti lewat `TraversalMode`.
 2. **Tangga dan tali:** naik dengan `E`, senjata tersimpan, dan stamina habis berarti lambat, bukan jatuh.

@@ -180,7 +180,7 @@ Kamera memakai `unscaledDeltaTime`, jadi gerakannya tetap halus saat gerak lamba
 - `DetachForDeath` dan `SetGameplayTimeScale` (`FirstPersonCamera.md`, `UIFocusStack.md`).
 - Urutan penanda, sinematik, hapus save, dan statistik (`RunLifecycle.md`).
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Model tubuh pemain:** rekomendasi `PlayerBodyRig` yang dinonaktifkan selama hidup, karena game first-person hanya menampilkan tangan. Alternatifnya, model mayat terpisah yang dibuat saat mati.
 2. **Lewati adegan:** rekomendasi `Skip` boleh setelah 2 detik, karena permadeath membuat adegan ini sering terlihat.

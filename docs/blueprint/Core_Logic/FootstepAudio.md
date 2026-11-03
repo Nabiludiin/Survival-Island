@@ -171,7 +171,7 @@ Raycast hanya terjadi saat satu langkah berbunyi, bukan tiap frame, sehingga beb
 - `FootstepAudio` tidak mengirim noise.
 - Tiap permukaan diakses lewat larik, tanpa alokasi saat bermain.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Pemicu langkah:** rekomendasi berbasis jarak, bukan Animation Event. Kamera orang pertama tidak menampilkan kaki, dan cara ini juga berlaku sebelum animasi #12 ada.
 2. **Nilai awal:** `stepDistance` 1,75 m, jongkok 40 persen, dan berlari 130 persen.

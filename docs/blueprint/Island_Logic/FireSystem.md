@@ -189,7 +189,7 @@ Aturan `Storm` dan `Blizzard` sama dengan `CampfireManager`. Objek beratap tidak
 
 **Keputusan yang mengikuti blueprint lain:** `Storm` dan `Blizzard` memadamkan api tak beratap (#44). Pengali `Fire` batu 0 (#47). Damage lewat `DamagePipeline` (#59).
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Cara memadamkan:** tahan `E` 1 detik dan pakai 1 air, air kotor lebih dulu. Rekomendasi ini memberi air kotor kegunaan baru tanpa alat tambahan.
 2. **Api unggun dan obor tidak menjalar:** supaya pemain tidak kehilangan base karena alat dasar yang diajarkan Diary Bab 1.

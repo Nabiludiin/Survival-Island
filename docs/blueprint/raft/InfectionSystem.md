@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/raft/InfectionSystem.md`
 **Deskripsi Utama:** Alur infeksi zombie dari gigitan sampai pengobatan: nilai infeksi per jenis musuh, empat tahap penalti, stok dan resep vaksin, pemakaian vaksin, serta urutan kematian `Zombified`.
 **Issue:** #64
-**Rujukan GDD:** Bagian 3 (infeksi naik karena serangan zombie, formula dan stok vaksin sangat sedikit, HP habis karena infeksi), bagian 4 (Diary Bab 2: vaksin dari getah pohon dan jamur Region 2), dan bagian 5 (Region 2: grinding material medis). Tahap, penalti, dan semua angka adalah usulan.
+**Rujukan GDD:** Bagian 3 (infeksi naik karena serangan zombie, formula dan stok vaksin sangat sedikit, HP habis karena infeksi), bagian 4 (Diary Bab 2: vaksin dari getah pohon dan jamur Region 2), dan bagian 5 (Region 2: grinding material medis). Laju HP saat `Infection` 100 adalah keputusan developer. Tahap, penalti, dan angka lainnya adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -154,7 +154,7 @@ Checklist #45 menulis `Antibiotik untuk infeksi`. Maksudnya infeksi luka, bukan 
 
 ### Urutan kematian `Zombified`
 
-1. `SurvivalStats.TickHP` menjalankan baris HP 5 di `VitalsRules.md` selama `Infection >= infectionDamageThreshold`, termasuk saat `Infection` tertahan di `MaxInfection`. `Infection` 100 tidak membunuh langsung, karena GDD bagian 3 menetapkan pemain mati saat HP habis. Saat HP habis, `ReduceHP` memanggil `TriggerDeath(DeathReason.Zombified)` lewat `DeathReasonMap`.
+1. `SurvivalStats.TickHP` menjalankan baris HP 5 di `VitalsRules.md` selama `Infection >= infectionDamageThreshold`, termasuk saat `Infection` tertahan di `MaxInfection`. Saat `Infection` 100, HP turun bertahap dengan laju awal 0,3 per detik, dan pemain tidak mati seketika, karena GDD bagian 3 menetapkan pemain mati saat HP habis. Saat HP habis, `ReduceHP` memanggil `TriggerDeath(DeathReason.Zombified)` lewat `DeathReasonMap`.
 2. `SurvivalStats` menerbitkan `PlayerDiedEvent { Zombified }`.
 3. `GameManager.TriggerGameOver` menerbitkan `RunEndedEvent`, lalu `RunLifecycle.RunEndSequence` berjalan (#82).
 4. `DeathCinematic.Play(DeathReason.Zombified)` (#53): pandangan menjadi hijau penuh, kontrol dilepas, napas berubah menjadi erangan, lalu fade selama `zombifyCinematicSeconds`. Ragdoll tidak dipakai.
@@ -199,13 +199,15 @@ Checklist #45 menulis `Antibiotik untuk infeksi`. Maksudnya infeksi luka, bukan 
 
 **Sudah ditetapkan dokumen lain:** `SurvivalStats` pemilik `Infection` (`GLOSSARY.md`). Bahan vaksin dari Region 2 (GDD bagian 4 dan 5). Batas 50 dan 75 (`VitalsRules.md`). `Zombified` sebagai alasan kematian (`GLOSSARY.md`).
 
+**Keputusan developer:** saat `Infection` mencapai 100, HP turun bertahap dengan laju awal 0,3 per detik lewat baris HP 5, dan pemain tidak mati seketika. Angkanya `vitals.infectionDamagePerSec`, dan bisa disetel.
+
 **Keputusan teknis di blueprint ini:**
 
 - Tahap dihitung dari `VitalsChangedEvent`, bukan setiap frame.
 - Penalti dipasang lewat `SetPenalty`, sehingga aturan gabungan tetap di `SurvivalStats`.
 - Vaksin memakai alur `ItemUseSystem`, tanpa jalur pakai baru.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Kenaikan infeksi:** hanya saat diserang. `selfProgressPerGameHour` bernilai 0, dan bisa dinaikkan tanpa mengubah kode.
 2. **Tahap dan penalti:** empat tahap sesuai tabel.
@@ -216,7 +218,6 @@ Checklist #45 menulis `Antibiotik untuk infeksi`. Maksudnya infeksi luka, bukan 
 7. **Node medis:** jamur dengan tangan, getah dengan Pisau, hanya di Region 2.
 8. **NPC medis:** vaksin 25 persen lebih kuat selama NPC hidup, tanpa syarat jarak.
 9. **Peran Antibiotik:** hanya untuk infeksi luka, tidak menyembuhkan gigitan zombie.
-10. **Laju HP saat `Infection` 100:** rekomendasi tetap 0,3 per detik lewat baris HP 5. Pilihan lain yang tetap sesuai GDD adalah laju lebih tinggi saat `Infection` 100. Kematian instan di 100 menyimpang dari GDD bagian 3, jadi hanya boleh dipakai kalau developer memutuskannya di #85.
 
 ## 6. Skenario Tes
 

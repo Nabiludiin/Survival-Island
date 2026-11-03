@@ -91,7 +91,7 @@
 
 **Sudah ditetapkan dokumen lain:** biaya dan pengali stamina (`VitalsRules.md`), `DamageRouter` (`DamagePipeline.md`), serta aturan `Hit` (`ResourceRespawn.md`).
 
-**Usulan yang menunggu developer (#85):**
+**Usulan yang disetujui developer sebagai nilai awal (#85):**
 
 1. **`Wpn_Machete` damage 35:** usulan senjata di `RegionLootTable.md`. Tidak berlaku sampai disetujui.
 2. **Damage 25, jarak 2, dan jeda 1 detik:** nilai lama. Rekomendasi: pindahkan ke data senjata saat script ditulis (#84).

@@ -126,7 +126,6 @@ Sistem baru menambahkan event ke tabel ini, bukan membuat jalur sendiri. Kolom S
 | Inventori | `TechNodeUnlockedEvent` | `nodeId` | `TechTreeManager` | Tidak |
 | Inventori | `DurabilityStateChangedEvent` | `instanceId`, `itemId`, `state` | `DurabilitySystem` | Tidak |
 | Inventori | `FishCaughtEvent` | `itemId` | `FishingSystem` | Tidak |
-| Inventori | `CropHarvestedEvent` | `cropId`, `amount` | `PlanterBox` | Tidak |
 | Inventori | `DebrisCollectedEvent` | `itemId`, `amount` | `DebrisRetrieval` | Tidak |
 | Inventori | `WeaponFiredEvent` | `itemId`, `position`, `byPlayer` | `GunController` | Tidak |
 | Inventori | `ThrowableChangedEvent` | `itemId`, `count` | `ThrowableSystem` | Ya |
@@ -167,10 +166,7 @@ Sistem baru menambahkan event ke tabel ini, bukan membuat jalur sendiri. Kolom S
 | NPC | `NPCRescuedEvent` | `npcId` | `LifeboatExtraction` | Tidak |
 | NPC | `NPCDiedEvent` | `npcId`, `reason` | `NPCCompanion`, `NPCRoster` | Tidak |
 | NPC | `NPCStateChangedEvent` | `npcId`, `state` | `NPCCompanion` | Tidak |
-| NPC | `NPCInfectionChangedEvent` | `npcId`, `value`, `stage` | `NPCInfection` | Tidak |
-| NPC | `NPCTurnedEvent` | `npcId`, `position`, `insideBase` | `NPCInfection` | Tidak |
-| NPC | `NPCExpelledEvent` | `npcId` | `NPCInfection` | Tidak |
-| Objektif | `DiaryChapterFoundEvent` | `chapter` | `ObjectiveManager` | Tidak |
+| Objektif | `DiaryChapterUnlockedEvent` | `chapter` | `ObjectiveManager` | Tidak |
 | Objektif | `ObjectiveChangedEvent` | `objectiveId`, `isComplete` | `ObjectiveManager` | Ya |
 | Objektif | `HelicopterPartInstalledEvent` | `partId`, `installed`, `total` | `RescueEventManager` | Ya |
 | Objektif | `HelicopterReadyEvent` | Tanpa isi | `RescueEventManager` | Ya |
@@ -193,7 +189,7 @@ Sistem baru menambahkan event ke tabel ini, bukan membuat jalur sendiri. Kolom S
 | UI | `SubtitleRequestedEvent` | `textKey`, `speakerKey`, `priority`, `sourceKind` | `NarrativeSequencer`, `DisasterManager`, `NPCBarks` | Tidak |
 | UI | `LocaleChangedEvent` | `localeId` | `LocalizationManager` | Ya |
 | UI | `AccessibilityChangedEvent` | `AccessibilityOptions` | `LocalizationManager` | Ya |
-| UI | `MapMarkerChangedEvent` | `markerId`, `isRemoved` | `MapMarkerRegistry` | Tidak |
+| UI | `MapMarkerChangedEvent` | `markerId`, `isRemoved` | `MapMarkerRegistry` (milik `CompassSystem`) | Tidak |
 
 ### Contoh rujukan: musuh mati dan Lucky Machine
 

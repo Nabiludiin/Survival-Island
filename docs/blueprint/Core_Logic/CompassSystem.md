@@ -1,34 +1,51 @@
 # Blueprint: CompassSystem.cs
 **Lokasi:** `docs/blueprint/Core_Logic/CompassSystem.md`
-**Deskripsi Utama:** Menampilkan arah mata angin (N, E, S, W) dan penanda lokasi di layar, serta memiliki `MapMarkerRegistry` yang dipakai bersama peta.
-**Issue:** #30, #69, #71, #81, #105
+**Deskripsi Utama:** Menampilkan arah mata angin (N, E, S, W) dan penanda lokasi di layar, serta memiliki data penanda `MapMarkerRegistry`.
+**Issue:** #30, #69, #71, #81
 **Rujukan GDD:** Usulan, belum ada di GDD.
 
 ## 1. Arsitektur & Variabel Utama
 
 ```csharp
-public enum MarkerIcon { Base, Supply, Part, Helipad, Objective, PlayerPin, PlayerDanger, PlayerResource }
+public enum MarkerIcon { Supply, Part, Helipad, Objective }
+
+[Serializable]
+public struct MapMarker
+{
+    public string id;           // part_2, supply, objective, helipad
+    public Vector3 position;
+    public MarkerIcon icon;
+    public string labelKey;     // Kunci #104, boleh kosong
+}
+
+public class MapMarkerRegistry
+{
+    public string Add(Vector3 position, MarkerIcon icon);    // Membuat id otomatis
+    public void Set(in MapMarker marker);                    // Membuat atau memperbarui
+    public bool Remove(string id);
+    public IReadOnlyList<MapMarker> All { get; }
+}
 ```
 
 | Variabel | Tipe | Fungsi |
 |---|---|---|
 | `playerTransform` | `Transform` | Sumber arah |
 | `compassBarUI` | `RectTransform` | Bar kompas |
-| `Markers` | `MapMarkerRegistry` | Data penanda. Tetap aktif walaupun `WorldMapSystem` nonaktif |
+| `Markers` | `MapMarkerRegistry` | Data penanda |
 
-`MapMarker` dan `MapMarkerRegistry` dijelaskan di `WorldMapSystem.md`.
+`MapMarkerRegistry` adalah kelas biasa milik sistem ini. Setiap perubahan menerbitkan `MapMarkerChangedEvent { markerId, isRemoved }`.
 
 ## 2. Detail Logika & Fungsi
 
-**`void Update()`**: ambil rotasi Y pemain, lalu geser `compassBarUI` berlawanan arah. Kompas hanya menggambar penanda dengan `showOnCompass = true`.
+**`void Update()`**: ambil rotasi Y pemain, lalu geser `compassBarUI` berlawanan arah. Kompas menggambar semua penanda di `Markers`.
 
 | Fungsi | Dipakai oleh | Isi |
 |---|---|---|
 | `string AddMarker(Vector3 position, MarkerIcon icon)` | `BeachSupplyManager` (#71) | Meneruskan ke `Markers.Add`, dan mengembalikan ID |
-| `void SetMarker(string markerId, Vector3 position)` | `HeavyItemSystem` (#69), format `part_<partId>` | Meneruskan ke `Markers.Set` |
+| `void SetMarker(string markerId, Vector3 position)` | `HeavyItemSystem` (#69), format `part_<partId>` | Meneruskan ke `Markers.Set`. `icon` diambil dari ID: `part_` menjadi `Part`, dan `helipad` menjadi `Helipad` |
 | `void RemoveMarker(string markerId)` | #69, #71 | Meneruskan ke `Markers.Remove` |
 
-**Penanda tujuan (#81):** mendengar `ObjectiveMarkerChangedEvent { hasMarker, position, label }`. Event ini sticky, jadi `Last` dibaca di `OnEnable`.
+**Penanda tujuan (#81):** mendengar `ObjectiveMarkerChangedEvent { hasMarker, position, label }`. Event ini sticky, jadi `Last` dibaca di `OnEnable`. Penandanya memakai ID `objective`.
 
 ## 3. Hubungan dengan Sistem Lain
 
@@ -38,7 +55,6 @@ public enum MarkerIcon { Base, Supply, Part, Helipad, Objective, PlayerPin, Play
 
 | Sistem | Hubungan |
 |---|---|
-| `WorldMapSystem` (#105) | Membaca `Markers` |
 | `BeachSupplyManager` (#71), `HeavyItemSystem` (#69) | Memasang penanda |
 | `ObjectiveManager` (#81) | Mengirim penanda tujuan |
 
@@ -47,14 +63,13 @@ public enum MarkerIcon { Base, Supply, Part, Helipad, Objective, PlayerPin, Play
 - **Objek pool:** tidak memakai pool.
 - **Game dijeda:** gerakan mengikuti rotasi pemain, yang berhenti saat jeda.
 - **Permadeath:** penanda hilang bersama scene.
-- **Save dan load:** penanda sistem dipasang ulang oleh pemiliknya. Penanda pemain disimpan `world_map` (#105).
-- **Peta nonaktif:** registry dan kompas tetap berjalan.
+- **Save dan load:** kompas tidak menyimpan data. Penanda dipasang ulang oleh pemiliknya.
 
 ## 5. Keputusan Desain
 
-**Sudah ditetapkan dokumen lain:** `MapMarkerRegistry` milik `CompassSystem` (`WorldMapSystem.md`).
+**Keputusan developer:** #105 tidak dipakai. `MapMarker` dan `MapMarkerRegistry` berpindah ke blueprint ini, dan penanda buatan pemain ikut dihapus.
 
-**Keputusan teknis:** ID penanda memakai `string`, mengikuti `MapMarkerRegistry` (#105). Rancangan #71 yang memakai `int AddMarker` dan `RemoveMarker(int)` tidak dipakai.
+**Keputusan teknis:** ID penanda memakai `string`, mengikuti `MapMarkerRegistry`. Rancangan #71 yang memakai `int AddMarker` dan `RemoveMarker(int)` tidak dipakai.
 
 **Menunggu developer:** tidak ada yang menghalangi.
 
@@ -64,5 +79,5 @@ public enum MarkerIcon { Base, Supply, Part, Helipad, Objective, PlayerPin, Play
 2. Tiba kargo pantai. **Hasil:** penanda `Supply` muncul, lalu hilang setelah `RemoveMarker`.
 3. Temukan suku cadang. **Hasil:** penanda `part_<partId>` muncul.
 4. Ganti tujuan. **Hasil:** penanda tujuan berpindah.
-5. Nonaktifkan peta. **Hasil:** kompas tetap menampilkan penanda.
-6. Buat penanda dengan `showOnCompass = false`. **Hasil:** tidak tampil di kompas.
+5. Save, keluar, lalu lanjutkan. **Hasil:** penanda kargo, suku cadang, dan tujuan kembali lewat pemiliknya.
+6. Panggil `RemoveMarker` dengan ID yang tidak ada. **Hasil:** tidak terjadi apa-apa, dan penanda lain tetap tampil.

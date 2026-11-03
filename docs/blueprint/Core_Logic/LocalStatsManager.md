@@ -175,7 +175,7 @@ File ini terpisah dari `survival_save.json`. `WorldStateSave.DeleteRunSave()` ti
 - File `stats.json`, urutan bootstrap 13, dan `RecordRunEnd(result, reason, currentDay, seed)` (`RunLifecycle.md`).
 - Run dengan cheat tidak masuk statistik (`DevConsole.md`).
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Sistem ini secara keseluruhan:** belum ada di GDD, tetapi `RunLifecycle.md` sudah memakainya. Rekomendasi dipakai, karena biayanya kecil dan memberi alasan mencoba lagi setelah permadeath.
 2. **Kata "Telemetry":** rekomendasi lokal saja, tanpa pengiriman data.

@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/left-4-dead/SpawnManager.md`
 **Deskripsi Utama:** Menentukan jenis musuh per region dan tempat kemunculannya, siang dan malam, lewat `ObjectPooler`.
 **Issue:** #62
-**Rujukan GDD:** Bagian 3 (siang hewan, malam zombie) dan bagian 5 (ancaman tiap region). Bobot dan angka adalah usulan.
+**Rujukan GDD:** Bagian 3 (siang hewan di luar ruangan, sebagian zombie diam di ruang gelap, dan malam zombie) dan bagian 5 (ancaman tiap region). Bobot dan angka adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -96,7 +96,7 @@ Varian Runner, Tank, dan Spitter mengikuti keputusan #25, dan ditambahkan sebaga
 
 | Event | Tindakan |
 |---|---|
-| `DaybreakEvent` | `isNight = false`. Zombie dibakar `SunlightExposure` (#63). Spawn hewan dimulai. `PopulateHidingSpots()` kalau Region 4 dimuat. Jadwalkan `SweepWrongPhase()` setelah `cleanupSeconds` |
+| `DaybreakEvent` | `isNight = false`. Zombie di luar ruangan dibakar `SunlightExposure` (#63). Zombie sarang di dalam `InteriorZone` tidak disentuh (#112). Spawn hewan dimulai. `PopulateHidingSpots()` kalau Region 4 dimuat. Jadwalkan `SweepWrongPhase()` setelah `cleanupSeconds` |
 | `NightfallEvent` | `isNight = true`. Hewan pergi sendiri (#61). Spawn zombie dimulai. Zombie Desa bangkit (#63). Jadwalkan `SweepWrongPhase()` |
 | `RegionChangedEvent` | `activeRegion = to`. Lihat "Pindah region" |
 | `RegionLoadStateChangedEvent` `Unloading` | `DespawnRegion(region)` pada frame yang sama |
@@ -105,7 +105,7 @@ Varian Runner, Tank, dan Spitter mengikuti keputusan #25, dan ditambahkan sebaga
 | `LairClearedEvent` (#112) | Tambah `regionBudgetReduction[region]` sebesar `lair.clearedBudgetReduction`, paling besar `lair.maxBudgetReduction` (`ZombieLair.md`). Nilai ini mengurangi `count` di `RequestWave` sebagai rasio |
 | `RunEndedEvent` | Hentikan coroutine |
 
-**`SweepWrongPhase()`** mengembalikan musuh yang salah waktu dan berada di luar pandangan, misalnya hewan yang tersesat saat malam, kecuali `IsDormantCounted`, zombie yang dilindungi #112, dan musuh hasil override aktif.
+**`SweepWrongPhase()`** mengembalikan musuh yang salah waktu dan berada di luar pandangan, misalnya hewan yang tersesat saat malam, kecuali `IsDormantCounted`, zombie sarang di dalam `InteriorZone` (`EnemyAI.lair != null`, #112), dan musuh hasil override aktif.
 
 ### Tick spawn
 
@@ -139,7 +139,7 @@ Tick ini hanya mengisi hewan pada siang hari.
 1. `count = rng.Range(groupMin, groupMax + 1)`.
 2. Untuk tiap anggota: `go = ObjectPooler.Instance.SpawnFromPool(entry.enemy.enemyId, posisi, rotasi)`. Anggota lain digeser dalam 2 m lewat `SamplePosition`.
 3. Kalau `go == null`, hentikan kelompok ini. Pool memang punya batas.
-4. Isi `EnemyInstance`. Pengali gelombang hanya berlaku untuk zombie, lewat `RequestWave`.
+4. Isi `EnemyInstance`. Pengali gelombang hanya berlaku untuk zombie, lewat `RequestWave`, `RequestBurst`, dan `RequestAmbush`.
 5. `WildlifeAI` menerima `homePoint` dan `groupId`.
 6. Tambah ke `activeEnemies`, lalu kirim `EnemySpawnedEvent { enemyId, position }`.
 
@@ -204,10 +204,10 @@ Rekomendasi (lihat bagian 5):
 | `void ReturnStuck(EnemyInstance e)` | #25, #94 | `Despawn(Stuck)` lalu `RefundBudget(1)` |
 | `int ReturnRaidersNear(Vector3 center, float radius)` | #90 | `Despawn(go, DespawnReason.TooFar)` untuk zombie di sekitar base. Mengembalikan jumlahnya |
 | `int AliveZombies { get; }`, `int AliveLarge { get; }` | #27 | Zombie hidup, tanpa `IsDormantCounted` |
-| `void RequestAmbush(Vector3 center, int count, float radius)` | #67, #80 | Memakai tabel malam, cincin `radius`, dan `AISensory.ForceAware`. Berlaku saat tidur |
+| `void RequestAmbush(Vector3 center, int count, float radius)` | #67, #80 | Memakai tabel malam, cincin `radius`, dan `AISensory.ForceAware`. Berlaku saat tidur. HP dan damage memakai `AIDirector.GetPostTargetModifiers(currentDay)`. `count` tidak dikali di sini, supaya pemulihan #80 tetap memunculkan jumlah yang sama |
 | `SpawnOverrideHandle PushOverride(in SpawnOverride o)` | #50, #70 | Lihat di bawah |
 | `void PopOverride(SpawnOverrideHandle h)` | #50, #70 | Melepas satu override |
-| `void RequestBurst(RegionSpawnTable table, int count, Vector3 center, float radius, in WaveModifiers modifiers)` | #50 | Memunculkan bertahap dengan `maxSpawnsPerFrame`, abaikan `behindChance`, tetap di luar pandangan. `modifiers` diisi seperti `RequestWave`. Tanpa parameter itu, semua pengali bernilai 1 |
+| `void RequestBurst(RegionSpawnTable table, int count, Vector3 center, float radius, in WaveModifiers modifiers)` | #50, #71 | Memunculkan bertahap dengan `maxSpawnsPerFrame`, abaikan `behindChance`, tetap di luar pandangan. `modifiers` diisi seperti `RequestWave`. Tanpa parameter itu, semua pengali bernilai 1 |
 | `void DebugSpawn(string enemyId, int count)` | #56 | Di depan pemain, tanpa syarat pandangan |
 | `void DebugReturnAll()` | #56 | Semua kembali ke pool |
 | `int EngagedEnemyCount { get; }` | #80 | Jumlah `IsEngaged` |
@@ -264,14 +264,14 @@ Beberapa override boleh aktif. Yang terakhir didorong menang untuk `table`, nila
 
 ## 5. Keputusan Desain
 
-**Sudah ditetapkan dokumen lain:** nama `SpawnManager` (`GLOSSARY.md`). Jenis musuh per region (GDD bagian 5). Pemilihan jumlah oleh #27. `RandomStreamId.Enemy` (#89). `RequestAmbush` (#67, #80). Musuh dikembalikan saat `Unloading` (#88).
+**Sudah ditetapkan dokumen lain:** nama `SpawnManager` (`GLOSSARY.md`). Zombie tidak berkeliaran di luar ruangan saat siang, tetapi boleh diam di ruang gelap (GDD bagian 3). Jenis musuh per region (GDD bagian 5). Pemilihan jumlah oleh #27. `RandomStreamId.Enemy` (#89). `RequestAmbush` (#67, #80). Musuh dikembalikan saat `Unloading` (#88).
 
 **Keputusan teknis di blueprint ini:**
 
 - `Despawn` menjadi satu-satunya jalur kembali ke pool di Fase 2, sehingga daftar selalu benar.
 - `EnemyInstance` memisahkan data spawn dari AI.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Bobot tabel per region.** Rekomendasi: nilai di bagian 1.
 2. **Batas musuh hidup dan target hewan.** Rekomendasi: 30 zombie, 50 saat override, batas 8 hewan, dan target 4 hewan.
@@ -281,7 +281,7 @@ Beberapa override boleh aktif. Yang terakhir didorong menang untuk `table`, nila
 
 ## 6. Skenario Tes
 
-1. Masuk Region 1 saat siang dengan log aktif. **Hasil:** hanya Serigala dan Babi Hutan yang muncul, dengan rasio mendekati 60:40.
+1. Masuk Region 1 saat siang dengan log aktif, jauh dari sarang. **Hasil:** tick spawn hanya memunculkan Serigala dan Babi Hutan, dengan rasio mendekati 60:40.
 2. Majukan jam ke 18:00. **Hasil:** spawn beralih ke `zombie_standar`, dan hewan pergi.
 3. Pindah ke Region 3 saat malam. **Hasil:** musuh baru memakai tabel `Snow`.
 4. Catat 100 titik spawn. **Hasil:** semuanya 20 sampai 45 m, di luar pandangan, dan sekitar 75 persen dari belakang.
@@ -292,6 +292,7 @@ Beberapa override boleh aktif. Yang terakhir didorong menang untuk `table`, nila
 9. Mundur dari region sampai `Unloading`. **Hasil:** semua musuh region itu kembali pada frame yang sama.
 10. Panggil `RequestWave` dengan `count = 10` dan `maxLarge = 1` saat malam. **Hasil:** 10 zombie muncul bertahap, paling banyak 1 varian besar, dan pengali HP terpasang.
 11. `PushOverride` dengan `capOverride = 50`, lalu `PopOverride`. **Hasil:** batas naik, lalu kembali 30. Musuh lama tetap hidup.
-12. Tidur sampai gangguan. **Hasil:** tidak ada spawn biasa, dan `RequestAmbush` tetap memunculkan musuh `Aware`.
+12. Tidur sampai gangguan. **Hasil:** tidak ada spawn biasa, dan `RequestAmbush` tetap memunculkan musuh `Aware`. Ulangi pada `setday 70`. **Hasil:** zombie memakai HP 1,2 kali dan damage 1,1 kali.
 13. Jalankan dua run dengan seed sama tanpa aksi. **Hasil:** urutan jenis musuh sama.
 14. Mati lalu mulai run baru. **Hasil:** `activeEnemies` kosong, dan tidak ada event ganda.
+15. Tunggu fajar di dekat gua berisi zombie sarang, lalu tunggu `cleanupSeconds`, di luar pandangan. **Hasil:** `SweepWrongPhase` tidak mengembalikan zombie sarang di dalam `InteriorZone`, dan zombie horde di luar ruangan sudah habis.

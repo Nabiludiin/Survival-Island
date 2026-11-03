@@ -147,7 +147,7 @@ Angka lain: `GameBalanceConfig.vfx.lowQualityDensity` 0,5 dan `mediumQualityDens
 - Efek baru dibuang saat batas tercapai, tanpa mengambil efek yang masih hidup.
 - Efek mengikuti lewat `follow`, tanpa `SetParent`.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Warna darah:** satu warna untuk zombie dan hewan pada versi awal. `EnemyHitEvent` tidak membawa jenis musuh, dan dampak visualnya kecil.
 2. **Impact per permukaan:** tiga kelompok (`VFX_Impact`, `VFX_ImpactDust`, `VFX_ImpactWood`), bukan satu per `SurfaceType`. Kelompok ini cukup terbaca dan menghemat aset.

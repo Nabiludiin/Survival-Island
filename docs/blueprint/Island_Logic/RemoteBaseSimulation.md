@@ -136,7 +136,7 @@ netDamage = kekuatan × (1 - mitigasi) × acak(1 - varianceFraction, 1 + varianc
 
 **`private void ApplyProgress(RaidPlan plan, float target)`**: `amount = netDamage × (target - appliedFraction)`, lalu `ApplyStructureDamage(cluster, amount)`, dan `appliedFraction = target`. Karena hanya selisih yang diterapkan, damage tidak pernah ganda.
 
-**`public void ApplyStructureDamage(BaseCluster c, float amount)`**, dipakai juga `NPCInfection` (#117):
+**`private void ApplyStructureDamage(BaseCluster c, float amount)`**:
 
 1. Bagi menjadi pukulan sebesar `hitChunk`, dan sisa pecahan dibawa ke panggilan berikutnya.
 2. Pilih sasaran berbobot: pintu `doorWeight`, dinding 1. Jebakan dan struktur dalam baru menjadi sasaran setelah semua dinding dan pintu hancur.
@@ -200,7 +200,7 @@ Hantaman langsung diterapkan pada panggilan itu, dan tidak masuk `RaidPlan`, seh
 | `StructureRegistry`, `BuildableData` (#79) | Daftar struktur dan data |
 | `BaseHealth`, `DamagePipeline` (#59) | Jalur damage |
 | `BuildingIntegrity` (#47), `BaseDefense` (#26) | `tier` dan jebakan |
-| `NPCRoster` (#76), `NPCInfection` (#117) | Cedera NPC, dan infeksi kalau #117 disetujui |
+| `NPCRoster` (#76) | Cedera NPC |
 | `SpawnManager` (#62), `AIDirector` (#27), `OptimizationManager` | Peralihan dan pengecualian culling |
 | `RegionStreaming` (#88) | `IsLoaded` dan `GetRegionAt` |
 | `DisasterManager` (#70) | Memanggil `QueueDisasterDamage` untuk region yang tidak dimuat |
@@ -227,7 +227,7 @@ Hantaman langsung diterapkan pada panggilan itu, dan tidak masuk `RaidPlan`, seh
 
 **Sudah ditetapkan dokumen lain:** bekerja dari data tanpa memuat region (`RegionStreaming.md`), dan damage `Structural` ke objek nonaktif (`DamagePipeline.md`).
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Aturan dasar:** rekomendasi diserang secara simulasi. Base aman membuat pertahanan sia-sia saat ditinggal, dan serangan penuh terlalu berat untuk performa.
 2. **Rumus dan angka:** rekomendasi seperti bagian 2, dengan serangan pertama hari ke-3.

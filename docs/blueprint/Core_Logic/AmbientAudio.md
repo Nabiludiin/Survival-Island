@@ -181,7 +181,7 @@ Random memakai `UnityEngine.Random` biasa. Suara tidak memengaruhi gameplay, seh
 
 **Sudah ditetapkan dokumen lain:** layer `ZoneTrigger` juga dipakai trigger audio (#87), `AudioListener.pause` diatur `UIFocusStack` (#83), dan langganan event dipasang di `OnEnable` (#107).
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Area di luar Pantai dan Hutan.** Issue hanya meminta dua area. Rekomendasi: empat profil cadangan per `RegionType`, supaya tidak ada area yang sunyi.
 2. **Prioritas Pantai di atas Hutan.** Rekomendasi: Pantai menang saat bertumpuk, karena ombak paling mudah dikenali.

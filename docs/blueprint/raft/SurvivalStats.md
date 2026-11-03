@@ -91,7 +91,7 @@ Daftar lengkap ada di `VitalsRules.md`.
 
 **Keputusan teknis di blueprint ini:** blueprint ini merangkum kontrak. Kalau ada perbedaan rincian, `VitalsRules.md` dan `DamagePipeline.md` yang dipakai.
 
-**Usulan yang menunggu developer:** angka laju turun perlu playtest (`VitalsRules.md`).
+**Usulan yang disetujui developer sebagai nilai awal:** angka laju turun perlu playtest (`VitalsRules.md`).
 
 ## 6. Skenario Tes
 

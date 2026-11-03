@@ -223,7 +223,7 @@ Kunci sisi memakai nilai kanonik, sehingga sisi utara sel A dan sisi selatan sel
 |---|---|---|
 | 1 | Ada `Selected` | `NoSelection` |
 | 2 | Jarak ke kamera `<= maxBuildDistance` | `OutOfRange` |
-| 3 | Di luar `NoBuildVolume`, yaitu seam dan link (#88), `BridgeSite` (#68), helipad dan titik pasang (#14), serta tiap `DiaryBook` (#81, #116) supaya buku tidak tertimbun | `NoBuildZone` |
+| 3 | Di luar `NoBuildVolume`, yaitu seam dan link (#88), `BridgeSite` (#68), helipad dan titik pasang (#14), serta `DiaryBook` (#81, #116) supaya buku tidak tertimbun | `NoBuildZone` |
 | 4 | Permukaan di bawah tapak terbaca lewat `TryGetSurfaceAt`, atau tapak bertumpu pada struktur | `UnknownSurface` |
 | 5 | `SurfaceDetection.Instance.IsBeachFootprint(...)` bernilai `false` | `Beach` |
 | 6 | Selisih tinggi tanah masih boleh | `TooSteep` |
@@ -407,7 +407,7 @@ public class StructureRecord
 - Tetangga dihitung dari grid, sehingga grafik tidak perlu disimpan.
 - `BaseHealth` tidak lagi menyimpan dirinya sendiri lewat `ISaveable`. Datanya ditulis `StructureRegistry`, karena struktur dibuat saat bermain dan harus dibuat ulang saat load.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Bentuk menu:** menu radial dua cincin, dibuka dengan klik kanan atau `B`.
 2. **Mode palu:** Perbaiki, Bangun, Upgrade, dan Bongkar. Mode awal Perbaiki, supaya klik kiri tidak membuang bahan tanpa sengaja. Tabel `EquipmentManager.md` yang menyebut klik kiri "Bangun" perlu mengikuti ini.

@@ -258,7 +258,7 @@ Pemeriksaan tidak berjalan saat `AttackBuilding` atau di dalam kandang Lucky Mac
 
 **Sudah ditetapkan dokumen lain:** headshot 2x (#85), armor Militer yang bisa ditembus di kepala (#59), infeksi per varian (#64), dan zombie tidak bisa mengenai zombie lewat `EnemyAttack` (#59).
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Runner, Tank, dan Spitter:** rekomendasi digabung sebagai pola pada varian GDD, tanpa `enemyId` baru, karena GDD tidak menyebut ketiganya.
 2. **Zombie Tribal:** rekomendasi jerat jarak 5 sampai 14 meter yang menarik dan menahan. Lepas lewat 25 damage, aksi #110, jarak, atau garis pandang terputus.

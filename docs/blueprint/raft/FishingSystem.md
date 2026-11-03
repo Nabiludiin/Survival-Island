@@ -12,7 +12,7 @@
 public enum FishingState { Idle, Charging, LureFlying, Waiting, BiteWindow, Reeling, Intercepted, Recovering }
 public enum FishingEndReason { Caught, FishEscaped, LineBroken, Cancelled, Interrupted, WaterGone, TooFar, InterceptedByTarget }
 
-public interface IKailCastInterceptor   // Diisi #106 kalau disetujui. Tanpa ini, #55 tetap utuh
+public interface IKailCastInterceptor   // Diisi #106. Tanpa ini, #55 tetap utuh
 {
     bool IsTargetAt(Vector3 landing);                        // Untuk teks penanda
     bool TryIntercept(Vector3 landing, FishingSystem kail);  // true berarti kail mengait target lain
@@ -174,7 +174,7 @@ Setelah jeda, state kembali `Idle`. Semua perubahan state menerbitkan `FishingSt
 | `InventoryManager`, `WorldItemManager` (#66) | Memberi `Food_RawFish` |
 | `CampfireManager` (#44) | Memasak `Food_RawFish` lewat resep `cook_fish` |
 | `DiseaseManager` (#45) | `Food_RawFish` memakai `poisonChance` 0,5 |
-| `DebrisRetrieval` (#106) | Mendaftar sebagai `IKailCastInterceptor` kalau disetujui |
+| `DebrisRetrieval` (#106) | Mendaftar sebagai `IKailCastInterceptor` |
 | `TideManager` (#91) | Tidak dipanggil. Air yang bergerak terbaca lewat cek ulang |
 | `VFXManager` (#15), `NotificationManager` (#22) | Percikan dan pesan |
 
@@ -195,7 +195,7 @@ Setelah jeda, state kembali `Idle`. Semua perubahan state menerbitkan `FishingSt
 
 **Sudah ditetapkan dokumen lain:** `Base_Kail` adalah item inti dan tidak bisa dibuang (`GLOSSARY.md`). Klik kiri lempar dan tarik, klik kanan batal (`EquipmentManager.md`). Aliran RNG `Gameplay` (`RunSeedManager.md`). Target 1 porsi sekitar 60 detik (`GameBalanceConfig.md`).
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Lokasi memancing:** boleh di semua `WaterBody` (laut, sungai, danau). Tebing karang lebih cepat dengan pengali 0,75, sesuai petunjuk Diary Bab 1.
 2. **Akibat benang putus:** ikan hilang dan jeda 5 detik. Kail tidak rusak dan tidak butuh bahan, karena item inti tidak boleh hilang.

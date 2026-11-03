@@ -222,7 +222,7 @@ Statistik dibaca lewat `WeaponStatCalculator.Get` saat senjata dipasang (`OnEqui
 - Peluru cadangan baru berkurang di akhir reload.
 - Spread memakai `UnityEngine.Random`, bukan `RunSeedManager`.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Pistol sebagai item inti:** bisa rusak, tetapi tidak pernah hancur. Selaras dengan `ToolRepairSystem.md`, sehingga pemain tidak kehilangan item awal.
 2. **Gangguan reload:** batal saat ganti senjata dan mulai berlari, serta lanjut saat kena serangan.

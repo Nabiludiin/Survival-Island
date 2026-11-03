@@ -2,14 +2,14 @@
 **Lokasi:** `docs/blueprint/raft/DebrisRetrieval.md`
 **Deskripsi Utama:** Menarik barang hanyut dari laut memakai `Base_Kail`, dengan tombol yang sama seperti memancing.
 **Issue:** #106
-**Rujukan GDD:** Usulan, belum ada di GDD. Sistem ini nonaktif sampai developer menyetujui. GDD bagian 3 menulis Kail "seperti di game Raft", tetapi hanya menyebut kail untuk memancing. **Rekomendasi:** dipakai dengan prioritas rendah, setelah #55 dan #71 selesai. Biayanya kecil, karena memakai lemparan #55 dan satu pool. Sistem ini juga cocok dengan cerita kapal karam, dan membuat pantai lebih hidup di antara kargo mingguan.
+**Rujukan GDD:** Bagian 3 (selain memancing, Kail bisa menarik barang hanyut dari laut, seperti di game Raft).
 
 ## 1. Arsitektur & Variabel Utama
 
 - **`DebrisRetrieval : MonoBehaviour, IKailCastInterceptor, ISaveable`:** singleton di `IslandPhase`. Mengatur kemunculan, daftar barang, dan tarikan.
 - **`DebrisItem : MonoBehaviour, IInteractable, IPoolable`:** satu barang hanyut. Pool `Debris_Generic`, mesh diganti dari `ItemData.worldMesh`, dan layer `Interactable`. Bergerak lewat `Transform`, tanpa Rigidbody.
 - **`DebrisLane : MonoBehaviour`:** jalur arus di scene region. Berisi `Vector3[] points` dari laut lepas ke titik hilang, dan `RegionType region`. Mendaftar di `OnEnable` dan melepas diri di `OnDisable`, sehingga ikut aktif bersama region (#88).
-- **Sakelar:** kalau `GameBalanceConfig.debris.enabled` bernilai `false`, `OnEnable` tidak mendaftar ke `FishingSystem` dan tidak memunculkan barang. Nilai awalnya `false` sampai developer menyetujui.
+- **Sakelar:** kalau `GameBalanceConfig.debris.enabled` bernilai `false`, `OnEnable` tidak mendaftar ke `FishingSystem` dan tidak memunculkan barang. Nilai awalnya `true`, dan `false` hanya dipakai sebagai sakelar uji.
 
 **Aturan membuat jalur:** titik pertama dan terakhir berada minimal 60 meter dari pantai terdekat, supaya tidak terlihat muncul atau hilang. Bagian tengah jalur melewati 10 sampai 20 meter dari garis pantai, sehingga masuk jangkauan `castMaxDistance`.
 
@@ -29,7 +29,7 @@
 
 | Nama | Nilai awal | Fungsi |
 |---|---|---|
-| `GameBalanceConfig.debris.enabled` | `false` | Sakelar sistem |
+| `GameBalanceConfig.debris.enabled` | `true` | Sistem dipakai. `false` hanya sakelar uji |
 | `GameBalanceConfig.debris.maxActive` | 4 | Barang sekaligus |
 | `GameBalanceConfig.debris.spawnIntervalGameHours` | 3 | Jeda dasar, 8 barang per hari game |
 | `GameBalanceConfig.debris.spawnCheckSeconds` | 1 | Jeda pemeriksaan jadwal, detik |
@@ -180,15 +180,15 @@ Tarikan tidak memakai Tension Bar, karena ini barang, bukan ikan. Klik kanan mem
 - **Barang ditembak:** layer `Interactable` masuk mask `Shoot`, tetapi `DebrisItem` tidak punya `IDamageable`, sehingga tidak terjadi apa-apa.
 - **Save dan load:** hanya `nextSpawnGameHour` yang disimpan, di bawah kunci `world_debris`. Barang yang sedang hanyut tidak disimpan, karena nilainya kecil dan pool kembali kosong setelah load.
 - **Permadeath:** `nextSpawnGameHour` dihapus bersama save. Pool dibersihkan saat scene dimuat ulang.
-- **Sistem nonaktif:** `FishingSystem` berjalan seperti biasa tanpa interceptor.
+- **Sistem nonaktif (sakelar uji):** `FishingSystem` berjalan seperti biasa tanpa interceptor.
 
 ## 5. Keputusan Desain
 
-**Sudah ditetapkan dokumen lain:** `Base_Kail` adalah item inti. Klik kiri dipakai item aktif (`GLOSSARY.md`). Memancing ikan ada di #55, dan kargo mingguan ada di #71.
+**Sudah ditetapkan dokumen lain:** Kail menarik barang hanyut dari laut (GDD bagian 3, keputusan developer). `Base_Kail` adalah item inti. Klik kiri dipakai item aktif (`GLOSSARY.md`). Memancing ikan ada di #55, dan kargo mingguan ada di #71.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
-1. **Fungsi ini dipakai atau tidak:** rekomendasi dipakai dengan prioritas rendah, setelah #55 dan #71. Kalau ditolak, issue ini bisa ditutup, dan `FishingSystem` tidak perlu berubah.
+1. **Urutan pengerjaan:** rekomendasi prioritas rendah, setelah #55 dan #71, karena biayanya kecil dan memakai lemparan #55.
 2. **Isi barang:** terutama kayu dan kain. Makanan, air, dan peluru dibuat jarang, supaya kargo mingguan tetap berharga.
 3. **Pengaruh cuaca dan pasang:** `Storm` 0,5, `Rain` 0,75, dan pasang 0,75 sebagai pengali jeda. Badai membuat barang lebih banyak, dan pemain harus memilih antara berisiko keluar atau tidak.
 4. **Tarikan tanpa Tension Bar:** cukup tahan klik kiri.
@@ -197,9 +197,9 @@ Tarikan tidak memakai Tension Bar, karena ini barang, bukan ikan. Klik kanan mem
 
 ## 6. Skenario Tes
 
-Atur `debris.enabled = true` lewat `balance` di `DevConsole`, kecuali tes 1.
+Semua tes memakai nilai awal `debris.enabled = true`, kecuali tes 1.
 
-1. Biarkan `enabled = false`, lempar Kail ke laut. **Hasil:** memancing normal, dan tidak ada barang muncul.
+1. Setel sakelar uji `debris.enabled = false` lewat `balance` di `DevConsole`, lalu lempar Kail ke laut. **Hasil:** memancing normal, dan tidak ada barang muncul.
 2. Tunggu 3 jam game di pantai. **Hasil:** satu barang muncul di awal jalur dan bergerak mengikuti titik.
 3. Tunggu hingga empat barang aktif. **Hasil:** barang kelima tidak muncul sampai ada yang hilang.
 4. Biarkan satu barang sampai titik terakhir. **Hasil:** kembali ke pool, dan `active` berkurang.

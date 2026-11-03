@@ -224,7 +224,7 @@ public class StorageChestSaveData
 - Panel menggambar ulang lewat tanda kotor, sekali per frame.
 - Hanya slot berisi yang disimpan, karena batas `JsonUtility`.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Jumlah slot:** 20 per peti, sedikit lebih besar dari 15 slot inventori.
 2. **Item inti dan item wajib:** tidak boleh masuk peti.

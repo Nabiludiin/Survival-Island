@@ -257,7 +257,7 @@ public struct EquipmentSaveData
 - `EquipmentManager` satu-satunya pembaca klik kiri dan klik kanan untuk item.
 - Viewmodel dibuat sekali per item, lalu dinyalakan dan dimatikan.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Jumlah slot hotbar:** 8, supaya semua item utama muat.
 2. **Isi hotbar:** merujuk ke slot inventori, sehingga 8 slot hotbar tidak mengurangi 15 slot inventori.

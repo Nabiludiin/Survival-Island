@@ -222,7 +222,7 @@ Hasil dicatat di `docs/PLAYTEST_LOG.md`.
 
 **Keputusan teknis di blueprint ini (usulan, dicatat di #85):** pembagian update memakai round-robin dengan batas per frame, dan "terlihat" memakai frustum.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Jalur bersama:** rekomendasi dipakai dalam bentuk titik tujuan bersama di atas 15 meter, bukan satu `NavMeshPath`. Hidupkan hanya kalau skenario B atau E belum memenuhi target.
 2. **Target performa:** rekomendasi tabel di bagian 2, dengan PC menengah sebagai patokan. Developer perlu menentukan spesifikasi minimum sebenarnya.

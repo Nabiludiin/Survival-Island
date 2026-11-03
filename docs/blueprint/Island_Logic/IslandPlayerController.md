@@ -82,7 +82,7 @@ Komponen di pemain Fase 2, bersama `CharacterController` dan `PlayerTraversal`. 
 
 **Sudah ditetapkan dokumen lain:** pengali kecepatan dan `jumpHeight` 1,1 (`PlayerTraversal.md`), biaya stamina (`VitalsRules.md`), kecepatan setengah saat membawa barang (`Claude.md` Tahap 4, #69), serta `FirstPersonCamera` (#102).
 
-**Usulan yang menunggu developer (#85):**
+**Usulan yang disetujui developer sebagai nilai awal (#85):**
 
 1. **`walkSpeed` 5 dan `sprintSpeed` 8:** nilai lama. Rekomendasi: pindahkan ke `GameBalanceConfig.traversal` saat script ditulis (#84).
 

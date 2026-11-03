@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/left-4-dead/ThrowableSystem.md`
 **Deskripsi Utama:** Barang lempar khas L4D untuk mengendalikan kerumunan: Molotov, Bom Rakitan, Batu, dan Suar.
 **Issue:** #96
-**Rujukan GDD:** Usulan, belum ada di GDD. Sistem ini nonaktif sampai developer menyetujui. Rekomendasi: sebaiknya dipakai, karena peluru sangat terbatas dan GDD bagian 7 mengharuskan pemain memancing musuh ke kandang Lucky Machine.
+**Rujukan GDD:** Bagian 3 (Barang Lempar: Molotov, Bom Rakitan, Batu, dan Suar untuk mengendalikan atau memancing kerumunan zombie) dan bagian 7 (memancing musuh ke kandang Lucky Machine).
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -44,7 +44,7 @@ Nama config: `molotovForce`, `molotovRadius`, `molotovDamagePerSec`, `molotovDur
 
 | Angka lain | Nilai awal | Fungsi |
 |---|---|---|
-| `GameBalanceConfig.throwable.enabled` | `false` | Sistem nonaktif sampai disetujui |
+| `GameBalanceConfig.throwable.enabled` | `true` | Sistem dipakai. `false` hanya sakelar uji |
 | `GameBalanceConfig.throwable.holdToAimSeconds` | 0,2 | Lama menahan `G` sebelum membidik |
 | `GameBalanceConfig.throwable.throwCooldownSeconds` | 0,8 | Jeda antar-lemparan |
 | `GameBalanceConfig.throwable.arcPointCount` | 30 | Titik garis perkiraan |
@@ -187,26 +187,24 @@ Batas issue: ledakan tong ada di `EnvironmentalHazard`, api menyebar di #97, dan
 - **Proyektil jatuh ke region yang dilepas:** `maxLifetimeSeconds` mengembalikannya ke pool.
 - **Hujan dan badai:** Molotov mengikuti aturan #97.
 - **Stasiun dan region:** barang bisa dilempar di semua region. Tidak bisa saat `Swimming` atau `Climbing`, karena `locks`.
-- **Sistem nonaktif:** `enabled = false` membuat `Throw` diabaikan, HUD disembunyikan, resep tidak didaftarkan, dan `Mat_Scrap` tetap berguna untuk kawat berduri (#26).
+- **Sistem nonaktif (sakelar uji):** `enabled = false` membuat `Throw` diabaikan, HUD disembunyikan, resep tidak didaftarkan, dan `Mat_Scrap` tetap berguna untuk kawat berduri (#26).
 - **#97 belum tersedia:** Molotov memakai `DamagePipeline` langsung, dengan tick damage setiap 1 detik lewat `OverlapSphere`, sampai #97 selesai.
 
 ## 5. Keputusan Desain
 
-**Sudah ditetapkan dokumen lain:** tombol `Throw` di `G` (`InputManager.md`), `ExplosionDamage` (`DamagePipeline.md`), serta layer `Projectile` (`PhysicsLayers.md`).
+**Sudah ditetapkan dokumen lain:** sistem dipakai, dengan daftar Molotov, Bom Rakitan, Batu, dan Suar (GDD bagian 3, keputusan developer). Tombol `Throw` di `G` (`InputManager.md`), `ExplosionDamage` (`DamagePipeline.md`), serta layer `Projectile` (`PhysicsLayers.md`).
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
-1. **Sistem dipakai atau tidak.** Rekomendasi: dipakai. Nilai awal tetap `enabled = false` sampai disetujui.
-2. **Daftar barang:** Molotov, Bom Rakitan, Batu, dan Suar. Rekomendasi: pakai keempatnya, dengan Batu sebagai pilihan murah untuk permainan senyap.
-3. **Garis perkiraan dan tombol:** ketuk `G` memilih, tahan membidik, dan lepas melempar. Rekomendasi: pakai, supaya hotbar tidak berubah.
-4. **Friendly fire api:** Molotov mengikuti baris ledakan buatan pemain. Rekomendasi: pakai.
-5. **Reaksi varian:** tabel di bagian 2. Rekomendasi: pakai, lalu setel lewat playtest.
-6. **Resep dan `Mat_Scrap`:** tabel di bagian 2. Rekomendasi: pakai.
+1. **Garis perkiraan dan tombol:** ketuk `G` memilih, tahan membidik, dan lepas melempar. Rekomendasi: pakai, supaya hotbar tidak berubah.
+2. **Friendly fire api:** Molotov mengikuti baris ledakan buatan pemain. Rekomendasi: pakai.
+3. **Reaksi varian:** tabel di bagian 2. Rekomendasi: pakai, lalu setel lewat playtest.
+4. **Resep dan `Mat_Scrap`:** tabel di bagian 2. Rekomendasi: pakai.
 
 ## 6. Skenario Tes
 
-1. Dengan `enabled = false`, tekan `G`. **Hasil:** tidak terjadi apa-apa, dan HUD tidak menampilkan barang lempar.
-2. Dengan `enabled = true` dan 3 Batu, tahan `G`. **Hasil:** garis perkiraan muncul, dan penanda mendarat di tanah.
+1. Setel sakelar uji `enabled = false` lewat `balance` di `DevConsole`, lalu tekan `G`. **Hasil:** tidak terjadi apa-apa, dan HUD tidak menampilkan barang lempar.
+2. Dengan nilai awal `enabled = true` dan 3 Batu, tahan `G`. **Hasil:** garis perkiraan muncul, dan penanda mendarat di tanah.
 3. Lepas `G`. **Hasil:** Batu mendarat dekat penanda, jumlah jadi 2, dan HUD berubah.
 4. Tahan `G`, lalu klik kanan. **Hasil:** bidikan batal, dan jumlah tetap.
 5. Lempar Batu di dekat 3 zombie yang belum melihat pemain. **Hasil:** ketiganya memeriksa titik suara, lalu kembali normal.

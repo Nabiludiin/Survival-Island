@@ -189,7 +189,7 @@ Efek yang bernilai 0 memakai `active = false`, supaya tidak menambah beban rende
 - Handler event hanya mengisi target, dan Volume hanya berubah di `Update`.
 - Efek bernilai nol dimatikan.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Masa hidup:** rekomendasi prefab per scene, bukan manager persisten, supaya efek tidak perlu reset dan tidak mengubah tabel #82.
 2. **Bentuk efek:** rekomendasi vignette untuk HP dan napas, Chromatic Aberration ditambah saturasi untuk infeksi, serta DOF Gaussian ditambah warna air untuk menyelam.

@@ -130,13 +130,6 @@ Nilai mengikuti target makan dan minum di `GameBalanceConfig.md`.
 | Baterai | `Item_Battery` | `isConsumable`, `maxStack` 5 (#98) | Aksi khusus |
 | Kit api unggun | `Kit_Campfire` | Aksi khusus (#44) | Tanpa waktu pakai |
 
-**Usulan, berlaku kalau #48 disetujui:**
-
-| Item | ID | Lapar | Pakai | Busuk | `poisonChance` |
-|---|---|---|---|---|---|
-| Kentang | `Food_Potato` | 10 | 2 detik | 72 jam game | 0 |
-| Kentang matang | `Food_CookedPotato` | 25 | 2 detik | 48 jam game | 0 |
-
 ## 2. Detail Logika & Fungsi
 
 ### Aksi item di UI
@@ -336,7 +329,7 @@ Isi keracunan, efek, dan obatnya milik #45. Blueprint ini mengirim `OnConsumed(i
 - `WorldItem` memakai satu pool generik dan mesh dari data.
 - Pembusukan dihitung dari jam game total saat dibutuhkan, tanpa penghitung per item.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Pemulihan bertahap:** makanan dan minuman naik selama 20 detik, mengikuti Raft. Tanpa kurva mentah dan matang.
 2. **Pemakaian bisa batal:** terkena serangan, berganti item, atau mulai lari membatalkan pemakaian, dan item tidak hilang.

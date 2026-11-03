@@ -196,7 +196,7 @@ Saat `stealth.enabled = false`, objek ini mematikan dirinya.
 - `Tick` dibagi ke beberapa frame, dan raycast suara hanya untuk lapisan luar radius.
 - Zombie memakai `AISensory`, sedangkan hewan memakai radius aggro di #61.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Sistem stealth dipakai atau tidak.** GDD tidak menyebutnya. Rekomendasi: dipakai.
 2. **Aturan "Aggro penuh" di `Claude.md` terhadap stealth.** Rekomendasi: zombie malam selalu bergerak ke `HuntHint`, tetapi baru mengejar langsung setelah `Aware`.

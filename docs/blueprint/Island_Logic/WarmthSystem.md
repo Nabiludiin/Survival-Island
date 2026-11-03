@@ -103,7 +103,7 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 2. `PhysicsQuery.Raycast` ke empat arah mendatar. Minimal tiga harus mengenai objek bertag `BaseWall` atau `BaseDoor`, sama dengan aturan tiga dinding di `BaseNavigation.md`.
 3. `isIndoors` adalah gabungan keduanya.
 
-**`private bool IsExposedToSky()`:** raycast ke atas dengan `PhysicsMasks.Sunlight` tidak mengenai apa pun, sama seperti `FarmingSystem.md`.
+**`private bool IsExposedToSky()`:** raycast ke atas dengan `PhysicsMasks.Sunlight` tidak mengenai apa pun, sama seperti `RainwaterCollector` (`HydrationSystem.md`).
 
 ### Pakaian hangat
 
@@ -190,7 +190,7 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 - Tangan kiri untuk senter dan obor (`EquipmentManager.md`).
 - Resep obor dan pakaian hangat (`CraftingStation.md`), yang menunggu konfirmasi di sini.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Bentuk `Warmth`:** rekomendasi nilai 0 sampai 100, dengan pemilik `WarmthSystem`. Ini mendukung `ApplyColdBurst` dan indikator HUD.
 2. **Hujan dan air di luar Region 3:** rekomendasi hanya menurunkan `Warmth` sampai batas aman, jadi frostbite tetap khusus Region 3. Efek nyatanya adalah cadangan panas berkurang.

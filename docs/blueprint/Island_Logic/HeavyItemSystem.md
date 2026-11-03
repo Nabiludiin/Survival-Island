@@ -216,7 +216,7 @@ Barang yang tergeletak di dalam trigger juga terpasang, sehingga pemain tidak di
 - Tombol `Q` (`InputManager.md`), pintu boleh dibuka, dan hold 0,5 detik (`IslandInteractable.md`).
 - Penyebaran acak dari titik buatan tangan, 5 barang (`RunSeedManager.md`, `GameBalanceConfig.md`). Keduanya sudah tercatat sebagai usulan di dokumen itu.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Dua suku cadang tambahan:** rekomendasi Baling-baling Ekor dan Panel Kendali, untuk mengisi "dll" di GDD.
 2. **Pengali kecepatan per barang:** rekomendasi semua 0,5 pada versi awal, sesuai `Claude.md`. Medan `speedMultiplierOverride` tersedia kalau Mesin ingin dibuat lebih lambat. `weightKg` tidak memengaruhi angka permainan.

@@ -46,10 +46,10 @@ public struct SafetyFinding { public string checkId; public SafetySeverity sever
 |---|---|---|---|---|
 | 1 | `Tool_Axe` (tidak wajib, tetapi mempercepat) | `rec_axe` di `Hand` | Bisa selalu dibuat ulang, lihat di bawah | #77, #113 |
 | 2 | `Mat_Wood` 500 | Pohon Region 1, tumbuh lagi | Pohon bisa ditebang tangan (damage 1, `maxHits` 5) | #73 |
-| 3 | Diary Bab 2 | Pos kemah Region 1 | Buku tanpa `BaseHealth`, dan `NoBuildVolume` | #81 |
-| 4 | Blueprint Jembatan | Hadiah Bab 2 | Bukan item, jadi tidak memakai slot | #68 |
+| 3 | Buku Diary | Shelter tua Region 1 | Buku tanpa `BaseHealth`, dan `NoBuildVolume` | #81 |
+| 4 | Blueprint Jembatan | Hadiah Bab 2, yang terbuka saat `obj_base` selesai atau pada `chapter2TriggerDay` | Diberikan saat bab terbuka, tanpa perlu dibaca. Bukan item, jadi tidak memakai slot | #68, #81 |
 | 5 | Jembatan `S1` | `BridgeSite` | Tidak bisa dirusak. Setoran tidak bisa hilang | #68 |
-| 6 | Diary Bab 3 | Pos terakhir Region 2 | Sama dengan Bab 2. Membuka `S2` | #81, #68 |
+| 6 | Diary Bab 3 | Terbuka saat pemain masuk Region 2 | Otomatis, tanpa benda lain yang harus dicari. Membuka `S2` | #81, #68 |
 | 7 | Akses `Logistic` dan `Snow` | `S2`, `S3` | Status gerbang di `world_gates` | #68 |
 | 8 | 5 suku cadang | Region 4 | Tidak bisa hancur, dan kembali ke posisi valid | #69 |
 | 9 | Helipad, kerangka, dan kokpit | Region 3 | Tanpa `IDamageable`, dan `NoBuildVolume` | #14 |
@@ -99,9 +99,10 @@ Rantai minimum dari tangan kosong:
 
 - Buku tidak punya `BaseHealth`, jadi erupsi dan gempa tidak merusaknya (`ObjectiveManager.md`).
 - Buku tetap ada setelah dibaca, dan bisa dibaca ulang di arsip `J`.
-- Bangunan tidak bisa menimbun buku, lewat `NoBuildVolume` di tiap `DiaryBook`.
+- Bangunan tidak bisa menimbun buku, lewat `NoBuildVolume` di `DiaryBook`.
 - Blueprint Jembatan tersimpan sebagai status gerbang, sehingga tidak bisa hilang, dibuang, atau hancur.
-- `Region` yang dilepas tidak berpengaruh, karena `markerPosition` adalah data.
+- Bab 2 dan 3 tidak bergantung pada benda baru. Waktu selalu berjalan untuk Bab 2, dan masuk Region 2 selalu membuka Bab 3.
+- `Region` yang dilepas tidak berpengaruh, karena `bookMarkerPosition` adalah data.
 
 ### Jembatan
 
@@ -142,7 +143,7 @@ Titik riwayat selalu berupa tempat yang pernah diinjak, sehingga pemain tidak bi
 | `parts_reachable` | Barang `Lying`: `NavMesh.SamplePosition` berhasil. Hanya barang di region yang dimuat | `Warning`. #69 memulihkannya |
 | `bridge` | Blueprint ada dan jembatan belum selesai, tetapi `BridgeSite` tidak aktif | `Blocked` |
 | `gates` | Kalau `HasBridgeBlueprint` dan jembatan selesai, `IsUnlocked(Amazon)` | `Blocked` |
-| `gates_diary` | Bab 3 ada di `foundChapters`, `IsUnlocked(Logistic)` | `Blocked` |
+| `gates_diary` | Bab 3 ada di `unlockedChapters`, `IsUnlocked(Logistic)` | `Blocked` |
 | `path_blocked` | Tidak ada struktur di `NoBuildVolume` jalur wajib (`BuildMenu.md`) | `Warning` |
 | `time_budget` | Lihat di bawah | `Warning` |
 
@@ -183,7 +184,7 @@ Perintah pengubah kondisi membuat `IsRunTainted` bernilai `true`.
 |---|---|
 | `RegionGateSystem` (#68) | `HasBridgeBlueprint`, `IsUnlocked`, `WoodRemaining` |
 | `HeavyItemSystem` (#69) | `records`, dan `Drop(Unstuck)` |
-| `ObjectiveManager` (#81) | `foundChapters` |
+| `ObjectiveManager` (#81) | `unlockedChapters` |
 | `RescueEventManager` (#14) | `InstalledCount`, `State` |
 | `ResourceRespawn` (#73) | `ForceRegrowStones`, dan jumlah batu aktif |
 | `InventoryManager`, `ItemUseSystem` (#66), `StorageChest` (#46) | `IsProtected`, jumlah item |
@@ -216,7 +217,7 @@ Perintah pengubah kondisi membuat `IsRunTainted` bernilai `true`.
 - Item inti tidak pernah hancur (`ToolRepairSystem.md`).
 - Node kayu, jamur, dan getah tidak diacak (`RunSeedManager.md`).
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Jembatan tidak bisa rusak:** rekomendasi mengikuti usulan `RegionGateSystem.md`. Alternatifnya, jembatan punya HP dan diperbaiki lewat #47.
 2. **Pengaman Diary:** rekomendasi buku tidak bisa rusak dan Blueprint berupa status, bukan item.
@@ -234,7 +235,7 @@ Semua memakai `DevConsole` (#56).
 3. `removeitem Base_Pistol`, lalu `softlockcheck`. **Hasil:** `core_items` berstatus `Fixed`, dan pistol kembali.
 4. Hapus semua kayu dan batu, `breaktool Tool_Axe`, lalu `clearstones`, dan `softlockcheck`. **Hasil:** `tool_path` berstatus `Fixed`, batu kecil muncul, dan `rec_axe` bisa dibuat.
 5. Tanpa kapak, tebang pohon dengan tangan. **Hasil:** pohon tumbang setelah 5 pukulan.
-6. `disaster Eruption 2` di dekat buku Bab 1. **Hasil:** buku tetap bisa dibaca.
+6. `disaster Eruption 2` di dekat buku Diary. **Hasil:** buku tetap bisa dibaca.
 7. Coba bangun dinding di atas buku. **Hasil:** ditolak `NoBuildZone`.
 8. `disaster Earthquake 2` di jembatan. **Hasil:** jembatan utuh, dan `IsUnlocked(Amazon)` tetap.
 9. Tp ke dalam geometri, lalu tombol `Keluar dari Tersangkut`. **Hasil:** setelah 5 detik pemain kembali ke posisi terakhir yang valid, tanpa damage jatuh.
@@ -245,3 +246,4 @@ Semua memakai `DevConsole` (#56).
 14. `setday 60` dengan helikopter `Ready`, lalu `softlockcheck`. **Hasil:** `time_budget` `Ok` kalau jam masih cukup untuk pemanasan.
 15. Mati, lalu run baru. **Hasil:** `softlockcheck` kembali bersih.
 16. `setday 61`, tanpa jembatan, lalu `softlockcheck`. **Hasil:** `time_budget` `Ok`, peringatan tidak tampil, dan pemeriksaan jalur menang tetap berjalan.
+17. Temukan buku tanpa membangun dan tanpa membuka menu, lalu tunggu `chapter2TriggerDay`. **Hasil:** Blueprint didapat, dan jembatan bisa dikerjakan. Selesaikan jembatan dan masuk Region 2. **Hasil:** Bab 3 terbuka, dan `gates_diary` `Ok`.

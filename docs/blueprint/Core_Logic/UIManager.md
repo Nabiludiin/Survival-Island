@@ -71,7 +71,7 @@
 
 **Sudah ditetapkan dokumen lain:** `UIManager` tidak mengatur waktu dan kursor (`UIFocusStack.md`). Isi layar akhir (`RunLifecycle.md`). `ShowGameOver(DeathReason)` (`LocalizationManager.md`).
 
-**Usulan yang menunggu developer (dicatat di #85):** tombol `Log` di `Pause` (#22), dan tombol Keluar dari Tersangkut di Fase 2 (#116).
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):** tombol `Log` di `Pause` (#22), dan tombol Keluar dari Tersangkut di Fase 2 (#116).
 
 ## 6. Skenario Tes
 

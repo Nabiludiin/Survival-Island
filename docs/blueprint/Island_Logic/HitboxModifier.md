@@ -54,7 +54,7 @@ Fungsi ini tidak memanggil `TakeDamage`, supaya pengali headshot tidak ditulis d
 
 **Sudah ditetapkan dokumen lain:** headshot 2x (#85), urutan hitung damage, dan `BodyPart` di `GLOSSARY.md`.
 
-**Usulan yang menunggu developer (#85):**
+**Usulan yang disetujui developer sebagai nilai awal (#85):**
 
 1. **Kaki 0,5x:** berasal dari blueprint lama. GDD tidak menyebutnya. Rekomendasi: pakai sebagai nilai awal.
 

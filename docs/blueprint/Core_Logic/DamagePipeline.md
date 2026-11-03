@@ -322,7 +322,7 @@ Target memeriksa aturan ini di `TakeDamage`, jadi senjata tidak perlu tahu jenis
 - Damage kondisi tidak mengirim `PlayerDamagedEvent`.
 - Serangan ke dinding memakai `Structural`.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Friendly fire:** peluru dan melee pemain tidak melukai NPC. Ledakan buatan pemain melukai pemain dan NPC sebesar 50 persen. Ledakan lingkungan melukai semua pihak.
 2. **Armor Zombie Militer:** badan 0,35, kaki 0,5, kepala tanpa pengurangan, sehingga headshot menjadi cara utama melawannya.

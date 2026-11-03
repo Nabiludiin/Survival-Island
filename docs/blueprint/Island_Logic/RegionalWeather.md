@@ -137,7 +137,6 @@ Pengali berlaku untuk musuh di region aktif, karena musuh hanya aktif di sekitar
 | Sistem | Cara membaca | Hasil |
 |---|---|---|
 | `RainwaterCollector` (#43) | `GetWeather(homeRegion)` | `Rain` dan `Storm` mengisi, `Snow` dan `Blizzard` tidak |
-| `PlanterBox` (#48) | `GetWeather(homeRegion)` | Mengikuti aturan #48 |
 | `CampfireManager` (#44) | `GetWeather(homeRegion)` | Mengikuti aturan #44 |
 | `FishingSystem` (#55) | `GetWeather(lureRegion)` | Hujan mempercepat gigitan |
 | `DebrisRetrieval` (#106) | `GetWeather(region)` | Jeda kemunculan |
@@ -188,9 +187,9 @@ public void PopOverride(WeatherOverrideHandle h);
 
 **Sudah ditetapkan dokumen lain:** `WeatherType` di GLOSSARY, rumus `Fork` di #89, dan interval jam game di #84.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
-1. **Cuaca dihitung per region:** semua region selalu punya cuaca, walaupun hanya region aktif yang ditampilkan. Rekomendasi: pakai, karena penampung hujan dan tanaman butuh cuaca di tempatnya, dan fungsi murni tidak menambah beban.
+1. **Cuaca dihitung per region:** semua region selalu punya cuaca, walaupun hanya region aktif yang ditampilkan. Rekomendasi: pakai, karena penampung hujan butuh cuaca di tempatnya, dan fungsi murni tidak menambah beban.
 2. **Tabel peluang di atas.** Rekomendasi: pakai sebagai nilai awal.
 3. **Cuaca berat tidak berurutan, dan tidak ada pada hari pertama.** Rekomendasi: pakai, karena game ini permadeath.
 4. **Efek Blizzard:** x0,75 kecepatan, -2 `Warmth` per detik, dan jarak pandang sekitar 25 m. Skala `Warmth` menunggu #65.

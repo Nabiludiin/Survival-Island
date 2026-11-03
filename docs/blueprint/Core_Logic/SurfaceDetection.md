@@ -230,7 +230,7 @@ Layer `Sand/Beach` tidak dipakai lagi (`PhysicsLayers.md`). Urutan lengkap valid
 - Bobot dihitung per `SurfaceType`, bukan per tekstur.
 - `IsBeachFootprint` membaca Terrain langsung lewat XZ, supaya benda di atas pasir tidak menutupi pasir.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Sumber deteksi:** alphamap yang di-bake, bukan volume trigger.
 2. **Campuran tekstur:** nilai dominan untuk suara dan gerak. Untuk bangunan, titik dilarang kalau bobot pasir mencapai 35 persen pada salah satu dari lima titik tapak.

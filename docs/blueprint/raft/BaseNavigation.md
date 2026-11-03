@@ -114,7 +114,7 @@ public struct BreachTarget
 | `GameBalanceConfig.baseNav.insideMinWallHits` | 3 | Dinding minimum dari empat arah |
 | `GameBalanceConfig.baseNav.doorSwingSeconds` | 0,4 | Lama pintu berputar |
 | `GameBalanceConfig.baseNav.doorNpcAutoCloseSeconds` | 1,5 | Pintu menutup kembali setelah NPC lewat |
-| `GameBalanceConfig.baseNav.lockedDoorDamageMultiplier` | 0,75 | Damage ke pintu yang terkunci |
+| `GameBalanceConfig.baseNav.lockedDamageMultiplier` | 0,75 | Damage `Structural` ke pintu yang terkunci |
 
 ## 2. Detail Logika & Fungsi
 
@@ -340,7 +340,7 @@ public class BreachSlots
 - Pemeriksaan jalur diantre, dengan batas per frame.
 - Target dipilih dari ujung jalur.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Carving** dipilih dibanding bake ulang per area.
 2. **Pintu terkunci:** dikunci lewat gerendel dengan `E`, menahan NPC agar tidak lewat, dan menerima 75 persen damage. Zombie tidak bisa membuka pintu yang tidak terkunci, tetapi tetap menyerangnya. Rekomendasi: pakai, supaya kunci punya fungsi yang jelas.

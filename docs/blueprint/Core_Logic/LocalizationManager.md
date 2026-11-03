@@ -97,7 +97,7 @@ Kunci berbentuk `<kelompok>.<nama>`: `ui.`, `prompt.`, `item.`, `diary.`, `lore.
 | `BuildMenu` | Pesan `PlacementError` | `build.error.<PlacementError>` |
 | `ItemData.itemName` | Nama langsung | `item.<itemId>.name` |
 | `DiaryEntry.title`, `body` | Teks di aset | `diary.ch<chapter>.title`, `diary.ch<chapter>.body` |
-| `NPCInfection`, `FishingSystem`, `NotificationManager` | Pesan langsung | `bark.`, `prompt.`, dan `notif.` |
+| `FishingSystem`, `NotificationManager` | Pesan langsung | `bark.`, `prompt.`, dan `notif.` |
 
 **`LocalizationAuditWindow`** (Editor) melaporkan kunci yang hilang di salah satu bahasa, kunci yang tidak terpakai, dan kata `Press [` di aset atau kode. Pemeriksaan ini wajib lulus sebelum build.
 
@@ -200,7 +200,7 @@ Rekaman di `LoreReader` (#100) menjeda game, jadi teksnya tampil di panel itu da
 - Semua penulisan tombol memakai `GetBindingDisplay`, sesuai `InputManager.md`.
 - Bentuk atau ikon pada hologram dan highlight selalu aktif.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Bahasa awal:** Indonesia sebagai bahasa awal dan cadangan, dengan struktur yang sudah siap untuk `en`. Tabel Inggris diisi setelah teks stabil. Alasan: sumber cerita proyek berbahasa Indonesia.
 2. **Alat:** tabel kunci sendiri, diimpor dari CSV. Alasan: hanya dua bahasa, panggilan sinkron cocok dengan `GetPrompt()`, dan tidak menambah Addressables.

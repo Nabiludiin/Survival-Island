@@ -174,7 +174,7 @@ Menu hanya memanggil fungsi manager ini, dan tidak menulis `QualitySettings` ata
 - Setting terpisah dari save file utama. Lokasinya `PlayerPrefs`, sesuai #80 dan #82.
 - Nama dan nilai awal setting kamera mengikuti `FirstPersonCamera.md`.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Volume dan sensitivitas langsung berlaku, grafis lewat tombol Terapkan.** Perubahan tekstur bisa membuat game tersendat, sedangkan slider perlu umpan balik langsung.
 2. **Brightness dibatasi 0,8 sampai 1,2.** Batas sempit menjaga GDD Bagian 5, yaitu Region 2 yang gelap meski siang hari, dan tetap membantu layar yang redup.

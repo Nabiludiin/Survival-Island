@@ -202,7 +202,7 @@ Semua efek yang aktif dikalikan, sehingga urutan pemberian efek tidak mengubah h
 - Damage dari efek memakai `ApplyVitalDamage`, tanpa `PlayerDamagedEvent`.
 - Semua pengali dikalikan, tanpa urutan.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Suplemen `Med_Supplement`:** kecepatan 20 persen selama 60 detik, dari issue ini. Item ini belum ada di GDD, dan sumbernya hanya loot (#103).
 2. **Aturan tumpuk awal:** minum ulang hanya mengisi durasi.

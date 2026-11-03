@@ -23,8 +23,10 @@ Game dibagi menjadi dua fase utama yang saling berkesinambungan.
     *   **Lapar:** Harus diisi dengan memancing (pakai Kail), berburu hewan, atau *looting*.
     *   **Haus:** Harus diisi dengan Air Minum Bersih, kelapa, atau air hujan yang ditampung. Air kotor bisa diminum dengan risiko sakit.
     *   **Infeksi:** Terkena serangan zombie akan meningkatkan meteran infeksi. MC memulai dengan formula vaksin dan stok vaksin yang sangat sedikit. Vaksin baru hanya bisa dirakit menggunakan material dari Region 2.
+    *   **Kail:** Selain memancing, Kail bisa menarik barang hanyut dari laut, seperti di game Raft.
+    *   **Barang Lempar:** Molotov, Bom Rakitan, Batu, dan Suar bisa dipakai untuk mengendalikan atau memancing kerumunan zombie.
 -   **Siklus Siang & Malam (Ancaman Ganda):**
-    *   **Siang Hari:** **Zombie akan terbakar dan mati jika terkena sinar matahari.** Oleh karena itu, tidak ada zombie yang berkeliaran di siang hari. Ancaman utama di siang hari murni berasal dari **Hewan Buas** yang agresif menjaga teritori dan *resource*.
+    *   **Siang Hari:** **Zombie akan terbakar dan mati jika terkena sinar matahari.** Oleh karena itu, tidak ada zombie yang berkeliaran di luar ruangan pada siang hari. Sebagian zombie bersembunyi diam di ruang gelap seperti gua, bunker, dan gudang, lalu bangun kalau terganggu. Ancaman utama di luar ruangan pada siang hari berasal dari **Hewan Buas** yang agresif menjaga teritori dan *resource*.
     *   **Malam Hari:** Matahari terbenam dan hewan buas kembali ke sarang. Gelapnya malam memicu **Horde Zombie** keluar dari persembunyiannya untuk memburu MC dan menyerang *base*.
 -   **Syarat Menang & Game Over (Permadeath):** 
     *   **Menang:** Menyelesaikan rakitan Helikopter di Region 3 dan lepas landas.
@@ -33,11 +35,11 @@ Game dibagi menjadi dua fase utama yang saling berkesinambungan.
 
 ## 4. Mekanik Base Building & Sistem Diary (Tutorial)
 **Aturan Shelter:**
--   **Restriksi Pantai:** Pemain dilarang keras membangun *base* di atas pasir pantai (akan hancur oleh air pasang atau dilarang oleh sistem). *Base* harus dibangun di daratan luar garis pantai.
+-   **Restriksi Pantai:** Pemain dilarang membangun *base* di atas pasir pantai. Sistem menolak penempatan, dan Diary menjelaskan bahwa air pasang akan menghanyutkan bangunan di sana. *Base* harus dibangun di daratan luar garis pantai.
 -   **Fungsi Base:** Sebagai tempat berlindung dari serangan zombie di malam hari, lokasi meja *crafting*, dan tempat NPC berlindung.
 
 **Sistem Diary (Peninggalan Penghuni Lama):**
-MC akan menemukan *shelter* tua yang hancur. Di dalamnya terdapat buku *Diary* yang berfungsi sebagai *guidebook* dan *lore*:
+MC akan menemukan *shelter* tua yang hancur. Di dalamnya terdapat satu buku *Diary* yang berfungsi sebagai *guidebook* dan *lore*. Bab-babnya terbuka bertahap mengikuti progres pemain:
 -   **Diary Bab 1 (Survival Dasar):** Berisi peringatan untuk tidak tidur di pantai, fakta bahwa zombie terbakar oleh matahari siang, cara membuat api unggun, dan cara memakai kail untuk menangkap ikan di tebing karang.
 -   **Diary Bab 2 (Obat & Infeksi):** Menceritakan bagaimana penulis diary terinfeksi dan berhasil meracik vaksin dari getah pohon dan jamur khusus yang hanya tumbuh di Hutan Tropis (Region 2). Diary ini memberikan *Blueprint Jembatan*.
 -   **Diary Bab 3 (Kebenaran & Pelarian):** Penulis mengungkap bahwa ada helipad dan landasan militer di puncak es (Region 3), tetapi suku cadang helikopternya ditinggalkan di desa bawah (Region 4) saat evakuasi gagal. Ini menjadi panduan objektif akhir pemain.

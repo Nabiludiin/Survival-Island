@@ -28,7 +28,6 @@ Resep memasak adalah `CookingRecipe`, turunan `CraftingRecipe` (#77), dengan `st
 |---|---|---|---|---|
 | `cook_meat` | `Food_RawMeat` | `Food_CookedMeat` | 30 detik | Ya |
 | `cook_fish` | `Food_RawFish` | `Food_CookedFish` | 30 detik | Ya |
-| `cook_potato` (#48, kalau disetujui) | `Food_Potato` | `Food_CookedPotato` | 30 detik | Ya |
 | `boil_water` | `Drink_DirtyWater` | `Drink_CleanWater` | 20 detik | Tidak |
 | `burn_charcoal` | `Mat_Wood` | `Mat_Charcoal` | 30 detik | Tidak |
 
@@ -246,7 +245,7 @@ Saat `StructureDestroyedEvent` untuk `StructureId` milik api ini: panggil `Extin
 - Waktu dihitung dari selisih jam game, tanpa timer terpisah per baris.
 - Baris memuat satu item, supaya tidak ada tumpukan dengan tingkat matang berbeda.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Waktu gosong:** 30 detik setelah matang, dan hasilnya `Food_Burnt` dengan lapar 5.
 2. **Bahan bakar:** 1 kayu 60 detik, batas 300 detik, dan menambah kayu otomatis menyalakan api tanpa alat.

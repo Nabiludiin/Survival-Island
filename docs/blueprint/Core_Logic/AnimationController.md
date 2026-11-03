@@ -38,7 +38,7 @@ public static class AnimIds   // Hash dibuat sekali, tanpa string per frame
 | `AC_PlayerArms` | Tangan Fase 1 dan Fase 2 | `Base` untuk gerak, `Action` (override) untuk tembak, reload, ayun, dan ganti item |
 | `AC_ZombieBase` | Semua zombie | `Base` |
 | `AC_AnimalBase` | Semua hewan | `Base` |
-| `AC_NPC` | NPC (#76, #117) | `Base`, dan layer `Sick` milik `NPCInfection` |
+| `AC_NPC` | NPC (#76) | `Base` |
 
 Variasi musuh memakai `AnimatorOverrideController` pada prefab, misalnya Zombie Militer memakai klip jalan yang lebih berat. Jumlah state tetap satu set, jadi tidak ada state machine per jenis.
 
@@ -166,7 +166,7 @@ Klip mengikuti timer `GunController`, bukan sebaliknya. Kalau batas kecepatan me
 - Root motion mati di semua karakter.
 - Satu state machine per kelompok karakter, dengan variasi lewat `AnimatorOverrideController`.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Model pemain:** pakai tangan first-person saja, tanpa tubuh penuh. Rekomendasi ini mengikuti GDD yang berpandangan first-person dan mengurangi kebutuhan aset. Konsekuensinya, pemain tidak punya bayangan tubuh.
 2. **Aset animasi:** pakai placeholder sampai aset final dipilih. Semua nama state dan parameter di sini tetap sama saat klip diganti.

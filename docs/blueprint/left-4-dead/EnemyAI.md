@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/left-4-dead/EnemyAI.md`
 **Deskripsi Utama:** Otak `NavMeshAgent` untuk zombie. Mengatur state, tujuan gerak, dan perpindahan ke `AttackBuilding` saat jalur menuju target terhalang base. Damage, pemilihan target, dan indra berada di sistem masing-masing.
 **Issue:** #25, #26, #49, #59, #62, #63, #67, #75, #78, #88, #93, #94, #95, #97, #108, #109, #112
-**Rujukan GDD:** Bagian 3 (zombie terbakar saat siang, horde memburu MC dan menyerang base) dan bagian 5 (jenis zombie per region). Bentuk FSM dan prioritas state adalah usulan teknis, belum ada di GDD.
+**Rujukan GDD:** Bagian 3 (zombie terbakar di luar ruangan saat siang, sebagian diam di ruang gelap lalu bangun kalau terganggu, serta horde memburu MC dan menyerang base) dan bagian 5 (jenis zombie per region). Bentuk FSM dan prioritas state adalah usulan teknis, belum ada di GDD.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -104,7 +104,7 @@ Mengikuti `BaseNavigation.md` bagian "Syarat baru pindah ke `AttackBuilding`". S
 
 ### Terbakar saat fajar
 
-Langganan `DaybreakEvent` dan `TriggerDaybreakDeath` dihapus. Keputusan terbakar milik `SunlightExposure` (#63).
+Langganan `DaybreakEvent` dan `TriggerDaybreakDeath` dihapus. Keputusan terbakar milik `SunlightExposure` (#63). Zombie dengan `lair != null` di dalam `InteriorZone` tidak terbakar, baik `Dormant` maupun sudah bangun (#112).
 
 **`public void EnterBurn()`**, dipanggil `SunlightExposure` sebelum damage `Fire`:
 
@@ -183,14 +183,14 @@ Langganan `DaybreakEvent` dan `TriggerDaybreakDeath` dihapus. Keputusan terbakar
 
 ## 5. Keputusan Desain
 
-**Sudah ditetapkan dokumen lain:** nilai `AIState` dan pemilik state (`GLOSSARY.md`), aturan terhalang (`BaseNavigation.md`), dan zombie terbakar saat siang (GDD bagian 3).
+**Sudah ditetapkan dokumen lain:** nilai `AIState` dan pemilik state (`GLOSSARY.md`), aturan terhalang (`BaseNavigation.md`), serta zombie terbakar di luar ruangan saat siang dan boleh diam di ruang gelap (GDD bagian 3).
 
 **Keputusan teknis di blueprint ini:**
 
 - `IsActiveThreat` bernilai `false` untuk `Dormant`, `Submerged`, dan `BurnToAshes`, sesuai `BaseDefense.md`.
 - Pengembalian ke pool saat mati dipegang `EnemyHitReaction`, lewat `SpawnManager.Despawn` (#95, #62).
 
-**Usulan yang menunggu developer:** tidak ada keputusan baru dari blueprint ini.
+**Usulan yang disetujui developer sebagai nilai awal:** tidak ada keputusan baru dari blueprint ini.
 
 ## 6. Skenario Tes
 
@@ -204,5 +204,6 @@ Langganan `DaybreakEvent` dan `TriggerDaybreakDeath` dihapus. Keputusan terbakar
 8. Lepas region saat zombie menyerang dinding. **Hasil:** zombie kembali ke pool, dan posisi serangannya kosong.
 9. Tidur di dekat zombie `Dormant`. **Hasil:** `IsActiveThreat` bernilai `false`, dan tidur tidak ditolak karena zombie itu.
 10. Di kapal, panggil `WakeUp` pada zombie `Dormant`. **Hasil:** zombie mengejar, dan kecepatan kembali normal saat dipakai ulang.
+11. Tunggu fajar dengan zombie sarang di dalam `InteriorZone`. **Hasil:** `EnterBurn` tidak terpanggil, dan state tidak berubah.
 
 Belum diuji di Unity, karena blueprint ini baru rancangan.

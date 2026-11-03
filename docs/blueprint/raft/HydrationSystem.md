@@ -167,7 +167,6 @@ Pohon kelapa berada di Region 1 dan Region 2. Buahnya memakai `PickupInteractabl
 | `RegionStreaming` (#88) | `GetRegionAt`, dan `structureRoot` nonaktif saat region dilepas |
 | `BuildMenu` (#79), `BaseHealth` (#59) | Membangun penampung dan HP-nya |
 | `IslandInteractable` (#17) | Kelas dasar dan `PickupInteractable` |
-| `FarmingSystem` (#48) | Satu penyiraman memakai 1 `Drink_DirtyWater`, atau 1 `Drink_CleanWater` kalau air kotor habis |
 | `ResourceRespawn` (#73) | Buah kelapa tumbuh kembali |
 | `WorldStateSave` (#80) | Menyimpan isi penampung |
 | `NotificationManager` (#22) | Peringatan |
@@ -199,7 +198,7 @@ Pohon kelapa berada di Region 1 dan Region 2. Buahnya memakai `PickupInteractabl
 - Air tidak meninggalkan botol kosong dalam data.
 - `WaterSourcePoint` memakai layer `Interactable`, sehingga layer `Water` tetap trigger.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Tanpa botol kosong:** satu item air habis sekali minum. Pilihan lain adalah botol yang diisi ulang, yang menambah aturan slot dan wadah.
 2. **Air laut:** tidak bisa diminum.

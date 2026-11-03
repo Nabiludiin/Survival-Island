@@ -200,7 +200,7 @@ overlay.alpha = isPoisoned ? Mathf.Lerp(0f, overlayMaxAlpha, t) : 0f;
 - Racun ular dibaca dari `DamageType.Poison`, sehingga `WildlifeAI` tidak mengenal `DiseaseManager`.
 - Pendarahan memakai `Melee`, tanpa enum baru.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Daftar penyakit:** keracunan makanan, racun ular, pendarahan, dan infeksi luka.
 2. **Peran Antibiotik:** hanya untuk infeksi luka. Checklist issue menulis `Antibiotik untuk infeksi`, dan GDD menjadikan vaksin satu-satunya obat gigitan zombie.

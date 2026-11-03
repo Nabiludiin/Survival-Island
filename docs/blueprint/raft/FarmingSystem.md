@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/raft/FarmingSystem.md`
 **Deskripsi Utama:** Bercocok tanam di kotak tanah sebagai sumber makanan pasif di base. Tanaman melewati 3 fase berbasis jam `DayNightDirector`, dan setiap fase butuh air.
 **Issue:** #48
-**Rujukan GDD:** Usulan, belum ada di GDD. Sistem ini nonaktif sampai developer menyetujui. GDD bagian 3 hanya menyebut memancing, berburu, dan looting sebagai sumber lapar. **Rekomendasi:** dipakai dengan hasil kecil, sebagai pelengkap, karena memberi alasan menjaga base dan tidak menggantikan keluar mencari makan.
+**Rujukan GDD:** Tidak dipakai, diputuskan developer. Disimpan sebagai arsip. Sistem lain tidak boleh bergantung pada blueprint ini.
 
 ## 1. Arsitektur & Variabel Utama
 

@@ -224,7 +224,7 @@ GDD bagian 6 menyebut gempa merusak base yang dindingnya belum di-upgrade. `Disa
 - Upgrade mengganti prefab, tetapi mempertahankan `structureId`.
 - `StructureVisual` mendengar event per objek.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Biaya perbaikan:** 1 bahan per ayunan, dan tiap ayunan memulihkan 15 persen HP maksimum.
 2. **Perbaikan saat diserang:** ditolak selama 2 detik setelah menerima damage. Rekomendasi: pakai, supaya pemain tidak bisa menahan satu dinding hanya dengan menekan klik kiri.

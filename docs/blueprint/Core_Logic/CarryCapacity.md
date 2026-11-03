@@ -223,7 +223,7 @@ public struct CarryCapacitySaveData
 - Kapasitas dipulihkan lebih dulu sebelum isi slot.
 - Berat tidak dibawa ke data pulau.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Tiga tingkat Backpack:** +5, +10, dan +15 slot. Rekomendasi: **dipakai**, karena memberi hadiah eksplorasi tanpa memengaruhi syarat menang. Kalau ditolak, semua aturan tas dihapus, dan konversi tetap berlaku.
 2. **Melepas tas:** ditolak kalau slot tambahan masih terisi.

@@ -65,7 +65,7 @@ Persen dihitung dari entri yang lolos saringan. Jadi total bobot tidak harus 100
 | Tabel | Item, jumlah, bobot, titik |
 |---|---|
 | `Loot_Ship` | `Food_Can` 1, 30. `Ammo_9mm` 3-6, 25. `Drink_CleanWater` 1, 20. `Med_Bandage` 1, 12. `Med_Medkit` 1, 5*. `Med_Vaccine` 1, 4*. `Item_Battery` 1, 5. Semua `Any` |
-| `Loot_Region1` | `Mat_Cloth` 1-3, 25, H. `Food_Can` 1-2, 20, HC. `Drink_CleanWater` 1, 20, HC. `Mat_Rope` 1-2, 15, HC. `Med_Bandage` 1, 10, HC. `Ammo_9mm` 3-6, 8, C. `Seed_Potato` 1-2, 6, H (usulan, kalau #48 disetujui). `Item_Battery` 1, 5, HC |
+| `Loot_Region1` | `Mat_Cloth` 1-3, 25, H. `Food_Can` 1-2, 20, HC. `Drink_CleanWater` 1, 20, HC. `Mat_Rope` 1-2, 15, HC. `Med_Bandage` 1, 10, HC. `Ammo_9mm` 3-6, 8, C. `Item_Battery` 1, 5, HC |
 | `Loot_Region2` | `Food_Can` 1-2, 15, HC. `Drink_CleanWater` 1, 15, HC. `Mat_TreeSap` 1-2, 14, HC. `Mat_Mushroom` 1-2, 14, HC. `Med_Norit` 1, 12, HC. `Mat_Rope` 1-2, 10, H. `Ammo_9mm` 3-6, 10, C. `Med_Antibiotic` 1, 8, C*. `Item_Battery` 1, 5, HC |
 | `Loot_Region3` | `Ammo_9mm` 6-12, 25, BW. `Mat_Scrap` 2-4, 15, W. `Ammo_556` 5-15, 15, BWC*, `minDay` 10. `Food_Can` 1-2, 12, CW. `Drink_CleanWater` 1, 10, CW. `Med_Medkit` 1, 8, BC*. `Gear_WarmClothes` 1, 6, CW. `Tool_Flashlight` 1, 4, W. `Med_Supplement` 1, 3, C*. `Item_Battery` 1, 5, CW |
 | `Loot_Region4` | `Ammo_9mm` 3-8, 20, HW. `Mat_Scrap` 2-5, 20, HW. `Food_Can` 1-2, 18, HC. `Drink_CleanWater` 1, 15, HC. `Mat_Rope` 1-2, 10, H. `Med_Bandage` 1, 10, HC. `Med_Antibiotic` 1, 5, C*. `Item_Battery` 1, 5, HC |
@@ -76,7 +76,7 @@ Suku cadang helikopter tidak ada di tabel ini (#69). Bobot `Item_Battery` masih 
 
 | Tabel | Isi | Pemakai |
 |---|---|---|
-| `Debris_Default` | Mengikuti `raft/DebrisRetrieval.md`. Usulan, kalau #106 disetujui | #106 |
+| `Debris_Default` | Mengikuti `raft/DebrisRetrieval.md` | #106 |
 | `supply_drop` | `Ammo_9mm` 3-6, 30. `Food_Can` 1-2, 30. `Drink_CleanWater` 1-2, 25. `Med_Bandage` 1, 15. Tanpa `Med_Vaccine`, sesuai GDD bagian 3 | #54 |
 | `Loot_Lair_Cave` | Usulan: `Ammo_9mm` 6-12, 30. `Mat_Scrap` 3-5, 25. `Med_Medkit` 1, 20*. `Food_Can` 2-3, 25 | #112 |
 | `Loot_Lair_MilitaryBunker` | Usulan: `Ammo_9mm` 8-15, 30. `Ammo_556` 10-20, 25*. `Med_Medkit` 1, 20*. `Mat_Scrap` 3-5, 25 | #112 |
@@ -96,7 +96,7 @@ Suku cadang helikopter tidak ada di tabel ini (#69). Bobot `Item_Battery` masih 
 | `Base_Pisau` | Melee | Tidak ada | Item awal | GDD |
 | `Tool_Axe`, `Tool_Pickaxe` | Melee dan alat | Tidak ada | Resep (#77) | Sudah ada |
 | `Reward_LaserPistol`, `Reward_FireAxe` | Hadiah | Tanpa peluru | Lucky Machine (#72) | GDD |
-| `Wpn_Machete` | Melee, damage 35 | Tidak ada | Pos penulis Diary, Region 2 | Usulan |
+| `Wpn_Machete` | Melee, damage 35 | Tidak ada | Kamp hutan, Region 2 | Usulan |
 | `Wpn_SMG` | `Auto`, damage 18, magazine 30, jeda 0,09 detik | `Ammo_9mm` | Gudang balai desa, Region 4 | Usulan |
 | `Wpn_Rifle` | `SemiAuto`, damage 45, magazine 20, jeda 0,3 detik, jarak 90 m, suara 45 m | `Ammo_556` | Gudang senjata, Pangkalan Militer, Region 3 | Usulan |
 
@@ -108,7 +108,7 @@ Barang unik tidak diacak. Titik yang dibuat tangan memakai field baru `guarantee
 
 | Titik | Isi tetap |
 |---|---|
-| `Chest_AuthorCamp`, Region 2 | `Wpn_Machete` |
+| `Chest_JungleCamp`, Region 2 | `Wpn_Machete` |
 | `Warehouse_VillageHall`, Region 4 | `Wpn_SMG`, 30 `Ammo_9mm` |
 | `Chest_Armory`, Region 3 | `Wpn_Rifle`, 20 `Ammo_556`, `Bag_Military` (#118) |
 
@@ -170,7 +170,7 @@ Tidak ada armor pemain di versi awal (usulan). `Infection` tetap naik sesuai `At
 | `EnemyHitReaction` (#95), `DebrisRetrieval` (#106), `ZombieLair` (#112) | Memakai aset `LootTable` |
 | `WorldItem`, `ObjectPooler` (#66) | Wujud item di dunia |
 | `GunController` (#58) | Aset `WeaponData` untuk `Wpn_SMG` dan `Wpn_Rifle` |
-| `CarryCapacity` (#118), `FarmingSystem` (#48), `DiseaseManager` (#45), `BaseDefense` (#26), `StatusEffectManager` (#20) | Sumber `Bag_Military`, `Seed_Potato`, obat, `Mat_Scrap`, dan `Med_Supplement` |
+| `CarryCapacity` (#118), `DiseaseManager` (#45), `BaseDefense` (#26), `StatusEffectManager` (#20) | Sumber `Bag_Military`, obat, `Mat_Scrap`, dan `Med_Supplement` |
 
 **Batas pekerjaan:** kotak dari langit di #54, kargo pantai di #71, dan resep di #77.
 
@@ -193,7 +193,7 @@ Tidak ada armor pemain di versi awal (usulan). `Infection` tetap naik sesuai `At
 - Bobot relatif menggantikan `dropChance`, karena `PickWeighted` di #89 sudah memakai bobot.
 - `LootEntry` memakai nama baru, karena `LootTable` adalah nama resmi aset menurut `GLOSSARY.md`.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Senjata baru:** tambah `Wpn_Machete`, `Wpn_SMG`, dan `Wpn_Rifle`, dengan `Ammo_556` sebagai peluru kedua. Rekomendasi: pakai. Pistol, Pisau, dan Kapak saja tidak memberi alasan menjelajah.
 2. **Armor pemain:** rekomendasi tidak ada di versi awal, dan tidak mengubah infeksi.

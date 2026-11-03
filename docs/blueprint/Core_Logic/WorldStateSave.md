@@ -156,21 +156,19 @@ Semua berada di `Application.persistentDataPath`.
 | Bangunan | `world_structures` | `StructureRegistry` (#79) | `StructureRecord[]`, HP, status pintu (#78), dan isi peti (#46) |
 | Suku cadang | `world_parts` | `HeavyItemSystem` (#69) | Posisi dan status tiap barang |
 | Helikopter | `world_helicopter` | `RescueEventManager` (#14) | Bagian terpasang |
-| Diary dan objektif | `world_objectives` | `ObjectiveManager` (#81) | Bab ditemukan dan objektif |
+| Diary dan objektif | `world_objectives` | `ObjectiveManager` (#81) | Status buku, bab terbuka, dan objektif |
 | Resep terbuka | `world_recipes` | `CraftingManager`, `TechTreeManager` (#77) | Node dan resep |
 | NPC | `world_npcs` | `NPCRoster` (#76) | Posisi, state, HP, dan yang sudah mati |
-| Infeksi NPC | `world_npc_infection` | `NPCInfection` (#117) | Record infeksi NPC |
 | Bencana | `world_disasters` | `DisasterManager` (#70) | Jadwal terpakai dan cooldown |
 | Blood Moon | `world_bloodmoon` | `HordeManager` (#50) | `lastBloodMoonDay`, `IsActive`, `activeDay`, `wavesSpawned`, dan `waveTimer` |
 | AI Director | `ai_director` | `AIDirector` (#27) | `spawnedTonight`, `CurrentPhase`, `Intensity`, `mobTimer`, dan `phaseTimer` |
 | Api | `world_fire` | `FireSystem` (#97) | `{ structureId, burnRemaining, generation }` |
 | Lore | `world_lore` | `LoreCollectibles` (#100) | Temuan lore dalam run ini |
-| Peta | `world_map` | `WorldMapSystem` (#105) | `WorldMapSaveData`, hanya kalau `GameBalanceConfig.map.enabled = true` |
-| Barang hanyut (usulan, kalau #106 disetujui) | `world_debris` | `DebrisRetrieval` (#106) | `nextSpawnGameHour` |
+| Barang hanyut | `world_debris` | `DebrisRetrieval` (#106) | `nextSpawnGameHour` |
 | Kargo pantai | `world_supply_beach` | `BeachSupplyManager` (#71) | Kargo yang belum diambil |
 | Suplai udara | `world_supply` | `SupplyDropManager` (#54) | Jadwal dan status suplai |
 | Hasil simulasi base | `world_remotebase` | `RemoteBaseSimulation` (#90) | Hasil yang belum diterapkan |
-| Lucky Machine | Lewat `RegionStateStore` | `LuckyMachine` (#72) | Kuota dan hadiah |
+| Lucky Machine | Lewat `RegionStateStore`, dengan `saveId` dari `SaveIdTag` | `LuckyMachine` (#72) | `quotaProgress`, `storedSpins`, `freeWindowEndGameHour`, `freeSpinsUsed`, `gateState`, `grantCounts`, dan `pendingSkins`. `grantCounts` diubah ke array di `CaptureState`. Buff tersimpan di `player_effects`, sedangkan modifier dan skin di `ItemInstance` |
 
 **`LightFixture` (#98):** `ISaveable` dengan `SaveId = StructureId`, berisi `fuelSeconds`, `IsLit`, dan `lastTickGameHour`. Dipulihkan setelah `world_structures`.
 
@@ -303,8 +301,7 @@ Urutan ini mengikuti `RunLifecycle.ContinueRun()`.
 | 10 | 100 | `world_fire`, `LightFixture` per `StructureId`, `world_parts`, `world_helicopter` | Data pulau. `world_fire` dan `LightFixture` merujuk struktur, jadi setelah `world_structures` |
 | 11 | 110 | `world_objectives`, `world_recipes`, `world_lore` | Data progres |
 | 12 | 120 | `world_npcs` | Butuh posisi pemain dan bangunan |
-| 13 | 130 | `world_npc_infection`, `world_disasters`, `world_bloodmoon`, `world_supply_beach`, `world_supply`, `world_remotebase`, `ai_director`, dan `world_debris` (usulan, kalau #106 disetujui) | Merujuk data di atas. `world_npc_infection` setelah data NPC |
-| 14 | 135 | `world_map` | Penanda sistem dipasang pemiliknya lebih dulu. Hanya kalau `GameBalanceConfig.map.enabled = true` |
+| 13 | 130 | `world_disasters`, `world_bloodmoon`, `world_supply_beach`, `world_supply`, `world_remotebase`, `ai_director`, dan `world_debris` | Merujuk data di atas |
 
 `RestoreState` hanya mengisi data dan tidak boleh mengirim event. Exception ditangkap per sistem, dicatat, lalu sistem itu memakai nilai awal.
 
@@ -403,7 +400,7 @@ Alur saat `Corrupt`:
 - Penulisan memakai file sementara dan `File.Replace`.
 - `CaptureState` berjalan di thread utama, dan penulisan autosave berjalan di thread lain.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Pemicu autosave:** tiba di pulau, pagi hari, bangun tidur, dan keluar game. "Pergantian hari" diartikan pagi pukul 06:00, karena pukul 24:00 berada di tengah serangan.
 2. **Aturan pertempuran:** autosave ditunda saat ada musuh aktif dalam 30 meter, 10 detik setelah diserang, saat bencana, diterkam, tenggelam, membeku, lapar atau haus nol, dan HP di bawah 10 persen. Permintaan dibuang setelah 120 detik.
@@ -436,3 +433,4 @@ Alur saat `Corrupt`:
 20. Buat base 400 struktur, lalu jalankan autosave sambil membuka Profiler. **Hasil:** waktu tangkap tercatat. Di atas 50 ms harus diperbaiki.
 21. Isi disk uji sampai penuh, lalu simpan. **Hasil:** notifikasi gagal, dan file lama tetap bisa dimuat.
 22. Lanjutkan lalu ambil loot, keluar, dan ulangi lima kali. **Hasil:** barang tidak berlipat, dan ukuran file stabil.
+23. Dapatkan `lucky_laser` dan satu `lucky_hp`, simpan, keluar, lalu lanjutkan. **Hasil:** `grantCounts` sama, `lucky_laser` tidak keluar lagi, dan buff tetap aktif.

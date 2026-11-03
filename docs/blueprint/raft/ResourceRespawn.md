@@ -197,7 +197,7 @@ Status memakai jam absolut. Saat region kembali, `RestoreState` mengisi `Status`
 | `ProgressionSafety` (#116) | `CountActiveStones` dan `ForceRegrowStones` |
 | `NoiseEmitter` (#49) | Dipakai `MeleeCombatSystem` saat memukul node |
 
-**Batas pekerjaan:** bercocok tanam di #48, dan loot di titik tetap milik `LootSpawnerSystem`.
+**Batas pekerjaan:** loot di titik tetap milik `LootSpawnerSystem`.
 
 ## 4. Kasus Khusus
 
@@ -223,7 +223,7 @@ Status memakai jam absolut. Saat region kembali, `RestoreState` mengisi `Status`
 - Jam absolut menggantikan `GetElapsedGameHours`, sehingga node tidak perlu menghitung selisih.
 - Item jatuh digabung menjadi tumpukan, sehingga jumlah objek pool tetap rendah.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Tabel alat:** damage per alat sesuai bagian 1. Pemukulan pohon dengan tangan tetap diperbolehkan.
 2. **Alat minimum:** batu besar butuh Kapak atau Beliung, dan pohon getah butuh Pisau.

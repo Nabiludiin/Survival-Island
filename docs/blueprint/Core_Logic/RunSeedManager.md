@@ -68,7 +68,7 @@ Kelas bawaan `System.Random` tidak dipakai, karena statusnya tidak bisa disimpan
 | `Weather` | Berkunci | Region dan nomor slot waktu | `RegionalWeather` (#115) |
 | `BeachSupply` | Berkunci | Nomor hari | `BeachSupplyManager` (#71) |
 | `Enemy` | Berurutan | Tidak ada | `SpawnManager` (#62), `AIDirector` (#27) |
-| `Gameplay` | Berurutan | Tidak ada | `ResourceNode`, `FishingSystem` (#55), dan drop lain. Usulan, kalau #106 disetujui: `DebrisRetrieval` dan `FarmingSystem` (#48) |
+| `Gameplay` | Berurutan | Tidak ada | `ResourceNode`, `FishingSystem` (#55), `DebrisRetrieval` (#106), dan drop lain |
 | `LuckyMachine` | Berurutan | Tidak ada | `LuckyMachine` (#72) |
 | `SupplyDrop` | Berkunci | Nomor hari | `SupplyDropManager` (#54) |
 
@@ -301,7 +301,7 @@ Layar akhir membaca seed sebelum reset, karena `ResetForNewRun()` baru berjalan 
 - Aliran berkunci dipakai untuk hal yang harus sama pada seed yang sama.
 - Jadwal bencana dihitung per blok dan disimpan, supaya `setday` tetap konsisten dan run bisa berlanjut setelah hari ke-60.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Seed dari pemain:** **tidak diizinkan pada versi awal.** Mengetahui seed berarti lokasi suku cadang dan jadwal bencana bisa dibagikan, yang mengurangi tekanan permadeath. Seed tetap ditampilkan untuk laporan bug, dan hanya `DevConsole` yang bisa memasukkannya. Fitur ini bisa ditambah nanti tanpa mengubah sistem.
 2. **Daftar yang berubah tiap run:** mengikuti tabel "Apa yang berubah dan tetap tiap run".

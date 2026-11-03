@@ -219,7 +219,7 @@ Saat batal: lepas izin, `nextAttackTime = Time.time + interruptCooldownSeconds`,
 - Damage memakai Animation Event dengan cadangan timer.
 - Bangunan tidak dicari lewat overlap, tetapi langsung lewat `currentBreach.target`.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Batas penyerang:** 3 zombie sekaligus untuk pemain dan 2 untuk tiap NPC. Yang lain menunggu di lingkaran 3,5 meter.
 2. **Waktu zombie standar:** Windup 0,5 detik, Active 0,15 detik, serta Recovery 1,2 detik setelah kena dan 0,8 detik setelah meleset.

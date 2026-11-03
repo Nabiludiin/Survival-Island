@@ -1,9 +1,9 @@
 # Blueprint: NPCInfection.cs
 **Lokasi:** `docs/blueprint/Island_Logic/NPCInfection.md`
 **Deskripsi Utama:** NPC bisa terinfeksi, diobati memakai stok vaksin pemain, dikarantina, diusir, atau berubah menjadi zombie.
-**Status:** Usulan, belum ada di GDD. Sistem ini nonaktif sampai developer menyetujui. **Rekomendasi:** sebaiknya dipakai setelah #76 stabil, karena menambah pilihan sulit soal vaksin yang langka tanpa menyentuh infeksi pemain.
+**Status:** Tidak dipakai, diputuskan developer. Disimpan sebagai arsip.
 **Issue:** #117
-**Rujukan GDD:** Usulan, belum ada di GDD. Terkait bagian 2 (wabah menyebar lewat gigitan), bagian 3 (stok vaksin sangat sedikit), dan bagian 4 (base melindungi NPC).
+**Rujukan GDD:** Tidak dipakai, diputuskan developer. Disimpan sebagai arsip. Sistem lain tidak boleh bergantung pada blueprint ini.
 
 ## 1. Arsitektur & Variabel Utama
 

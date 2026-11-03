@@ -249,7 +249,7 @@ Sistem gameplay tidak boleh bergantung pada `DevConsole`. Fungsi bernama `Debug*
 - Reflection hanya dipakai `balance`.
 - `setday` tidak menjalankan hari yang terlewati.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Build rilis tanpa konsol:** pemain tidak bisa mengaktifkannya. Ini sejalan dengan #82, dan menjaga permadeath.
 2. **`setday` tidak mengejar:** kargo, bencana, dan pembusukan pada hari yang terlewati tidak berjalan. Kalau uji butuh kondisi lengkap, perintah terpisah bisa ditambah.

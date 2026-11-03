@@ -199,7 +199,7 @@ Damage hewan, termasuk serudukan babi hutan, ikut jalur `PlayerHit` ini.
 - Fungsi `Play` statis, sehingga aman dipanggil dari mana pun.
 - Jarak dihitung sendiri, bukan lewat dissipation.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Alat getaran:** rekomendasi tetap memakai Cinemachine Impulse seperti diminta issue, hanya untuk sinyalnya. Kalau paket tidak cocok, sinyal bisa diganti dengan Perlin sendiri tanpa mengubah pemanggil.
 2. **Getaran tembak tidak menggeser bidikan:** rekomendasi `GunFire` memakai channel `Visual`, supaya akurasi hanya diatur `AddRecoil` dan spread.

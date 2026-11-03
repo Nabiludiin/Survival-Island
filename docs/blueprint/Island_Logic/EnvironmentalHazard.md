@@ -50,7 +50,7 @@ Komponen di prefab tong yang diletakkan di peta. Damage ledakan melewati `Explos
 
 **Sudah ditetapkan dokumen lain:** falloff dan aturan bagian tubuh `Torso` (`DamagePipeline.md`).
 
-**Usulan yang menunggu developer (#85):**
+**Usulan yang disetujui developer sebagai nilai awal (#85):**
 
 1. **Tong Merah:** GDD tidak menyebutnya. Radius 5, damage 100, dan dorongan 500 berasal dari blueprint lama dan sebaiknya pindah ke `GameBalanceConfig` (#84).
 

@@ -167,7 +167,7 @@ Tujuannya: Region 2 dan malam terasa perlu senter, tetapi layar tidak hitam tota
 
 **Keputusan issue yang mengikat:** hanya satu sistem menulis fog dan cahaya, sesuai `RegionStreaming.md`.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Urutan gabungan:** region, jam, cuaca, event, interior. Rekomendasi: pakai.
 2. **Region aktif saat zona bertumpuk:** hitungan zona, dengan pilihan zona terakhir. Rekomendasi: pakai.

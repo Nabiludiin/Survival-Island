@@ -68,7 +68,7 @@
 
 **Sudah ditetapkan dokumen lain:** angka baterai dan `Item_Battery` (#98, `LightSourceSystem.md`), serta slot tangan kiri (#60).
 
-**Usulan yang menunggu developer (#85):**
+**Usulan yang disetujui developer sebagai nilai awal (#85):**
 
 1. **Senter dan baterai:** GDD tidak menyebutnya. Rekomendasi: pakai, supaya Region 2 tetap gelap tanpa membuat pemain buta.
 

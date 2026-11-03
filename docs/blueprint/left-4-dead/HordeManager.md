@@ -42,7 +42,7 @@
 
 **Patokan malam:** 1 malam sekitar 450 detik. Empat gelombang berakhir pada detik 290, sehingga sisa malam diisi `sustainAlive`.
 
-**Ukuran gelombang:** `Min(maxAlive, baseWaveSize + (nomorEvent - 1) * waveSizePerEvent)`, dengan `nomorEvent = day / intervalDays`. Hari ke-10 berisi 12, hari ke-60 berisi 32, dan hari ke-70 berisi 36 zombie per gelombang. Ukurannya berhenti di 50.
+**Ukuran gelombang:** `Min(maxAlive, Round((baseWaveSize + (nomorEvent - 1) * waveSizePerEvent) * AIDirector.Instance.GetPostTargetCountMultiplier(day)))`, dengan `nomorEvent = day / intervalDays`. Hari ke-10 berisi 12, hari ke-60 berisi 32, dan hari ke-70 berisi 43 zombie per gelombang. Ukurannya berhenti di 50, mulai hari ke-80. `sustainAlive` tetap 20, karena batas zombie aktif tidak ikut dikali, sama seperti `maxAlive` di `AIDirector.md`.
 
 ## 2. Detail Logika & Fungsi
 
@@ -172,14 +172,16 @@ Zombie yang tersisa terbakar saat fajar lewat `SunlightExposure` (#63). `HordeMa
 
 **Sudah ditetapkan dokumen lain:** Blood Moon mengabaikan Stealth (#49), target `BaseAnchor` dan urutan override (#108), Director berhenti (#27), tidak bisa tidur (#67), jadwal tidak diacak (#89), dan hanya `EnvironmentDirector` yang menulis fog (#92).
 
-**Usulan yang menunggu developer:**
+**Keputusan developer:** setelah hari ke-60, Blood Moon memakai pengali jumlah, HP, dan damage yang sama dengan `AIDirector.md`.
+
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Pemakaian sistem:** pakai. GDD hanya menyebut horde malam biasa.
 2. **Satu malam penuh:** dari `NightfallEvent` sampai `DaybreakEvent`, dan zombie tetap terbakar saat fajar, sesuai GDD bagian 3.
 3. **Hanya visual pada cuaca:** cuaca tetap berjalan, dan hanya warna langit serta kabut yang ditimpa.
-4. **Empat gelombang, lalu jaga 20 zombie:** ukuran 12 pada hari ke-10, 32 pada hari ke-60, lalu terus naik sampai batas 50.
+4. **Empat gelombang, lalu jaga 20 zombie:** ukuran 12 pada hari ke-10, 32 pada hari ke-60, lalu naik bersama pengali jumlah sampai batas 50.
 5. **Serbuan mengikuti pemain kalau base jauh:** kalau pemain lebih dari 120 meter dari base, horde berpusat pada pemain, dan base dihitung lewat #90. Ini sesuai batas region dimuat di #88.
-6. **Hari ke-60 ikut Blood Moon:** menjadi puncak menuju target. Blood Moon berlanjut setelah hari ke-60, dengan pengali HP dan damage dari `AIDirector.md`.
+6. **Hari ke-60 ikut Blood Moon:** menjadi puncak menuju target. Blood Moon berlanjut setelah hari ke-60.
 7. **Peringatan jam 12:00:** satu notifikasi pada hari yang sama. Tanpa hitung mundur HUD.
 
 **Perubahan kontrak yang diperlukan:** `BaseAnchor` dan `TryGetBaseAnchor` di `raft/BaseNavigation.md`, warna langit dan waktu transisi lapisan `BloodMoon` di `Island_Logic/EnvironmentProfile.md`, serta baris `world_bloodmoon` di `Core_Logic/WorldStateSave.md`.
@@ -196,7 +198,7 @@ Sebelum tes, atur `balance bloodMoon.enabled 1`.
 6. Berdiri 8 meter dari zombie di luar base. **Hasil:** zombie menyerang pemain.
 7. Tes tanpa base. **Hasil:** zombie memburu pemain, dan gelombang berpusat pada pemain.
 8. Berada 300 meter dari base. **Hasil:** horde berpusat pada pemain, dan jalur zombie tidak menuju base.
-9. Catat jumlah zombie saat puncak di hari ke-60 dan hari ke-120. **Hasil:** tidak melewati 50, zombie hari ke-120 memakai pengali HP dan damage, dan FPS dicatat ke lembar playtest.
+9. Catat ukuran gelombang dan jumlah zombie saat puncak di hari ke-60, ke-70, dan ke-120. **Hasil:** gelombang 32, 43, dan 50, zombie aktif tidak melewati 50, zombie hari ke-120 memakai pengali HP dan damage, dan FPS dicatat ke lembar playtest.
 10. Tunggu fajar. **Hasil:** warna kembali, `BloodMoonEndedEvent` terkirim, batas spawn kembali normal, dan zombie terbakar.
 11. Coba tidur saat Blood Moon. **Hasil:** ditolak dengan pesan `Malam ini terlalu berbahaya`.
 12. Simpan saat gelombang kedua, lalu muat. **Hasil:** suasana merah kembali, dan gelombang berlanjut dari `wavesSpawned` tersimpan.

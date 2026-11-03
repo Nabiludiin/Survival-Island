@@ -231,7 +231,7 @@ Hasil paling banyak pada zombie standar: 0,08 × 2 = 0,16 peluru per mayat, kala
 - Mayat memakai `CorpseBudget` per scene.
 - `AIState.Dying` ditambahkan untuk mayat. Perlu dicatat di `GLOSSARY.md`.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Drop zombie:** ada, dengan peluang kecil per varian, batas 10 per malam, dan tanpa drop dari matahari atau tumbal. Zombie Militer menjadi sumber peluru utama, karena berisiko tinggi.
 2. **Shove:** tombol `V`, tanpa damage, dengan biaya 10 stamina dan jeda 0,8 detik.

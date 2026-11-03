@@ -99,7 +99,7 @@ Aturan atap lama pindah ke `SupportRule.WallBelow` di `BuildMenu.md`.
 
 **Keputusan teknis di blueprint ini:** `BuildManager.md` hanya merangkum kontrak. Kalau ada perbedaan rincian, `BuildMenu.md` yang dipakai.
 
-**Usulan yang menunggu developer:** grid 2,5 meter dan jarak bangun 6 meter perlu playtest.
+**Usulan yang disetujui developer sebagai nilai awal:** grid 2,5 meter dan jarak bangun 6 meter perlu playtest.
 
 ## 6. Skenario Tes
 

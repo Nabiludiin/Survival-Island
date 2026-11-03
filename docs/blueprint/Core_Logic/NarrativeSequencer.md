@@ -198,7 +198,7 @@ Trigger layer `ZoneTrigger` di `Region3_Snow`, sekaligus `ISaveable` lewat `Regi
 - Persisten, tombol `Skip`, panel `Cinematic`, dan `AllowActivation` (`RunLifecycle.md`, `InputManager.md`, `UIFocusStack.md`).
 - Adegan yang sudah ditonton berada di luar data run (`RunLifecycle.md`).
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Alat:** rekomendasi rangkaian teks dan gambar untuk versi awal, karena murah dan mudah diterjemahkan. Timeline bisa menyusul tanpa mengubah pemanggil.
 2. **Daftar adegan:** rekomendasi tujuh adegan pada tabel.

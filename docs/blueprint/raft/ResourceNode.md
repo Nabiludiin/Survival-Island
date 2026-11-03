@@ -104,7 +104,7 @@ public enum NodeStatus { Standing, Depleted }
 - Node habis hanya berganti status, dan tidak dinonaktifkan, sesuai `ResourceRespawn.md`. Dengan begitu, tunggul tetap punya collider.
 - Blueprint ini merangkum kontrak. Kalau ada perbedaan rincian, `ResourceRespawn.md` yang dipakai.
 
-**Usulan yang menunggu developer:** tabel alat dan jadwal tumbuh perlu playtest.
+**Usulan yang disetujui developer sebagai nilai awal:** tabel alat dan jadwal tumbuh perlu playtest.
 
 ## 6. Skenario Tes
 

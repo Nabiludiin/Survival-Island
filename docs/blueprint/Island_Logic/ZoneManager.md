@@ -64,7 +64,7 @@ public enum RegionType { Volcano, Amazon, Snow, Logistic }   // Enum resmi GLOSS
 
 **Sudah ditetapkan dokumen lain:** trigger di `IslandPhase` (`RegionStreaming.md`), `ZoneTracker` (`EnvironmentProfile.md`), alur frostbite (`VitalsRules.md`), dan pesan barang berat (`TutorialManager.md`).
 
-**Usulan yang menunggu developer:** tidak ada yang baru. Usulan region aktif saat zona bertumpuk dicatat di `EnvironmentProfile.md` bagian 5.
+**Usulan yang disetujui developer sebagai nilai awal:** tidak ada yang baru. Usulan region aktif saat zona bertumpuk dicatat di `EnvironmentProfile.md` bagian 5.
 
 ## 6. Skenario Tes
 

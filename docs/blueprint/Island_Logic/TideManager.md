@@ -165,7 +165,7 @@ Memancing di tebing karang tetap bisa kapan saja. Diary Bab 1 mengajarkan cara i
 
 **Sudah mengikuti blueprint lain:** bangunan dilarang di pasir, sehingga air pasang tidak merusak bangunan (`BuildMenu.md`).
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Siklus:** dua kali pasang per hari, dengan puncak malam lebih tinggi. Rekomendasi: pakai, karena GDD mengaitkan pantai dengan bahaya tidur.
 2. **Bahaya saat pasang:** stamina berkurang dan gerak melambat, tanpa dorongan dan tanpa item hanyut dari inventori. Rekomendasi: pakai, karena dorongan melawan `CharacterController` dan terasa tidak adil pada game permadeath.

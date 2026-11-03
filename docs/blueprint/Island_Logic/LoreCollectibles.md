@@ -14,8 +14,8 @@
 ```csharp
 public enum LoreKind { Note, Recording, Board }           // Catatan, rekaman, papan
 public enum LoreSource { Researcher, Military, Experiment }
-public enum LoreHintKind { None, PartLocation, RevealMapRegion }
-public enum BarkCategory { Greeting, Hurt, Hungry, ZombieIncoming, InfectionStage2, InfectionStage3, InfectionStage4 }
+public enum LoreHintKind { None, PartLocation }
+public enum BarkCategory { Greeting, Hurt, Hungry, ZombieIncoming }
 
 [CreateAssetMenu(menuName = "Survival/Lore Entry")]
 public class LoreEntry : ScriptableObject
@@ -34,7 +34,7 @@ public class LoreEntry : ScriptableObject
 [Serializable] public struct BarkLine { public string textKey; public AudioClip clip; } // clip boleh kosong
 
 [CreateAssetMenu(menuName = "Survival/Bark Set")]
-public class BarkSet : ScriptableObject { public BarkLine[] greeting, hurt, hungry, zombieIncoming, infection2, infection3, infection4; }
+public class BarkSet : ScriptableObject { public BarkLine[] greeting, hurt, hungry, zombieIncoming; }
 ```
 
 | Variabel | Pemilik | Tipe | Nilai awal | Fungsi |
@@ -92,7 +92,7 @@ Total 20 temuan, dan Region 4 paling banyak sesuai GDD bagian 5.
 
 **Petunjuk suku cadang:** `HeavyItemSystem` (#69) mendengar event itu dan membuat satu barang `Lying` yang belum `isDiscovered` menjadi `isDiscovered = true`, sehingga penanda kompas muncul. Pilihannya adalah indeks terkecil, supaya hasilnya pasti untuk seed yang sama. Teks catatan ditulis umum, karena posisi barang diacak #89.
 
-**Rekomendasi aset petunjuk:** hanya 2 log militer Region 4 memakai `PartLocation`. `RevealMapRegion` tidak berpengaruh selama `WorldMapSystem` (#105) nonaktif.
+**Rekomendasi aset petunjuk:** hanya 2 log militer Region 4 memakai `PartLocation`.
 
 ### Membaca ulang
 
@@ -119,7 +119,6 @@ Total 20 temuan, dan Region 4 paling banyak sesuai GDD bagian 5.
 |---|---|---|
 | `ZombieIncoming` | `NightfallEvent`, atau `PhysicsQuery.OverlapSphere(npcPos, zombieAlertRadius, mask layer Enemy, overlapBuffer)` menemukan tag `Zombie` | 5 |
 | `Hurt` | `NPCRecord.hp / maxHp < hurtHpRatio` | 4 |
-| `InfectionStage2-4` | `NPCInfectionChangedEvent { npcId, value, stage }`, sesuai tabel `NPCInfection.md` | 3 |
 | `Hungry` | `VitalWarningChangedEvent` memuat `HungerLow` atau `Starving` milik pemain | 2 |
 | `Greeting` | `PlayerBaseStateChangedEvent { isInside: true }`, atau pemain masuk `greetRadius` setelah berpisah `greetAwaySeconds` | 1 |
 
@@ -156,13 +155,12 @@ Contoh baris awal `id`:
 | `Hurt` | `Lukaku belum menutup...` |
 | `Hungry` | `Kamu pucat. Sudah makan belum?` |
 | `ZombieIncoming` | `Mereka datang! Masuk, cepat!` |
-| `InfectionStage2` | `Cuma luka kecil...` (dari `NPCInfection.md`) |
 
 ## 3. Hubungan dengan Sistem Lain
 
 **Event yang dikirim:** `LoreFoundEvent`, `LoreHintGrantedEvent`, dan `SubtitleRequestedEvent` (#104).
 
-**Event yang didengar:** `NightfallEvent`, `VitalWarningChangedEvent`, `NPCInfectionChangedEvent`, `PlayerBaseStateChangedEvent`, `NPCDiedEvent`, dan `RunEndedEvent`.
+**Event yang didengar:** `NightfallEvent`, `VitalWarningChangedEvent`, `PlayerBaseStateChangedEvent`, `NPCDiedEvent`, dan `RunEndedEvent`.
 
 | Sistem | Hubungan |
 |---|---|
@@ -170,7 +168,6 @@ Contoh baris awal `id`:
 | `UIFocusStack` (#83) | Panel `LoreReader` |
 | `ObjectiveManager` (#81) | `DiaryArchivePanel` mendapat tab `Arsip` |
 | `HeavyItemSystem` (#69) | Mendengar `LoreHintGrantedEvent` |
-| `WorldMapSystem` (#105) | Mendengar `RevealMapRegion` kalau disetujui |
 | `NPCRoster` (#76) | Membaca `NPCRecord`, dan `NPCData.barkSet` |
 | `LocalizationManager` (#104) | Teks dan subtitle |
 | `WorldStateSave` (#80) | `world_lore` dengan `LoadOrder` 110 |
@@ -199,7 +196,7 @@ Contoh baris awal `id`:
 - `LoreReader` menjeda game, sesuai tabel `UIFocusStack.md`.
 - Ucapan NPC disalurkan lewat subtitle #104.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Sebaran:** 20 temuan dengan pembagian di tabel. Region 4 paling banyak.
 2. **Petunjuk gameplay:** ya, tetapi sangat terbatas. 2 log militer Region 4 menandai 1 suku cadang masing-masing. Temuan lain murni cerita. Alasan: ada alasan untuk mencari, tanpa membuat temuan menjadi wajib.

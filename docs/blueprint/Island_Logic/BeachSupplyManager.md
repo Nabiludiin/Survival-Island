@@ -54,7 +54,6 @@ Mengikuti GDD: Air Minum Bersih, Makanan Kaleng, Peluru, dan Resource langka. Ti
 | `Food_Can` | 2 | 40 | 30 | 20 |
 | `Ammo_9mm` | 6 sampai 12 | 15 | 30 | 30 |
 | `Mat_Scrap` (langka) | 3 | 3 | 5 | 12 |
-| `Seed_Potato` (langka) | 2 | 2 | 3 | 5 |
 | `Med_Antibiotic` (langka) | 1 | 0 | 2 | 8 |
 | `Item_Battery` (langka, #98) | 1 | 5 | 8 | 10 |
 
@@ -142,10 +141,10 @@ GDD menyebut hewan buas pada siang hari dan zombie pada malam hari, jadi penyerg
 | Kondisi | Tindakan |
 |---|---|
 | Siang, pemain dalam `ambushTriggerDistance`, dan `!animalAmbushDone` | `SpawnManager.RequestBurst(beachDayTable, ambushAnimals, tengah, 25)` |
-| Malam, pemain dalam `ambushTriggerDistance`, dan `!zombieAmbushDone` | `SpawnManager.RequestBurst(beachNightTable, ambushZombies, tengah, 25)` |
+| Malam, pemain dalam `ambushTriggerDistance`, dan `!zombieAmbushDone` | `SpawnManager.RequestBurst(beachNightTable, ambushZombies, tengah, 25, AIDirector.Instance.GetPostTargetModifiers(day))` |
 
 - `ambushAnimals = Min(ambushAnimalsBase + day / 21, ambushAnimalsMax)`, sehingga hari ke-7 berisi 2 hewan.
-- `ambushZombies = Min(ambushZombiesBase + day / 7, ambushZombiesMax)`, sehingga hari ke-7 berisi 5 zombie.
+- `ambushZombies = Round(Min(ambushZombiesBase + day / 7, ambushZombiesMax) * AIDirector.Instance.GetPostTargetCountMultiplier(day))`, sehingga hari ke-7 berisi 5 zombie, dan hari ke-70 berisi 12 zombie. Hewan tidak memakai pengali ini.
 - Kalau pemain terlalu jauh, tidak ada yang muncul. Jarak ini mengikuti `despawnDistance` 70 m di `SpawnManager`, supaya musuh tidak langsung dikembalikan. Pemeriksaan diulang pada jam berikutnya.
 - `HandleHour` hanya sekali per 37,5 detik, jadi pemeriksaan tambahan berjalan saat pemain memasuki `tideZone`.
 - `RequestBurst` sudah menjaga agar musuh muncul di luar pandangan.
@@ -183,21 +182,23 @@ Tier memberi air dan makanan lebih dulu pada pekan awal, karena pemain masih mem
 - **Lewat batas saat tidak dimuat:** `HandleHour` tetap jalan karena manager berada di `IslandPhase`. Kargo yang tidak muncul tetap kedaluwarsa.
 - **Region 1 dilepas:** kargo kembali ke pool, dan `state` tetap ada. Dimunculkan lagi saat `Loaded`.
 - **`setday` atau tidur melewati fajar:** `DaybreakEvent` tetap terkirim karena tidur berhenti saat fajar. `setday 7` memberi `pendingDay`, dan kargo muncul pada fajar berikutnya.
-- **Setelah hari ke-60:** kiriman ke-8 pada hari ke-56, dan ke-9 pada hari ke-63. Isi tetap memakai tier `Hari 42+`, jadi makanan, air, dan peluru terus tersedia. Jumlah penyergap tetap dibatasi `ambushAnimalsMax` dan `ambushZombiesMax`.
+- **Setelah hari ke-60:** kiriman ke-8 pada hari ke-56, dan ke-9 pada hari ke-63. Isi tetap memakai tier `Hari 42+`, jadi makanan, air, dan peluru terus tersedia. Hewan tetap dibatasi `ambushAnimalsMax`. Zombie dibatasi `ambushZombiesMax`, lalu dikali pengali jumlah dari `AIDirector.md`, jadi paling banyak 15.
 - **Bencana:** kiriman tidak dibatalkan. Saat badai, pasang naik, tetapi kargo masih di atas level 0,85 pada siang hari.
 
 ## 5. Keputusan Desain
 
 **Sudah ditetapkan GDD:** jadwal hari ke-7, 14, dan seterusnya, dan empat kelompok isi.
 
-**Usulan yang menunggu developer:**
+**Keputusan developer:** setelah hari ke-60, penyergapan zombie memakai pengali jumlah, HP, dan damage yang sama dengan `AIDirector.md`.
+
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Lokasi:** hanya pantai selatan Region 1 (#88). Rekomendasi: pakai, karena region ini selalu terbuka.
 2. **Jumlah kargo:** 2 sampai 4, dengan 3 isi per kargo.
 3. **Batas waktu:** muncul pukul 06:00, dan hilang pukul 00:00 pada puncak pasang. Rekomendasi: pakai, supaya GDD "turun sebentar" dan #91 saling menguatkan.
 4. **Risiko:** hewan siang dan zombie malam, tanpa Zombie Desa. Rekomendasi: pakai, karena pantai berada di Region 1.
 5. **Isi berubah menurut hari:** tiga tier di tabel. Rekomendasi: pakai.
-6. **Barang langka:** `Mat_Scrap`, `Seed_Potato`, dan `Med_Antibiotic`, tanpa vaksin. Daftar ini bisa diperpanjang setelah #103 selesai.
+6. **Barang langka:** `Mat_Scrap` dan `Med_Antibiotic`, tanpa vaksin. Daftar ini bisa diperpanjang setelah #103 selesai.
 7. **`SaveId`:** `world_supply_beach`, terpisah dari #54, karena `Register` menolak `SaveId` ganda.
 8. **Setelah hari ke-60:** kiriman terus berjalan tiap 7 hari dengan 4 kargo dan tier `Hari 42+`. Rekomendasi: pakai, supaya run panjang tetap mungkin dimenangkan. Jumlah peluru perlu diuji bersama pengali HP di `AIDirector.md`.
 
@@ -216,3 +217,4 @@ Tier memberi air dan makanan lebih dulu pada pekan awal, karena pemain masih mem
 11. Bangun struktur di dekat titik kargo lewat `DevConsole`. **Hasil:** titik lain terpilih.
 12. Cek titik di Editor. **Hasil:** semua `isReachable` bernilai `true` dan berada di atas level 0,85.
 13. `setday 63`, lalu tunggu fajar. **Hasil:** 4 kargo muncul dengan isi tier `Hari 42+`.
+14. `setday 70`, lalu berada di dekat kargo pada malam hari. **Hasil:** 12 zombie muncul, dengan HP 1,2 kali dan damage 1,1 kali. Ulangi pada siang hari. **Hasil:** jumlah hewan tidak berubah.

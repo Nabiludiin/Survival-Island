@@ -42,7 +42,6 @@ public class GameBalanceConfig : ScriptableObject
     public RepairBalance repair;
     public UpgradeBalance upgrade;
     public FishingBalance fishing;
-    public FarmingBalance farming;
     public DebrisBalance debris;
     public SurfaceBalance surface;
     public BuildBalance build;
@@ -77,7 +76,6 @@ public class GameBalanceConfig : ScriptableObject
     public BloodMoonBalance bloodMoon;
     public LuckyMachineBalance luckyMachine;
     public NpcBalance npc;
-    public NpcInfectionBalance npcInfection;
     public ObjectiveBalance objective;
     public LootBalance loot;
     public RemoteBaseBalance remoteBase;
@@ -103,7 +101,6 @@ public class GameBalanceConfig : ScriptableObject
     public LoreBalance lore;
     public BarksBalance barks;
     public LocalizationBalance localization;
-    public MapBalance map;
 }
 ```
 
@@ -151,7 +148,7 @@ Sebelumnya `timeMultiplier = 50` menghasilkan 28,8 menit per hari dan 28,8 jam t
 
 - **Makanan:** 3 kali per hari game, dengan pemulihan sekitar 33 per porsi.
 - **Minuman:** 4 kali per hari game, dengan pemulihan sekitar 25 per porsi.
-- **Sumber makanan yang perlu dicek:** satu sesi memancing sebaiknya menghasilkan 1 porsi dalam sekitar 60 detik, sehingga 3 porsi butuh 180 detik atau 40 persen waktu siang. Berburu mengisi sisanya dengan risiko lebih tinggi.
+- **Sumber makanan yang perlu dicek:** satu sesi memancing sebaiknya menghasilkan 1 porsi dalam sekitar 60 detik, sehingga 3 porsi butuh 180 detik atau 40 persen waktu siang. Berburu mengisi sisanya dengan risiko lebih tinggi. Bertani tidak dipakai (#48), jadi run setelah hari ke-60 tetap makan dari memancing (`FishingSystem.md`), berburu, panen kelapa yang tumbuh kembali (`ResourceRespawn.md`), dan kargo mingguan yang terus datang (`BeachSupplyManager.md`).
 
 ### Biaya bangun terhadap hasil panen
 
@@ -228,11 +225,10 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 | `repair` | #113 | lowRatio 0,2, maxLossPerRepair 0,1, maxRepairs 6, repairSeconds 3, upgradeSeconds 6 |
 | `upgrade` | #113 | damageBonus 0,1, magazineBonus 2, speedBonus 0,1, durabilityBonus 0,25, maxPerItem 2, maxDamageMultiplier 4 |
 | `fishing` | #55 | Jarak dan tenaga lempar (castMinDistance 6, castMaxDistance 25, leashDistance 32), waktu gigit 12 sampai 30 detik, biteWindowSeconds 2, serta angka Tension Bar (tensionRisePerSec 0,30, tensionFallPerSec 0,35, progressPerSec 0,10). Target 1 porsi sekitar 60 detik |
-| `farming` | #48 | sproutHours 12, growingHours 24, waterPerPhase 1, skyCheckDistance 30, structureRecheckRadius 8, snowRegionGrowthAllowed false. Satu kotak sekitar 33 Hunger per hari |
-| `debris` | #106 | enabled false, maxActive 4, spawnIntervalGameHours 3, spawnCheckSeconds 1, pengali Storm 0,5, Rain 0,75, dan pasang 0,75, driftSpeed 1,2, hookRadius 2,5, pullSpeed 4, collectDistance 3, pullMaxDistance 32. Sekitar 13 kayu per hari, jauh di bawah menebang |
+| `debris` | #106 | enabled true, maxActive 4, spawnIntervalGameHours 3, spawnCheckSeconds 1, pengali Storm 0,5, Rain 0,75, dan pasang 0,75, driftSpeed 1,2, hookRadius 2,5, pullSpeed 4, collectDistance 3, pullMaxDistance 32. Sekitar 13 kayu per hari, jauh di bawah menebang |
 | `surface` | #86 | probeUp 1, probeDown 3, beachBuildSandWeight 0,35, nearSandSampleCount 8, runtimeBakeRowsPerFrame 64, debugGridCells 64, debugGridSpacing 1 |
 | `build` | #79 | gridSize 2,5, maxBuildDistance 6, levelHeight 2,5, heightSnap 0,25, maxFoundationHeightDelta 1,25, groundProbeHeight 5, maxLevels 3, maxHorizontalSpan 2, maxStructures 400, overlapShrink 0,1, maxCollapsePerFrame 4, maxCollapseVfxPerSecond 8, demolishHoldSeconds 1,2, demolishRefundRatio 0,5, demolishBlockedAfterDamageSeconds 5, hammerDecayPerBuild 1, hammerDecayPerDemolish 1 |
-| `baseNav` | #78 | pathCheckIntervalSeconds 1, maxPathChecksPerFrame 4, spawnGraceSeconds 2, blockedConfirmSeconds 1,5, retargetCooldownSeconds 4, targetSearchRadius 6, maxAttackersPerWall 4, maxAttackersPerDoor 3, slotSpacing 0,8, slotStandoff 0,9, waitRingRadius 4, insideCheckSeconds 0,5, insideRayDistance 6, insideMinWallHits 3, doorSwingSeconds 0,4, doorNpcAutoCloseSeconds 1,5, lockedDoorDamageMultiplier 0,75 |
+| `baseNav` | #78 | pathCheckIntervalSeconds 1, maxPathChecksPerFrame 4, spawnGraceSeconds 2, blockedConfirmSeconds 1,5, retargetCooldownSeconds 4, targetSearchRadius 6, maxAttackersPerWall 4, maxAttackersPerDoor 3, slotSpacing 0,8, slotStandoff 0,9, waitRingRadius 4, insideCheckSeconds 0,5, insideRayDistance 6, insideMinWallHits 3, doorSwingSeconds 0,4, doorNpcAutoCloseSeconds 1,5, lockedDamageMultiplier 0,75 (pintu terkunci menerima 25 persen lebih sedikit damage `Structural`, tetapi tetap bisa didobrak) |
 | `integrity` | #47 | repairRange 4, repairSwingSeconds 0,6, repairHpRatioPerSwing 0,15, repairBlockedAfterDamageSeconds 2, upgradeHoldSeconds 1, upgradeBlockedAfterDamageSeconds 5, hammerDecayPerRepairSwing 0,5, hammerDecayPerUpgrade 2, noiseRadiusPerSwing 15 |
 | `storage` | #46 | chestSlotCount 20, dropScatterRadius 1,2 |
 | `sleep` | #67 | timeMultiplierAsleep 2160, drainRatioAsleep 0,5, maxGameHoursPerStep 0,25, enemyBlockRadius 25, enemyWakeRadius 8, enemyCheckSeconds 0,5, structureAlarmRadius 15, minVitalToSleep 10, retrySeconds 5, hpPerGameHourInBase 2, hpPerGameHourOutside 0, minHoursForStamina 4, interruptChanceInBase 0,25, interruptChanceOutside 0,6, interruptChanceBeach 1, interruptMinProgress 0,25, interruptMaxProgress 0,9, ambushBaseCount 4, ambushCountPerTenDays 1, ambushRadiusInBase 20, ambushRadiusExposed 10, beachRadius 8, beachTideStaminaLoss 30 |
@@ -246,12 +242,12 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 | `spawn` | #62 | Jeda dan batas spawn, batas zombie dan hewan, jarak, arah belakang, pengaman macet, sapu bersih, target hewan, dan batas pengurangan anggaran dari sarang |
 | `sunlight` | #63 | Jeda cek sinar, sudut matahari, durasi terbakar, batas berlindung, jam sembunyi, waktu turun dan naik, boost, dan jumlah Zombie Desa siang |
 | `specialZombie` | #25 | Angka perilaku varian: jerat Tribal, amarah Lumut, lambat Militer, ledakan Beku, terkaman Desa, dan pengaman macet varian besar. Statistik HP dan kecepatan ada di aset `ZombieData` |
-| `aiDirector` | #27 | `threatCurve` per hari, pengali region, waktu tahap Director, intensitas, ukuran mob, batas kecepatan zombie, dan pengali setelah hari ke-60: postTargetCountPerDay 0,02, postTargetCountMax 1,5, postTargetHpPerDay 0,02, postTargetHpMax 2, postTargetDamagePerDay 0,01, postTargetDamageMax 1,5 (usulan) |
+| `aiDirector` | #27 | `threatCurve` per hari, pengali region, waktu tahap Director, intensitas, ukuran mob, batas kecepatan zombie, dan pengali setelah hari ke-60: postTargetCountPerDay 0,02, postTargetCountMax 1,5, postTargetHpPerDay 0,02, postTargetHpMax 2, postTargetDamagePerDay 0,01, postTargetDamageMax 1,5 (keputusan developer, juga dipakai Blood Moon dan penyergapan) |
 | `crowd` | #93 | Kapasitas agen, batas tick per frame, interval per tingkatan, ambang update tujuan, kelompok, avoidance, buffer overlap, dan stagger animasi |
 | `pinned` | #110 | enabled, kemajuan lepas, biaya stamina, pengali status, Pisau, bantuan NPC, batas tertahan, batas penyerang lain, dan waktu kebal |
 | `trap` | #26 | Damage, jeda, keausan, dan suara Spike Trap, kawat, dan api unggun, serta batas jebakan per region |
-| `throwable` | #96 | enabled, gaya, sumbu, radius, damage, durasi, dan noise tiap barang, serta bidikan, jeda lempar, dan batas Suar |
-| `lair` | #112 | enabled, radius aktif, pemicu Dormant, pintu keluar, HP sarang, pengurangan horde, dan porsi zombie yang keluar saat malam |
+| `throwable` | #96 | enabled true, gaya, sumbu, radius, damage, durasi, dan noise tiap barang, serta bidikan, jeda lempar, dan batas Suar |
+| `lair` | #112 | enabled true, radius aktif, pemicu Dormant, pintu keluar, HP sarang, pengurangan horde, dan porsi zombie yang keluar saat malam |
 | `warmth` | #65 | tickSeconds 0,5; freezeEnterThreshold 20; freezeExitThreshold 30; ambientHeat 5; regionSnowCold 20; blizzardCold 2; rainCold/rainFloor 8/40; stormCold/stormFloor 12/30; waterCold/waterFloor 15/30; snowWaterCold 30; clothesHeat 20; torchHeat 20; protectedFloor 30 (usulan); campfireHeat 40; indoorHeat 25; shelterCheckSeconds 2; shelterProbeDistance 6; torchBurnSeconds 300; torchRainExtinguishSeconds 20 |
 | `heavyItem` | #69 | pickupHoldSeconds 0,5; dropDamageThreshold 25; dropForwardDistance 1,2; validSampleSeconds 1; navSampleRadius 2; recoveryCheckSeconds 5; discoverRadius 40 |
 | `swimming` | #13 | idleStaminaPerSec 2; swimSpeedMultiplier 0,5; wadeSpeedMultiplier 0,7; wadeEnterDepth 0,5; swimEnterDepth 1,3; swimExitDepth 1,0; maxBreathSeconds 30; breathRecoverPerSec 10; sinkingBreathMultiplier 2; sinkSpeed 0,5; verticalSwimSpeed 1,5; surfaceEyeOffset 0,3; waterCheckSeconds 0,1; landingProbeDistance 30 |
@@ -265,8 +261,7 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 | `bloodMoon` | #50 | Saklar enabled false, intervalDays 10, warningHour 12, waveCount 4, baseWaveSize 12, waveSizePerEvent 4, maxAlive 50, sustainAlive 20, burstRadius 45, baseEngageDistance 120, dan jeda gelombang |
 | `luckyMachine` | #72 | freeWindowSeconds 30, maxFreeSpinsPerWindow 3, maxStoredSpins 1, spinSeconds 4, vacuumSeconds 1,2, bobot tier 5/25/70, gateReopenSeconds 2, dan cageRewardOffset 2 |
 | `npc` | #76 | thinkSeconds 0,25, jarak ikut 5 dan 2,5, teleportDistance 40, detectRadius 15, attackLeashDistance 12, baseRegenPerSec 0,5, workSearchRadius 30, cookSpeedMultiplier 1,25, builderRepairMultiplier 1,25, dan avoidancePriority 70 |
-| `npcInfection` | #117 | enabled false, gainMultiplier 1, selfProgressPerGameHour 1,5, cureBelow 10, stage3SkillFactor 0,5, stage3SpeedMultiplier 0,85, stage4SpeedMultiplier 0,6, quarantineMinDistance 15, turnSeconds 3, turnNoiseRadius 25, remoteTurnDamage 120, remoteBiteInfection 15 |
-| `objective` | #81 | baseWallCount 4, hudFlashSeconds 3 |
+| `objective` | #81 | baseWallCount 4, hudFlashSeconds 3, chapter2TriggerDay 2, chapter3TriggerRegion `Amazon` (keputusan developer) |
 | `loot` | #103 | warehouseEmptyChance 0,25, chestRollsMin/Max 1/3, bodyRollsMin/Max 1/2, amountMulVolcano 1, amountMulAmazon 1,1, amountMulLogistic 1,25, amountMulSnow 1,4, rareWeightPerDay 0,02, rareWeightMaxMul 2, amountBonusPer10Days 0,1. Memakai `runSeed.lootPointEmptyChance` 0,5 yang sudah ada |
 | `remoteBase` | #90 | Jarak: remoteDistance 80, returnDistance 60, distanceCheckSeconds 2, clusterRadius 30. Serangan: minStructuresForRaid 4, maxRaidedClusters 2, firstRaidDay 3, raidChanceBase 0,5, raidChancePerDay 0,01, raidChanceMax 0,9, basePower 150, powerPerDay 20, maxPower 2550, bloodMoonMultiplier 2, referenceStructures 12, sizeFactorMin/Max 0,75/1,5, varianceFraction 0,15. Pertahanan: scoreWallWood/Stone 10/25, scoreTrap 15, scoreNpcGuard 20, mitigationK 200, maxMitigation 0,8. Penerapan: hitChunk 60, doorWeight 2, trapWearFraction 0,3, raidStartHourMin/Max 20/23, raidEndHour 5. NPC: npcInjuryChanceMax 0,6, npcInjuryDamage 40, npcDeathChanceOnBreach 0,35, npcGuardDeathMultiplier 0,5, npcGuardMinHpRatio 0,25. Peralihan: takeoverZombiesPerPower 0,02, takeoverMaxZombies 12 |
 | `fire` | #97 | Batas api aktif (maxBurning 24, maxAreas 8, maxCarvedAreas 4), jeda tick, peluang menyala dari area, jeda nyala ulang, batas lompatan vegetasi, pengali cuaca, lama memadamkan, angka area Fireball, serta peluang Fire Axe dan jebakan api unggun |
@@ -291,7 +286,6 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 | `lore` | #100 | maxPartHintsPerRun 2 |
 | `barks` | #100 | checkSeconds 2, globalCooldownSeconds 6, npcCooldownSeconds 20, categoryCooldownSeconds 90, hearRadius 25, greetRadius 6, greetAwaySeconds 120, hurtHpRatio 0,4, zombieAlertRadius 15 |
 | `localization` | #104 | textScaleMin 0,85, textScaleMax 1,5, subtitleMinSeconds 1,5, subtitleSecondsPerChar 0,06, subtitleMaxRows 3, maxFlashesPerSecond 3 |
-| `map` | #105 | enabled false, fogCellSize 8, fogRevealRadius 40, fogRevealRadiusAmazon 25, fogUpdateSeconds 1, maxPlayerMarkers 8 |
 
 ## 3. Hubungan dengan Sistem Lain
 
@@ -310,9 +304,9 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 
 ## 5. Keputusan Desain
 
-**Keputusan developer:** `bridgeWoodCost` bernilai awal 500.
+**Keputusan developer:** `bridgeWoodCost` bernilai awal 500. Pengali `aiDirector.postTarget*` setelah hari ke-60 (`AIDirector.md`). Laju `vitals.infectionDamagePerSec` 0,3 saat `Infection` 100 (`VitalsRules.md`). Pemicu `objective.chapter2TriggerDay` dan `objective.chapter3TriggerRegion` (`ObjectiveManager.md`). Mesin `luckyMachine` hanya satu (`LuckyMachine.md`).
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 - Panjang satu hari game 15 menit, dan total 15 jam.
 - Hasil panen 8 sampai 12 kayu per pohon.

@@ -135,7 +135,7 @@ Kill Marker selalu mengalahkan Hit Marker yang sedang tampil.
 
 **Sudah ditetapkan dokumen lain:** `DamageInfo.hitDirection` untuk #51, damage kondisi tanpa `PlayerDamagedEvent` (#59), dan penanda serangan dari luar pandangan (#109).
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Hit Marker untuk semua serangan pemain.** Issue hanya menyebut peluru. Rekomendasi: berlaku juga untuk melee dan barang lempar, supaya umpan baliknya konsisten.
 2. **Marker jebakan.** Rekomendasi: hanya tampil kalau titik kena berada dalam pandangan, tanpa mengubah `EnemyHitEvent`.

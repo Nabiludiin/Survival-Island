@@ -212,7 +212,7 @@ Panel mendengar `InventoryChangedEvent`, `CraftQueueChangedEvent`, dan `TechNode
 - Ruang inventori diperiksa lewat simulasi sebelum bahan dipotong.
 - Stasiun mendaftar sendiri, jadi pemeriksaan jarak tidak butuh overlap.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Jenis stasiun:** `Hand`, `WoodBench`, `MedicalBench`, dan `Campfire`, dengan biaya meja di tabel bagian 1.
 2. **Proses:** antrean berurutan sampai 5 job. Bahan dipotong saat masuk antrean, dan kembali penuh saat dibatalkan.

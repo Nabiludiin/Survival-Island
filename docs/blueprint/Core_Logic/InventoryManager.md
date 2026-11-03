@@ -79,7 +79,7 @@ Setiap perubahan isi tangan menerbitkan `ShipHandChangedEvent { weight, capacity
 
 **Sudah ditetapkan dokumen lain:** `AddItem` mengembalikan sisa (`ItemUseSystem.md`). Tangan di kapal (`LifeboatExtraction.md`). `SetMaxSlots` (`CarryCapacity.md`).
 
-**Usulan yang menunggu developer (dicatat di #85):** nama `FindFirstInstance` untuk kebutuhan #110.
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):** nama `FindFirstInstance` untuk kebutuhan #110.
 
 ## 6. Skenario Tes
 

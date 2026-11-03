@@ -304,7 +304,7 @@ NavMesh tidak bisa berputar saat bermain, jadi **geometri tidak boleh diputar sa
 - Geometri kapal memakai kemiringan tetap, supaya NavMesh tetap sah.
 - Ship sway menjadi sumber offset kamera, dan keluar dari `ShipPlayerController`.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Pistol dan Pisau:** **tidak bisa dipakai di Fase 1.** Pemain hanya menghindar dan mendorong. Pilihan lain adalah mengizinkannya, tetapi peluru akan terbuang dan fase ini berubah menjadi pertarungan.
 2. **Dorongan:** klik kiri mendorong zombie sejauh 3 meter, terhuyung 1,5 detik, tanpa damage, dengan jeda 1,5 detik.

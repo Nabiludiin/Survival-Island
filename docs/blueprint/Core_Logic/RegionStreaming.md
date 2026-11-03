@@ -338,7 +338,7 @@ Perintah `streamstat` di `DevConsole` (#56) menampilkan state tiap region, memor
 - Status objek disimpan sebagai JSON per `SaveId` di satu `RegionStateStore`.
 - Tidak ada bake NavMesh saat bermain.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Additive scene per region:** dipilih daripada satu scene besar.
 2. **Peta konsep:** rantai Region 1, Region 2, Region 4, Region 3, dengan tiga seam. Syarat akses tiap seam tetap milik #68.

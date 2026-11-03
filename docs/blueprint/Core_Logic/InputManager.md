@@ -41,7 +41,7 @@ Aktif saat tidak ada panel yang memblokir input.
 | `HotbarSelect` | Value, Integer | `1` sampai `8`, jumlah final (usulan #60) | `EquipmentManager` (#60) |
 | `HotbarScroll` | Value, Float | Scroll mouse | `EquipmentManager` (#60) |
 | `Flashlight` | Button | `F` | `EquipmentManager.ToggleOffHand` (#60) |
-| `Throw` | Button | `G` | `ThrowableSystem` (#96, nonaktif sampai disetujui) |
+| `Throw` | Button | `G` | `ThrowableSystem` (#96) |
 | `DropHeavyItem` | Button | `Q` | `HeavyItemSystem` (#69) |
 | `Struggle` | Button | `Space` | `PlayerPinnedState` (#110) |
 | `Shove` | Button | `V` | `PlayerShove` (#95) |
@@ -49,7 +49,6 @@ Aktif saat tidak ada panel yang memblokir input.
 | `OpenCrafting` | Button | `C` | Pemilik panel `Crafting` (#77) |
 | `OpenBuildMenu` | Button | `B` | `BuildMenu` (#79) |
 | `OpenDiary` | Button | `J` | `DiaryManager` |
-| `OpenMap` | Button | `M` | `WorldMapSystem` (#105, nonaktif sampai disetujui) |
 | `Pause` | Button | `Esc` | Diteruskan ke `UIFocusStack.HandleEscape()` |
 
 Klik kiri tidak dipakai untuk interaksi, sesuai keputusan #85.
@@ -72,7 +71,6 @@ Aktif saat ada panel yang memblokir input.
 | `ToggleCrafting` | Button | `C` | `toggleAction` panel `Crafting` |
 | `ToggleBuildMenu` | Button | `B` | `toggleAction` panel `BuildMenu` |
 | `ToggleDiary` | Button | `J` | `toggleAction` panel `Diary` |
-| `ToggleMap` | Button | `M` | `toggleAction` panel `WorldMap` |
 | `Skip` | Button | `Space` | `NarrativeSequencer` (#99) |
 
 ### Action Map `Debug`
@@ -269,7 +267,7 @@ Kunci yang berasal dari kondisi gameplay ada pada sistem pemilik kondisinya, buk
 - Hanya Esc yang memakai callback, karena harus diteruskan ke satu pengatur.
 - `Debug` dipisah supaya tidak ikut ke build rilis.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Tombol awal selain `E` dan klik kiri:** mengikuti tabel Action Map.
 2. **Gamepad:** versi awal hanya memakai skema `KeyboardMouse`. Aset disiapkan agar skema `Gamepad` bisa ditambah nanti, tanpa mengubah pembaca tombol.

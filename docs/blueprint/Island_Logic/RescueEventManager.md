@@ -75,7 +75,7 @@ Urutan pasang bebas. Pemasangan langsung selesai saat barang tiba, tanpa bahan t
 
 1. `State = WarmingUp`, dan `warmupLeft = engineWarmupSeconds`.
 2. Terbitkan `HelicopterEngineChangedEvent { state, secondsLeft }`. `CombatMusicDirector` (#114), HUD, dan `CameraShake` (#24) mendengarnya.
-3. Kalau `DayNightDirector.Instance.IsNight`: `AIDirector.Instance.RequestPanicWave(warmupPanicWaveSize, "helicopter_engine")`. Saat siang tidak ada zombie, sesuai GDD, jadi gelombang tidak dikirim. Ancaman siang hanya hewan buas yang tertarik suara mesin.
+3. Kalau `DayNightDirector.Instance.IsNight`: `AIDirector.Instance.RequestPanicWave(warmupPanicWaveSize, "helicopter_engine")`. Saat siang tidak ada zombie di luar ruangan, sesuai GDD, jadi gelombang tidak dikirim. Ancaman siang di luar ruangan hanya hewan buas yang tertarik suara mesin.
 
 **`Update()` saat `WarmingUp`** memakai `Time.deltaTime`:
 
@@ -161,7 +161,7 @@ GDD tidak meminta event paksa di hari ke-60. Hari ke-60 adalah target, dan melew
 - Pemasangan lewat trigger tanpa `E` (`IslandInteractable.md`, `PhysicsLayers.md`).
 - Lima suku cadang (`GameBalanceConfig.md`, `HeavyItemSystem.md`).
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Pemanasan mesin:** rekomendasi 120 detik bertahan di dekat kokpit sebelum bisa terbang. GDD hanya menyebut merakit dan lepas landas, jadi ini tambahan untuk memberi klimaks. Alternatifnya, langsung terbang saat `E` ditekan.
 2. **Gelombang saat pemanasan:** rekomendasi `RequestPanicWave` hanya saat malam, karena zombie terbakar di siang hari.

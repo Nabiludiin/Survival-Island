@@ -2,8 +2,8 @@
 **Lokasi:** `docs/blueprint/Core_Logic/WorldMapSystem.md`
 **Deskripsi Utama:** Peta pulau yang terbuka saat dijelajahi, dengan penanda otomatis dan penanda buatan pemain.
 **Issue:** #105
-**Rujukan GDD:** Usulan, belum ada di GDD. Mendukung perjalanan antar-region di bagian 5.
-**Status:** Usulan, belum ada di GDD. Sistem ini nonaktif sampai developer menyetujui.
+**Rujukan GDD:** Tidak dipakai, diputuskan developer. Disimpan sebagai arsip. Sistem lain tidak boleh bergantung pada blueprint ini.
+**Status:** Tidak dipakai, diputuskan developer. Disimpan sebagai arsip.
 **Rekomendasi pemakaian:** Sebaiknya dipakai dalam bentuk peta kertas di menu penuh, tanpa minimap. Rute bolak-balik Region 4 ke Region 3 sulit diingat, dan peta kertas tidak mengurangi suasana survival seperti minimap yang selalu tampil.
 
 ## 1. Arsitektur & Variabel Utama
@@ -134,7 +134,7 @@ Kompas (#30) membaca `showOnCompass`. Panel membaca `showOnMap`. Penanda pemain 
 
 | Lembar | Lokasi usulan | Alasan |
 |---|---|---|
-| `Volcano` | Shelter tua tempat Diary Bab 1 | Peta awal yang hampir pasti ditemukan |
+| `Volcano` | Shelter tua tempat buku Diary | Peta awal yang hampir pasti ditemukan |
 | `Amazon` | Kemah peneliti di ujung jembatan | Hadiah setelah membuka jembatan |
 | `Snow` | Pos jaga Pangkalan Militer | Jejak militer di GDD bagian 2 |
 | `Logistic` | Balai desa, atau dari log militer `RevealMapRegion` (#100) | Membantu mencari suku cadang |

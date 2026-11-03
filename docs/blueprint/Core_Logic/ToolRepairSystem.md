@@ -209,7 +209,7 @@ Hasilnya dihitung saat item dipasang atau berubah, lalu disimpan oleh pengendali
 - Status durabilitas dihitung dari data.
 - `DurabilitySystem` tanpa `MonoBehaviour`, sesuai `EquipmentManager.md`.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Sistem perbaikan dan upgrade dipakai:** rekomendasi ya. GDD tidak menyebutnya, tetapi alat dan senjata perlu bertahan selama 60 hari, dan bisa lebih lama.
 2. **Biaya dan stasiun:** tabel di bagian 1, dengan biaya sesuai tingkat kerusakan.

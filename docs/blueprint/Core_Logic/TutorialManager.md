@@ -63,7 +63,7 @@ Semua pemicu berasal dari event, sehingga sistem gameplay tidak perlu mengenal `
 | `first_infection` | `VitalsChangedEvent.infection > 0` | Infeksi dari zombie dan vaksin | 85 |
 | `first_night` | `NightfallEvent` | Zombie keluar saat malam, dan berlindung di base | 95 |
 | `first_day` | `DaybreakEvent` pertama setelah `first_night` tampil | Zombie terbakar matahari, dan hewan buas aktif siang hari | 60 |
-| `first_diary` | `DiaryChapterFoundEvent` | Diary berisi panduan lanjutan | 60 |
+| `first_diary` | `DiaryChapterUnlockedEvent` | Diary berisi panduan lanjutan | 60 |
 | `first_supply` | `BeachSupplyArrivedEvent` | Kargo tiba di pantai | 60 |
 | `region_snow` | `RegionChangedEvent` ke `Snow` | Pakai pakaian hangat atau obor, kalau tidak terkena frostbite | 75 |
 | `region_logistic` | `RegionChangedEvent` ke `Logistic` | Suku cadang berat memperlambat langkah | 75 |
@@ -137,7 +137,7 @@ Lucky Machine tidak punya pop-up, karena mesin itu sengaja menjadi kejutan pemai
 
 **Sudah mengikuti GDD:** Diary tetap *guidebook* utama (Bagian 4). Pop-up tidak mengulang isi lore atau resep vaksin dari Diary.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Permadeath dan pop-up:** pop-up yang sudah dibaca tidak muncul lagi di run berikutnya. Pemain mengulang dari awal cukup sering, jadi pengulangan akan mengganggu. Developer bisa memilih mengulang semua pop-up per run dengan memindahkan `seen` ke save run.
 2. **Bentuk tampilan:** pop-up kecil tanpa jeda, bukan layar penuh yang menghentikan game. Permainan ini berbasis tekanan waktu, dan Fase 1 hanya 60 detik.

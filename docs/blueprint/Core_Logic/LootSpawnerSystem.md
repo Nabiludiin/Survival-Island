@@ -83,7 +83,7 @@ public struct LootPointState { public int pointIndex; public string itemId; publ
 
 **Sudah ditetapkan dokumen lain:** `SpawnOrRestore`, `LootPointState`, dan `MarkTaken` (`RunSeedManager.md`). `LootPointDef` (`RegionLootTable.md`). Pool kapal (`LifeboatExtraction.md`).
 
-**Usulan yang menunggu developer (dicatat di #85):** peluang kosong 50 persen dan 25 persen untuk gudang.
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):** peluang kosong 50 persen dan 25 persen untuk gudang.
 
 ## 6. Skenario Tes
 

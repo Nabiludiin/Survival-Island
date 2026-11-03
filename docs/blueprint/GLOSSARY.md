@@ -22,6 +22,13 @@ Developer sudah menyetujui keputusan berikut.
 | Headshot | 2x damage |
 | Tombol interaksi | `E` di Fase 1 dan Fase 2. Klik kiri dipakai item aktif |
 | Referensi combat | Left 4 Dead (L4D) saja |
+| Zombie setelah hari ke-60 | Per hari: jumlah +2 persen, HP +2 persen, dan damage +1 persen. Batasnya 1,5x, 2x, dan 1,5x |
+| Infeksi mencapai 100 | HP turun bertahap, tidak mati seketika |
+| Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
+| Lucky Machine | Satu mesin. Lokasi masih menunggu developer |
+| Fitur tambahan yang dipakai | #96, #106, dan #112 |
+| Fitur yang tidak dipakai | #48, #105, dan #117. Blueprint-nya disimpan sebagai arsip |
+| Angka inti dan usulan kecil | Disetujui sebagai nilai awal, dan boleh berubah saat playtest |
 
 ---
 
@@ -107,7 +114,6 @@ Developer sudah menyetujui keputusan berikut.
 | `UpgradeKind` | `Damage`, `MagazineSize`, `Speed`, `Durability` | `ToolRepairSystem` (#113) |
 | `FishingState` | `Idle`, `Charging`, `LureFlying`, `Waiting`, `BiteWindow`, `Reeling`, `Intercepted`, `Recovering` | `FishingSystem` (#55) |
 | `FishingEndReason` | `Caught`, `FishEscaped`, `LineBroken`, `Cancelled`, `Interrupted`, `WaterGone`, `TooFar`, `InterceptedByTarget` | `FishingSystem` (#55) |
-| `CropPhase` | `Empty`, `Sprout`, `Growing`, `Harvestable` | `FarmingSystem` (#48) |
 | `BuildCategory` | `Structure`, `Furniture`, `Defense` | `BuildMenu` (#79) |
 | `BuildSlotKind` | `Cell`, `Edge`, `WallMount` (#98) | `BuildMenu` (#79) |
 | `SupportRule` | `GroundOrWall`, `FloorOrGround`, `WallBelow` | `BuildMenu` (#79) |
@@ -145,7 +151,7 @@ Developer sudah menyetujui keputusan berikut.
 | `WaterMode` | `None`, `Wading`, `Swimming` | `SwimmingController` (#13) |
 | `EnvEventId` | Lapisan event `EnvironmentDirector`, misalnya `Eruption` dan `BloodMoon` | `EnvironmentDirector` (#92) |
 | `DisasterPhase` | `Idle`, `Warning`, `Active`, `Aftermath` | `DisasterManager` (#70) |
-| `MarkerIcon` | `Base`, `Supply`, `Part`, `Helipad`, `Objective`, `PlayerPin`, `PlayerDanger`, `PlayerResource` | `CompassSystem` (#71, #105) |
+| `MarkerIcon` | `Supply`, `Part`, `Helipad`, `Objective` | `CompassSystem` (#30, #71) |
 | `SupplyDropState` | `Idle`, `Scheduled`, `PlaneInbound`, `Descending`, `Landed` | `SupplyDropManager` (#54) |
 | `LuckyRewardKind` | `WeaponModifier`, `Skin`, `PermanentBuff`, `SpawnItem` | `LuckyMachine` (#72) |
 | `LuckyTier` | `B`, `A`, `S` | `LuckyMachine` (#72) |
@@ -171,9 +177,8 @@ Developer sudah menyetujui keputusan berikut.
 | `ThreatCueKind` | `Idle`, `Alert` | `CombatMusicDirector` (#114) |
 | `LoreKind` | `Note`, `Recording`, `Board` | `LoreCollectibles` (#100) |
 | `LoreSource` | `Researcher`, `Military`, `Experiment` | `LoreCollectibles` (#100) |
-| `LoreHintKind` | `None`, `PartLocation`, `RevealMapRegion` | `LoreCollectibles` (#100) |
+| `LoreHintKind` | `None`, `PartLocation` | `LoreCollectibles` (#100) |
 | `BarkCategory` | Kategori ucapan NPC | `NPCBarks` (#100) |
-| `MarkerSource` | `System`, `Player` | `WorldMapSystem` (#105) |
 
 ---
 
@@ -313,7 +318,6 @@ Developer sudah menyetujui keputusan berikut.
 | `IKailCastInterceptor` | Interface sistem yang mengambil alih lemparan Kail, dipakai `DebrisRetrieval` | #55 |
 | `WaterBody` | Komponen pada collider layer `Water`: `kind` (`Sea`, `River`, `Lake`) dan `biteDelayMultiplier`. Bisa dipakai #13 dan #91 | #55 |
 | `FishingTensionHUD` | Panel HUD Tension Bar, hanya membaca `FishingSystem` | #55 |
-| `CropData` | ScriptableObject data jenis tanaman | #48 |
 | `DebrisItem` | Barang hanyut dari pool `Debris_Generic` | #106 |
 | `DebrisLane` | Jalur arus di scene region | #106 |
 | `PhysicsMasks.CastLanding` | Mask titik jatuh Kail: `Water`, `Terrain`, `Structure`, `Obstacle` | #55 |
@@ -435,8 +439,6 @@ Developer sudah menyetujui keputusan berikut.
 | `LuckyRewardData` | ScriptableObject satu hadiah | #72 |
 | `SacrificeQuota` | Data kuota per `enemyId` | #72 |
 | `NPCRecord` | Baris data per NPC di `NPCRoster`, termasuk isi yang disimpan | #76 |
-| `NPCInfectionRecord` | Data infeksi per NPC yang disimpan di `world_npc_infection` | #117 |
-| `NPCInfectionVisual` | Komponen prefab NPC yang menampilkan tanda infeksi per tahap | #117 |
 | `ObjectiveData` | ScriptableObject satu tujuan cerita | #81 |
 | `DiaryReward` | Struct hadiah satu bab Diary | #81 |
 | `DiaryArchivePanel` | Panel baca ulang bab dan daftar tujuan selesai | #81 |
@@ -517,13 +519,8 @@ Developer sudah menyetujui keputusan berikut.
 | `GhostStatusIcon` | Ikon status pada hologram bangunan | #104 |
 | `FlashGuard` | Pembatas kilatan layar penuh | #104 |
 | `LocalizationAuditWindow` | Alat Editor pemeriksa kunci teks | #104 |
-| `MapMarker` | Struct data penanda bersama kompas dan peta | #105 |
-| `MapMarkerRegistry` | Kelas penyimpan penanda, dimiliki `CompassSystem` | #105 |
-| `WorldMapPanel` | `UIPanel` untuk panel `WorldMap` | #105 |
-| `WorldMapSaveData` | Data save peta | #105 |
-| `MapSheetPickup` | `IslandInteractable` lembar peta region | #105 |
-| `MapMarkerIcon` | Komponen ikon penanda di panel peta | #105 |
-| `MapBakeWindow` | Alat Editor pembuat gambar peta | #105 |
+| `MapMarker` | Struct data penanda kompas | #30 |
+| `MapMarkerRegistry` | Kelas penyimpan penanda, dimiliki `CompassSystem` | #30 |
 
 **Pemilik status pemain:** `SurvivalStats` memegang `HP`, `Stamina`, `Hunger`, `Thirst`, dan `Infection`. Sistem lain membaca atau mengubah nilainya lewat fungsi publik `SurvivalStats`.
 
@@ -570,7 +567,7 @@ Setiap issue menulis ke file berikut. Kalau issue tidak menyebut nama file, bari
 | #45 | `raft/DiseaseManager.md` | `DiseaseManager` |
 | #46 | `raft/StorageChest.md` | `StorageChest` |
 | #47 | `raft/BuildingIntegrity.md` | `BuildingIntegrity` |
-| #48 | `raft/FarmingSystem.md` | `FarmingSystem`, `PlanterBox` |
+| #48 | `raft/FarmingSystem.md` (tidak dipakai) | `FarmingSystem`, `PlanterBox` |
 | #49 | `left-4-dead/AISensory.md` | `AISensory`, `NoiseEmitter` |
 | #50 | `left-4-dead/HordeManager.md` | `HordeManager` |
 | #51 | `Core_Logic/CombatFeedbackUI.md` | `CombatFeedbackUI` |
@@ -627,7 +624,7 @@ Setiap issue menulis ke file berikut. Kalau issue tidak menyebut nama file, bari
 | #102 | `Core_Logic/FirstPersonCamera.md` | `FirstPersonCamera` |
 | #103 | `Core_Logic/RegionLootTable.md` | `RegionLootTable` |
 | #104 | `Core_Logic/LocalizationManager.md` | `LocalizationManager` |
-| #105 | `Core_Logic/WorldMapSystem.md` | `WorldMapSystem` |
+| #105 | `Core_Logic/WorldMapSystem.md` (tidak dipakai) | `WorldMapSystem` |
 | #106 | `raft/DebrisRetrieval.md` | `DebrisRetrieval` |
 | #107 | `Core_Logic/GameEventBus.md` | `EventChannel<T>` |
 | #108 | `left-4-dead/ThreatSystem.md` | `ThreatSystem`, `ITargetable` |
@@ -639,5 +636,5 @@ Setiap issue menulis ke file berikut. Kalau issue tidak menyebut nama file, bari
 | #114 | `Core_Logic/CombatMusicDirector.md` | `CombatMusicDirector` |
 | #115 | `Island_Logic/RegionalWeather.md` | `RegionalWeather` |
 | #116 | `Core_Logic/ProgressionSafety.md` | `ProgressionSafety` |
-| #117 | `Island_Logic/NPCInfection.md` | `NPCInfection` |
+| #117 | `Island_Logic/NPCInfection.md` (tidak dipakai) | `NPCInfection` |
 | #118 | `Core_Logic/CarryCapacity.md` | `CarryCapacity` |

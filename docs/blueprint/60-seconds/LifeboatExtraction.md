@@ -261,7 +261,7 @@ Fungsi `GameManager.SaveFase1Loot(List<Item>)` diganti `SaveShipOutcome`. `ShipT
 - Posisi aman dicek dengan jarak, bukan trigger.
 - `IslandArrival` dijalankan `RunLifecycle`, supaya urutannya pasti sebelum save pertama.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Sekoci sebagai titik aman dan titik setor:** di dek atas. Menyetor mengosongkan seluruh tangan.
 2. **Gagal mencapai sekoci:** **permadeath langsung** dengan `LeftOnShip`. Pilihan lain adalah tiba di pulau tanpa barang tambahan. Rekomendasi ini mengikuti 60 Seconds dan membuat waktu terasa berbahaya.

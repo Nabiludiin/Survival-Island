@@ -30,7 +30,7 @@ public interface ITargetable
 | Pemain | `PlayerTargetable` | `Player` | 1 |
 | NPC | `NPCCompanion` (#76) | `NPC` | 0,6, atau 0,3 saat `TakeCover` |
 | Markas | `BaseAnchor` di pusat base (#78) | `BaseAnchor` | Hanya saat Blood Moon |
-| Umpan | Proyektil #96 | `Lure` | Nonaktif sampai #96 disetujui |
+| Umpan | Proyektil #96 | `Lure` | 1 |
 
 Dinding dan pintu **bukan** `ITargetable`. Target tetap tujuan utama, dan saat jalur terhalang, `BaseNavigation` mengisi `currentBreach` sebagai sasaran sementara.
 
@@ -189,7 +189,7 @@ Saat Blood Moon tanpa base, `BaseAnchor` tidak sah, dan zombie memburu pemain.
 | `BaseNavigation` (#78) | `currentBreach`, dan pemasangan `BaseAnchor` |
 | `HordeManager` (#50) | Mengirim event Blood Moon |
 | `NPCCompanion`, `NPCRoster` (#76) | Memasang `ITargetable` |
-| `ThrowableSystem` (#96) | Memasang `Lure` kalau disetujui |
+| `ThrowableSystem` (#96) | Memasang `Lure` |
 | `EnemyAttack` (#109) | Menerima `ITargetable` dari `CurrentTarget` |
 | `HordeCrowdManager` (#93) | Jatah per frame dan pembaruan tujuan |
 | `AITraversal` (#94), `SpawnManager` (#62) | Anti-exploit dan pengaman macet |
@@ -220,7 +220,7 @@ Saat Blood Moon tanpa base, `BaseAnchor` tidak sah, dan zombie memburu pemain.
 - Dinding bukan `ITargetable`.
 - Penilaian dibagi per frame, dengan hasil sensor yang sudah tersimpan.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Urutan override:** baru ditembak, lalu umpan, lalu Blood Moon. Pemain yang menembak selalu mendapat balasan, dan umpan tetap berguna saat Blood Moon.
 2. **NPC sebagai target:** zombie dan hewan boleh mengincar NPC, dengan bobot lebih rendah dari pemain. Selaras dengan keputusan #76 kalau disetujui.

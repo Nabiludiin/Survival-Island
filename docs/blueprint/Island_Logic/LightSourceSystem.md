@@ -199,7 +199,7 @@ Sumber di atas `maxRegisteredSources` tetap tampil lewat `emissive`, tetapi tida
 
 **Keputusan yang mengikuti blueprint lain:** titik sambung `SetVisibilityModifier` (#49), tombol `E` (#85), serta aturan cuaca dan atap mengikuti `CampfireManager`.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Cahaya base menarik zombie: ya, secara ringan.** Hanya zombie `Unaware` yang terpengaruh, dengan peluang maksimum 0,35. GDD sudah menyebut zombie memburu MC dan menyerang base, jadi aturan ini memberi pilihan terang atau aman tanpa mengubah aturan intinya.
 2. **Cara mengisi senter: baterai temuan, tanpa generator.** Generator menambah struktur, bahan bakar, dan suara baru, sedangkan issue ini berprioritas rendah. Generator bisa ditambah kemudian.

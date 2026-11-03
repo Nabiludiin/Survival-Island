@@ -263,7 +263,7 @@ Saat berganti item, `EquipmentManager` memanggil `SetMainPose(ViewmodelPose)`. T
 - Rotasi tambahan dijumlahkan, dengan batas per sumbu.
 - Satu prefab rig untuk dua fase.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Aim down sights:** tidak ada di versi awal, mengikuti L4D.
 2. **Nilai awal kamera:** FOV 70, FOV tangan 55, tambahan FOV lari 8, dan head bob 2,5 cm.

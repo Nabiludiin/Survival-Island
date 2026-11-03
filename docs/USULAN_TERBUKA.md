@@ -1,26 +1,28 @@
-# Usulan yang Menunggu Keputusan Developer
+# Keputusan atas Usulan Blueprint
 
 **Issue:** #85
 
-Daftar usulan dari semua blueprint. Semua isinya **belum menjadi aturan**, sampai developer menyetujuinya. Kalau berbeda dari bagian 5 blueprint terkait, ikuti blueprint, karena sebagian usulan disesuaikan setelah daftar ini dibuat.
+Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi nilai awal, dan boleh berubah saat playtest. Kalau berbeda dari blueprint terkait, ikuti blueprint, karena sebagian usulan disesuaikan setelah daftar ini dibuat.
 
-## Prioritas pertama
+## Masih terbuka
 
-Hal-hal ini menyentuh GDD atau aturan inti, jadi sebaiknya diputuskan lebih dulu.
+| Topik | Kondisi sekarang |
+|---|---|
+| Lokasi Lucky Machine | Nilai awal Region 3. Tumbal mudah dilakukan, tetapi jendela gratis 30 detik sulit dipakai kalau base pemain jauh |
 
-| Topik | Kondisi di blueprint | Yang perlu diputuskan |
-|---|---|---|
-| Zombie setelah hari ke-60 | Jumlah +2 persen, HP +2 persen, dan damage +1 persen per hari, dengan batas atas (`AIDirector`) | Angka dan batas kekuatannya, karena GDD tidak memberi angka |
-| Infeksi 100 | Tidak membunuh langsung, HP turun bertahap (`VitalsRules`, `InfectionSystem`) | Tetap begitu, atau mati seketika |
-| Lokasi Diary | Bab 2 dan 3 tersebar, padahal GDD menulis Diary ada di shelter tua (`ObjectiveManager`) | Satu buku di shelter, atau bab tersebar dengan GDD diubah |
-| Lucky Machine | Dua mesin, dan yang di Region 1 belum punya koordinat (`LuckyMachine`) | Jumlah dan lokasi mesin |
-| Zombie di dalam ruangan saat siang | Nonaktif lewat `lair.enabled = false`. Melanggar "murni Hewan Buas" di GDD bagian 3 (`ZombieLair`) | Dipakai dengan GDD diubah, atau dibuang |
-| Pakaian hangat | Mengangkat `Warmth` ke `protectedFloor` 30. Air es Region 3 dan obor padam saat `Blizzard` tetap membekukan (`WarmthSystem`) | Sesuai GDD atau tidak |
-| Blueprint Jembatan | Sumbernya hanya `RegionGateSystem.hasBridgeBlueprint` | Konfirmasi bentuknya |
-| Fitur di luar GDD | #48, #96, #105, #106, #112, #117 | Dipakai atau tidak |
-| Angka inti | Hari 15 menit, 8 sampai 12 kayu per pohon, dan 5 suku cadang (`GameBalanceConfig`) | Setuju, atau setel ulang |
+## Keputusan utama
 
-## Semua usulan per issue
+| Topik | Keputusan |
+|---|---|
+| Zombie setelah hari ke-60 | Per hari: jumlah +2 persen, HP +2 persen, dan damage +1 persen. Batasnya 1,5x, 2x, dan 1,5x |
+| Infeksi mencapai 100 | HP turun bertahap, dan tidak mati seketika |
+| Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
+| Lucky Machine | Satu mesin |
+| Fitur tambahan yang dipakai | #96, #106, dan #112 |
+| Fitur yang tidak dipakai | #48, #105, dan #117 |
+| Angka inti | Hari 15 menit, 8 sampai 12 kayu per pohon, 5 suku cadang, dan frostbite 1 HP per detik |
+
+## Usulan yang menjadi nilai awal, per issue
 
 ### #12
 
@@ -236,18 +238,6 @@ Hal-hal ini menyentuh GDD atau aturan inti, jadi sebaiknya diputuskan lebih dulu
 | Upgrade lantai, atap, dan tangga | Tidak bisa di-upgrade pada versi awal. |
 | HP setelah upgrade | Mengikuti rasio HP sebelum upgrade. |
 | Syarat membuka upgrade | Terbuka lewat TechTreeManager, dengan node awal mengikuti #77. Sampai #77 selesai, unlockNodeId dikosongkan. |
-
-### #48
-
-| Topik | Usulan |
-|---|---|
-| Bercocok tanam dipakai atau tidak (belum ada di GDD; header ditulis sebagai usulan nonaktif) | Dipakai dengan hasil kecil sebagai pelengkap, sekitar satu porsi per kotak per hari, bukan pengganti memancing dan berburu. |
-| Jenis tanaman | Satu jenis pada versi awal: kentang (Seed_Potato, Food_Potato), karena CampfireManager sudah menyiapkan cook_potato. |
-| Air kotor untuk menyiram | Boleh dan didahulukan sebelum air bersih. 'Botol air' berarti satu item air, karena HydrationSystem tidak memakai botol kosong. |
-| Tanaman tanpa air | Berhenti tumbuh tetapi tidak mati. |
-| Hujan menyiram otomatis | Rain dan Storm menyiram kotak yang tidak beratap, per homeRegion. |
-| Bertani di region salju | Tanaman tidak tumbuh di RegionType.Snow (snowRegionGrowthAllowed = false). |
-| Angka hasil dan waktu tumbuh | Sprout 12 jam game, Growing 24 jam game, hasil 2 kentang, peluang bibit kembali 0,75. Perlu dicek saat playtest. |
 
 ### #49
 
@@ -516,7 +506,6 @@ Hal-hal ini menyentuh GDD atau aturan inti, jadi sebaiknya diputuskan lebih dulu
 | Jadwal tumbuh kembali | Pohon 5 sampai 10 hari, dan batu 10 sampai 12 hari per region. Jamur 1 hari dan pohon getah 2 hari mengikuti InfectionSystem.md. |
 | Syarat tumbuh kembali | Minimal 25 meter dari pemain, dan radius 3 meter bebas bangunan, pemain, NPC, serta Heavy Item. |
 | Kepadatan node per region | Region 1 minimal 120 pohon dan 40 batu, dengan 80 pohon dalam 200 meter dari titik mulai. Region lain sesuai tabel. |
-| Sifat tanaman medis Region 2 | 10 jamur dan 8 pohon getah yang tersebar dan tumbuh cepat, sehingga bisa di-grind tanpa habis permanen. Sekitar 3 dosis per hari, disetel bersama #64. |
 | Item jatuh masuk air atau tertimbun | Item kembali ke pangkal node, tanpa hilang. |
 
 ### #74
@@ -607,7 +596,6 @@ Hal-hal ini menyentuh GDD atau aturan inti, jadi sebaiknya diputuskan lebih dulu
 
 | Topik | Usulan |
 |---|---|
-| Tempat Diary Bab 2 dan Bab 3 | Bab 2 di pos kemah penulis di Region 1, Bab 3 di Region 2. Bab 2 harus sebelum jembatan, dan RegionGateSystem butuh Bab 3 sebelum Region 4. |
 | Hadiah api unggun dari Bab 1 | Beri satu Kit_Campfire, dan rec_campfire tetap terbuka sejak awal. |
 | Bentuk Blueprint Jembatan | Penanda hasBridgeBlueprint di RegionGateSystem, bukan item, agar tidak bisa hilang dan tidak memakai slot. |
 | Tujuan sebelum babnya ditemukan | Disembunyikan dari HUD, tetapi progresnya tetap dicatat, supaya Region 3 dan suku cadang tetap menjadi kejutan Bab 3. |
@@ -829,18 +817,6 @@ Hal-hal ini menyentuh GDD atau aturan inti, jadi sebaiknya diputuskan lebih dulu
 | Subtitle peringatan bencana saat subtitle dimatikan | Peringatan bencana tetap tampil karena menyangkut keselamatan pemain. |
 | Tempat data reduceFlashing | Di LocalizationManager.Accessibility, seperti yang sudah dirujuk DiseaseManager. Alternatifnya memindahkannya ke SettingsManager. |
 
-### #105
-
-| Topik | Usulan |
-|---|---|
-| Apakah WorldMapSystem dipakai | Rekomendasi dipakai karena rute antar-4 region sulit diingat. Sampai disetujui, GameBalanceConfig.map.enabled = false. |
-| Bentuk peta | Menu penuh bergaya kertas tanpa minimap. |
-| Apakah peta menjeda game | Tidak menjeda, sesuai tabel WorldMap yang sudah ada di UIFocusStack.md. |
-| Aturan fog of war | Radius buka 40 m, dan 25 m di Region 2 karena hutannya rapat. Sel 8 m. |
-| Lokasi item peta region | Satu lembar per region: shelter tua Diary Bab 1, kemah peneliti di ujung jembatan, pos jaga Pangkalan Militer, dan balai desa atau log militer. Lembar hanya menambah keterangan, tidak membuka fog. |
-| Penanda pemain | Maksimum 8, dan tidak tampil di kompas kecuali dipilih. |
-| Data peta saat permadeath | Semua area terbuka, lembar, dan penanda ikut terhapus bersama survival_save.json, sesuai GDD bagian 1. |
-
 ### #106
 
 | Topik | Usulan |
@@ -953,20 +929,6 @@ Hal-hal ini menyentuh GDD atau aturan inti, jadi sebaiknya diputuskan lebih dulu
 | Waktu pemeriksaan kondisi run | Setiap pergantian hari dan sekali setelah masuk atau load ke pulau. |
 | Peringatan waktu tidak cukup | Sekali per hari, dengan margin 1,5, dan tidak pernah memaksa game berakhir. |
 | Peringatan time_budget | Diubah menjadi peringatan zombie akan menguat, sekali per hari, dan hanya sampai hari ke-60. Setelah itu time_budget selalu Ok dan tidak pernah mengakhiri run. |
-
-### #117
-
-| Topik | Usulan |
-|---|---|
-| Apakah sistem infeksi NPC dipakai (usulan, belum ada di GDD) | Ya, setelah #76 selesai. enabled tetap false selama belum disetujui dan belum diuji. |
-| Cara infeksi NPC naik | Lewat gigitan dengan nilai sama seperti pemain, ditambah 1,5 per jam game setelah digigit. Ini berbeda dari pemain, yang selfProgressPerGameHour-nya 0. |
-| Biaya vaksin untuk NPC | Satu Med_Vaccine dari stok pemain, tanpa barang tambahan. |
-| Waktu NPC berubah menjadi zombie | Ditunda sampai malam (pendingTurn), karena GDD membuat zombie terbakar saat siang. |
-| Jenis zombie hasil perubahan | zombie_standar di semua region, dengan pakaian NPC sebagai varian tampilan. |
-| NPC berubah saat base ditinggal | Dihitung dari data lewat #90: remoteTurnDamage 120 ke base, tanpa zombie sungguhan. |
-| Aksi lain terhadap NPC terinfeksi | Karantina dan usir, tanpa struktur baru. |
-| Dampak infeksi ke skill NPC | Melemah x0,5 di tahap 3, mati di tahap 4, kembali setelah sembuh, dan hilang permanen kalau NPC berubah, mati, atau diusir. |
-| NPC terinfeksi yang mati karena damage biasa | Tidak menjadi zombie, supaya aturannya sederhana. |
 
 ### #118
 

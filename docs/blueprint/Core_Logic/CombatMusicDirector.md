@@ -231,7 +231,7 @@ Musuh tetap terdengar dari balik dinding, tetapi teredam. Pemain tetap tahu arah
 
 **Sudah ditetapkan dokumen lain:** tahap Director (#27), `AudioMixer.updateMode = UnscaledTime` dan volume musik saat jeda (#83), serta referensi combat L4D (#85).
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Empat stem selaras, bukan empat lagu terpisah.** Rekomendasi: stem selaras, karena pergantian lebih halus. Syaratnya, aset musik harus dibuat dengan tempo dan panjang sama.
 2. **Sumber ketegangan.** Rekomendasi: nilai terbesar dari musuh dekat, damage, `Intensity`, dan tahap Director, supaya siang hari juga punya musik pertempuran dari hewan.

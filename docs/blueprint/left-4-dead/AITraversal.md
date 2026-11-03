@@ -207,7 +207,7 @@ Lokasi berikut berasal dari GDD, dan koordinatnya diisi saat level selesai. Tiap
 
 **Sudah ditetapkan dokumen lain:** NavMesh hanya di tanah (#88), zombie tidak memanjat dinding (#78), dan musuh macet kembali ke pool (`docs/REFERENSI_MUSUH_L4D.md` bagian 8).
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Kemampuan per jenis:** rekomendasi tabel di bagian 1. Hanya Desa dan Tribal yang memanjat.
 2. **Respons:** rekomendasi bertahap, mulai dari mengepung, melempar batu, lalu mundur. Struktur diserang kalau ada.

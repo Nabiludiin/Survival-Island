@@ -175,7 +175,7 @@ Dengan 6 tekanan per detik:
 
 **Sudah ditetapkan dokumen lain:** `PlayerPinnedEvent` (`GameEventBus.md`), tombol `Struggle` (`InputManager.md`), `EquipLock.Pinned` (`EquipmentManager.md`), dan `SetForcedLook` (`FirstPersonCamera.md`).
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Sifat sistem:** GDD tidak menyebut serangan menahan. Rekomendasi: pakai, hanya untuk Jaguar dan Zombie Tribal. Nilai awal tetap `pinned.enabled = false` sampai disetujui.
 2. **Cara lepas:** menekan berulang menjadi bawaan, menahan tombol menjadi pilihan aksesibilitas, dan Pisau menjadi cara cepat. Rekomendasi: pakai ketiganya.

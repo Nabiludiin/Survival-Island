@@ -177,7 +177,7 @@ Setiap `HourChangedEvent` saat `Landed`:
 
 **Sudah ditetapkan dokumen lain:** nama file dan kelas (`GLOSSARY.md`), `SupplyDropLandedEvent` (`GameEventBus.md`), `world_supply` (`WorldStateSave.md`), tombol `E` (#85), dan batas dengan #71.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Pemakaian sistem:** pakai, dengan peluang 10 persen per hari sesuai contoh issue. GDD belum menyebutnya sebagai mekanik.
 2. **Hanya siang:** pesawat hanya terbang pada jam 08:00 sampai 14:00.

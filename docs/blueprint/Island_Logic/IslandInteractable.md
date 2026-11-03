@@ -264,7 +264,7 @@ Barang dilepas dengan tombol `DropHeavyItem`, bukan `E` (#69).
 - Target dipilih dengan sphere cast, lalu garis pandang diperiksa dengan raycast.
 - Target bertahan 0,15 detik agar prompt stabil.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Peti loot mengeluarkan isi ke tanah,** bukan membuka panel. Pemain tidak berhenti di tengah bahaya, dan panel hanya untuk peti simpanan (#46).
 2. **Interaksi tahan:** membuka peti loot 1 detik dan kargo 2 detik, dan batal saat pemain berlari atau diserang. Benda kecil langsung terambil.

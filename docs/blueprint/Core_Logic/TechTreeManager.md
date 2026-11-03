@@ -15,7 +15,7 @@ public class TechNode { public string nodeID; public bool isUnlocked; public str
 |---|---|---|
 | `techTree` | `List<TechNode>` | Semua node |
 
-**Bukan isi sistem ini:** Blueprint Jembatan. Statusnya hanya ada di `RegionGateSystem.hasBridgeBlueprint`, tersimpan di `world_gates`, dan diisi saat `DiaryChapterFoundEvent` Bab 2 (#68). Bentuk ini masih usulan di `RegionGateSystem.md` dan `ObjectiveManager.md`, dan menunggu konfirmasi developer.
+**Bukan isi sistem ini:** Blueprint Jembatan. Statusnya hanya ada di `RegionGateSystem.hasBridgeBlueprint`, tersimpan di `world_gates`, dan diisi saat `DiaryChapterUnlockedEvent` Bab 2 (#68). Bentuk ini masih usulan di `RegionGateSystem.md` dan `ObjectiveManager.md`, dan menunggu konfirmasi developer.
 
 ## 2. Detail Logika & Fungsi
 
@@ -56,5 +56,5 @@ public class TechNode { public string nodeID; public bool isUnlocked; public str
 
 1. Buka node tanpa prasyarat. **Hasil:** `IsUnlocked` bernilai `true`, dan event terkirim sekali.
 2. Buka node dengan prasyarat terkunci. **Hasil:** ditolak.
-3. Temukan Diary Bab 2. **Hasil:** tidak ada node yang berubah, `RegionGateSystem.HasBridgeBlueprint` bernilai `true`, dan jembatan bisa dibangun.
+3. Temukan buku Diary, dan tunggu Bab 2 terbuka. **Hasil:** tidak ada node yang berubah, `RegionGateSystem.HasBridgeBlueprint` bernilai `true`, dan jembatan bisa dibangun.
 4. Simpan, keluar, lalu lanjutkan. **Hasil:** status node sama.

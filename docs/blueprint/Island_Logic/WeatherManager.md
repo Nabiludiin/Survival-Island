@@ -66,7 +66,7 @@ Singleton di scene `IslandPhase`. `WeatherManager` tidak lagi mengacak cuaca dan
 
 **Sudah ditetapkan dokumen lain:** cuaca per region dari seed, efek cuaca, dan `Fx_Blizzard` (`RegionalWeather.md`), serta fog dan cahaya (`EnvironmentProfile.md`).
 
-**Usulan yang menunggu developer (#85):**
+**Usulan yang disetujui developer sebagai nilai awal (#85):**
 
 1. **Tampilan per cuaca di tabel:** rekomendasi pakai sebagai nilai awal, lalu setel saat playtest.
 

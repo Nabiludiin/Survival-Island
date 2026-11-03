@@ -1,7 +1,7 @@
 # Blueprint: DayNightDirector.cs
 **Lokasi:** `docs/blueprint/left-4-dead/DayNightDirector.md`
 **Deskripsi Utama:** Pemilik jam dunia. Memajukan waktu dan mengirim sinyal pagi serta malam lewat event, tanpa `FindObjectsOfType`. Cahaya ditulis `EnvironmentDirector`.
-**Issue:** #56, #63, #66, #67, #80, #92, #117
+**Issue:** #56, #63, #66, #67, #80, #92
 **Rujukan GDD:** Bagian 3 (siklus siang dan malam, target 60 hari). Kecepatan waktu dan langkah jam adalah usulan teknis, belum ada di GDD.
 
 ## 1. Arsitektur & Variabel Utama
@@ -20,9 +20,9 @@
 
 | Properti | Isi | Dipakai |
 |---|---|---|
-| `IsNight` | `isNight` | `SleepSystem`, `NPCInfection`, `RescueEventManager` |
+| `IsNight` | `isNight` | `SleepSystem`, `RescueEventManager` |
 | `IsDay` | `!isNight` | `SunlightExposure` |
-| `TotalGameHours` | Lihat tabel di atas | `CampfireManager`, `FarmingSystem`, `ItemUseSystem`, `StatusEffectManager`, `RegionalWeather` |
+| `TotalGameHours` | Lihat tabel di atas | `CampfireManager`, `ItemUseSystem`, `StatusEffectManager`, `RegionalWeather` |
 | `BaseTimeMultiplier` | `GameManager.Instance.Balance.time.timeMultiplier` | `Update` |
 | `SunRotation` | `Quaternion`, dihitung dari `currentTimeOfDay` | `EnvironmentDirector` |
 | `SunDirection` | `Vector3`, dihitung dari `SunRotation` | `SunlightExposure` |
@@ -116,7 +116,7 @@ while (remaining > 0f)
 - `TotalGameHours` disimpan dan dimajukan `AdvanceClock`, karena `WorldStateSave.md` menyimpannya dan `AdvanceDay` bisa keluar lebih awal.
 - `SunDirection` dihitung dari jam, karena `directionalLight` tidak lagi ada di kelas ini.
 
-**Usulan yang menunggu developer:** tidak ada keputusan baru dari blueprint ini.
+**Usulan yang disetujui developer sebagai nilai awal:** tidak ada keputusan baru dari blueprint ini.
 
 ## 6. Skenario Tes
 

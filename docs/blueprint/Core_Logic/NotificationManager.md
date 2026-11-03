@@ -132,7 +132,7 @@ canvasGroup.alpha = isHeld ? 0f : 1f;
 | `HelicopterPartInstalledEvent` | Selalu | `Suku cadang terpasang {installed}/{total}` | `Objective` |
 | `HelicopterReadyEvent` | Selalu | `Helikopter siap` | `Objective` |
 | `RegionUnlockedEvent` | Selalu | `Akses baru terbuka` | `Objective` |
-| `DiaryChapterFoundEvent` | Selalu | `Bab diary ditemukan` | `Objective` |
+| `DiaryChapterUnlockedEvent` | Selalu | `Halaman baru di Diary` | `Objective` |
 | `NPCRescuedEvent`, `NPCDiedEvent` | Selalu | Nama NPC dari `NPCData.displayNameKey` | `Info`, `Danger` |
 | `StructureBurningEvent` | `isBurning == true` | `Base terbakar` | `Danger` |
 | `StructureDestroyedEvent` | Selalu | `Bangunan hancur` | `Warning` |
@@ -160,7 +160,7 @@ Semua handler di tabel ini keluar lebih dulu kalau `TopPanel.id == Loading`. Pes
 | `LocalizationManager` (#104) | Teks pesan |
 | `ItemDatabase` (#66) | Memastikan `itemId` sah |
 | `AudioManager` | `PlaySFX(clip)` untuk suara per jenis |
-| Pemanggil langsung | `ItemUseSystem`, `EquipmentManager`, `CraftingStation`, `StorageChest`, `CarryCapacity`, `HeavyItemSystem`, `HydrationSystem`, `InfectionSystem`, `DiseaseManager`, `DisasterManager`, `HordeManager`, `BeachSupplyManager`, `SupplyDropManager`, `FishingSystem`, `ResourceRespawn`, `IslandInteractable`, `NPCInfection`, `RemoteBaseSimulation`, `ObjectiveManager`, `ToolRepairSystem`, dan `WorldStateSave` |
+| Pemanggil langsung | `ItemUseSystem`, `EquipmentManager`, `CraftingStation`, `StorageChest`, `CarryCapacity`, `HeavyItemSystem`, `HydrationSystem`, `InfectionSystem`, `DiseaseManager`, `DisasterManager`, `HordeManager`, `BeachSupplyManager`, `SupplyDropManager`, `FishingSystem`, `ResourceRespawn`, `IslandInteractable`, `RemoteBaseSimulation`, `ObjectiveManager`, `ToolRepairSystem`, dan `WorldStateSave` |
 | `UIManager` | Panel `Pause` memuat tombol `Log` |
 | `DevConsole` (#56) | Perintah `notify <jenis> <kunci>` |
 
@@ -190,7 +190,7 @@ Semua handler di tabel ini keluar lebih dulu kalau `TopPanel.id == Loading`. Pes
 - Pesan sejenis digabung dalam jendela waktu.
 - Log berupa ring buffer di memori.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Pemanggilan langsung:** rekomendasi sistem lain memanggil `NotificationManager.Instance.Show(...)` secara langsung, seperti `AudioManager`, dan event hanya untuk tabel di atas. Blueprint yang ada juga menulisnya begitu. Pilihan lain adalah event permintaan, tetapi hasilnya lebih panjang tanpa manfaat besar.
 2. **Log event:** rekomendasi tampil di panel `Pause`, tanpa `UIPanelId` baru. Issue menyebut "Event Log" pada judul, tetapi tidak merinci isinya.

@@ -77,7 +77,7 @@ Manager hanya mengisi `Instance` di `Awake`. Pekerjaan yang bergantung pada mana
 | **Persisten (`DontDestroyOnLoad`)** | Semua layanan pada tabel urutan bootstrap, termasuk `VFXManager` (#15) dan `TutorialManager` (#16), lalu `RunLifecycle`, `NarrativeSequencer` (#99), dan `EventSystem` | Dipakai lintas scene, atau menyimpan data yang harus bertahan saat scene berganti |
 | **Scene `MainMenu`** | `MainMenuController` | Hanya dipakai di menu |
 | **Scene `ShipPhase`** | `ShipTimerManager`, `ShipHazardManager`, `LifeboatExtraction`, `LootSpawnerSystem`, `InventoryManager`, `HUDManager`, `HordeCrowdManager` (#93), dan pemain Fase 1 dengan komponen `DeathCinematic` (#53) | Fase 1 dibuang utuh setelah selesai |
-| **Scene `IslandPhase`** | `RegionStreaming`, `DayNightDirector`, `ZoneManager`, `RegionalWeather`, `EnvironmentDirector`, `DisasterManager`, `SpawnManager`, `AIDirector`, `HordeManager`, `BuildManager`, `CraftingManager`, `InventoryManager`, `EquipmentManager`, `HeavyItemSystem`, `RescueEventManager`, `ObjectiveManager`, `DiaryManager`, `NPCRoster`, `HUDManager`, `ItemUseSystem` dan `WorldItemManager` (#66), `IslandArrival` (#74), `HordeCrowdManager` dan `AITraversal` (#93, #94), `NPCInfection` (#117), `RemoteBaseSimulation` (#90), `ProgressionSafety` (#116), dan pemain Fase 2 dengan komponen `DeathCinematic` (#53) | Terikat pada dunia pulau, dan hilang bersama scene saat reset |
+| **Scene `IslandPhase`** | `RegionStreaming`, `DayNightDirector`, `ZoneManager`, `RegionalWeather`, `EnvironmentDirector`, `DisasterManager`, `SpawnManager`, `AIDirector`, `HordeManager`, `BuildManager`, `CraftingManager`, `InventoryManager`, `EquipmentManager`, `HeavyItemSystem`, `RescueEventManager`, `ObjectiveManager`, `DiaryManager`, `NPCRoster`, `HUDManager`, `ItemUseSystem` dan `WorldItemManager` (#66), `IslandArrival` (#74), `HordeCrowdManager` dan `AITraversal` (#93, #94), `RemoteBaseSimulation` (#90), `ProgressionSafety` (#116), dan pemain Fase 2 dengan komponen `DeathCinematic` (#53) | Terikat pada dunia pulau, dan hilang bersama scene saat reset |
 | **Region scene** | Tidak boleh memuat manager. Hanya objek dunia (#88) | Region bisa dilepas kapan saja |
 
 `InventoryManager` memakai satu kelas untuk dua fase, dengan instance di tiap scene. Barang berpindah fase lewat `GameManager.savedShipLoot`, sesuai `GLOSSARY.md`.
@@ -325,7 +325,7 @@ Panel `Loading` mengubah bar dengan `Mathf.MoveTowards` dan `Time.unscaledDeltaT
 - Bootstrap memakai `IBootstrapService.Initialize()` dengan urutan tertulis, bukan urutan `Awake`.
 - `ClearAll()` diapit `managersRoot.SetActive(false)` dan `SetActive(true)`, karena `ClearAll()` juga menghapus pendengar persisten.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Pembagian manager persisten dan per scene:** mengikuti tabel "Masa hidup manager".
 2. **Layar kalah:** dua tombol, Ulangi dari Kapal dan Menu Utama. GDD hanya meminta kembali ke Fase 1, jadi tombol Menu Utama adalah tambahan.

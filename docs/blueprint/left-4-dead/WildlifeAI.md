@@ -238,7 +238,7 @@ Saat fajar dan senja keduanya bisa berpapasan. Mereka saling mengabaikan: tidak 
 - Serangan khusus memakai `AnimalAttackKind`, bukan state baru, supaya daftar `AnimalState` tetap mengikuti `GLOSSARY.md`.
 - Radius aggro hewan terpisah dari `AISensory`, karena hewan lebih sedikit dan perilakunya lebih sederhana.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Cara Gagak terbang.** Rekomendasi: `NavMeshAgent` di tanah dengan `baseOffset` tinggi, supaya aturan `Claude.md` tetap terpenuhi.
 2. **Hubungan hewan dan zombie saat fajar dan senja.** Rekomendasi: saling mengabaikan, supaya GDD tetap sederhana dan performa aman.

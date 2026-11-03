@@ -180,7 +180,7 @@ Air dangkal tidak menyelamatkan pemain dari damage jatuh.
 - `drownDamagePerSec` 10 setelah oksigen habis (`VitalsRules.md`).
 - Item terkunci saat berenang (`EquipmentManager.md`).
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Menyelam:** rekomendasi tetap ada, dengan napas 30 detik. `VitalsRules.md` dan #23 sudah mengacu pada oksigen dan menyelam. Pada versi awal menyelam belum memberi hadiah, dan bisa ditambah lewat #106.
 2. **Kecepatan berenang:** rekomendasi 2,5 m/s, sama dengan membawa Heavy Item.

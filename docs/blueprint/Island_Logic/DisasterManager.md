@@ -238,7 +238,7 @@ Dengan aturan ini, gempa tidak langsung menghancurkan dinding kayu yang penuh. B
 
 **Sudah ditetapkan dokumen lain:** `survivesEarthquake` di #47, `DamageType` di #59, dan nama event di #107.
 
-**Usulan yang menunggu developer:**
+**Usulan yang disetujui developer sebagai nilai awal:**
 
 1. **Cakupan erupsi:** Fireball hanya di Region 1, sedangkan langit merah dan gemuruh terasa di semua region. Rekomendasi: pakai, karena GDD menempatkan erupsi di Region 1 dan pemain di mana pun tetap tahu ada peluang spin gratis.
 2. **Prioritas:** Blood Moon menang, dan tidak ada bencana pada hari Blood Moon. Bencana mulai pukul 08:00 sampai 14:00. Rekomendasi: pakai, supaya pemain tidak menerima horde dan bencana sekaligus.

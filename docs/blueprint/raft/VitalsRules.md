@@ -66,7 +66,7 @@ Semua berada di `GameBalanceConfig.vitals`. Nilai yang sudah ada di `GameBalance
 | `frostbiteStaminaDrainPerSec` | 5 | Sudah ada |
 | `frostbiteDamagePerSec` | 1 | Sudah ada |
 | `drownDamagePerSec` | 10 | HP penuh habis dalam 10 detik setelah oksigen habis (#13) |
-| `infectionDamagePerSec` | 0,3 | Damage saat infeksi tinggi. Angka final bersama #64 |
+| `infectionDamagePerSec` | 0,3 | Damage saat infeksi tinggi, termasuk saat `Infection` 100. Nilai awal keputusan developer |
 | `infectionDamageThreshold` | 75 | Awal damage infeksi. Selaras dengan tahap 4 di #64 |
 | `regenPerSec` | 0,25 | HP penuh pulih dalam 400 detik, sekitar 0,45 hari game |
 | `regenMinHunger` | 50 | Lapar minimum untuk pulih |
@@ -270,18 +270,20 @@ ZoneManager --RegionChangedEvent--> WarmthSystem (#65) --WarmthChangedEvent { wa
 
 **Sudah ditetapkan dokumen lain:** `SurvivalStats` memegang semua status (`GLOSSARY.md`). Frostbite menguras stamina dulu, lalu HP (`GLOSSARY.md`). Haus menjadi status inti (`GLOSSARY.md`). Angka lapar, haus, dan frostbite (`GameBalanceConfig.md`). Dehidrasi menghentikan regenerasi stamina (#43).
 
+**Keputusan developer:** saat `Infection` mencapai 100, HP turun bertahap dengan laju awal 0,3 per detik lewat baris 5, dan pemain tidak mati seketika. Kematiannya tetap `Zombified` saat HP habis, sesuai GDD bagian 3.
+
 **Keputusan teknis di blueprint ini:**
 
 - `VitalsRules` tidak menjadi kelas terpisah, supaya pemilik status tetap satu.
 - Pengurasan stamina karena dingin berada di luar tabel HP.
 - Damage kondisi tidak mengubah `lastDamageTime`.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Kerusakan tidak bertumpuk:** hanya kondisi tertinggi yang berlaku, mengikuti pola Raft di `CATATAN_MEKANIK.md`. Pilihan lain adalah bertumpuk, tetapi HP bisa habis terlalu cepat saat beberapa status buruk bersamaan.
 2. **Urutan prioritas:** tenggelam, frostbite, kelaparan, dehidrasi, infeksi, lalu pemulihan, sesuai checklist issue.
 3. **Pemulihan HP alami:** ada, 0,25 per detik, dengan syarat lapar dan haus minimal 50, infeksi di bawah 50, dan 12 detik tanpa diserang.
-4. **Damage infeksi:** 0,3 per detik mulai `Infection` 75. GDD menyebut HP habis karena infeksi, jadi `Infection` 100 tidak membunuh langsung, dan HP tetap turun lewat baris 5.
+4. **Awal damage infeksi:** mulai `Infection` 75, dengan laju yang sama seperti saat `Infection` 100.
 5. **Biaya stamina:** lari 10 per detik, lompat 8, melee 15, berenang 6 per detik, dan memanjat 5 per detik.
 6. **Kelelahan:** setelah stamina habis, lari dan lompat terkunci sampai stamina 25. Melee tetap bisa, dengan damage 70 persen dan jeda 1,5x.
 7. **Penalti lapar dan haus rendah:** di bawah 25, batas stamina menjadi 75 persen, atau regenerasi stamina setengah.

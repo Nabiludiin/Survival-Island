@@ -150,7 +150,7 @@ Menyalakan musuh dan api yang menjalar diatur #97. Jebakan ini hanya memberi dam
 
 **Sudah ditetapkan dokumen lain:** struktur memakai `Instantiate` (`BuildMenu.md`), `BuildCategory.Defense`, dan restriksi pantai (GDD bagian 4).
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Daftar jebakan:** Spike Trap, kawat berduri, dan api unggun, sesuai issue. Rekomendasi: pakai ketiganya.
 2. **Pemain dan NPC:** tidak terkena jebakan. Rekomendasi: pakai, karena GDD hanya membahas ancaman musuh dan base dipakai NPC berlindung.

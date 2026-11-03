@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/Island_Logic/DiaryManager.md`
 **Deskripsi Utama:** Menampilkan isi bab Diary dan membuka arsip baca ulang. Jeda, kursor, dan penutupan panel diatur `UIFocusStack`.
 **Issue:** #81 (melengkapi #83, #18, dan #104)
-**Rujukan GDD:** Bagian 4 (Sistem Diary, Bab 1 sampai 3). Jeda saat membaca mengikuti `Claude.md` Tahap 5. Tombol `J` dan arsip baca ulang adalah usulan, belum ada di GDD.
+**Rujukan GDD:** Bagian 4 (satu buku Diary, Bab 1 sampai 3 yang terbuka bertahap). Jeda saat membaca mengikuti `Claude.md` Tahap 5. Membaca bab dari menu adalah keputusan developer. Tombol `J` adalah usulan, belum ada di GDD.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -12,7 +12,7 @@
 |---|---|---|
 | `DiaryManager` | Manager di `IslandPhase` | Pintu masuk `OpenDiary`, dan membaca tombol arsip |
 | `DiaryPanel` | Turunan `UIPanel`, `UIPanelId.Diary` | Panel teks satu bab |
-| `DiaryArchivePanel` | Turunan `UIPanel` | Daftar bab ditemukan dan tujuan selesai. Isi dan tab `Arsip` ada di `ObjectiveManager.md` |
+| `DiaryArchivePanel` | Turunan `UIPanel` | Daftar bab terbuka dan tujuan selesai. Isi dan tab `Arsip` ada di `ObjectiveManager.md` |
 
 | Variabel | Tipe | Nilai awal | Fungsi |
 |---|---|---|---|
@@ -32,15 +32,17 @@
 
 **Tombol Close** pada `DiaryPanel` memanggil `UIFocusStack.Instance.Close(diaryPanel, UICloseReason.User)`. Esc ditangani `UIFocusStack`, karena hanya sistem itu yang membaca Esc.
 
-**Aksi input `OpenDiary` (`J`):** kalau `InputManager.Instance.OpenDiaryPressed` dan `!UIFocusStack.Instance.IsGameplayInputBlocked`, panggil `UIFocusStack.Instance.Push(archivePanel)`. Memilih bab di arsip memanggil `OpenDiary(entry)`. Panel baca berada di atas arsip, sehingga menutupnya kembali ke arsip.
+**`public void OpenArchive()`** memanggil `UIFocusStack.Instance.Push(archivePanel)`. Dipakai `ObjectiveManager.InteractBook` untuk buku yang sudah ditemukan.
+
+**Aksi input `OpenDiary` (`J`):** kalau `InputManager.Instance.OpenDiaryPressed` dan `!UIFocusStack.Instance.IsGameplayInputBlocked`, panggil `OpenArchive()`. Memilih bab di arsip memanggil `OpenDiary(entry)`. Panel baca berada di atas arsip, sehingga menutupnya kembali ke arsip.
 
 ## 3. Hubungan dengan Sistem Lain
 
-**Event yang dikirim dan didengar:** tidak ada. Penemuan bab menerbitkan `DiaryChapterFoundEvent` dari `ObjectiveManager`.
+**Event yang dikirim dan didengar:** tidak ada. Bab yang terbuka menerbitkan `DiaryChapterUnlockedEvent` dari `ObjectiveManager`.
 
 | Sistem | Hubungan |
 |---|---|
-| `ObjectiveManager` (#81) | Memanggil `OpenDiary(entry)`, dan menyediakan `DiaryEntry`, `foundChapters`, serta isi arsip |
+| `ObjectiveManager` (#81) | Memanggil `OpenDiary(entry)`, dan menyediakan `DiaryEntry`, `unlockedChapters`, serta isi arsip |
 | `UIFocusStack` (#83) | `Push` dan `Close`. Pemilik jeda dan kursor |
 | `InputManager` (#18) | Aksi `OpenDiary` |
 | `LocalizationManager` (#104) | Teks `diary.ch<chapter>.title` dan `diary.ch<chapter>.body` |
@@ -51,20 +53,22 @@
 - **Pool dipakai ulang:** panel tidak memakai pool.
 - **Game dijeda:** `Diary` sudah menjeda. Membuka Pause di atasnya, lalu menutup Diary, tidak menjalankan waktu kembali, karena jeda dihitung dari seluruh isi stack.
 - **Tombol `J` saat panel lain terbuka:** ditolak lewat `IsGameplayInputBlocked`.
-- **Save dan load:** tidak ada data milik `DiaryManager`. Bab ditemukan tersimpan di `world_objectives`.
+- **Save dan load:** tidak ada data milik `DiaryManager`. Bab terbuka tersimpan di `world_objectives`.
 - **Permadeath:** `DiaryManager` hilang bersama scene `IslandPhase`, dan isi arsip mulai dari nol.
 
 ## 5. Keputusan Desain
 
 **Sudah ditetapkan dokumen lain:** Diary menjeda game (`Claude.md` Tahap 5), panel dan Esc lewat `UIFocusStack` (#83), serta `OpenDiary(DiaryEntry)` dan `DiaryArchivePanel` (#81).
 
-**Usulan yang menunggu developer (#85):**
+**Keputusan developer:** bab yang terbuka bisa dibaca dari menu setelah buku ditemukan, karena semua bab berada dalam satu buku di shelter tua.
 
-1. **Tombol `J` dan arsip baca ulang:** rekomendasi pakai, karena Diary berfungsi sebagai *guidebook* sepanjang run.
+**Usulan yang disetujui developer sebagai nilai awal (#85):**
+
+1. **Tombol `J`:** rekomendasi pakai, karena Diary berfungsi sebagai *guidebook* sepanjang run.
 
 ## 6. Skenario Tes
 
-1. Tekan `E` pada buku Bab 1. **Hasil:** panel terbuka, `Time.timeScale` 0, dan kursor lepas.
+1. Tekan `E` pada buku Diary. **Hasil:** panel terbuka, `Time.timeScale` 0, dan kursor lepas.
 2. Klik Close. **Hasil:** panel tertutup, waktu berjalan, dan kursor terkunci.
 3. Buka lagi, lalu tekan Esc. **Hasil:** panel tertutup lewat `UIFocusStack`.
 4. Cari `Time.timeScale` dan `Cursor.` di `DiaryManager.cs`. **Hasil:** tidak ada.
@@ -72,3 +76,4 @@
 6. Tekan `J` saat `CraftingPanel` terbuka. **Hasil:** arsip tidak terbuka.
 7. Ganti bahasa, lalu buka bab. **Hasil:** teks mengikuti bahasa baru.
 8. Mati, lalu mulai run baru dan tekan `J`. **Hasil:** arsip kosong.
+9. Tekan `E` lagi pada buku yang sudah ditemukan. **Hasil:** arsip terbuka, bukan panel Bab 1.

@@ -15,7 +15,7 @@ public enum UIPanelId
 {
     MainMenu, Loading, Cinematic, Pause, Settings, ConfirmDialog, RunSummary,
     Diary, LoreReader, Inventory, Crafting, Storage, Campfire, BuildMenu,
-    WorldMap, LuckyMachine, GameOver, WinScreen, DevConsole, Stats
+    LuckyMachine, GameOver, WinScreen, DevConsole, Stats
 }
 
 public enum UICloseReason { User, Forced, RunEnded, SceneUnloaded }
@@ -72,7 +72,6 @@ public abstract class UIPanel : MonoBehaviour
 | `Storage` (#46) | Tidak | Ya | Ya | Ya | Tidak | Tidak |
 | `Campfire` (#44) | Tidak | Ya | Ya | Ya | Tidak | Tidak |
 | `BuildMenu` (#79) | Tidak | Ya | Ya | Ya | Tidak | Tidak |
-| `WorldMap` (#105, nonaktif) | Tidak | Ya | Ya | Ya | Tidak | Tidak |
 | `LuckyMachine` (#72) | Tidak | Ya | Ya | Ya | Tidak | Tidak |
 | `GameOver` | Ya | Ya | Ya | Tidak | Ya | Ya |
 | `WinScreen` | Ya | Ya | Ya | Tidak | Ya | Ya |
@@ -238,7 +237,7 @@ Panel hanya memanggil `Push` dan `Close`. Pemeriksaan teks `Time.timeScale`, `Cu
 | `UIManager` | Memiliki panel persisten `Pause`, `Loading`, `Cinematic`, `GameOver`, dan `WinScreen`. Tidak lagi mengatur waktu, kursor, atau Esc |
 | `DiaryManager` | `OpenDiary` memanggil `Push(diaryPanel)`, dan tombol Close memanggil `Close`. Variabel `isReading` dan pembacaan Esc dihapus |
 | `AudioManager` | Menyediakan `SetPausedMix` |
-| #44, #46, #72, #77, #79, #100, #105 | Panelnya mewarisi `UIPanel` |
+| #44, #46, #72, #77, #79, #100 | Panelnya mewarisi `UIPanel` |
 | #53, #56 | Memakai `SetGameplayTimeScale` |
 | #99 | Memakai panel `Cinematic` untuk adegan |
 
@@ -266,7 +265,7 @@ Panel hanya memanggil `Push` dan `Close`. Pemeriksaan teks `Time.timeScale`, `Cu
 - Waktu dan kursor dihitung dari seluruh isi stack, bukan hanya puncak.
 - `Loading` menjeda waktu, jadi dunia tidak berjalan saat pemain belum bisa bergerak.
 
-**Usulan yang menunggu developer (dicatat di #85):**
+**Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Panel yang menjeda:** `Pause`, `Settings`, `ConfirmDialog`, `RunSummary`, `Diary`, `LoreReader`, `GameOver`, `WinScreen`, `Loading`, dan `DevConsole`. **Inventori, crafting, peti, api unggun, dan menu bangun tidak menjeda.**
 2. **Gerakan saat panel tanpa jeda terbuka:** pemain berhenti, karena seluruh `Gameplay` dimatikan. Pilihan lain adalah tetap bisa berjalan, tetapi itu membutuhkan pemisahan Action Map tambahan.
