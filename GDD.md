@@ -3,7 +3,7 @@
 ## 1. Game Overview
 **Logika Inti:** Percampuran mekanik *scavenging* berbatas waktu, *survival base-building* dengan restriksi area, aksi melawan ancaman ganda (hewan buas di siang hari, zombie di malam hari), dan sistem *grinding* logistik antar-region.
 **Genre:** First-Person Survival, Action Horror, Base-Building, Resource Management, Roguelike/Permadeath.
-**Tujuan Utama:** Bertahan hidup selama 60 hari, mengelola status lapar dan infeksi, memindahkan suku cadang dari desa (Region 4) ke pangkalan militer (Region 3), dan merakit helikopter untuk kabur. **Game menggunakan sistem Permadeath: jika pemain mati atau gagal, game akan diulang sepenuhnya dari awal.**
+**Tujuan Utama:** Bertahan hidup dengan target 60 hari, mengelola status lapar dan infeksi, memindahkan suku cadang dari desa (Region 4) ke pangkalan militer (Region 3), dan merakit helikopter untuk kabur. **Game menggunakan sistem Permadeath: jika pemain mati, game akan diulang sepenuhnya dari awal.**
 
 ## 2. Narrative & Latar Belakang
 **Insiden Kapal:** Karakter Utama (MC) adalah penumpang kapal pesiar raksasa. Kekacauan terjadi ketika seorang zombie (korban wabah dari daratan yang menyusup) menggigit penumpang. Wabah menyebar cepat, kepanikan membuat kru kehilangan kendali, dan kapal menabrak gunung es hingga karam di dekat pulau misterius. 
@@ -27,8 +27,9 @@ Game dibagi menjadi dua fase utama yang saling berkesinambungan.
     *   **Siang Hari:** **Zombie akan terbakar dan mati jika terkena sinar matahari.** Oleh karena itu, tidak ada zombie yang berkeliaran di siang hari. Ancaman utama di siang hari murni berasal dari **Hewan Buas** yang agresif menjaga teritori dan *resource*.
     *   **Malam Hari:** Matahari terbenam dan hewan buas kembali ke sarang. Gelapnya malam memicu **Horde Zombie** keluar dari persembunyiannya untuk memburu MC dan menyerang *base*.
 -   **Syarat Menang & Game Over (Permadeath):** 
-    *   **Menang:** Menyelesaikan rakitan Helikopter di Region 3 dan lepas landas sebelum batas waktu 60 hari habis.
-    *   **Kalah / Game Over:** Jika MC **mati** (HP habis karena diserang, lapar, haus, atau infeksi) ATAU **gagal kabur** saat batas waktu 60 hari habis, **maka game akan mengulang dari awal (Reset).** Pemain akan kembali ke Fase 1 (berada di dalam kapal pesiar yang tenggelam) dan harus mengambil barang-barang (looting) dari nol lagi.
+    *   **Menang:** Menyelesaikan rakitan Helikopter di Region 3 dan lepas landas.
+    *   **Kalah / Game Over:** Jika MC **mati** (HP habis karena diserang, lapar, haus, atau infeksi), **maka game akan mengulang dari awal (Reset).** Pemain akan kembali ke Fase 1 (berada di dalam kapal pesiar yang tenggelam) dan harus mengambil barang-barang (looting) dari nol lagi.
+    *   **Melewati Hari ke-60:** Bukan Game Over. Pemain tetap bisa bertahan dan kabur dengan helikopter, tetapi zombie akan semakin kuat.
 
 ## 4. Mekanik Base Building & Sistem Diary (Tutorial)
 **Aturan Shelter:**

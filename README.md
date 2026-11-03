@@ -66,7 +66,7 @@ GDD.md → Issue GitHub → Blueprint .md → Pull Request → Script C# → Tes
 Sebelum menyentuh folder kode atau logika, baca file berikut agar memahami dunia game dan batasan-batasannya:
 
 1. **`Survival Island/README.md`:** Memahami cerita dan *feel* game.
-2. **`GDD.md` (Game Design Document):** Dokumen paling krusial. Berisi seluruh aturan game, narasi (insiden kapal, diary), mekanik 4 Region (Gunung Berapi, Amazon, Es, Desa), mekanik siang/malam (Hewan vs Zombie terbakar), dan *Win Condition* (merakit Helikopter dan kabur sebelum batas Hari ke-60).
+2. **`GDD.md` (Game Design Document):** Dokumen paling krusial. Berisi seluruh aturan game, narasi (insiden kapal, diary), mekanik 4 Region (Gunung Berapi, Amazon, Es, Desa), mekanik siang/malam (Hewan vs Zombie terbakar), dan *Win Condition* (merakit Helikopter dan kabur, dengan target Hari ke-60. Melewati Hari ke-60 membuat zombie semakin kuat, tetapi bukan Game Over).
 3. **`README.md` (File ini):** Memahami alur kerja, struktur folder, dan instruksi penulisan.
 4. **`Claude.md`:** Berisi cara kerja, perintah eksekusi, dan standar teknis yang harus dipatuhi.
 
