@@ -26,6 +26,12 @@
 | `spoilHours` | `float` | 0 | Jam game sampai busuk. 0 berarti tidak busuk |
 | `poisonChance` | `float` | 0 | Peluang keracunan saat segar. Dipakai #45 |
 | `worldMesh`, `worldMaterial` | Aset | `null` | Tampilan `WorldItem` |
+| `curesDiseases` | `DiseaseCure` | `None` | Penyakit yang disembuhkan (#45) |
+| `fuelSeconds` | `float` | 0 | Bahan bakar api unggun. `Mat_Wood` 60, `Mat_Charcoal` 120 (#44) |
+| `appliesEffectId` | `string` | Kosong | Efek yang dipasang saat dipakai (#20) |
+| `isRepairable` | `bool` | `false` | Bisa diperbaiki (#113) |
+| `repairCost` | `RecipeIngredient[]` | Kosong | Biaya perbaikan penuh (#113) |
+| `repairStation` | `CraftingStationType` | `WoodBench` | Stasiun perbaikan (#113) |
 
 `Base_Kail`, `Base_Pistol`, dan `Base_Pisau` memakai `isCoreItem = true` dan `isDroppable = false`, sesuai `GLOSSARY.md`. `ItemType.KeyItem` juga selalu `isDroppable = false` (#116).
 
@@ -41,6 +47,9 @@ public class ItemInstance
     public int magazineAmmo;        // -1 kalau bukan senjata api (#58)
     public float createdGameHour;   // Jam game total saat dibuat. -1 kalau tidak busuk
     public int upgradeMask;         // Dicadangkan untuk #113
+    public int repairCount;         // Jumlah perbaikan (#113)
+    public string luckyModifierId;  // Modifier Lucky Machine. Kosong kalau tidak ada (#113, #72)
+    public string skinId;           // Tampilan senjata dari Lucky Machine. Kosong kalau tidak ada (#72)
 }
 
 [Serializable]
@@ -57,14 +66,18 @@ public class InventorySlot
 
 | Fungsi | Kegunaan |
 |---|---|
-| `int AddItem(ItemInstance source, int amount)` | Menambah, lalu mengembalikan sisa yang tidak muat. `AddItem(ItemData, int)` tetap ada dan memakai fungsi ini |
+| `int AddItem(ItemInstance source, int amount)` | Memanggil `SlotArrayOps.Add`, lalu mengembalikan sisa yang tidak muat. `AddItem(ItemData, int)` tetap ada dan memakai fungsi ini. Aturan tumpukan hanya ada di `SlotArrayOps`, dipakai bersama `StorageChest` (#46) |
 | `void RemoveFromSlot(int slotIndex, int amount)` | Mengurangi dari slot tertentu |
 | `void RemoveInstance(int instanceId)` | Menghapus item unik |
 | `int SplitStack(int slotIndex, int amount)` | Memisahkan tumpukan ke slot kosong. Mengembalikan indeks baru, atau -1 |
 | `void MoveSlot(int from, int to)` | Menukar isi dua slot |
 | `ItemInstance FindInstance(int instanceId)` | Mencari item unik |
+| `int GetCount(string itemId)` | Menghitung total lewat `SlotArrayOps.CountItem` (#46) |
+| `bool CanFitAfterRemoval(RecipeIngredient[] removed, ItemData result, int amount)` | Simulasi ruang tanpa mengubah slot (#77) |
 
 `AddItem` lama yang mengembalikan `bool` diganti, supaya tumpukan yang hanya muat sebagian tidak hilang.
+
+**Kontrak save `InventoryManager` (#80):** `ISaveable`, dengan `SaveId = player_inventory` dan `LoadOrder = 50`. Yang disimpan: slot berisi, `ItemInstance`, dan `nextInstanceId`.
 
 ### Status pakai
 
@@ -95,13 +108,34 @@ Nilai mengikuti target makan dan minum di `GameBalanceConfig.md`.
 | Item | ID | Lapar | Haus | Pakai | Busuk | `poisonChance` |
 |---|---|---|---|---|---|---|
 | Daging mentah | `Food_RawMeat` | 15 | 0 | 2 detik | 12 jam game | 0,5 (#45) |
+| Ikan mentah | `Food_RawFish` | 12 | 0 | 2 detik | 12 jam game | 0,5 (#45, #55) |
 | Daging matang | `Food_CookedMeat` | 33 | 0 | 2 detik | 48 jam game | 0 |
 | Ikan matang | `Food_CookedFish` | 33 | 5 | 2 detik | 36 jam game | 0 |
+| Makanan gosong | `Food_Burnt` | 5 | 0 | 2 detik | Tidak busuk | 0 (#44) |
 | Makanan kaleng | `Food_Can` | 33 | 5 | 3 detik | Tidak busuk | 0 |
 | Air Minum Bersih | `Drink_CleanWater` | 0 | 25 | 2 detik | Tidak busuk | 0 |
 | Kelapa | `Drink_Coconut` | 5 | 25 | 3 detik | 96 jam game | 0 |
-| Air kotor | `Drink_DirtyWater` | 0 | 15 | 2 detik | Tidak busuk | Diatur #43 dan #45 |
-| Vaksin | `Med_Vaccine` | 0 | 0 | Diatur #64 | Tidak busuk | 0 |
+| Air kotor | `Drink_DirtyWater` | 0 | 15 | 2 detik | Tidak busuk | 0,35 (#45) |
+| Vaksin | `Med_Vaccine` | 0 | 0 | 4 detik (`GameBalanceConfig.infection.vaccineInjectSeconds`) | Tidak busuk | 0 |
+
+**Isi tambahan obat dan lainnya:**
+
+| Item | ID | Isi | Pakai |
+|---|---|---|---|
+| Vaksin | `Med_Vaccine` | `restoreSeconds = 0`, `infectionDelta = -50` (`GameBalanceConfig.infection.vaccineReduction`) | 4 detik |
+| Norit | `Med_Norit` | Menyembuhkan lewat `curesDiseases` (#45) | 2 detik |
+| Perban | `Med_Bandage` | HP +5 (#45) | 3 detik |
+| Medkit | `Med_Medkit` | HP +40 (#45) | 5 detik |
+| Antibiotik | `Med_Antibiotic` | Menyembuhkan lewat `curesDiseases` (#45) | 2 detik |
+| Baterai | `Item_Battery` | `isConsumable`, `maxStack` 5 (#98) | Aksi khusus |
+| Kit api unggun | `Kit_Campfire` | Aksi khusus (#44) | Tanpa waktu pakai |
+
+**Usulan, berlaku kalau #48 disetujui:**
+
+| Item | ID | Lapar | Pakai | Busuk | `poisonChance` |
+|---|---|---|---|---|---|
+| Kentang | `Food_Potato` | 10 | 2 detik | 72 jam game | 0 |
+| Kentang matang | `Food_CookedPotato` | 25 | 2 detik | 48 jam game | 0 |
 
 ## 2. Detail Logika & Fungsi
 
@@ -112,6 +146,9 @@ Nilai mengikuti target makan dan minum di `GameBalanceConfig.md`.
 | Aksi | Syarat tampil | Fungsi | Hasil |
 |---|---|---|---|
 | **Pakai** | `isConsumable` | `ItemUseSystem.TryUse(slot)` | Mulai memakai, lalu panel tetap terbuka |
+| **Pakai** | `isWarmClothing` | `WarmthSystem.WearClothing(instanceId)` (#65), bukan `TryUse` | Pakaian terpasang |
+| **Pakai** | `Kit_Campfire` | `BuildManager.BeginPlacementFromItem(instanceId, Build_Campfire)` (#44) | Mulai penempatan |
+| **Pakai** | `Item_Battery` | Cari `Tool_Flashlight` yang dipegang, lalu yang isinya terendah di inventori. Panggil `Recharge(flashlight.batteryRecharge)`, lalu kurangi 1 item (#98) | Ditolak kalau senter tidak ada atau sudah penuh |
 | **Buang** | `isDroppable` | `ItemUseSystem.DropFromSlot(slot, amount)` | Item jatuh sebagai `WorldItem` |
 | **Pisahkan** | `amount > 1` dan ada slot kosong | `InventoryManager.SplitStack(slot, amount / 2)` | Tumpukan terbagi dua |
 | **Ke Hotbar** | Punya `equipPrefab` atau `isConsumable` | `EquipmentManager.AssignToHotbar(index, instanceId)` | Rujukan masuk ke hotbar (#60) |
@@ -119,6 +156,7 @@ Nilai mengikuti target makan dan minum di `GameBalanceConfig.md`.
 
 - Seret dan lepas antar-slot memanggil `MoveSlot`.
 - Menyeret keluar panel sama dengan Buang.
+- Saat `StoragePanel` terbuka, menu kecil `InventoryPanel` tidak muncul pada klik kanan, karena klik kanan menjadi transfer cepat (#46).
 - `OnClosed` mengembalikan barang yang masih diseret ke slot asalnya, termasuk saat pemain mati (#83).
 - Panel tidak mengubah status langsung, sesuai aturan UI di `GameEventBus.md`.
 
@@ -127,7 +165,7 @@ Nilai mengikuti target makan dan minum di `GameBalanceConfig.md`.
 **`public bool TryUse(int slotIndex)`**:
 
 1. Tolak kalau `IsUsing`, slot kosong, atau item bukan `isConsumable`.
-2. Tolak kalau semua status yang dipulihkan sudah penuh, dengan notifikasi. Vaksin dan obat mengikuti sistem pemiliknya (#64, #45).
+2. Tolak kalau semua status yang dipulihkan sudah penuh, dengan notifikasi. Kalau `item.infectionDelta < 0`, panggil `InfectionSystem.CanUseMedicine(item)` (#64). Kalau `item.curesDiseases != None`, atau item obat dengan `healAmount > 0`, panggil `DiseaseManager.CanUseMedicine(item)` (#45).
 3. Catat `useSlotIndex`, atur `useTimer = useSeconds`, dan `IsUsing = true`.
 4. Pasang `IslandPlayerController.SetSpeedModifier(ItemUse, useMoveSpeedMultiplier)`.
 5. Kalau `useSeconds == 0`, langsung panggil `CompleteUse()`.
@@ -144,8 +182,9 @@ Nilai mengikuti target makan dan minum di `GameBalanceConfig.md`.
 6. Kalau `infectionDelta != 0`, panggil `InfectionSystem.ApplyMedicine(item)`, atau `SurvivalStats.ReduceInfection` selama #64 belum tersedia.
 7. Panggil `DiseaseManager.OnConsumed(item, freshness)` (#45) untuk peluang keracunan.
 8. `InventoryManager.RemoveFromSlot(slot, 1)`, yang menerbitkan `InventoryChangedEvent`.
-9. Terbitkan `ItemConsumedEvent { itemId, freshness }`.
-10. Hapus pengali kecepatan, dan `IsUsing = false`.
+9. Kalau `appliesEffectId` terisi, panggil `StatusEffectManager.ApplyById(appliesEffectId, itemId)` (#20).
+10. Terbitkan `ItemConsumedEvent { itemId, freshness }`.
+11. Hapus pengali kecepatan, dan `IsUsing = false`.
 
 **`public void CancelUse(string reason)`**: `IsUsing = false`, hapus pengali kecepatan, dan item tidak berkurang.
 
@@ -218,6 +257,9 @@ Isi keracunan, efek, dan obatnya milik #45. Blueprint ini mengirim `OnConsumed(i
 | `void Despawn(WorldItem item)` | Melepas daftar dan mengembalikan ke pool |
 | `void CaptureRegion(RegionType region)` | Dipanggil saat region `Unloading`. Menulis data ke `RegionStateStore`, lalu mengembalikan objeknya ke pool |
 | `void RestoreRegion(RegionType region)` | Dipanggil saat region `Loaded`. Memunculkan kembali item |
+| `void SweepBelow(Bounds zone, float waterY, TideSafePoint[] safe)` | Dipanggil `TideManager` (#91). Item biasa di bawah `waterY` kembali ke pool. Item penting pindah ke `TideSafePoint` terdekat, disertai notifikasi |
+
+`WorldItemManager` mendengar `RegionLoadStateChangedEvent`. Pada `Unloading`, ia mencatat `itemId`, jumlah, dan posisi ke `RegionStateStore`, lalu mengembalikan objek ke pool. Pada `Loaded`, ia memunculkannya kembali (#88).
 
 **Membuang item, `public void DropFromSlot(int slotIndex, int amount)`**:
 
@@ -276,7 +318,7 @@ Isi keracunan, efek, dan obatnya milik #45. Blueprint ini mengirim `OnConsumed(i
 - **Target hover kembali ke pool:** `PlayerInteractor` melepas target yang tidak aktif (#17).
 - **Game dijeda:** `Time.deltaTime` bernilai 0, jadi waktu pakai berhenti. Jam game juga berhenti, jadi pembusukan berhenti. Panel `Inventory` tidak menjeda, sesuai #83, jadi memakai item di menu tetap memakan waktu.
 - **Permadeath:** isi inventori, `WorldItem`, dan `nextInstanceId` terhapus bersama save run (#82).
-- **Save dan load:** setiap `InventorySlot` disimpan dengan `ItemInstance` lengkap: `instanceId`, `itemId`, `durability`, `magazineAmmo`, `createdGameHour`, dan `upgradeMask`, lalu `amount` dan `nextInstanceId`. `WorldItem` disimpan per region di `RegionStateStore`. `IsUsing` tidak disimpan, jadi pemakaian yang sedang berjalan batal.
+- **Save dan load:** setiap `InventorySlot` disimpan dengan `ItemInstance` lengkap: `instanceId`, `itemId`, `durability`, `magazineAmmo`, `createdGameHour`, `upgradeMask`, `repairCount`, `luckyModifierId`, dan `skinId`, lalu `amount` dan `nextInstanceId`. `WorldItem` disimpan per region di `RegionStateStore`. `IsUsing` tidak disimpan, jadi pemakaian yang sedang berjalan batal.
 - **Inventori penuh saat mengambil:** item tetap di tanah, tanpa pengurangan apa pun.
 - **Slot berubah saat dipakai:** `CompleteUse` membandingkan `instanceId` dengan yang tercatat. Kalau berbeda, pemakaian batal.
 - **Tumpukan makanan dengan umur berbeda:** digabung lewat rata-rata berbobot. Ini sedikit menguntungkan pemain, tetapi jauh lebih sederhana daripada satu slot per umur.

@@ -1,52 +1,83 @@
 # Blueprint: ShipPlayerController.cs (First-Person Edition)
 **Lokasi:** `docs/blueprint/60-seconds/ShipPlayerController.md`
-**Deskripsi Utama:** Skrip pergerakan dan kamera murni **First-Person**. Skrip ini menangani rotasi leher (Mouse Look), pergerakan badan (WASD), mekanik goyangan layar akibat kapal tenggelam (*Ship Sway*), dan tembakan *Raycast* langsung dari titik tengah mata pemain.
+**Deskripsi Utama:** Pergerakan pemain Fase 1. Kamera memakai prefab rig `FirstPersonCamera`, interaksi memakai `PlayerInteractor`, dan input memakai `InputManager`.
+**Issue:** #17, #18, #74, #75, #83, #102
+**Rujukan GDD:** Bagian 1 (Fase 1, first-person). Level kontrol dan aksi dorong adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
-*   `[Header("First Person Camera Settings")]`
-    *   `[SerializeField] private Camera firstPersonCamera;`
-    *   `public float mouseSensitivity = 2f;`
-    *   `public float maxLookAngle = 80f;` (Batas melihat ke atas/bawah agar leher tidak patah).
-    *   `private float xRotation = 0f;` (Rotasi sumbu X kamera).
-*   `[Header("Movement Settings")]`
-    *   `[SerializeField] private CharacterController controller;`
-    *   `public float moveSpeed = 5f;`
-*   `[Header("Ship Sway (Simulasi Tenggelam)")]`
-    *   `public float swayAmount = 5f;` (Derajat kemiringan kapal maksimal).
-    *   `public float swaySpeed = 1f;`
-*   `[Header("Interaction System (Crosshair)")]`
-    *   `public float interactRange = 3f;`
-    *   `private IInteractable currentHoveredObject;`
+
+```csharp
+public enum ShipControlLevel { None, LookOnly, Full }
+```
+
+| Variabel | Tipe | Nilai awal | Fungsi |
+|---|---|---|---|
+| `controller` | `CharacterController` | Dari prefab | Pergerakan |
+| `moveSpeed` | `float` | 5 | Kecepatan dasar |
+| `controlLevel` | `ShipControlLevel` | `None` | Level kontrol saat ini |
+| `waterMul`, `tiltMul` | `float` | 1 | Pengali dari `ShipHazardManager` (#75) |
+| `drift` | `Vector3` | Nol | Geser kapal dari `ShipHazardManager` |
+
+**Dihapus:** mouse look, `firstPersonCamera`, `mouseSensitivity`, `maxLookAngle`, `xRotation`, rumus `zSway`, raycast interaksi, `currentHoveredObject`, `Input.GetAxis`, serta penulisan `Cursor.lockState` dan `Cursor.visible`. Kursor diatur `UIFocusStack`.
 
 ## 2. Detail Logika & Fungsi
-*   **`void Start()`**
-    *   Kunci dan sembunyikan kursor mouse agar pemain bisa melihat sekeliling dengan bebas:
-        `Cursor.lockState = CursorLockMode.Locked;`
-        `Cursor.visible = false;`
 
-*   **`void Update()`**
-    *   **1. First-Person Mouse Look (Menoleh):**
-        *   Ambil input: `float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;`
-        *   Ambil input: `float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;`
-        *   Hitung rotasi vertikal (melihat ke atas/bawah): 
-            `xRotation -= mouseY;`
-            `xRotation = Mathf.Clamp(xRotation, -maxLookAngle, maxLookAngle);`
-        *   Putar badan pemain (Kiri/Kanan): `transform.Rotate(Vector3.up * mouseX);`
-    *   **2. Ship Sway Effect (Kamera Miring):**
-        *   Gunakan matematika gelombang (*Sine Wave*) untuk memiringkan layar ke kiri dan kanan (Sumbu Z) seakan kapal terombang-ambing.
-        *   `float zSway = Mathf.Sin(Time.time * swaySpeed) * swayAmount;`
-        *   Terapkan rotasi akhir ke kamera: 
-            `firstPersonCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, zSway);`
-    *   **3. First-Person Movement (Berjalan):**
-        *   `float x = Input.GetAxis("Horizontal");`
-        *   `float z = Input.GetAxis("Vertical");`
-        *   `Vector3 move = transform.right * x + transform.forward * z;`
-        *   `controller.Move(move * moveSpeed * Time.deltaTime);`
-    *   **4. Crosshair Interaction (Raycast dari Mata):**
-        *   Selalu tembakkan `Raycast` dari posisi dan arah kamera:
-            `PhysicsQuery.Raycast(ray, out RaycastHit hit, interactRange, PhysicsMasks.Interact);`
-        *   Jika mengenai objek `IInteractable`, ubah UI Crosshair di tengah layar menjadi ikon tangan terbuka, dan tunggu tombol `E` untuk mengambil.
+**`public void SetControlLevel(ShipControlLevel level)`**:
 
-## 3. Catatan Khusus untuk AI (Claude)
-*   **Raycast Origin:** Pastikan raycast interaksi *selalu* ditembakkan dari `firstPersonCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0))` yang merupakan titik tengah layar persis, bukan dari posisi dada pemain.
-*   **Kamera Terpisah:** Komponen Camera HARUS dijadikan *child* dari GameObject Pemain dan diletakkan di koordinat `Y = 1.6f` (ketinggian mata orang dewasa).
+| Level | Gerak | Menengok | Interaksi |
+|---|---|---|---|
+| `None` | Tidak | Tidak | Tidak |
+| `LookOnly` | Tidak | Ya | Tidak |
+| `Full` | Ya | Ya | Ya |
+
+Fungsi ini mengatur `FirstPersonCamera` dan `PlayerInteractor`.
+
+**`public void SetShipMoveModifiers(float waterMul, float tiltMul, Vector3 drift)`**: menerima pengali dari `ShipHazardManager`.
+
+**`void Update()`**:
+
+1. Keluar dari gerak kalau `controlLevel != Full`.
+2. Baca `InputManager.Instance.MoveInput`.
+3. `Vector3 move = transform.right * x + transform.forward * z`.
+4. `controller.Move((move * moveSpeed * waterMul * tiltMul + drift) * Time.deltaTime)`.
+5. Kalau `InputManager.Instance.PrimaryPressed`, jalankan `ShipShove`.
+
+**Interaksi:** tombol `E` dibaca `PlayerInteractor` (#17), bukan kelas ini. Ship sway memakai `ShipSwaySource` sebagai `ICameraOffsetSource` (#75, #102).
+
+## 3. Hubungan dengan Sistem Lain
+
+**Event:** tidak mengirim dan tidak mendengar event.
+
+| Sistem | Hubungan |
+|---|---|
+| `InputManager` (#18) | Sumber `MoveInput` dan `PrimaryPressed` |
+| `FirstPersonCamera` (#102) | Membaca `LookDelta`, dan mengatur kamera |
+| `PlayerInteractor` (#17) | Membaca `InteractPressed` |
+| `LifeboatExtraction` (#74) | Memanggil `SetControlLevel` |
+| `ShipHazardManager` (#75) | Memanggil `SetShipMoveModifiers`, dan memiliki `ShipShove` |
+| `UIFocusStack` (#83) | Mengatur kursor, dan mematikan input lewat Action Map |
+
+## 4. Kasus Khusus
+
+- **Objek pool:** pemain tidak memakai pool.
+- **Game dijeda:** `Gameplay` mati, dan `Time.deltaTime` bernilai 0.
+- **Permadeath:** kelas ini hilang bersama `ShipPhase`.
+- **Save dan load:** Fase 1 tidak punya save (#82).
+- **Mati:** `DeathCinematic.DisableController` mematikan kelas ini.
+- **Waktu habis:** `LifeboatExtraction` memanggil `SetControlLevel(None)`, jadi pemain tidak bisa mengambil barang lagi.
+
+## 5. Keputusan Desain
+
+**Sudah ditetapkan dokumen lain:** `SetControlLevel` (`LifeboatExtraction.md`), `SetShipMoveModifiers` dan `ShipShove` (`ShipHazardManager.md`), kamera (`FirstPersonCamera.md`), interaksi (`IslandInteractable.md`).
+
+**Menunggu developer:** tidak ada yang menghalangi.
+
+## 6. Skenario Tes
+
+1. Pada `LookOnly`. **Hasil:** pemain menengok, tetapi tidak bisa bergerak dan berinteraksi.
+2. Pada `Full`, tekan `W`. **Hasil:** bergerak dengan kecepatan 5 tanpa air.
+3. Berdiri di air dengan `waterMul` 0,5. **Hasil:** kecepatan setengah.
+4. Klik kiri di dekat zombie. **Hasil:** `ShipShove` berjalan.
+5. Arahkan ke barang, lalu tekan `E`. **Hasil:** `PlayerInteractor` yang memprosesnya.
+6. Ganti tombol `Move`. **Hasil:** tombol baru berlaku.
+7. Tekan `Esc`. **Hasil:** kursor muncul, pemain berhenti, dan kelas ini tidak menulis kursor.

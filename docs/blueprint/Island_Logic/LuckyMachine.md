@@ -119,7 +119,7 @@ Kandang berbentuk lorong dengan dua sisi terbuka, supaya musuh yang mengejar pem
 
 1. Lewati kalau tag bukan `Zombie` atau `Animal` (sesuai `PhysicsLayers.md`).
 2. `var inst = other.GetComponentInParent<EnemyInstance>()`. Lewati kalau `null` atau `inst.IsSacrificing`.
-3. Lewati kalau `EnemyHealth.IsDead`, atau state `BurnToAshes`.
+3. Lewati kalau `!EnemyHealth.IsAlive`, atau state `BurnToAshes`.
 4. Cari `enemyHealth.data.enemyId` di `quotas`. Lewati kalau tidak ada.
 5. Lewati kalau `storedSpins >= maxStoredSpins`, atau `gateState == Closed`.
 6. `inst.IsSacrificing = true`, lalu `StartVacuum(inst, quotaIndex)`.
@@ -184,7 +184,7 @@ Kandang berbentuk lorong dengan dua sisi terbuka, supaya musuh yang mengejar pem
 
 | Jenis | Langkah |
 |---|---|
-| `SpawnItem` | `WorldItem.Spawn(inst, amount, rewardPoint, despawns: false)`. Tidak hilang, dan tidak bergantung pada inventori penuh. Kalau `modifier` terisi, pasang ke `inst` lebih dulu |
+| `SpawnItem` | `WorldItemManager.Spawn(inst, amount, rewardPoint, despawns: false)`. Tidak hilang, dan tidak bergantung pada inventori penuh. Kalau `modifier` terisi, pasang ke `inst` lebih dulu |
 | `WeaponModifier` | Target: item yang dipegang kalau senjata, lalu `Base_Pistol` di inventori. Isi `inst.luckyModifierId`. Kalau `modifier.indestructible`, `inst.durability = -1`. Panggil `EquipmentManager.RefreshEquipped()` |
 | `Skin` | Cari `skinTargetItemId` di inventori. Isi `inst.skinId`. `EquipmentManager` mengganti material. Kalau item tidak ada, simpan di `pendingSkins`, lalu pasang saat item didapat |
 | `PermanentBuff` | `StatusEffectManager.Instance.Apply(r.buff, "lucky_machine")`. Aset memakai `Permanent`, `Intensify`, dan `maxStacks = 3` |

@@ -20,7 +20,6 @@
 | `waveTimer` | `float` | 0 | Sisa waktu ke gelombang berikutnya |
 | `overrideHandle` | `SpawnOverrideHandle` | Kosong | Dari `SpawnManager.PushOverride` |
 | `tablesByRegion` | `RegionSpawnTable[4]` | Dari Inspector | Tabel malam per `RegionType`. Memakai aset yang sama dengan #62 |
-| `bloodMoonProfile` | `RegionEnvironmentProfile` | Dari Inspector | Lapisan langit dan kabut merah (#92) |
 
 ### Angka (`GameBalanceConfig.bloodMoon`, bagian baru)
 
@@ -67,7 +66,7 @@ Jadwal tetap dan tidak memakai `RunSeedManager`, sesuai `RunSeedManager.md`.
 
 1. `IsActive = true`, `activeDay = day`, `lastBloodMoonDay = day`, `wavesSpawned = 0`, `waveTimer = firstWaveDelaySeconds`.
 2. `overrideHandle = SpawnManager.Instance.PushOverride(new SpawnOverride { forceNightTable = true, suspendNormalSpawn = true, suspendAnimals = true, capOverride = maxAlive })`.
-3. `EnvironmentDirector.PushEventLayer(bloodMoonProfile, EnvironmentEventPriority.BloodMoon)` (#92).
+3. `EnvironmentDirector.PushEventLayer(EnvEventId.BloodMoon, 1f)` (#92).
 4. Terbitkan `BloodMoonStartedEvent { day }`.
 
 Pendengar event melakukan bagian masing-masing:
@@ -81,18 +80,17 @@ Pendengar event melakukan bagian masing-masing:
 
 ### Override cuaca
 
-Hanya `EnvironmentDirector` (#92) yang menulis fog dan cahaya. Blood Moon adalah lapisan teratas, setelah dasar region, jam, dan cuaca.
+Hanya `EnvironmentDirector` (#92) yang menulis fog dan cahaya. Blood Moon adalah lapisan event `EnvEventId.BloodMoon` dengan prioritas tertinggi (30), setelah dasar region, jam, dan cuaca. Nilainya milik tabel lapisan di `EnvironmentProfile.md`:
 
-| Parameter `bloodMoonProfile` | Nilai awal | Efek |
+| Parameter lapisan | Nilai awal | Efek |
 |---|---|---|
-| `fogColor` | `#5A0A0A` | Kabut merah pekat |
-| `fogDensity` | 0,018 | Jarak pandang sekitar 80 meter |
-| `ambientColor` | `#3A0808` | Bayangan kemerahan |
-| `moonLightColor` | `#D02020` | Cahaya bulan merah |
-| `skyboxTint` | `#801010` | Langit merah |
-| Transisi | 20 detik | Masuk saat matahari terbenam, dan keluar 10 detik saat fajar |
+| Warna fog | `#6B0F12` | Kabut merah pekat |
+| Tambahan fog | 0,01 | Jarak pandang menurun, dibatasi `maxFogDensity` |
+| Pengali matahari | 0,8, warna merah | Cahaya menjadi merah |
+| Warna langit (usulan tambahan) | `#801010` | Langit merah. Lihat perubahan kontrak di bagian 5 |
+| Transisi (usulan tambahan) | Masuk 20 detik, keluar 10 detik | Masuk saat matahari terbenam, keluar saat fajar |
 
-`RegionalWeather` (#115) tetap berjalan, supaya jadwal cuacanya tidak bergeser. Hujan dan Blizzard tetap memainkan partikel, sedangkan warna langit dan kabut mengikuti lapisan Blood Moon. Senter dan api tetap berguna, karena `ambientColor` masih memberi siluet.
+`RegionalWeather` (#115) tetap berjalan, supaya jadwal cuacanya tidak bergeser. Hujan dan Blizzard tetap memainkan partikel, sedangkan warna langit dan kabut mengikuti lapisan Blood Moon. Senter dan api tetap berguna, karena `minAmbientLuminance` di `EnvironmentProfile.md` menjaga batas gelap.
 
 ### Spawn massal
 
@@ -128,7 +126,7 @@ Hanya `EnvironmentDirector` (#92) yang menulis fog dan cahaya. Blood Moon adalah
 **`private void EndBloodMoon()`**:
 
 1. `SpawnManager.Instance.PopOverride(overrideHandle)`.
-2. `EnvironmentDirector.PopEventLayer(bloodMoonProfile)`.
+2. `EnvironmentDirector.PopEventLayer(EnvEventId.BloodMoon)`.
 3. `IsActive = false`.
 4. Terbitkan `BloodMoonEndedEvent { day = activeDay }`.
 
@@ -183,7 +181,7 @@ Zombie yang tersisa terbakar saat fajar lewat `SunlightExposure` (#63). `HordeMa
 6. **Hari ke-60 ikut Blood Moon:** menjadi puncak akhir run.
 7. **Peringatan jam 12:00:** satu notifikasi pada hari yang sama. Tanpa hitung mundur HUD.
 
-**Perubahan kontrak yang diperlukan:** `BaseAnchor` dan `TryGetBaseAnchor` di `raft/BaseNavigation.md`, serta `PushEventLayer` di `Island_Logic/EnvironmentProfile.md`.
+**Perubahan kontrak yang diperlukan:** `BaseAnchor` dan `TryGetBaseAnchor` di `raft/BaseNavigation.md`, warna langit dan waktu transisi lapisan `BloodMoon` di `Island_Logic/EnvironmentProfile.md`, serta baris `world_bloodmoon` di `Core_Logic/WorldStateSave.md`.
 
 ## 6. Skenario Tes
 

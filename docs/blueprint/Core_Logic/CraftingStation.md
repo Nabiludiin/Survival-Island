@@ -29,7 +29,7 @@ public class CraftingRecipe : ScriptableObject
 }
 ```
 
-`CookingRecipe` (#44) mewarisi kelas ini, dengan `station = Campfire`. `RecipeDatabase` memuat semua resep dan menyediakan pencarian `recipeId`.
+`CookingRecipe : CraftingRecipe` (#44) menambah `canBurn`, `burnAfterSeconds`, dan `burntResult`, dengan `station = Campfire`. Panel `CraftingManager` tidak menampilkan resep `Campfire`. `RecipeDatabase` memuat semua resep dan menyediakan pencarian `recipeId`.
 
 ### Kelas
 
@@ -84,7 +84,7 @@ Waktu dan bahan tiap resep berada di aset `CraftingRecipe`.
 | `rec_pickaxe` | 3 `Mat_Wood`, 3 `Mat_Stone` | `Tool_Pickaxe` | 4 | `Hand` | Usulan |
 | `rec_hammer` | 2 `Mat_Wood`, 1 `Mat_Stone` | `Tool_Hammer` | 3 | `Hand` | Usulan |
 | `rec_torch` | 1 `Mat_Wood`, 1 `Mat_Cloth` | `Tool_Torch` | 2 | `Hand` | Usulan, bersama #65 |
-| `rec_campfire` | 3 `Mat_Wood`, 3 `Mat_Stone` | `Kit_Campfire` | 3 | `Hand` | `CampfireManager.md` |
+| `rec_campfire` | 5 `Mat_Wood`, 3 `Mat_Stone` | `Kit_Campfire` | 3 | `Hand` | #44, `campfire.recipeWood` dan `recipeStone` |
 | `rec_warm_clothes` | 4 `Mat_Hide`, 2 `Mat_Rope` | `Gear_WarmClothes` | 15 | `WoodBench` | Usulan, bersama #65 |
 | `rec_vaccine` | 2 `Mat_TreeSap`, 2 `Mat_Mushroom` | `Med_Vaccine` | 10 | `MedicalBench` | `InfectionSystem.md` |
 | `rec_antibiotic` | 1 `Mat_TreeSap`, 1 `Mat_Mushroom` | `Med_Antibiotic` | 8 | `MedicalBench` | `DiseaseManager.md` |
@@ -92,6 +92,12 @@ Waktu dan bahan tiap resep berada di aset `CraftingRecipe`.
 | `rec_bandage` | 2 `Mat_Cloth` | `Med_Bandage` | 3 | `Hand` | `DiseaseManager.md` |
 | `rec_bag_cloth` | 6 `Mat_Cloth`, 2 `Mat_Rope` | `Bag_Cloth` | 5 | `Hand` | `CarryCapacity.md` |
 | `rec_bag_leather` | 6 `Mat_Hide`, 4 `Mat_Rope`, 1 `Bag_Cloth` | `Bag_Leather` | 10 | `WoodBench` | `CarryCapacity.md` |
+
+**Resep api unggun (`CookingRecipe`, #44):** `cook_meat`, `cook_fish`, `boil_water`, dan `burn_charcoal`, dengan isi di `raft/CampfireManager.md`.
+
+**Resep barang lempar (#96):** `rec_throw_rock`, `rec_throw_flare`, `rec_throw_molotov`, dan `rec_throw_bomb`, dengan isi di `left-4-dead/ThrowableSystem.md`. Keempatnya didaftarkan hanya kalau `throwable.enabled` bernilai `true`.
+
+**Validasi Editor (#116):** bahan resep tidak boleh memenuhi `ProgressionSafety.IsProtected(item)`.
 
 Semua resep di atas memakai `startsUnlocked = true`. Alat dasar harus tersedia dengan tangan, karena membangun meja sudah butuh palu. Batu pertama berasal dari `PickupInteractable` (#17) dan kayu pertama dari pohon yang dipukul tangan (#73).
 

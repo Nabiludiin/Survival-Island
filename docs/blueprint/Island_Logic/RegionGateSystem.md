@@ -41,7 +41,6 @@ Aturan gerbang adalah data, jadi mengubah usulan di bagian 5 tidak mengubah kode
 | Nama | Tipe | Nilai awal | Fungsi |
 |---|---|---|---|
 | `woodDeposited` | `int` | 0 | Kayu yang sudah disetor |
-| `hasBridgeBlueprint` | `bool` | `false` | Hadiah Diary Bab 2 |
 | `bridgeComplete` | `bool` | `false` | Jembatan selesai |
 | `unlockedMask` | `int` | Hanya `Volcano` | Bit per `RegionType` |
 | `rules` | `GateRule[3]` | Tabel di atas | Aturan seam |
@@ -66,7 +65,9 @@ Aturan gerbang adalah data, jadi mengubah usulan di bagian 5 tidak mengubah kode
 | Fungsi | Dipakai oleh | Isi |
 |---|---|---|
 | `bool IsUnlocked(RegionType r)` | `RegionStreaming`, #116, #81 | Membaca `unlockedMask` |
+| `int DepositedWood { get; }` | #81 | Membaca `woodDeposited` |
 | `int WoodRemaining { get; }` | `BridgeSite`, #81 | `Max(0, bridgeWoodCost - woodDeposited)` |
+| `bool HasBridgeBlueprint { get; }` | `BridgeSite`, #116 | `TechTreeManager.Instance.IsUnlocked("node_bridge_blueprint")`. Node dibuka hadiah Diary Bab 2 (`ObjectiveManager.md`) |
 | `int Deposit(int amount)` | `BridgeSite` | Mengubah progres, dan mengembalikan jumlah yang diterima |
 | `void Unlock(RegionType r)` | Internal, `DevConsole` | Membuka region dan mematikan barrier |
 
@@ -77,7 +78,7 @@ Aturan gerbang adalah data, jadi mengubah usulan di bagian 5 tidak mengubah kode
 **`CanInteract(in InteractContext ctx)`:**
 
 1. Kalau `ctx.IsCarryingHeavyItem`, kembalikan `CarryingHeavyItem`.
-2. Kalau `!hasBridgeBlueprint`, kembalikan `Locked`. Prompt: `Butuh Blueprint Jembatan`.
+2. Kalau `!HasBridgeBlueprint`, kembalikan `Locked`. Prompt: `Butuh Blueprint Jembatan`.
 3. Kalau `ctx.Inventory` tidak punya `Mat_Wood`, kembalikan `Locked`. Prompt: `Butuh kayu (312 / 500)`.
 4. Selain itu, `None`.
 
@@ -121,8 +122,7 @@ Jembatan berada di layer `Structure` supaya bisa dipijak, tetapi tidak punya `Ba
 
 **`HandleDiaryChapter(DiaryChapterFoundEvent e)`:**
 
-1. Kalau `e.chapter == 2`, `hasBridgeBlueprint = true`.
-2. Untuk tiap aturan `DiaryChapter` dengan bab yang sama, panggil `Unlock`, lalu buka aturan `FollowsPrevious` sesudahnya.
+Untuk tiap aturan `DiaryChapter` dengan bab yang sama, panggil `Unlock`, lalu buka aturan `FollowsPrevious` sesudahnya. Blueprint Jembatan tidak diurus di sini, karena hadiah Bab 2 membuka node lewat `ObjectiveManager`.
 
 **`Unlock(RegionType r)`:** set bit, matikan `barriers` milik aturan itu, lalu terbitkan `RegionUnlockedEvent`. Kalau bit sudah terpasang, keluar tanpa event.
 
@@ -154,16 +154,17 @@ Jembatan berada di layer `Structure` supaya bisa dipijak, tetapi tidak punya `Ba
 | `InventoryManager` | `RemoveItem("Mat_Wood", n)` |
 | `RegionStreaming` (#88) | Membaca `IsUnlocked`, dan menyediakan `GetRegionAt` |
 | `RegionBoundaryGuard` (#88) | Menyediakan `LastSafePosition` |
-| `ObjectiveManager` (#81) | Menerbitkan bab Diary, dan membaca progres jembatan |
+| `ObjectiveManager` (#81) | Menerbitkan bab Diary, membuka `node_bridge_blueprint`, dan membaca `DepositedWood` |
+| `TechTreeManager` | Pemilik status Blueprint Jembatan |
 | `SwimmingController` (#13) | Dibatasi `GateBarrier` di air |
-| `ProgressionSafety` (#116) | Membaca `hasBridgeBlueprint`, `bridgeComplete`, dan `IsUnlocked` |
+| `ProgressionSafety` (#116) | Membaca `HasBridgeBlueprint`, `bridgeComplete`, dan `IsUnlocked` |
 | `DevConsole` (#56) | Perintah `unlockregion <region>` dan `depositwood <jumlah>` |
 
 ## 4. Kasus Khusus
 
 - **Objek pool:** `RegionGateSystem` dan `BridgeSite` bukan objek pool. Debu kayu memakai `VFXManager`, dan tidak ada status yang perlu direset.
 - **Game dijeda:** input terkunci (#83), sehingga setoran tidak bisa dimulai. `verifyTimer` memakai `Time.deltaTime`, jadi ikut berhenti.
-- **Save:** `world_gates` menyimpan `woodDeposited`, `hasBridgeBlueprint`, `bridgeComplete`, dan `unlockedMask`. `RestoreState` tidak mengirim event. `BridgeProgressChangedEvent` dikirim ulang setelah semua data dimuat. `barriers` diatur dari `unlockedMask`.
+- **Save:** `world_gates` menyimpan `woodDeposited`, `bridgeComplete`, dan `unlockedMask`. Status Blueprint Jembatan tersimpan di `world_recipes` (#77). `RestoreState` tidak mengirim event. `BridgeProgressChangedEvent` dikirim ulang setelah semua data dimuat. `barriers` diatur dari `unlockedMask`.
 - **Permadeath:** semua data di atas ikut terhapus bersama save run. Kayu tersetor tidak kembali ke run baru.
 - **Region dilepas saat progres berjalan:** `BridgeSite.OnEnable` memanggil `RefreshVisual`, sehingga ruas kembali sesuai data saat scene dimuat lagi.
 - **`bridgeWoodCost` diubah lewat `DevConsole` lebih rendah dari `woodDeposited`:** setoran berikutnya tidak diperlukan. `RefreshVisual` membatasi rasio ke 1, dan `CompleteBridge` dipanggil saat `BalanceChanged`, atau saat `Interact` berikutnya.
@@ -185,13 +186,13 @@ Jembatan berada di layer `Structure` supaya bisa dipijak, tetapi tidak punya `Ba
 1. **Syarat Region 4 (`S2`):** rekomendasi Diary Bab 3, karena bab itu mengungkap lokasi suku cadang. Ini mengharuskan Bab 3 berada di Region 1 atau Region 2 (#81).
 2. **Syarat Region 3 (`S3`):** rekomendasi terbuka bersama `S2`, tanpa syarat item. Dingin sudah menjadi rintangan alami, dan pemain tidak boleh terkunci hanya karena gagal menemukan satu benda.
 3. **Kerusakan jembatan:** rekomendasi tidak bisa dirusak zombie, hewan, atau bencana, karena kerugiannya terlalu besar dalam game permadeath. Alternatifnya, jembatan punya HP dan bisa diperbaiki lewat #47 dan #116.
-4. **Bentuk Blueprint Jembatan:** rekomendasi berupa status di `RegionGateSystem`, bukan item inventori, supaya tidak bisa terjual, terbuang, atau hilang.
+4. **Bentuk Blueprint Jembatan:** rekomendasi berupa node `node_bridge_blueprint` di `TechTreeManager`, bukan item inventori, supaya tidak bisa terbuang atau hilang. Ini sama dengan usulan di `ObjectiveManager.md`, dan `RegionGateSystem` hanya membacanya.
 5. **Pencegahan renang:** rekomendasi memakai dinding tak terlihat di air. Alternatif arus laut lebih alami, tetapi lebih sulit dijamin.
 
 ## 6. Skenario Tes
 
 1. Bawa 100 kayu ke `BridgeSite` tanpa Blueprint, lalu tekan `E`. **Hasil:** prompt `Butuh Blueprint Jembatan`, dan kayu tidak berkurang.
-2. Jalankan `DiaryChapterFoundEvent` Bab 2, lalu tahan `E` selama 1 detik. **Hasil:** 100 kayu pindah, papan menulis `100 / 500`, dan 4 ruas tampil.
+2. Temukan Diary Bab 2, sehingga `node_bridge_blueprint` terbuka, lalu tahan `E` selama 1 detik. **Hasil:** 100 kayu pindah, papan menulis `100 / 500`, dan 4 ruas tampil.
 3. Coba berjalan di ruas setengah jadi. **Hasil:** pemain tidak tertahan oleh ruas, dan jatuh lalu dikembalikan oleh `RavineRecoveryVolume` dengan HP turun 20.
 4. Setor tiga kali sampai 500. **Hasil:** semua ruas tampil, `deckCollider` aktif, `RegionUnlockedEvent(Amazon)` terkirim sekali, dan Region 2 mulai dimuat pada jarak 150 meter.
 5. Malam hari setelah jembatan selesai, pancing zombie dari Region 2. **Hasil:** zombie menyeberang lewat `NavMeshLink`.

@@ -8,7 +8,7 @@
 
 ### Pola
 
-`RunSeedManager` adalah manager persisten (`IBootstrapService`, urutan ke-11 di #82). Sistem gameplay tidak boleh memakai `UnityEngine.Random`, kecuali untuk efek yang tidak memengaruhi permainan.
+`RunSeedManager` adalah manager persisten (`IBootstrapService`, urutan ke-15 di #82). Sistem gameplay tidak boleh memakai `UnityEngine.Random`, kecuali untuk efek yang tidak memengaruhi permainan.
 
 | Jenis acak | Sumber | Contoh |
 |---|---|---|
@@ -23,7 +23,8 @@ Satu aliran bersama membuat hasil saling bergantung: kalau satu sistem menambah 
 public enum RandomStreamId
 {
     ShipLoot, IslandLoot, PartLocation, Weather, Disaster, NPC,
-    BeachSupply, Enemy, Gameplay, LuckyMachine
+    BeachSupply, Enemy, Gameplay, LuckyMachine,
+    SupplyDrop   // Ditambahkan di akhir, supaya nilai lama tidak bergeser (#54)
 }
 
 public struct RandomStream
@@ -67,8 +68,9 @@ Kelas bawaan `System.Random` tidak dipakai, karena statusnya tidak bisa disimpan
 | `Weather` | Berkunci | Region dan nomor slot waktu | `RegionalWeather` (#115) |
 | `BeachSupply` | Berkunci | Nomor hari | `BeachSupplyManager` (#71) |
 | `Enemy` | Berurutan | Tidak ada | `SpawnManager` (#62), `AIDirector` (#27) |
-| `Gameplay` | Berurutan | Tidak ada | `ResourceNode`, `FishingSystem` (#55), dan drop lain |
+| `Gameplay` | Berurutan | Tidak ada | `ResourceNode`, `FishingSystem` (#55), dan drop lain. Usulan, kalau #106 disetujui: `DebrisRetrieval` dan `FarmingSystem` (#48) |
 | `LuckyMachine` | Berurutan | Tidak ada | `LuckyMachine` (#72) |
+| `SupplyDrop` | Berkunci | Nomor hari | `SupplyDropManager` (#54) |
 
 ### Data run
 
@@ -214,7 +216,7 @@ Masalah lamanya: `Start()` selalu menyebar loot, sehingga setelah load, item bis
    - Kalau status dari `RegionStateStore` (#88) ada, pulihkan item dari daftar. Titik dengan `isTaken = true` dilewati. Tidak ada pengacakan.
    - Kalau belum ada, ini penyebaran pertama dalam run. Panggil `RollAndRecord()`.
 4. **`RollAndRecord()`:** untuk tiap titik, buat `var s = Fork(streamId, spawnerId + "/" + pointIndex)`. `streamId` bernilai `ShipLoot` di `ShipPhase` dan `IslandLoot` di pulau. Titik kosong ditentukan `s.NextFloat01() < lootPointEmptyChance`. Item dipilih dengan `s.PickWeighted(bobot)` (#103), lalu dicatat ke daftar.
-5. Item memakai `WorldItem` dari `ObjectPooler`, bukan `Instantiate`. Saat diambil, `WorldItem` memanggil `spawner.MarkTaken(pointIndex)`.
+5. Di pulau, item memakai `WorldItem` lewat `WorldItemManager.Spawn`, bukan `Instantiate`. `ShipPhase` dikecualikan: item kapal memakai pool `ShipLoot_Generic` berisi `ShipInteractable`, bukan `WorldItem` (#74). Saat diambil, `WorldItem` memanggil `spawner.MarkTaken(pointIndex)`.
 6. `CaptureState()` menulis daftar tersebut untuk `RegionStateStore` dan save.
 
 **Hasilnya:** run baru menyebar loot sekali per spawner. Setelah load atau region kembali, hasilnya dibaca dari save. Region yang belum pernah dikunjungi saat game disimpan tetap menyebar saat pertama dimuat, dengan hasil yang sama seperti tanpa save, karena kuncinya tetap.

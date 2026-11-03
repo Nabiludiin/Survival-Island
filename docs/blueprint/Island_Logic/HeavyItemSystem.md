@@ -138,7 +138,7 @@ Air dangkal yang masih bisa dilewati tidak menjatuhkan barang (#13).
 2. `NavMesh.SamplePosition` menemukan titik dalam `navSampleRadius`.
 3. Pemain tidak berada di air.
 
-**`HeavyItem.OnTriggerEnter`:** kalau collider berada di layer `Water`, panggil `ReturnToValid(index)`.
+**`HeavyItem.OnTriggerEnter`:** kalau collider berada di layer `Water` dan `state == Lying`, panggil `ReturnToValid(index)`. Barang `Carried` diabaikan, karena boleh dibawa melewati air dangkal. Air dalam ditangani lewat `DropReason.Water`.
 
 **`RecoveryTick()`** setiap `recoveryCheckSeconds`, untuk barang `Lying` di region `Loaded`:
 

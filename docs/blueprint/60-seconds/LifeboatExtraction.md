@@ -202,7 +202,7 @@ Fungsi `GameManager.SaveFase1Loot(List<Item>)` diganti `SaveShipOutcome`. `ShipT
 1. Kalau `GameManager.hasArrivedOnIsland` bernilai `true`, abaikan. Jalur `ContinueRun` tidak melewati fungsi ini.
 2. Tempatkan pemain di `landingPoint`, lalu arahkan kamera ke `lookTarget`.
 3. `SurvivalStats`: `HP = shipOutcome.hpOnExit`, `Infection = shipOutcome.infectionOnExit`, dan status lain penuh.
-4. `InventoryManager`: tambahkan `Base_Kail`, `Base_Pistol`, dan `Base_Pisau`, lalu vaksin awal (#64).
+4. `InventoryManager`: tambahkan `Base_Kail`, `Base_Pistol`, dan `Base_Pisau`, lalu `Med_Vaccine` sebanyak `GameBalanceConfig.infection.startingVaccineDoses` (2) (#64), sebelum `ApplyShipLoot`.
 5. `CarryCapacity.ApplyShipLoot(savedShipLoot)` (#118). Yang tidak muat menjadi `WorldItem` di `overflowOrigin`, dan tidak hilang otomatis.
 6. `NPCRoster.SpawnRescued(rescuedNpcIds, npcOrigin)` (#76).
 7. `GameManager.hasArrivedOnIsland = true`.

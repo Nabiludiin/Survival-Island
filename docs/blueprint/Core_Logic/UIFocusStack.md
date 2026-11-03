@@ -8,14 +8,14 @@
 
 ### Pola
 
-`UIFocusStack` adalah manager persisten (`IBootstrapService`, urutan ke-6 di #82). Stack disimpan sebagai `List<UIPanel>`, karena sistem lain bisa menutup panel yang tidak berada di puncak.
+`UIFocusStack` adalah manager persisten (`IBootstrapService`, urutan ke-8 di #82). Stack disimpan sebagai `List<UIPanel>`, karena sistem lain bisa menutup panel yang tidak berada di puncak.
 
 ```csharp
 public enum UIPanelId
 {
     MainMenu, Loading, Cinematic, Pause, Settings, ConfirmDialog, RunSummary,
     Diary, LoreReader, Inventory, Crafting, Storage, Campfire, BuildMenu,
-    WorldMap, LuckyMachine, GameOver, WinScreen, DevConsole
+    WorldMap, LuckyMachine, GameOver, WinScreen, DevConsole, Stats
 }
 
 public enum UICloseReason { User, Forced, RunEnded, SceneUnloaded }
@@ -77,6 +77,7 @@ public abstract class UIPanel : MonoBehaviour
 | `GameOver` | Ya | Ya | Ya | Tidak | Ya | Ya |
 | `WinScreen` | Ya | Ya | Ya | Tidak | Ya | Ya |
 | `DevConsole` (#56) | Ya | Ya | Ya | Ya | Tidak | Tidak |
+| `Stats` (#57) | Ya | Ya | Ya | Ya | Tidak | Tidak |
 
 **Alasan pembagian jeda:** `Claude.md` menjeda Diary, jadi panel baca ikut menjeda. Inventori, crafting, peti, api unggun, dan menu bangun berjalan tanpa jeda, supaya pemain tetap merasakan tekanan survival dan tidak bisa menyusun barang dengan aman di tengah serangan. `LuckyMachine` tidak menjeda, karena GDD bagian 7 memberi jatah 30 detik saat bencana.
 
@@ -100,7 +101,8 @@ public abstract class UIPanel : MonoBehaviour
 2. Kalau `TopPanel.settings.rejectsNewPanels` bernilai `true`, kembalikan `false`. Pengecualian hanya untuk `DevConsole`.
 3. Panggil `TopPanel.OnFocusLost()`, kalau ada.
 4. Tambahkan `panel`, catat `openedFrame = Time.frameCount`, lalu panggil `panel.Show()` dan `panel.OnFocusGained()`.
-5. Panggil `ApplyState()`.
+5. Terbitkan `UIPanelOpenedEvent { panelId = panel.id }` (#16).
+6. Panggil `ApplyState()`.
 
 **`public bool Close(UIPanel panel, UICloseReason reason)`**
 
@@ -207,7 +209,7 @@ Elemen HUD yang bukan panel boleh memakai waktu biasa, karena HUD memang ikut be
 | Musik latar | Tetap main, dengan volume turun | `bgmSource.ignoreListenerPause = true`, dan snapshot `AudioMixer` |
 | SFX tombol UI | Tetap bunyi | `sfxSource.ignoreListenerPause = true` |
 
-**`AudioManager.SetPausedMix(bool paused)`** beralih antara snapshot `Normal` dan `Paused` selama `pauseAudioFadeSeconds`, dengan `AudioMixer.updateMode = UnscaledTime`. Coroutine `CrossfadeBGM` juga memakai `Time.unscaledDeltaTime`, supaya musik tidak tersangkut di tengah transisi. #114 mengikuti aturan ini.
+**`AudioManager.SetPausedMix(bool paused)`** beralih antara snapshot `Normal` dan `Paused` selama `pauseAudioFadeSeconds`, dengan `AudioMixer.updateMode = UnscaledTime`. `CrossfadeBGM` sudah dihapus (#114). Fade musik di `CombatMusicDirector` dan `AudioManager.PlayMusicClip` memakai `Time.unscaledDeltaTime`, supaya musik tidak tersangkut di tengah transisi.
 
 ### Panel tertutup oleh sistem lain
 
@@ -225,7 +227,7 @@ Panel hanya memanggil `Push` dan `Close`. Pemeriksaan teks `Time.timeScale`, `Cu
 
 ## 3. Hubungan dengan Sistem Lain
 
-**Event yang dikirim:** `UIFocusChangedEvent` (`isGameplayBlocked`, `isPaused`), sticky.
+**Event yang dikirim:** `UIFocusChangedEvent` (`isGameplayBlocked`, `isPaused`), sticky, dan `UIPanelOpenedEvent` (`panelId`).
 
 **Event yang didengar:** `PlayerPinnedEvent`.
 

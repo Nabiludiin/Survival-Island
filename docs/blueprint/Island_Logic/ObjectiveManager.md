@@ -9,7 +9,7 @@
 `ObjectiveManager` adalah singleton di scene `IslandPhase` (#82) dan `ISaveable` dengan `SaveId = world_objectives`. Tujuan didorong event, tanpa `Update`. `DiaryManager` hanya menampilkan isi bab.
 
 ```csharp
-public enum DiaryRewardKind { None, GiveItem, UnlockTechNode, RevealObjectives }
+public enum DiaryRewardKind { None, GiveItem, RevealObjectives }
 public enum ObjectiveCondition { BuildCount, ItemTotal, BridgeBuilt, ItemCrafted, RegionEntered, PartsInstalled, Escaped }
 
 [Serializable]
@@ -17,7 +17,6 @@ public struct DiaryReward
 {
     public DiaryRewardKind kind;
     public ItemData item; public int amount;
-    public string techNodeId;
 }
 
 [CreateAssetMenu(menuName = "Survival/Diary Entry")]
@@ -63,7 +62,7 @@ public class ObjectiveData : ScriptableObject
 | Bab | Tempat | Hadiah | Isi sesuai GDD |
 |---|---|---|---|
 | 1 | Shelter tua hancur, Region 1 | `Kit_Campfire` x1 | Jangan tidur di pantai, zombie terbakar matahari, cara membuat api unggun, memancing dengan kail di tebing karang |
-| 2 | Pos kemah penulis di tepi jurang, Region 1 | Node `node_bridge_blueprint`, dan tujuan kelompok 2 | Penulis terinfeksi, vaksin dari getah dan jamur Region 2, Blueprint Jembatan |
+| 2 | Pos kemah penulis di tepi jurang, Region 1 | Blueprint Jembatan (`RegionGateSystem.hasBridgeBlueprint`), dan tujuan kelompok 2 | Penulis terinfeksi, vaksin dari getah dan jamur Region 2, Blueprint Jembatan |
 | 3 | Pos terakhir penulis di hutan, Region 2 | Petunjuk helipad, dan tujuan kelompok 3 | Helipad dan landasan di puncak es, suku cadang tertinggal di desa |
 
 Bab 2 harus berada di Region 1, karena jembatan menuju Region 2 membutuhkan isi bab ini. Bab 3 berada di Region 2, supaya pemain menemukannya setelah menyeberang.
@@ -105,7 +104,7 @@ Kalau tidak ada tujuan terlihat yang belum selesai, HUD menampilkan tujuan cadan
 **`private void GrantRewards(DiaryEntry entry)`**: keluar kalau `grantedRewards` sudah memuat bab ini. Untuk tiap hadiah:
 
 - `GiveItem`: `InventoryManager.AddItem(item, amount)`. Kalau inventori penuh, sisanya menjadi `WorldItem` di dekat buku (#66).
-- `UnlockTechNode`: `TechTreeManager.Instance.UnlockNode(techNodeId)`. Node tersimpan bersama `world_recipes` (#77), jadi Blueprint Jembatan tidak memakai slot, dan tidak bisa hilang, dibuang, atau hancur (#116).
+- **Blueprint Jembatan:** bukan entri `rewards`. `RegionGateSystem` mendengar `DiaryChapterFoundEvent` dengan `chapter == 2`, lalu mengisi `hasBridgeBlueprint = true` dan menyimpannya di `world_gates` (#68). Jadi Blueprint tidak memakai slot, dan tidak bisa hilang, dibuang, atau hancur (#116).
 - `RevealObjectives`: cukup dengan `foundChapters`, karena `IsVisible` membacanya.
 
 **`private bool IsVisible(ObjectiveData o)`** = `o.revealedByChapter == 0 || foundChapters.Contains(o.revealedByChapter)`.
@@ -115,7 +114,7 @@ Kalau tidak ada tujuan terlihat yang belum selesai, HUD menampilkan tujuan cadan
 | Kondisi | Pemeriksaan |
 |---|---|
 | `BuildCount` | Hitung `StructureRegistry` yang `buildableId`-nya berawalan `Wall_` dan `Door_` |
-| `ItemTotal` | `InventoryManager.GetTotal(targetId) + RegionGateSystem.DepositedWood >= targetAmount`, atau jembatan sudah selesai |
+| `ItemTotal` | `InventoryManager.GetCount(targetId) + (region.bridgeWoodCost - RegionGateSystem.WoodRemaining) >= targetAmount`, atau jembatan sudah selesai |
 | `BridgeBuilt` | `RegionGateSystem.IsUnlocked(Amazon)` |
 | `ItemCrafted`, `RegionEntered`, `Escaped` | Hanya berubah lewat event. Tercatat di `completed` saat event tiba |
 | `PartsInstalled` | Membaca `HelicopterPartInstalledEvent.Last` |
@@ -168,8 +167,8 @@ Tombol `OpenDiary` (`J`) membuka `DiaryArchivePanel` lewat `UIFocusStack.Push`. 
 |---|---|
 | `DiaryManager` | `OpenDiary(DiaryEntry)` menggantikan versi teks, dan memakai `UIFocusStack` |
 | `IslandInteractable` (#17) | `DiaryBook` memanggil `FoundChapter` |
-| `RegionGateSystem` (#68) | Syarat Blueprint Jembatan lewat `TechTreeManager.IsUnlocked`, serta `DepositedWood` dan `IsUnlocked` |
-| `CraftingManager`, `TechTreeManager` (#77) | `rec_vaccine`, dan node hadiah |
+| `RegionGateSystem` (#68) | Mendengar `DiaryChapterFoundEvent` untuk Blueprint Jembatan dan gerbang `S2`. Sistem ini membaca `WoodRemaining` dan `IsUnlocked` |
+| `CraftingManager` (#77) | `rec_vaccine` lewat `ItemCraftedEvent` |
 | `HeavyItemSystem` (#69), `RescueEventManager` (#14) | Suku cadang, helikopter, dan lepas landas |
 | `CompassSystem` (#30), `NotificationManager` (#22) | Penanda arah dan pesan |
 | `ProgressionSafety` (#116) | Membaca `foundChapters`, dan melindungi buku Diary |
@@ -189,7 +188,7 @@ Tombol `OpenDiary` (`J`) membuka `DiaryArchivePanel` lewat `UIFocusStack.Push`. 
 - **Region tidak dimuat:** `markerPosition` adalah data, jadi penanda tetap bekerja.
 - **Tertangkap pada frame kemenangan:** `RunEndedEvent` hanya mencatat `obj_takeoff`, dan tidak menampilkan notifikasi, karena alur akhir run sudah berjalan.
 - **Kalah:** `RunEndedEvent` selain `Won` diabaikan.
-- **`GetTotal` belum ada:** kalau `InventoryManager` hanya punya `HasItem`, fungsi ini perlu ditambah. Lihat catatan perubahan kontrak.
+- **`GetCount` belum ada di `InventoryManager.md`:** blueprint itu baru punya `HasItem`. `ThrowableSystem.md` juga memakai `GetCount`, jadi fungsi ini perlu ditambahkan di sana.
 
 ## 5. Keputusan Desain
 
@@ -199,7 +198,7 @@ Tombol `OpenDiary` (`J`) membuka `DiaryArchivePanel` lewat `UIFocusStack.Push`. 
 
 1. **Tempat Bab 2 dan 3:** rekomendasi Bab 2 di pos kemah penulis di Region 1, dan Bab 3 di Region 2.
 2. **Hadiah api unggun Bab 1:** rekomendasi memberi satu `Kit_Campfire` dan tetap membiarkan `rec_campfire` terbuka sejak awal, sesuai `CraftingStation.md`. Pilihan lain adalah mengunci resep sampai Bab 1, tetapi pemain bisa kesulitan memasak sebelum menemukan shelter.
-3. **Bentuk Blueprint Jembatan:** rekomendasi berupa node `node_bridge_blueprint`, bukan item, agar tidak bisa hilang dan tidak memakai slot.
+3. **Bentuk Blueprint Jembatan:** rekomendasi berupa penanda `hasBridgeBlueprint` di `RegionGateSystem` (#68), bukan item, agar tidak bisa hilang dan tidak memakai slot.
 4. **Tujuan tersembunyi sebelum babnya ditemukan:** rekomendasi disembunyikan, supaya Region 3 dan suku cadang tetap menjadi kejutan Bab 3.
 5. **Syarat `obj_base`:** rekomendasi 4 dinding dan 1 pintu, sesuai contoh base awal di `GameBalanceConfig.md`.
 
@@ -209,7 +208,7 @@ Tombol `OpenDiary` (`J`) membuka `DiaryArchivePanel` lewat `UIFocusStack.Push`. 
 2. Tekan `E` pada buku Bab 1. **Hasil:** panel terbuka, game terjeda, `Kit_Campfire` masuk inventori, dan `DiaryChapterFoundEvent` terkirim.
 3. Baca lagi lewat `J`. **Hasil:** isi sama, dan `Kit_Campfire` tidak bertambah.
 4. Bangun 4 dinding dan 1 pintu. **Hasil:** `obj_base` selesai, lalu HUD menampilkan `Cari bab Diary berikutnya`.
-5. Temukan Bab 2. **Hasil:** `IsUnlocked(node_bridge_blueprint)` bernilai `true`, dan HUD menampilkan progres kayu.
+5. Temukan Bab 2. **Hasil:** `RegionGateSystem.hasBridgeBlueprint` bernilai `true`, dan HUD menampilkan progres kayu.
 6. Setor 200 kayu, dan pegang 300 kayu. **Hasil:** `obj_wood` selesai, dan `obj_bridge` aktif.
 7. Lewat `DevConsole`, pindah ke Region 4 sebelum Bab 3. **Hasil:** tidak ada notifikasi. Saat Bab 3 ditemukan, `obj_region4` sudah terlewati.
 8. Hancurkan satu dinding base. **Hasil:** `obj_base` tetap selesai.

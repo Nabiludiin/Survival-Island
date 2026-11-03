@@ -108,12 +108,12 @@ UpdatePlayerEffects();
 | `T=60` | Sway tahap 0, 4 zombie tertidur (3 dek bawah, 1 dek tengah) | -1 | Semua terbuka |
 | `T=45` | Alarm lebih keras, sway tahap 1, 2 zombie bangun di dek tengah | -0,5, masih di bawah lantai dek bawah | Semua terbuka |
 | `T=33` | Tanda runtuh `Corridor_MidPort`: debu, suara besi, dan garis merah | -0,1 | Masih terbuka |
-| `T=30` | `CameraShake`, sway tahap 2, koridor runtuh, dan 2 zombie di dek bawah | 0, mulai membasahi dek bawah | `Corridor_MidPort` tertutup |
+| `T=30` | `CameraShake.Play(CameraShakeKind.ShipRumble)`, sway tahap 2, koridor runtuh, dan 2 zombie di dek bawah | 0, mulai membasahi dek bawah | `Corridor_MidPort` tertutup |
 | `T=18` | Tanda runtuh `Stair_LowerAft` | 0,9 | Masih terbuka |
 | `T=15` | Sway tahap 3, tangga runtuh, 2 zombie di dek tengah, dan garis area aman tampil | 1,1 | `Stair_LowerAft` tertutup |
 | Sekitar `T=13` | Kepala terendam di dek bawah, dan `lowerDeckBarrier` aktif | 1,6 | Dek bawah tidak bisa dimasuki. Yang masih di bawah keluar lewat `Stair_LowerFore` |
 | `T=5` | Air mencapai dek tengah | 4,0 | Dek tengah mulai melambat |
-| `T=0` | `FinalShudder`, lalu #74 menentukan hasil | 4,6 | Input terkunci |
+| `T=0` | `FinalShudder` dengan `CameraShake.Play(CameraShakeKind.ShipFinalShudder)`, lalu #74 menentukan hasil | 4,6 | Input terkunci |
 
 `docs/blueprint/60-seconds/README.md` menulis air mulai masuk pada `T=15`. Blueprint ini mengikuti itu untuk dek tengah dan lantai utama yang dilihat pemain, sementara dek bawah mulai basah sejak `T=30`, supaya ada tahapan.
 
@@ -171,7 +171,7 @@ stats.SetDrowning(depth >= headDepth);
 1. Kalau pemain berada di `blockVolume`, pindahkan lewat `controller.Move` ke `exitPoint`, tanpa damage. Tanda sudah diberikan selama 3 detik.
 2. Nyalakan `debrisRoot` dan `navObstacle`.
 3. Zombie di dalam `blockVolume` langsung kembali ke pool.
-4. Panggil `CameraShake.Play(...)` (#24) dan mainkan suara.
+4. Panggil `CameraShake.Play(CameraShakeKind.ShipCollapse)` (#24) dan mainkan suara.
 
 **Aturan rute:** selalu ada satu rute dari dek tengah ke sekoci. `ShipRouteAudit` adalah alat Editor yang memeriksa jalur NavMesh dari titik awal ke sekoci, dengan semua obstacle jadwal aktif, dan melaporkan kalau jalurnya putus. Titik NPC di dek bawah harus punya waktu jalan ke sekoci paling lama 20 detik, untuk syarat 5 di `RunLayoutValidator` (#89).
 
@@ -180,7 +180,7 @@ stats.SetDrowning(depth >= headDepth);
 | Hal | Aturan |
 |---|---|
 | Jumlah | 4 tertidur di awal, tambah 2, 2, dan 2 sesuai jadwal. Paling banyak `zombieMaxAlive` 8 sekaligus |
-| Jenis | Zombie standar, `ZombieData` dengan `enemyId = zombie_standard` (#25), memakai pool yang sama dengan pulau |
+| Jenis | Zombie standar, `ZombieData` dengan `enemyId = zombie_standar` (#25), memakai pool yang sama dengan pulau, dengan tag `Zombie_Standard`. Target memakai `EnemyAI.SetTarget` langsung, karena `ThreatSystem` tidak ada di `ShipPhase` (#109) |
 | Posisi | Titik `ShipZombiePoint` per grup, minimal `zombieMinSpawnDistance` dari pemain dan sekoci |
 | Tidur | `AIState.Dormant`. Bangun kalau pemain masuk `zombieAggroRadius` dan terlihat, atau saat suara `T=45` untuk grup yang dijadwalkan |
 | Kecepatan | `zombieMoveSpeed`, dikali pengali air. Pemain selalu bisa berlari menjauh di lantai kering |

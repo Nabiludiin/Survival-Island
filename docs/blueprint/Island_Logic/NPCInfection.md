@@ -101,7 +101,7 @@ NPC medis yang terinfeksi tahap 4 tidak memberi pengali, karena skill-nya mati.
 
 **`private void TryTurn(NPCInfectionRecord r)`**:
 
-1. Kalau siang (`DayNightDirector.isNight == false`): `pendingTurn = true`, NPC berbaring, dan menunggu. Zombie akan langsung terbakar sinar matahari kalau berubah di siang hari, sehingga pemain mendapat kesempatan terakhir untuk memberi vaksin.
+1. Kalau siang (`DayNightDirector.Instance.IsNight == false`): `pendingTurn = true`, NPC berbaring, dan menunggu. Zombie akan langsung terbakar sinar matahari kalau berubah di siang hari, sehingga pemain mendapat kesempatan terakhir untuk memberi vaksin.
 2. Kalau malam dan objek NPC aktif: `TurnInWorld(r)`.
 3. Kalau malam dan objek NPC nonaktif: `TurnRemote(r)`.
 

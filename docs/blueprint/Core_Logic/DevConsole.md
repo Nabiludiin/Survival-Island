@@ -8,7 +8,7 @@
 
 ### Pola
 
-`DevConsole` adalah manager persisten (`IBootstrapService`, urutan ke-14 di #82) dan sekaligus `UIPanel` dengan id `DevConsole` (#83).
+`DevConsole` adalah manager persisten (`IBootstrapService`, urutan ke-18 di #82) dan sekaligus `UIPanel` dengan id `DevConsole` (#83).
 
 Seluruh kelas berada di dalam `#if UNITY_EDITOR || DEVELOPMENT_BUILD`. Di build rilis, kelas ini tidak ada, dan Action Map `Debug` tidak dibuat (#18). `RunLifecycle` tidak memasukkannya ke `orderedServices` di prefab rilis.
 
@@ -128,6 +128,13 @@ Perintah yang mengubah kondisi permainan mengatur `IsRunTainted = true`.
 | `disaster <tipe> [skala]` | `disaster Eruption 2` | Memicu bencana | `DisasterManager` (#70) |
 | `unlock <region>` | `unlock Amazon` | Membuka region | `RegionGateSystem` (#68) |
 | `save`, `loadlast` | `save` | Memaksa save, atau kembali ke menu dan melanjutkan | `SaveRequestedEvent`, `RunLifecycle` |
+| `savecorrupt` | `savecorrupt` | Mengubah satu byte file save utama, untuk tes #80 | `WorldStateSave` (#80) |
+| `savedelay <detik>` | `savedelay 5` | Menunda penulisan save, untuk tes #80 | `WorldStateSave` (#80) |
+| `spawnstat` | `spawnstat` | Musuh aktif, jumlah `Submerged`, dan kegagalan mencari titik spawn | `SpawnManager` (#62) |
+| `settide <low\|high>` | `settide high` | Memaksa level air | `TideManager` (#91) |
+| `notify <jenis> <kunci>` | `notify Warning notif.test` | Memanggil `NotificationManager.Instance.Show(kunci, jenis)` | `NotificationManager` (#22) |
+| `postfx <efek> <0..1>` | `postfx infection 0.5` | Memaksa target efek | `PostProcessController` (#23) |
+| `shake <kind> [scale]` | `shake Earthquake 2` | Memanggil `CameraShake.Play(kind, scale)` | `CameraShake` (#24) |
 
 Sistem lain menambah `stress <jumlah>` (#93), `softlockcheck` (#116), dan sejenisnya.
 

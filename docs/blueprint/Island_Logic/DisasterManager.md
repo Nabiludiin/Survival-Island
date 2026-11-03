@@ -135,7 +135,7 @@ Saat `RegionChangedEvent`, bobot dan Fireball ikut berubah, bahkan di tengah ben
 2. Untuk target yang bukan bangunan, periksa `PhysicsQuery.Raycast` ke target dengan `PhysicsMasks.AIVision`. Kalau terhalang, target terlindung. Inilah yang memaksa MC berlindung, sesuai GDD bagian 5.
 3. Target yang kena menerima `DamageInfo { type = Explosion, sourceId = "Fireball", amount = Lerp(fireballDamageCenter, fireballDamageEdge, jarak / radius) }`. Bangunan menerima `fireballStructureDamage`.
 4. Dengan peluang `fireballTreeChance`, panggil `ForceDeplete(withDrops: false)` pada `ResourceNode` terdekat.
-5. Mainkan `Fx_FireballImpact`, `CameraShake` (#24), dan `FireSystem.TryIgniteAt(titik)` (#97).
+5. Mainkan `Fx_FireballImpact`, `CameraShake` (#24), dan `FireSystem.SpawnFireArea(titik, fire.fireballAreaRadius, fire.fireballAreaSeconds, fire.fireballDamagePerSec, false, true)` (#97).
 6. Kembalikan Fireball dan penanda ke pool.
 
 **Di luar Region 1:** saat `Active` dimulai, panggil `RemoteBaseSimulation.QueueDisasterDamage(Volcano, DamageType.Explosion, fireballStructureDamage, hits, onlyWood: false)`, dengan `hits = eruptionOffscreenHits * scale`.

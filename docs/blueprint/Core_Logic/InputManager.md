@@ -33,17 +33,18 @@ Aktif saat tidak ada panel yang memblokir input.
 | `Jump` | Button | `Space` | `IslandPlayerController` |
 | `Sprint` | Button, ditahan | `Left Shift` | `IslandPlayerController` |
 | `Crouch` | Button, ditahan | `Left Ctrl` | `PlayerTraversal` (#101) |
-| `Interact` | Button | `E` | `PlayerInteractor` (#17), `ShipPlayerController` |
-| `PrimaryAction` | Button | Klik kiri | Item aktif lewat `IEquippable` (#60) |
+| `Interact` | Button | `E` | `PlayerInteractor` (#17) |
+| `PrimaryAction` | Button | Klik kiri | Item aktif lewat `IEquippable` (#60). Di `ShipPhase`: `ShipShove`, lewat `ShipPlayerController` (#75) |
 | `SecondaryAction` | Button | Klik kanan | Item aktif lewat `IEquippable` (#60) |
 | `Reload` | Button | `R` | `GunController` (#58) |
 | `BuildRotate` | Button | `R` | `BuildManager`, saat mode bangun |
-| `HotbarSelect` | Value, Integer | `1` sampai `8`. Jumlah slot final dari #60 | `EquipmentManager` (#60) |
+| `HotbarSelect` | Value, Integer | `1` sampai `8`, jumlah final (usulan #60) | `EquipmentManager` (#60) |
 | `HotbarScroll` | Value, Float | Scroll mouse | `EquipmentManager` (#60) |
-| `Flashlight` | Button | `F` | `FlashlightController` |
+| `Flashlight` | Button | `F` | `EquipmentManager.ToggleOffHand` (#60) |
 | `Throw` | Button | `G` | `ThrowableSystem` (#96, nonaktif sampai disetujui) |
 | `DropHeavyItem` | Button | `Q` | `HeavyItemSystem` (#69) |
 | `Struggle` | Button | `Space` | `PlayerPinnedState` (#110) |
+| `Shove` | Button | `V` | `PlayerShove` (#95) |
 | `OpenInventory` | Button | `Tab` | Pemilik panel `Inventory` |
 | `OpenCrafting` | Button | `C` | Pemilik panel `Crafting` (#77) |
 | `OpenBuildMenu` | Button | `B` | `BuildMenu` (#79) |
@@ -108,14 +109,20 @@ public bool JumpPressed => actions.Gameplay.Jump.WasPressedThisFrame();
 public bool SprintHeld => actions.Gameplay.Sprint.IsPressed();
 public bool CrouchHeld => actions.Gameplay.Crouch.IsPressed();
 public bool InteractPressed => actions.Gameplay.Interact.WasPressedThisFrame();
+public bool InteractHeld => actions.Gameplay.Interact.IsPressed();
 public bool PrimaryPressed => actions.Gameplay.PrimaryAction.WasPressedThisFrame();
 public bool PrimaryHeld => actions.Gameplay.PrimaryAction.IsPressed();
 public bool PrimaryReleased => actions.Gameplay.PrimaryAction.WasReleasedThisFrame();
+public bool SecondaryPressed => actions.Gameplay.SecondaryAction.WasPressedThisFrame();
 public bool SecondaryHeld => actions.Gameplay.SecondaryAction.IsPressed();
+public bool SecondaryReleased => actions.Gameplay.SecondaryAction.WasReleasedThisFrame();
 public bool ReloadPressed => actions.Gameplay.Reload.WasPressedThisFrame();
 public bool FlashlightPressed => actions.Gameplay.Flashlight.WasPressedThisFrame();
 public bool DropHeavyItemPressed => actions.Gameplay.DropHeavyItem.WasPressedThisFrame();
 public bool SkipPressed => actions.UI.Skip.WasPressedThisFrame();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+public bool ConsoleTogglePressed => actions.Debug.ToggleConsole.WasPressedThisFrame();
+#endif
 ```
 
 Properti lain mengikuti pola yang sama untuk setiap action di tabel. Action yang dimatikan mengembalikan nilai kosong dan `false`, jadi pembaca tidak perlu mengecek menu terbuka.
@@ -210,7 +217,7 @@ Hasilnya disimpan di cache per action, dan cache dibuang saat `InputBindingsChan
 void Update()
 {
     // Tidak perlu mengecek menu. Action otomatis mati saat panel memblokir input.
-    if (InputManager.Instance.FlashlightPressed) ToggleFlashlight();
+    if (InputManager.Instance.FlashlightPressed) ToggleOffHand();
 }
 ```
 
@@ -230,9 +237,9 @@ Kunci yang berasal dari kondisi gameplay ada pada sistem pemilik kondisinya, buk
 | `SettingsManager` (#19) | Menyediakan menu ganti tombol |
 | `FirstPersonCamera` (#102) | Membaca `LookDelta` dan menerapkan sensitivitas |
 | `EquipmentManager` (#60) | Membaca `PrimaryAction`, `SecondaryAction`, dan hotbar, lalu meneruskan ke item aktif |
-| `PlayerInteractor` (#17) | Membaca `InteractPressed` |
-| `ShipPlayerController`, `IslandPlayerController` | Mengganti `Input.GetAxis` dan `Input.GetKey` |
-| `FlashlightController` | Mengganti pembacaan tombol `F` |
+| `PlayerInteractor` (#17) | Membaca `InteractPressed` dan `InteractHeld` |
+| `ShipPlayerController`, `IslandPlayerController` | Mengganti `Input.GetAxis` dan `Input.GetKey`. `ShipPlayerController` tidak lagi membaca `Interact` |
+| `FlashlightController` | Tombol `F` kini dibaca `EquipmentManager.ToggleOffHand` |
 | `UIManager`, `DiaryManager` | Tidak lagi membaca `Escape` |
 | `DevConsole` (#56) | Membaca `Debug/ToggleConsole`, lalu `UIFocusStack.Push` |
 | `LocalizationManager` (#104) | Memakai `GetBindingDisplay` dalam teks |
@@ -249,7 +256,7 @@ Kunci yang berasal dari kondisi gameplay ada pada sistem pemilik kondisinya, buk
 - **Lanjut setelah Alt-Tab:** `backgroundBehavior` mereset perangkat, dan #83 membuka Pause.
 - **Mouse melonjak setelah fokus kembali:** `FirstPersonCamera` mengabaikan `LookDelta` pada frame pertama setelah `Gameplay` aktif kembali.
 - **Bentrok tombol antar-map:** diperbolehkan, karena `Gameplay` dan `UI` tidak aktif bersamaan.
-- **Fase 1:** memakai map yang sama. Action yang tidak dipakai di kapal tidak punya pembaca, jadi tidak berpengaruh. Pemakaian Pistol dan Pisau di kapal ada di #75.
+- **Fase 1:** memakai map yang sama. Action yang tidak dipakai di kapal tidak punya pembaca, jadi tidak berpengaruh. Keputusan #75: Pistol dan Pisau tidak dipakai di kapal, dan `PrimaryPressed` menjadi aksi dorong `ShipShove`.
 
 ## 5. Keputusan Desain
 

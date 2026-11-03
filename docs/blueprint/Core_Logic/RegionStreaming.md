@@ -188,7 +188,7 @@ Selisih 150 dan 250 meter mencegah region dimuat dan dilepas berulang saat pemai
 
 **`IEnumerator UnloadRegion(RegionRecord r)`**:
 
-1. `r.state = Unloading`, lalu terbitkan event `Unloading`. `SpawnManager`, `NPCRoster`, `HeavyItemSystem`, dan pemilik `WorldItem` mengurus objeknya pada frame ini.
+1. `r.state = Unloading`, lalu terbitkan event `Unloading`. `SpawnManager`, `NPCRoster`, `HeavyItemSystem`, dan `WorldItemManager` mengurus objeknya pada frame ini.
 2. Tunggu satu frame.
 3. Panggil `CaptureRegion(r.region)`, lalu catat `r.lastUnloadedGameHour`.
 4. Aktifkan `r.farMesh`, matikan `r.structureRoot`, dan nyalakan `SeamBarrier` terkait.
@@ -217,8 +217,8 @@ public class RegionStateStore
 |---|---|
 | Objek statis dengan status (pohon, batu, peti, Diary, Lucky Machine) | `ISaveable` dengan `SaveId` stabil dari #80. Saat `CaptureRegion`, statusnya masuk ke `Store`. Saat `RestoreRegion`, statusnya dibaca kembali |
 | `LootSpawnerSystem` | `ISaveable`. Daftar titik dan barang yang sudah diambil masuk ke `Store` (#89) |
-| `WorldItem` yang jatuh | Pemilik `WorldItem` (#66) mencatat `itemId`, jumlah, dan posisi ke `Store`, lalu mengembalikan objek ke pool |
-| Node yang tumbuh kembali | `Store` hanya menyimpan status. Saat region kembali, #73 mengejar waktu lewat `GetElapsedGameHours(region)` |
+| `WorldItem` yang jatuh | `WorldItemManager` (#66) memakai `CaptureRegion` dan `RestoreRegion`: mencatat `itemId`, jumlah, dan posisi ke `Store`, lalu mengembalikan objek ke pool |
+| Node yang tumbuh kembali | `Store` menyimpan status dan jam absolut `RegrowAtGameHour`. Saat region kembali, #73 membandingkannya dengan `TotalGameHours` |
 
 **Pengisian:** `RestoreRegion` memanggil `root.GetComponentsInChildren<ISaveable>(true)` sekali saat region masuk, lalu menyimpan daftarnya untuk dipakai `CaptureRegion`. Pencarian ini tidak dipanggil setiap frame.
 
@@ -270,7 +270,7 @@ Dalam kondisi normal, pemain berlari 8 m/s butuh sekitar 18 detik dari `loadDist
 2. **Dinding seam:** `SeamBarrier` adalah `BoxCollider` di layer `Obstacle`, dan aktif selama salah satu sisi belum `Loaded`. Pemain tertahan di batas, dan tidak jatuh ke ruang kosong.
 3. **Pesan:** kalau pemain tertahan selama `stallNoticeSeconds`, `IsStalled = true`, dan HUD menampilkan "Memuat area".
 4. **Jeda:** kalau masih tertahan selama `stallPanelSeconds`, `RunLifecycle` mendorong panel `Loading`. Waktu berhenti, jadi pemain tidak mati saat menunggu. Panel tertutup setelah region `Loaded`.
-5. **Jatuh ke ruang kosong:** `RegionBoundaryGuard` mencatat `lastSafePosition` setiap `safePositionIntervalSeconds`, saat `PhysicsQuery.Raycast` ke `PhysicsMasks.Ground` mengenai tanah. Kalau pemain berada di region yang belum `Loaded` dan tidak ada tanah di bawahnya, pemain dipindah ke `lastSafePosition`, dan gravitasi `IslandPlayerController` ditahan sampai region siap.
+5. **Jatuh ke ruang kosong:** `RegionBoundaryGuard` membuka `public Vector3 LastSafePosition { get; }` lewat `Instance`, yang dipakai `RavineRecoveryVolume` dan `VerifyPlayerRegion` (#68). Nilainya dicatat setiap `safePositionIntervalSeconds`, saat `PhysicsQuery.Raycast` ke `PhysicsMasks.Ground` mengenai tanah. Kalau pemain berada di region yang belum `Loaded` dan tidak ada tanah di bawahnya, pemain dipindah ke `lastSafePosition`, dan gravitasi `IslandPlayerController` ditahan sampai region siap.
 
 ### Fungsi publik
 
@@ -278,8 +278,8 @@ Dalam kondisi normal, pemain berlari 8 m/s butuh sekitar 18 detik dari `loadDist
 |---|---|
 | `RegionType GetRegionAt(Vector3 position)` | Region dari `Bounds`, tanpa memakai trigger |
 | `bool IsLoaded(RegionType region)` | Dipakai `SpawnManager`, #70, dan #71 sebelum memunculkan objek |
-| `Transform GetStructureRoot(RegionType region)` | Induk bangunan baru untuk `BuildManager` |
-| `float GetElapsedGameHours(RegionType region)` | Waktu sejak region dilepas, untuk #73 |
+| `Transform GetStructureRoot(RegionType region)` | Mengembalikan `RegionRecord.structureRoot`, sebagai induk bangunan baru untuk `BuildManager` dan `BuildMenu` (#79) |
+| `float GetElapsedGameHours(RegionType region)` | Waktu sejak region dilepas. #73 tidak lagi memakainya |
 | `void CaptureLoadedRegions()` | Mengambil status region aktif sebelum save (#80) |
 
 `GetRegionAt` berbeda dengan `RegionChangedEvent`. Event itu milik `ZoneManager` dan menunjukkan region gameplay pemain. `RegionStreaming` tidak memakai trigger untuk memutuskan pemuatan.

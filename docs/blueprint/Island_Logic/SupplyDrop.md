@@ -96,7 +96,7 @@ Kalau semua gagal, event hari itu batal dan dicatat lewat `eventlog`. Kuota hari
 
 **`private void BeginDrop()`**:
 
-1. Fork kedua `Fork(SupplyDrop, e.day * 31 + 1)` dipakai untuk lokasi. Kalau `TryFindDropPoint` gagal, `state = Idle`.
+1. Fork kedua `Fork(SupplyDrop, GameManager.currentDay * 31 + 1)` dipakai untuk lokasi. Kalau `TryFindDropPoint` gagal, `state = Idle`.
 2. Kalau pemain sedang tidur (`SleepSystem.IsSleeping`), lewati pesawat dan parasut, lalu panggil `Land()` langsung.
 3. Ambil `Plane_Supply`. Arah terbang acak, dari `target - dir * planeLeadDistance` ke `target + dir * planeLeadDistance`, pada `planeAltitude`. `state = PlaneInbound`.
 4. Kirim notifikasi `Terdengar pesawat di kejauhan` lewat `NotificationManager` (#22).
@@ -126,7 +126,7 @@ Kalau semua gagal, event hari itu batal dan dicatat lewat `eventlog`. Kuota hari
 **`OnInteract`**:
 
 1. Ambil isi dari `LootTable` `supply_drop` (#103), dengan `Fork(SupplyDrop, day * 31 + 2)`.
-2. Untuk tiap hasil: `WorldItem.Spawn(inst, amount, posisi sekitar peti, despawns: true)`.
+2. Untuk tiap hasil: `WorldItemManager.Spawn(inst, amount, posisi sekitar peti, despawns: true)`.
 3. Hentikan suar, buka tutup peti, lalu kembalikan peti ke pool setelah pemain menjauh 30 meter atau 60 detik berlalu.
 4. `state = Idle`.
 

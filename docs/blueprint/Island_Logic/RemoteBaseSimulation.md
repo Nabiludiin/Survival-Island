@@ -135,7 +135,7 @@ netDamage = kekuatan × (1 - mitigasi) × acak(1 - varianceFraction, 1 + varianc
 
 **`private void ApplyProgress(RaidPlan plan, float target)`**: `amount = netDamage × (target - appliedFraction)`, lalu `ApplyStructureDamage(cluster, amount)`, dan `appliedFraction = target`. Karena hanya selisih yang diterapkan, damage tidak pernah ganda.
 
-**`public void ApplyStructureDamage(BaseCluster c, float amount)`**, dipakai juga #70:
+**`public void ApplyStructureDamage(BaseCluster c, float amount)`**, dipakai juga `NPCInfection` (#117):
 
 1. Bagi menjadi pukulan sebesar `hitChunk`, dan sisa pecahan dibawa ke panggilan berikutnya.
 2. Pilih sasaran berbobot: pintu `doorWeight`, dinding 1. Jebakan dan struktur dalam baru menjadi sasaran setelah semua dinding dan pintu hancur.
@@ -157,7 +157,7 @@ NPC penjaga adalah NPC `StayAtBase` atau `Work` yang posisi tercatatnya berada d
 
 1. `tekanan = netDamage / total maxHP dinding dan pintu awal`. `isBreached` bernilai benar kalau ada dinding atau pintu yang hancur malam ini.
 2. Peluang cedera = `min(npcInjuryChanceMax, tekanan)`. Kalau tidak ada yang jebol, peluang ini dibagi 2.
-3. Kalau cedera: `NPCRoster.ApplyRemoteInjury(npcId, npcInjuryDamage)`.
+3. Kalau cedera: `NPCRoster.ApplyRemoteDamage(npcId, npcInjuryDamage)`.
 4. Kalau `isBreached`, lempar `npcDeathChanceOnBreach`, dikali `npcGuardDeathMultiplier` untuk NPC bersenjata. Kalau kena, atau HP habis, `NPCRoster.KillNpc(npcId, DeathReason.KilledByEnemy)`, yang menerbitkan `NPCDiedEvent`.
 
 Peluang selamat tanpa cedera pada hari ke-40 dengan base kayu 5 struktur: 40 persen. NPC di balik base batu terawat hampir selalu aman, sehingga upgrade dinding punya nilai jelas.
@@ -178,7 +178,15 @@ Dengan cara ini, zombie tidak membeku di dekat base akibat `OptimizationManager`
 
 ### Bencana saat ditinggal
 
-Base yang ditinggal tetap terkena bencana. `DisasterManager` (#70) memutuskan besarnya, memakai `ApplyStructureDamage` untuk data, dan melewati `survivesEarthquake` saat gempa. Sistem ini tidak menghitung bencana sendiri, supaya tidak ganda.
+Base yang ditinggal tetap terkena bencana. `DisasterManager` (#70) memutuskan besarnya, dan sistem ini hanya menerapkannya, supaya tidak ganda.
+
+**`public void QueueDisasterDamage(RegionType region, DamageType type, float damagePerHit, int hits, bool onlyWood)`**, dipanggil #70 untuk region yang tidak dimuat:
+
+1. Ambil semua cluster di `region`, termasuk pos sementara. Keluar kalau tidak ada.
+2. Untuk tiap cluster, kumpulkan sasaran dari `StructureRegistry`. Kalau `onlyWood`, buang struktur dengan `data.survivesEarthquake == true` (`raft/BuildingIntegrity.md`).
+3. Pilih `hits` sasaran acak memakai `RunSeedManager.GetStream(Disaster)`, lalu panggil `BaseHealth.TakeDamage(in DamageInfo { amount = damagePerHit, type, byPlayer = false })`.
+
+Hantaman langsung diterapkan pada panggilan itu, dan tidak masuk `RaidPlan`, sehingga tidak perlu disimpan. Karena `DisasterManager` memanggilnya hanya saat bencana dimulai atau pada denyut pertama, jumlahnya kecil dan tidak perlu dibagi per frame.
 
 ## 3. Hubungan dengan Sistem Lain
 
@@ -194,7 +202,7 @@ Base yang ditinggal tetap terkena bencana. `DisasterManager` (#70) memutuskan be
 | `NPCRoster` (#76), `NPCInfection` (#117) | Cedera NPC, dan infeksi kalau #117 disetujui |
 | `SpawnManager` (#62), `AIDirector` (#27), `OptimizationManager` | Peralihan dan pengecualian culling |
 | `RegionStreaming` (#88) | `IsLoaded` dan `GetRegionAt` |
-| `DisasterManager` (#70) | Memakai `ApplyStructureDamage` |
+| `DisasterManager` (#70) | Memanggil `QueueDisasterDamage` untuk region yang tidak dimuat |
 | `NotificationManager` (#22) | Pesan |
 | `RunSeedManager` (#89), `WorldStateSave` (#80) | Keacakan dan simpanan |
 

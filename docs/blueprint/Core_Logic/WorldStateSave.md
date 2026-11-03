@@ -8,7 +8,7 @@
 
 ### Pola
 
-`WorldStateSave` adalah manager persisten (`IBootstrapService`, urutan ke-12 di #82). Blueprint ini melengkapi dan menggantikan isi `SaveSystem.md`: kelas `GameData`, pemanggilan langsung ke manager, dan `File.WriteAllText` tidak dipakai lagi.
+`WorldStateSave` adalah manager persisten (`IBootstrapService`, urutan ke-16 di #82). Blueprint ini melengkapi dan menggantikan isi `SaveSystem.md`: kelas `GameData`, pemanggilan langsung ke manager, dan `File.WriteAllText` tidak dipakai lagi.
 
 Tiap sistem menyimpan datanya sendiri lewat `ISaveable`, jadi `WorldStateSave` tidak perlu mengenal isi tiap sistem.
 
@@ -22,7 +22,7 @@ public interface ISaveable
     void OnRestoreFinished();       // Mengirim ulang event sticky dan menyegarkan tampilan
 }
 
-public enum SaveReason { ArrivedOnIsland, WakeUp, Daybreak, QuitToMenu, AppQuit, Manual }
+public enum SaveReason { ArrivedOnIsland, WakeUp, Daybreak, QuitToMenu, AppQuit, Manual, BridgeComplete }
 public enum SaveProblem { None, Corrupt, NewerVersion, OldVersionNoMigration }
 ```
 
@@ -71,6 +71,7 @@ public struct SaveEntry
 | `survival_save.corrupt.json` | Salinan save rusak, untuk laporan bug | **Dihapus** |
 | `run_end.marker` | Penanda akhir run (#82) | Dihapus setelah alur selesai |
 | `stats.json` | Statistik (#57) | **Tetap** |
+| `lore_archive.json` | ID lore yang pernah ditemukan (#100) | **Tetap**. `DeleteRunSave` tidak menyentuh file ini |
 | `PlayerPrefs` | Setting dan tombol (#18, #19) | **Tetap** |
 
 Semua berada di `Application.persistentDataPath`.
@@ -140,7 +141,7 @@ Semua berada di `Application.persistentDataPath`.
 | Data | `SaveId` | Pemilik | Isi |
 |---|---|---|---|
 | Seed dan susunan run | Dipanggil langsung | `RunSeedManager` (#89) | `RunSeedSaveData` |
-| Hari dan fase | Dipanggil langsung | `GameManager` | `currentDay`, `hasEscaped`, dan `shipOutcome` |
+| Hari dan fase | Dipanggil langsung | `GameManager` | `currentDay`, `hasEscaped`, `hasArrivedOnIsland`, `shipOutcome` dengan `lostNpcIds`, dan `wasTainted` |
 | Jam dunia | `world_clock` | `DayNightDirector` | `currentTimeOfDay`, `TotalGameHours`, dan `isNight` |
 | Akses region dan jembatan | `world_gates` | `RegionGateSystem` (#68) | Kayu tersetor, jembatan selesai, dan region terbuka |
 | Status region | `regionStoreJson` | `RegionStateStore` (#88) | Node panen, peti loot, `WorldItem`, dan `lastUnloadedGameHour` |
@@ -149,6 +150,7 @@ Semua berada di `Application.persistentDataPath`.
 | Hotbar | `player_equipment` | `EquipmentManager` (#60) | `EquipmentSaveData` |
 | Status tubuh | `player_vitals` | `SurvivalStats` (#111) | `HP`, `Stamina`, `Hunger`, `Thirst`, `Infection`, `IsExhausted`, dan sisa pemulihan |
 | Infeksi, penyakit, dan efek | `player_infection`, `player_disease`, `player_effects` | #64, #45, #20 | Tahap dan sisa waktu |
+| Kehangatan | `player_warmth` | `WarmthSystem` (#65) | Nilai kehangatan dan pakaian |
 | Posisi pemain | `player_transform` | `IslandPlayerController` | `GetSafeSavePosition()` (#101), `yaw`, dan `pitch` (#102) |
 | Bangunan | `world_structures` | `StructureRegistry` (#79) | `StructureRecord[]`, HP, status pintu (#78), dan isi peti (#46) |
 | Suku cadang | `world_parts` | `HeavyItemSystem` (#69) | Posisi dan status tiap barang |
@@ -156,10 +158,19 @@ Semua berada di `Application.persistentDataPath`.
 | Diary dan objektif | `world_objectives` | `ObjectiveManager` (#81) | Bab ditemukan dan objektif |
 | Resep terbuka | `world_recipes` | `CraftingManager`, `TechTreeManager` (#77) | Node dan resep |
 | NPC | `world_npcs` | `NPCRoster` (#76) | Posisi, state, HP, dan yang sudah mati |
+| Infeksi NPC | `world_npc_infection` | `NPCInfection` (#117) | Record infeksi NPC |
 | Bencana | `world_disasters` | `DisasterManager` (#70) | Jadwal terpakai dan cooldown |
+| Blood Moon | `world_bloodmoon` | `HordeManager` (#50) | `lastBloodMoonDay`, `IsActive`, `activeDay`, `wavesSpawned`, dan `waveTimer` |
+| AI Director | `ai_director` | `AIDirector` (#27) | `spawnedTonight`, `CurrentPhase`, `Intensity`, `mobTimer`, dan `phaseTimer` |
+| Api | `world_fire` | `FireSystem` (#97) | `{ structureId, burnRemaining, generation }` |
+| Lore | `world_lore` | `LoreCollectibles` (#100) | Temuan lore dalam run ini |
+| Peta | `world_map` | `WorldMapSystem` (#105) | `WorldMapSaveData`, hanya kalau `GameBalanceConfig.map.enabled = true` |
+| Barang hanyut (usulan, kalau #106 disetujui) | `world_debris` | `DebrisRetrieval` (#106) | `nextSpawnGameHour` |
 | Kargo dan suplai | `world_supply` | #71, #54 | Kargo yang belum diambil |
 | Hasil simulasi base | `world_remotebase` | `RemoteBaseSimulation` (#90) | Hasil yang belum diterapkan |
 | Lucky Machine | Lewat `RegionStateStore` | `LuckyMachine` (#72) | Kuota dan hadiah |
+
+**`LightFixture` (#98):** `ISaveable` dengan `SaveId = StructureId`, berisi `fuelSeconds`, `IsLit`, dan `lastTickGameHour`. Dipulihkan setelah `world_structures`.
 
 **Tidak disimpan:** musuh, state AI, panel UI, `Time.timeScale`, status tidur, hologram, isi pool, audio, dan efek. Semuanya dihitung ulang atau dimulai dari awal.
 
@@ -190,6 +201,7 @@ Semua berada di `Application.persistentDataPath`.
 | `QuitToMenu` | `RunLifecycle` | Ya, selalu tulis |
 | `AppQuit` | `Application.wantsToQuit`, dan `OnApplicationPause(true)` di Android | Ya, selalu tulis |
 | `Manual` | `DevConsole` (#56) | Ya, selalu tulis |
+| `BridgeComplete` | `RegionGateSystem` (#68) | Diperiksa |
 
 ### Menulis tanpa merusak file lama
 
@@ -241,7 +253,7 @@ Bangun saat fajar mengirim `WakeUp` dan `Daybreak` hampir bersamaan. `pendingRea
 
 Dengan aturan ini, autosave tidak pernah mengurung pemain dalam keadaan hampir pasti mati.
 
-**Keluar saat pertempuran:** `QuitToMenu` dan `AppQuit` tetap menulis, karena pemain tidak boleh kehilangan run. Supaya bukan jalan pintas keluar dari bahaya, payload mencatat `wasInCombat` dan `engagedEnemyCount`. Saat `FinishRestore`, kalau `wasInCombat` dan saat itu malam, panggil `SpawnManager.Instance.RequestAmbush(posisiPemain, Mathf.Min(engagedEnemyCount, combatRestoreMaxEnemies), combatRestoreRadius)`.
+**Keluar saat pertempuran:** `QuitToMenu` dan `AppQuit` tetap menulis, karena pemain tidak boleh kehilangan run. Supaya bukan jalan pintas keluar dari bahaya, payload mencatat `engagedEnemyCount` dari `SpawnManager.Instance.EngagedEnemyCount`, dan `wasInCombat`, yang bernilai `true` kalau jumlahnya lebih dari 0 (#62). Saat `FinishRestore`, kalau `wasInCombat` dan saat itu malam, panggil `SpawnManager.Instance.RequestAmbush(posisiPemain, Mathf.Min(engagedEnemyCount, combatRestoreMaxEnemies), combatRestoreRadius)`.
 
 ### Mencegah save-scumming
 
@@ -281,13 +293,14 @@ Urutan ini mengikuti `RunLifecycle.ContinueRun()`.
 | 4 | 40 | `player_carry` | Slot tas harus benar sebelum isi inventori (#118) |
 | 5 | 50 | `player_inventory` | Sumber `ItemInstance` |
 | 6 | 60 | `player_equipment` | Merujuk `instanceId` (#60) |
-| 7 | 70 | `player_vitals`, `player_infection`, `player_disease`, `player_effects` | Mengisi status |
+| 7 | 70 | `player_vitals`, `player_infection`, `player_disease`, `player_effects`, `player_warmth` | Mengisi status |
 | 8 | 80 | `player_transform` | Menentukan region awal |
 | 9 | 90 | `world_structures` | Memakai `GetStructureRoot`, dan item untuk peti |
-| 10 | 100 | `world_parts`, `world_helicopter` | Data pulau |
-| 11 | 110 | `world_objectives`, `world_recipes` | Data progres |
+| 10 | 100 | `world_fire`, `LightFixture` per `StructureId`, `world_parts`, `world_helicopter` | Data pulau. `world_fire` dan `LightFixture` merujuk struktur, jadi setelah `world_structures` |
+| 11 | 110 | `world_objectives`, `world_recipes`, `world_lore` | Data progres |
 | 12 | 120 | `world_npcs` | Butuh posisi pemain dan bangunan |
-| 13 | 130 | `world_disasters`, `world_supply`, `world_remotebase` | Terakhir, karena bisa merujuk data di atas |
+| 13 | 130 | `world_npc_infection`, `world_disasters`, `world_bloodmoon`, `world_supply`, `world_remotebase`, `ai_director`, dan `world_debris` (usulan, kalau #106 disetujui) | Merujuk data di atas. `world_npc_infection` setelah data NPC |
+| 14 | 135 | `world_map` | Penanda sistem dipasang pemiliknya lebih dulu. Hanya kalau `GameBalanceConfig.map.enabled = true` |
 
 `RestoreState` hanya mengisi data dan tidak boleh mengirim event. Exception ditangkap per sistem, dicatat, lalu sistem itu memakai nilai awal.
 
@@ -330,6 +343,8 @@ Alur saat `Corrupt`:
 
 **`public void ClearRunEndMarker()`** menghapus penanda.
 
+**`public void SetAutosaveEnabled(bool enabled)`** mengisi `autosaveEnabled`. `RunLifecycle` mematikannya pada langkah 1 alur akhir run.
+
 **`public bool TryReadRunEndMarker(out RunEndMarker m)`** dipakai `RecoverInterruptedEnd()` (#82).
 
 **`public void ResetForNewRun()`**: `pendingReason = null`, `autosaveEnabled = true`, `loadedPayload = null`, dan `registered` dikosongkan.
@@ -342,7 +357,7 @@ Alur saat `Corrupt`:
 
 | Sistem | Hubungan |
 |---|---|
-| `RunLifecycle` (#82) | Memanggil `HasContinuableSave`, `ReadRunFile`, `RestoreBaseScene`, `FinishRestore`, `MarkRunEnded`, `DeleteRunSave`, `ClearRunEndMarker`, dan `TryReadRunEndMarker` |
+| `RunLifecycle` (#82) | Memanggil `HasContinuableSave`, `ReadRunFile`, `RestoreBaseScene`, `FinishRestore`, `SetAutosaveEnabled`, `MarkRunEnded`, `DeleteRunSave`, `ClearRunEndMarker`, dan `TryReadRunEndMarker` |
 | `RegionStreaming` (#88) | `CaptureLoadedRegions`, `RegionStateStore`, dan pemulihan objek region |
 | `RunSeedManager` (#89), `GameManager` | `CaptureSave`, `RestoreFromSave`, dan `RestoreRunData` |
 | `StructureRegistry` (#79) | `world_structures`, termasuk #46 dan #78 |

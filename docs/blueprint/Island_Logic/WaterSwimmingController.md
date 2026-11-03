@@ -20,7 +20,7 @@ public enum WaterMode { None, Wading, Swimming }
 public class WaterVolume : MonoBehaviour
 {
     public WaterKind kind;
-    public float SurfaceY { get; }   // Laut: TideManager (#91). Lainnya: posisi Y objek
+    public float SurfaceY { get; }   // Posisi Y collider. Collider laut digerakkan TideManager (#91)
 }
 ```
 

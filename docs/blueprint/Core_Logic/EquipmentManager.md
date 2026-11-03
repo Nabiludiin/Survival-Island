@@ -60,7 +60,7 @@ public enum EquipLock { None = 0, Menu = 1, HeavyItem = 2, Climbing = 4, Pinned 
 | Pisau | `Base_Pisau` | `OneHand` | `MeleeCombatSystem` | Tusuk | Tidak dipakai |
 | Kapak | `Tool_Axe` | `TwoHand` | `MeleeCombatSystem` | Tebang dan serang | Tidak dipakai |
 | Beliung | `Tool_Pickaxe` | `TwoHand` | `MeleeCombatSystem` | Tambang dan serang | Tidak dipakai |
-| Palu | `Tool_Hammer` | `OneHand` | `BuildManager`, #79 | Bangun | Menu radial (#79) |
+| Palu | `Tool_Hammer` | `OneHand` | `HammerEquippable`, diteruskan ke `BuildManager` dan `BuildingIntegrity` (#79) | Sesuai `HammerMode`: Perbaiki (awal), Bangun, Upgrade, atau Bongkar | Menu radial (#79) |
 | Obor | `Tool_Torch` | `OffHand` | `TorchController` (#65) | Tidak dipakai | Tidak dipakai |
 | Senter | `Tool_Flashlight` | `OffHand` | `FlashlightController` | Tidak dipakai | Tidak dipakai |
 | Laser Pistol | `Reward_LaserPistol` | `OneHand` | `GunController` dengan `WeaponData` lain | Tembak | Tidak dipakai |
@@ -94,7 +94,11 @@ void Update()
     if (state != EquipState.Idle) return;
 
     var input = InputManager.Instance;
-    if (input.PrimaryPressed) Active.PrimaryAction(ActionPhase.Pressed);
+    if (DurabilitySystem.GetState(ActiveInstance) == DurabilityState.Broken)
+    {
+        if (input.PrimaryPressed) RejectBroken();   // Suara dan notifikasi. Item tetap di hotbar (#113)
+    }
+    else if (input.PrimaryPressed) Active.PrimaryAction(ActionPhase.Pressed);
     else if (input.PrimaryHeld) Active.PrimaryAction(ActionPhase.Held);
     else if (input.PrimaryReleased) Active.PrimaryAction(ActionPhase.Released);
     // SecondaryAction mengikuti pola yang sama
@@ -102,6 +106,8 @@ void Update()
 ```
 
 Rincian tiap kunci ada di tabel kunci.
+
+**`public void RefreshEquipped()`** membaca ulang modifier, dan mengganti material viewmodel dari `ItemInstance.skinId` (#72).
 
 ### Hotbar
 
@@ -170,7 +176,7 @@ Durasi bakar Obor tetap berjalan saat disimpan otomatis, sesuai #65. `Flashlight
 
 ### Item aktif hancur atau hilang
 
-**Pemicu:** `DurabilitySystem` memanggil `InventoryManager.RemoveInstance(instanceId)`, atau item dijatuhkan dan habis dipakai. `DurabilitySystem` hanya mengurangi `ItemInstance.durability`, dan tidak lagi berada di MonoBehaviour senjata.
+**Pemicu:** status `DurabilityState.Destroyed` memanggil `InventoryManager.RemoveInstance(instanceId)`, atau item dijatuhkan dan habis dipakai. Status `Broken` tidak memicu alur ini (#113). `DurabilitySystem` hanya mengurangi `ItemInstance.durability`, dan tidak lagi berada di MonoBehaviour senjata.
 
 **Alur:**
 

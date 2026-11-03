@@ -29,6 +29,7 @@ public class StatusEffectData : ScriptableObject
 
     public float moveSpeedMultiplier = 1f;
     public float maxStaminaMultiplier = 1f;
+    public float maxHpMultiplier = 1f;       // Dipakai Buff_LuckyHP (#72)
     public float staminaRegenMultiplier = 1f;
     public bool blocksHPRegen;
 
@@ -124,7 +125,7 @@ Damage kondisi tidak mengirim `PlayerDamagedEvent`, jadi tidak membatalkan pemak
 **`private void Recalculate()`**, tanpa alokasi memori:
 
 ```csharp
-float speed = 1f, maxStamina = 1f, regen = 1f;
+float speed = 1f, maxStamina = 1f, maxHp = 1f, regen = 1f;
 bool blockRegen = false;
 for (int i = 0; i < active.Count; i++)
 {
@@ -133,6 +134,7 @@ for (int i = 0; i < active.Count; i++)
     {
         speed *= e.data.moveSpeedMultiplier;
         maxStamina *= e.data.maxStaminaMultiplier;
+        maxHp *= e.data.maxHpMultiplier;
         regen *= e.data.staminaRegenMultiplier;
     }
     blockRegen |= e.data.blocksHPRegen;
@@ -144,6 +146,7 @@ Lalu, hanya kalau nilainya berubah:
 - `SurvivalStats.SetPenalty(VitalPenaltySource.StatusEffect, maxStamina, regen)`.
 - `IslandPlayerController.SetSpeedModifier(SpeedModifierId.StatusEffect, speed)`.
 - `SurvivalStats.SetRegenBlocked(blockRegen)`.
+- `SurvivalStats.SetMaxHpMultiplier(maxHp)` (#72).
 
 Semua efek yang aktif dikalikan, sehingga urutan pemberian efek tidak mengubah hasil. `VitalsRules.md` perlu aturan khusus untuk sumber `StatusEffect`, karena buff di atas 1 tidak boleh hilang oleh perhitungan nilai terkecil.
 

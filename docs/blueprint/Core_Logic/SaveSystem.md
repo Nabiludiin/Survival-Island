@@ -1,39 +1,49 @@
 # Blueprint: SaveSystem.cs
 **Lokasi:** `docs/blueprint/Core_Logic/SaveSystem.md`
-**Deskripsi Utama:** Menangani serialisasi dan deserialisasi data permainan menggunakan `JsonUtility`. Menyimpan progress seperti hari, inventori pemain, dan lokasi fisik pemain saat keluar dari game (Save & Quit).
+**Deskripsi Utama:** Catatan peralihan. Isi file ini digantikan `Core_Logic/WorldStateSave.md`. `GameData`, pemanggilan langsung ke manager, dan `File.WriteAllText` tidak dipakai lagi.
+**Issue:** #82, #80
+**Rujukan GDD:** Bagian 1 dan 3 (Permadeath). Rincian format adalah usulan teknis di `WorldStateSave.md`.
 
-## 1. Arsitektur & Struktur Data
-*   `public static SaveSystem Instance;` (Singleton Pattern).
-*   `private string saveFilePath;`
-*   **Struktur Kelas Data JSON (`GameData`):**
-    *   Buat *class* serializable di dalam skrip:
-        `[System.Serializable]`
-        `public class GameData {`
-            `public int currentDay;`
-            `public Vector3 playerPosition;`
-            `public float playerHealth;`
-            `public float playerHunger;`
-            `public float playerThirst;`
-            `public float playerInfection;`
-            `public List<string> inventoryItemIDs;`
-        `}`
+## 1. Arsitektur & Variabel Utama
+
+Tidak ada kelas `SaveSystem` baru. Semua nama di file ini diteruskan ke `WorldStateSave` (#80). Selama `WorldStateSave` belum ditulis sebagai script, nama fungsi di bawah adalah kontrak yang harus disediakan.
+
+**Dihapus:** kelas `GameData`, `saveFilePath` sendiri, `SaveGame()`, `LoadGame()`, `DeleteSaveFile()`, dan panggilan `UIManager.ShowNotification`.
 
 ## 2. Detail Logika & Fungsi
-*   **`void Awake()`**
-    *   Terapkan Singleton.
-    *   Tentukan lokasi file (Aman untuk PC/Android): 
-        `saveFilePath = Application.persistentDataPath + "/survival_save.json";`
-*   **`public void SaveGame()`**
-    *   Buat *instance* baru dari `GameData`.
-    *   Ambil data dari *Manager* lain: `data.currentDay = GameManager.Instance.currentDay`, ambil posisi pemain, HP, dan isi inventori.
-    *   Ubah ke format JSON: `string json = JsonUtility.ToJson(data, true);` (Gunakan parameter `true` agar JSON diformat rapi/Pretty Print untuk debugging).
-    *   Tulis ke file: `File.WriteAllText(saveFilePath, json);`
-    *   Panggil `UIManager.Instance.ShowNotification("Game Saved");`
-*   **`public void LoadGame()`**
-    *   Cek eksistensi file: `if (!File.Exists(saveFilePath)) return;`
-    *   Baca file JSON: `string json = File.ReadAllText(saveFilePath);`
-    *   Ubah kembali menjadi objek C#: `GameData data = JsonUtility.FromJson<GameData>(json);`
-    *   Terapkan nilai-nilai tersebut kembali ke `GameManager`, `PlayerController`, dan `InventoryManager`.
-*   **`public void DeleteSaveFile()` (Permadeath Trigger)**
-    *   Jika pemain mati, hapus file agar tidak bisa diload ulang:
-        `if (File.Exists(saveFilePath)) File.Delete(saveFilePath);`
+
+| Fungsi | Kegunaan | Dipanggil oleh |
+|---|---|---|
+| `bool HasContinuableSave()` | Tombol Lanjutkan boleh tampil | `MainMenuController` |
+| `bool ReadRunFile()` | Membaca file save ke memori | `RunLifecycle.ContinueRun` |
+| `void RestoreBaseScene()` | Memulihkan data scene dasar | `RunLifecycle.ContinueRun` |
+| `void FinishRestore()` | Mengirim ulang event sticky | `RunLifecycle.ContinueRun` |
+| `void SetAutosaveEnabled(bool)` | Mematikan autosave saat `Ending` | `RunLifecycle` |
+| `void MarkRunEnded(RunResult, DeathReason)` | Menulis `run_end.marker` berisi `result`, `reason`, `currentDay`, dan `seed` | `RunLifecycle.RunEndSequence` |
+| `void ClearRunEndMarker()` | Menghapus penanda | `RunLifecycle` |
+| `bool TryReadRunEndMarker(out RunEndMarker)` | Membaca penanda saat boot | `RunLifecycle.RecoverInterruptedEnd` |
+| `void DeleteRunSave()` | Menggantikan `DeleteSaveFile()` | `RunLifecycle` |
+
+Pesan berhasil atau gagal tidak lagi memanggil `UIManager`. Sistem yang perlu memberi tahu pemain mendengar `SaveCompletedEvent`.
+
+## 3. Hubungan dengan Sistem Lain
+
+**Event yang dikirim:** `SaveCompletedEvent`, oleh `WorldStateSave`.
+
+**Event yang didengar:** `SaveRequestedEvent`, oleh `WorldStateSave`.
+
+Pemilik data menyimpan lewat `ISaveable`. Daftarnya ada di `WorldStateSave.md`.
+
+## 4. Kasus Khusus
+
+Semua kasus khusus ada di `WorldStateSave.md`: pool, game dijeda, permadeath, save rusak, dan versi file.
+
+## 5. Keputusan Desain
+
+**Sudah ditetapkan dokumen lain:** penggantian `SaveSystem` (`WorldStateSave.md`, `RunLifecycle.md`).
+
+**Menunggu developer:** file ini bisa dihapus setelah semua rujukan pindah ke `WorldStateSave`.
+
+## 6. Skenario Tes
+
+Ikuti bagian 6 di `WorldStateSave.md`. Pastikan juga tidak ada script yang memanggil `File.WriteAllText` untuk file save.

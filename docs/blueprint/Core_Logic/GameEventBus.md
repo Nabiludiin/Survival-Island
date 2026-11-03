@@ -36,6 +36,8 @@ public static class EventChannel<T> where T : struct
 - `GameEventRegistry` mencatat fungsi `Clear` tiap channel saat pertama kali dipakai.
 - Struct dengan atribut `[StickyEvent]` menyimpan nilai terakhir di `Last`.
 - `GameEventRegistry.ClearAll()` dipanggil `RunLifecycle` (#82) saat run berakhir.
+- `int GameEventRegistry.ListenerCount` adalah total pendengar seluruh channel, untuk pemeriksaan kebocoran (#82).
+- `GameEventRegistry.LogHook` (`Action<string>`, nilai awal `null`) hanya ada di `#if UNITY_EDITOR || DEVELOPMENT_BUILD`. `EventChannel<T>.Publish` memanggilnya kalau tidak `null`, untuk perintah `eventlog` (#56).
 - Isi event adalah struct kecil, bukan kelas, jadi tidak menghasilkan garbage.
 
 ## 2. Detail Logika & Fungsi
@@ -88,47 +90,109 @@ Sistem baru menambahkan event ke tabel ini, bukan membuat jalur sendiri. Kolom S
 | Waktu | `HourChangedEvent` | `hour` | `DayNightDirector` | Ya |
 | Pemain | `VitalsChangedEvent` | `hp`, `stamina`, `hunger`, `thirst`, `infection` | `SurvivalStats`, 4 kali per detik | Ya |
 | Pemain | `WarmthChangedEvent` | `warmth`, `isFreezing` | `WarmthSystem` | Ya |
-| Pemain | `PlayerDamagedEvent` | `DamageInfo`, `remainingHP` | `SurvivalStats` | Tidak |
+| Pemain | `PlayerDamagedEvent` | `DamageInfo`, `remainingHP`. Hanya untuk damage dari luar. Damage kondisi (lapar, haus, frostbite, tenggelam, infeksi) tidak mengirimnya | `SurvivalStats` | Tidak |
 | Pemain | `PlayerDiedEvent` | `DeathReason` | `SurvivalStats` | Tidak |
 | Pemain | `InfectionStageChangedEvent` | `stage` | `InfectionSystem` | Ya |
 | Pemain | `PlayerPinnedEvent` | `attackerId`, `isPinned` | `PlayerPinnedState` | Ya |
 | Pemain | `NoiseEmittedEvent` | `position`, `radius`, `sourceKind` | `NoiseEmitter` | Tidak |
+| Pemain | `VitalWarningChangedEvent` | `flags` (`VitalWarningFlags`) | `SurvivalStats` | Ya |
+| Pemain | `InteractedEvent` | `targetId` | `PlayerInteractor` | Tidak |
+| Pemain | `VaccineUsedEvent` | `reduction`, `infectionAfter` | `InfectionSystem` | Tidak |
+| Pemain | `DiseaseChangedEvent` | `type`, `isActive` | `DiseaseManager` | Tidak |
+| Pemain | `StatusEffectChangedEvent` | `effectId`, `isActive`, `stacks` | `StatusEffectManager` | Tidak |
+| Pemain | `FishingStateChangedEvent` | `state`, `endReason` | `FishingSystem` | Tidak |
+| Pemain | `SleepStateChangedEvent` | `isSleeping`, `reason` (`SleepWakeReason`) | `SleepSystem` | Ya |
+| Pemain | `PlayerDetectionChangedEvent` | `level01`, `isAware` | `AISensoryHub` | Ya |
+| Pemain | `SwimStateChangedEvent` | `isSwimming`, `isUnderwater`, `breathRatio` | `SwimmingController` | Ya |
+| Pemain | `PlayerLightLevelChangedEvent` | `lightLevel01`, `visibility` | `LightSourceSystem` | Ya |
 | Musuh | `EnemySpawnedEvent` | `enemyId`, `position` | `SpawnManager` | Tidak |
 | Musuh | `EnemyHitEvent` | `position`, `bodyPart`, `isKill`, `byPlayer` | `EnemyHealth` | Tidak |
 | Musuh | `EnemyKilledEvent` | `enemyId`, `position`, `damageType`, `byPlayer` | `EnemyHealth` | Tidak |
 | Musuh | `EnemySacrificedEvent` | `enemyId` | `LuckyMachine` | Tidak |
+| Musuh | `EnemyAttackTelegraphEvent` | `position`, `attackId` | `EnemyAttack` | Tidak |
+| Musuh | `DirectorPhaseChangedEvent` | `phase` | `AIDirector` | Ya |
+| Musuh | `LairClearedEvent` | `lairId`, `region` | `ZombieLair` | Tidak |
 | Inventori | `InventoryChangedEvent` | `itemId`, `delta`, `total` | `InventoryManager` | Tidak |
 | Inventori | `EquippedItemChangedEvent` | `itemId` | `EquipmentManager` | Ya |
 | Inventori | `AmmoChangedEvent` | `inMagazine`, `reserve` | `GunController` | Ya |
 | Inventori | `ItemCraftedEvent` | `recipeId` | `CraftingManager` | Tidak |
 | Inventori | `HeavyItemChangedEvent` | `partId`, `isCarried` | `HeavyItemSystem` | Ya |
+| Inventori | `HotbarChangedEvent` | `hotbarIndex`, `itemId` | `EquipmentManager` | Tidak |
+| Inventori | `ItemConsumedEvent` | `itemId`, `freshness` | `ItemUseSystem` | Tidak |
+| Inventori | `InventoryCapacityChangedEvent` | `capacity` | `CarryCapacity` | Ya |
+| Inventori | `ItemCookedEvent` | `recipeId`, `isBurnt` | `CampfireManager` | Tidak |
+| Inventori | `CraftQueueChangedEvent` | `queueCount`, `activeRecipeId` | `CraftingManager` | Tidak |
+| Inventori | `TechNodeUnlockedEvent` | `nodeId` | `TechTreeManager` | Tidak |
+| Inventori | `DurabilityStateChangedEvent` | `instanceId`, `itemId`, `state` | `DurabilitySystem` | Tidak |
+| Inventori | `FishCaughtEvent` | `itemId` | `FishingSystem` | Tidak |
+| Inventori | `CropHarvestedEvent` | `cropId`, `amount` | `PlanterBox` | Tidak |
+| Inventori | `DebrisCollectedEvent` | `itemId`, `amount` | `DebrisRetrieval` | Tidak |
+| Inventori | `WeaponFiredEvent` | `itemId`, `position`, `byPlayer` | `GunController` | Tidak |
+| Inventori | `ThrowableChangedEvent` | `itemId`, `count` | `ThrowableSystem` | Ya |
+| Inventori | `ShotResolvedEvent` | `itemId`, `hitEnemy`, `isHeadshot`, `byPlayer` | `GunController` | Tidak |
+| Inventori | `ResourceNodeHitEvent` | `nodeType`, `isDepleted`, `byPlayer` | `ResourceNode` | Tidak |
+| Fase 1 | `ShipHandChangedEvent` | `weight`, `capacity` | `InventoryManager` | Ya |
+| Fase 1 | `ShipHazardStageChangedEvent` | `stage`, `secondsLeft` | `ShipHazardManager` | Tidak |
 | Region | `RegionChangedEvent` | `from`, `to` | `ZoneManager` | Ya |
 | Region | `RegionUnlockedEvent` | `region` | `RegionGateSystem` | Tidak |
 | Region | `WeatherChangedEvent` | `region`, `weather` | `RegionalWeather` | Ya |
 | Region | `TideChangedEvent` | `level`, `isHigh` | `TideManager` | Ya |
+| Region | `RegionLoadStateChangedEvent` | `region`, `state` | `RegionStreaming` | Tidak |
+| Region | `InteriorZoneChangedEvent` | `zoneId`, `isInside`, `isDark` | `InteriorZone` | Ya |
+| Region | `BridgeProgressChangedEvent` | `deposited`, `required` | `RegionGateSystem` | Ya |
 | Bencana | `DisasterStartedEvent` | `type`, `scale` | `DisasterManager` | Tidak |
 | Bencana | `MajorDisasterStartedEvent` | `type`, `durationSeconds` | `DisasterManager` | Tidak |
 | Bencana | `DisasterEndedEvent` | `type` | `DisasterManager` | Tidak |
 | Bencana | `BloodMoonStartedEvent` | `day` | `HordeManager` | Tidak |
 | Bencana | `BloodMoonEndedEvent` | `day` | `HordeManager` | Tidak |
+| Bencana | `BloodMoonWarningEvent` | `day` | `HordeManager` | Tidak |
 | Suplai | `BeachSupplyArrivedEvent` | `day`, `crateCount` | `BeachSupplyManager` | Tidak |
 | Suplai | `SupplyDropLandedEvent` | `position` | `SupplyDropManager` | Tidak |
+| Suplai | `BeachCrateOpenedEvent` | `day` | `BeachSupplyManager` | Tidak |
 | Base | `StructureBuiltEvent` | `structureId`, `buildableId` | `BuildManager` | Tidak |
 | Base | `StructureDamagedEvent` | `structureId`, `hpRatio` | `BaseHealth` | Tidak |
 | Base | `StructureDestroyedEvent` | `structureId`, `position` | `BaseHealth` | Tidak |
 | Base | `BaseRaidResolvedEvent` | `damageTotal`, `npcInjured` | `RemoteBaseSimulation` | Tidak |
+| Base | `BuildModeChangedEvent` | `mode`, `buildableId` | `BuildManager` | Tidak |
+| Base | `DoorStateChangedEvent` | `structureId`, `state` | `BaseDoor` | Tidak |
+| Base | `PlayerBaseStateChangedEvent` | `isInside` | `BaseNavigation` | Ya |
+| Base | `StructureRepairedEvent` | `structureId`, `hpRatio` | `BuildingIntegrity` | Tidak |
+| Base | `StructureUpgradedEvent` | `structureId`, `buildableId` | `BuildingIntegrity` | Tidak |
+| Base | `BaseRaidStartedEvent` | `clusterId`, `region` | `RemoteBaseSimulation` | Tidak |
+| Base | `StructureBurningEvent` | `structureId`, `isBurning` | `Flammable` | Tidak |
+| Base | `LightSourceToggledEvent` | `structureId`, `isLit` | `LightFixture` | Tidak |
+| Lucky Machine | `LuckyMachineFreeWindowChangedEvent` | `isActive`, `seconds` | `LuckyMachine` | Ya |
+| Lucky Machine | `LuckyMachineSpinResolvedEvent` | `rewardId` | `LuckyMachine` | Tidak |
 | NPC | `NPCRescuedEvent` | `npcId` | `LifeboatExtraction` | Tidak |
 | NPC | `NPCDiedEvent` | `npcId`, `reason` | `NPCCompanion` | Tidak |
+| NPC | `NPCStateChangedEvent` | `npcId`, `state` | `NPCCompanion` | Tidak |
+| NPC | `NPCInfectionChangedEvent` | `npcId`, `value`, `stage` | `NPCInfection` | Tidak |
+| NPC | `NPCTurnedEvent` | `npcId`, `position`, `insideBase` | `NPCInfection` | Tidak |
+| NPC | `NPCExpelledEvent` | `npcId` | `NPCInfection` | Tidak |
 | Objektif | `DiaryChapterFoundEvent` | `chapter` | `ObjectiveManager` | Tidak |
 | Objektif | `ObjectiveChangedEvent` | `objectiveId`, `isComplete` | `ObjectiveManager` | Ya |
 | Objektif | `HelicopterPartInstalledEvent` | `partId`, `installed`, `total` | `RescueEventManager` | Ya |
 | Objektif | `HelicopterReadyEvent` | Tanpa isi | `RescueEventManager` | Ya |
+| Objektif | `ActiveObjectiveChangedEvent` | `objectiveId`, `current`, `target` | `ObjectiveManager` | Ya |
+| Objektif | `ObjectiveMarkerChangedEvent` | `hasMarker`, `position`, `label` | `ObjectiveManager` | Ya |
+| Objektif | `HelicopterEngineChangedEvent` | `state`, `secondsLeft` | `RescueEventManager` | Ya |
+| Objektif | `LoreFoundEvent` | `loreId`, `region`, `isFirstEver` | `LoreCollectibles` | Tidak |
+| Objektif | `LoreHintGrantedEvent` | `loreId`, `hintKind`, `region` | `LoreCollectibles` | Tidak |
 | Run | `RunStartedEvent` | `seed`, `isNewRun` | `RunLifecycle` | Ya |
 | Run | `PhaseChangedEvent` | `phase` | `GameManager` | Ya |
-| Run | `RunEndedEvent` | `RunResult`, `DeathReason` | `GameManager` | Tidak |
-| Run | `SaveRequestedEvent` | `reason` | Pemicu autosave | Tidak |
+| Run | `RunEndedEvent` | `RunResult`, `DeathReason`. `reason` bernilai `DeathReason.None` saat menang | `GameManager` | Tidak |
+| Run | `SaveRequestedEvent` | `reason` (`SaveReason`). Didengar `WorldStateSave` | `RunLifecycle`, `SleepSystem`, `DevConsole`, serta `WorldStateSave` untuk `DaybreakEvent` | Tidak |
 | Run | `SaveCompletedEvent` | `succeeded` | `WorldStateSave` | Tidak |
+| Run | `NarrativeStateChangedEvent` | `sceneId`, `isPlaying` | `NarrativeSequencer` | Ya |
 | UI | `UIFocusChangedEvent` | `isGameplayBlocked`, `isPaused` | `UIFocusStack` | Ya |
+| UI | `InputBindingsChangedEvent` | Tanpa isi | `InputManager` | Tidak |
+| UI | `UIPanelOpenedEvent` | `panelId` | `UIFocusStack` | Tidak |
+| UI | `SettingsChangedEvent` | `category` | `SettingsManager` | Ya |
+| UI | `CinematicStateChangedEvent` | `isPlaying`, `keepMusic` | `NarrativeSequencer`, `DeathCinematic` | Ya |
+| UI | `SubtitleRequestedEvent` | `textKey`, `speakerKey`, `priority`, `sourceKind` | `NarrativeSequencer`, `DisasterManager`, `NPCBarks` | Tidak |
+| UI | `LocaleChangedEvent` | `localeId` | `LocalizationManager` | Ya |
+| UI | `AccessibilityChangedEvent` | `AccessibilityOptions` | `LocalizationManager` | Ya |
+| UI | `MapMarkerChangedEvent` | `markerId`, `isRemoved` | `MapMarkerRegistry` | Tidak |
 
 ### Contoh rujukan: musuh mati dan Lucky Machine
 
@@ -142,7 +206,7 @@ Dulu `EnemyAI` memanggil `LuckyMachine.AddEnergy()`, sehingga AI musuh harus men
 
 ## 3. Hubungan dengan Sistem Lain
 
-- **#82 `RunLifecycle`:** memanggil `GameEventRegistry.ClearAll()` saat run berakhir, setelah semua pendengar sekali pakai selesai.
+- **#82 `RunLifecycle`:** memanggil `GameEventRegistry.ClearAll()` saat run berakhir, setelah semua pendengar sekali pakai selesai. `ClearAll()` diapit `managersRoot.SetActive(false)` dan `SetActive(true)`, karena `ClearAll()` juga menghapus pendengar persisten.
 - **#56 `DevConsole`:** perintah `eventlog 1` menampilkan event yang terkirim.
 - **Semua blueprint baru:** menulis event yang dikirim dan didengar di bagian 3.
 

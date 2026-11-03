@@ -51,16 +51,22 @@ Manager hanya mengisi `Instance` di `Awake`. Pekerjaan yang bergantung pada mana
 | 2 | `InputManager` (#18) | Membuat Action Map dan memuat tombol tersimpan |
 | 3 | `SettingsManager` (#19) | Membaca setting, lalu menerapkannya ke input dan audio |
 | 4 | `AudioManager` | Memakai volume dari setting |
-| 5 | `LocalizationManager` (#104) | Menyiapkan teks sebelum UI tampil |
-| 6 | `UIFocusStack` (#83) | Pengatur waktu, kursor, dan fokus |
-| 7 | `UIManager` | Menyiapkan panel persisten |
-| 8 | `NotificationManager` (#22) | Memakai canvas persisten |
-| 9 | `ObjectPooler` | Membuat isi pool |
-| 10 | `AsyncSceneLoader` | Layanan scene tunggal |
-| 11 | `RunSeedManager` (#89) | Belum membuat seed, hanya menyiapkan data |
-| 12 | `WorldStateSave` (#80) | Menentukan lokasi save dan memeriksa penanda akhir run |
-| 13 | `LocalStatsManager` (#57) | Membaca `stats.json` |
-| 14 | `DevConsole` (#56) | Hanya di build pengembangan |
+| 5 | `AmbientAudio` (#52) | Memakai mixer `AudioManager` |
+| 6 | `CombatMusicDirector` (#114) | Memakai mixer `AudioManager` |
+| 7 | `LocalizationManager` (#104) | Menyiapkan teks sebelum UI tampil |
+| 8 | `UIFocusStack` (#83) | Pengatur waktu, kursor, dan fokus |
+| 9 | `UIManager` | Menyiapkan panel persisten |
+| 10 | `NotificationManager` (#22) | Memakai canvas persisten |
+| 11 | `TutorialManager` (#16) | Memakai `NotificationManager` dan canvas persisten |
+| 12 | `ObjectPooler` | Membuat isi pool |
+| 13 | `VFXManager` (#15) | Tepat setelah `ObjectPooler`, karena memakai pool |
+| 14 | `AsyncSceneLoader` | Layanan scene tunggal |
+| 15 | `RunSeedManager` (#89) | Belum membuat seed, hanya menyiapkan data |
+| 16 | `WorldStateSave` (#80) | Menentukan lokasi save dan memeriksa penanda akhir run |
+| 17 | `LocalStatsManager` (#57) | Membaca `stats.json` |
+| 18 | `DevConsole` (#56) | Hanya di build pengembangan |
+
+`AmbientAudio`, `CombatMusicDirector`, `TutorialManager`, dan `VFXManager` masuk `orderedServices`, dan berada di bawah `PersistentRoot`.
 
 `RunLifecycle` berjalan terakhir, setelah semua layanan siap. Selama #80 belum selesai, nama `WorldStateSave` di blueprint ini merujuk ke `SaveSystem`.
 
@@ -68,10 +74,10 @@ Manager hanya mengisi `Instance` di `Awake`. Pekerjaan yang bergantung pada mana
 
 | Masa hidup | Sistem | Alasan |
 |---|---|---|
-| **Persisten (`DontDestroyOnLoad`)** | Semua layanan pada tabel urutan bootstrap, `RunLifecycle`, `NarrativeSequencer` (#99), `VFXManager` (#15), dan `EventSystem` | Dipakai lintas scene, atau menyimpan data yang harus bertahan saat scene berganti |
+| **Persisten (`DontDestroyOnLoad`)** | Semua layanan pada tabel urutan bootstrap, termasuk `VFXManager` (#15) dan `TutorialManager` (#16), lalu `RunLifecycle`, `NarrativeSequencer` (#99), dan `EventSystem` | Dipakai lintas scene, atau menyimpan data yang harus bertahan saat scene berganti |
 | **Scene `MainMenu`** | `MainMenuController` | Hanya dipakai di menu |
-| **Scene `ShipPhase`** | `ShipTimerManager`, `ShipHazardManager`, `LifeboatExtraction`, `LootSpawnerSystem`, `InventoryManager`, `HUDManager`, dan pemain Fase 1 | Fase 1 dibuang utuh setelah selesai |
-| **Scene `IslandPhase`** | `RegionStreaming`, `DayNightDirector`, `ZoneManager`, `RegionalWeather`, `EnvironmentDirector`, `DisasterManager`, `SpawnManager`, `AIDirector`, `HordeManager`, `BuildManager`, `CraftingManager`, `InventoryManager`, `EquipmentManager`, `HeavyItemSystem`, `RescueEventManager`, `ObjectiveManager`, `DiaryManager`, `NPCRoster`, `HUDManager`, dan pemain Fase 2 | Terikat pada dunia pulau, dan hilang bersama scene saat reset |
+| **Scene `ShipPhase`** | `ShipTimerManager`, `ShipHazardManager`, `LifeboatExtraction`, `LootSpawnerSystem`, `InventoryManager`, `HUDManager`, `HordeCrowdManager` (#93), dan pemain Fase 1 dengan komponen `DeathCinematic` (#53) | Fase 1 dibuang utuh setelah selesai |
+| **Scene `IslandPhase`** | `RegionStreaming`, `DayNightDirector`, `ZoneManager`, `RegionalWeather`, `EnvironmentDirector`, `DisasterManager`, `SpawnManager`, `AIDirector`, `HordeManager`, `BuildManager`, `CraftingManager`, `InventoryManager`, `EquipmentManager`, `HeavyItemSystem`, `RescueEventManager`, `ObjectiveManager`, `DiaryManager`, `NPCRoster`, `HUDManager`, `ItemUseSystem` dan `WorldItemManager` (#66), `IslandArrival` (#74), `HordeCrowdManager` dan `AITraversal` (#93, #94), `NPCInfection` (#117), `RemoteBaseSimulation` (#90), `ProgressionSafety` (#116), dan pemain Fase 2 dengan komponen `DeathCinematic` (#53) | Terikat pada dunia pulau, dan hilang bersama scene saat reset |
 | **Region scene** | Tidak boleh memuat manager. Hanya objek dunia (#88) | Region bisa dilepas kapan saja |
 
 `InventoryManager` memakai satu kelas untuk dua fase, dengan instance di tiap scene. Barang berpindah fase lewat `GameManager.savedShipLoot`, sesuai `GLOSSARY.md`.
@@ -81,6 +87,7 @@ Manager hanya mengisi `Instance` di `Awake`. Pekerjaan yang bergantung pada mana
 | Nama | Nilai awal | Fungsi |
 |---|---|---|
 | `GameBalanceConfig.run.endSequenceTimeoutSeconds` | 15 | Batas tunggu sinematik sebelum alur akhir tetap berlanjut |
+| `GameBalanceConfig.run.endingTimeoutSeconds` | 120 | Batas tunggu adegan akhir saat `Won`, karena takeoff dan ending lebih panjang dari 15 detik (#99) |
 | `GameBalanceConfig.run.timeExpiredFadeSeconds` | 3 | Fade hitam saat hari ke-60 berakhir |
 | `GameBalanceConfig.run.gameOverInputDelaySeconds` | 1 | Tombol layar akhir aktif setelah jeda ini, supaya tidak tertekan tanpa sengaja |
 | `GameBalanceConfig.run.saveWaitTimeoutSeconds` | 5 | Batas tunggu `SaveCompletedEvent` saat keluar ke menu |
@@ -111,6 +118,7 @@ Manager hanya mengisi `Instance` di `Awake`. Pekerjaan yang bergantung pada mana
 | **Lanjutkan** | `WorldStateSave.HasContinuableSave()` bernilai `true` | `RunLifecycle.ContinueRun()` |
 | **Run Baru** | Selalu | Kalau ada save, tampilkan `ConfirmDialog` bahwa run lama akan hilang. Lalu `RunLifecycle.StartNewRun()` |
 | **Pengaturan** | Selalu | Dorong panel `Settings` milik #19 |
+| **Statistik** | Selalu | Dorong `StatsPanel` lewat `UIFocusStack` (#57) |
 | **Keluar** | Selalu | `Application.Quit()` |
 
 `HasContinuableSave()` bernilai `false` kalau file tidak ada, penanda akhir run ada, atau save rusak dan tidak bisa dipakai (aturan rinci di #80).
@@ -124,7 +132,7 @@ Manager hanya mengisi `Instance` di `Awake`. Pekerjaan yang bergantung pada mana
 3. `RunSeedManager.BeginNewRun()` (#89).
 4. Terbitkan `RunStartedEvent { seed, isNewRun = true }`. Event ini sticky, jadi objek di scene baru bisa membacanya saat aktif.
 5. `GameManager.SetPhase(GamePhase.SinkingShip)`, yang menerbitkan `PhaseChangedEvent`.
-6. `yield return AsyncSceneLoader.LoadSingle("ShipPhase")`.
+6. Jalankan `AsyncSceneLoader.LoadSingle("ShipPhase", holdActivation: true)` sebagai coroutine, lalu `yield return NarrativeSequencer.Instance.PlayDuringLoad("intro_ship")`, lalu `yield return` coroutine muatnya (#99).
 7. Tutup panel `Loading`, lalu `State = InShip`.
 
 ### Lanjutkan run
@@ -143,14 +151,15 @@ Manager hanya mengisi `Instance` di `Awake`. Pekerjaan yang bergantung pada mana
 
 ### Pindah dari kapal ke pulau
 
-**`public void EnterIslandPhase()`** dipanggil pemilik akhir Fase 1 (#74, `ShipTimerManager`). Hanya berlaku saat state `InShip`:
+**`public void EnterIslandPhase()`** dipanggil pemilik akhir Fase 1, yaitu `LifeboatExtraction` (#74). Hanya berlaku saat state `InShip`:
 
-1. Dorong panel `Loading`, atau biarkan #99 memutar adegan sekoci dengan `holdActivation = true`.
+1. Jalankan `AsyncSceneLoader.LoadSingle("IslandPhase", holdActivation: true)` sebagai coroutine (#99).
 2. `GameManager.SetPhase(GamePhase.IslandSurvival)`.
-3. `yield return AsyncSceneLoader.LoadSingle("IslandPhase", holdActivation)`.
-4. `yield return RegionStreaming.Instance.LoadInitialRegions(titikPendaratan)`.
-5. `State = OnIsland`, lalu terbitkan `SaveRequestedEvent` dengan alasan `ArrivedOnIsland`. Ini save pertama dalam satu run.
-6. Tutup panel `Loading`.
+3. `yield return NarrativeSequencer.Instance.PlayDuringLoad("lifeboat_to_beach")`, lalu `yield return` coroutine muatnya.
+4. `yield return RegionStreaming.Instance.LoadInitialRegions(IslandArrival.Instance.LandingPosition)`.
+5. `IslandArrival.Instance.Apply()` (#74).
+6. `State = OnIsland`, lalu terbitkan `SaveRequestedEvent` dengan alasan `ArrivedOnIsland`. Ini save pertama dalam satu run.
+7. Tutup panel `Loading`.
 
 ### Alur akhir run tunggal
 
@@ -173,7 +182,7 @@ RescueEventManager  ------------->  GameManager.TriggerWinSequence()      ─┘
 | 1 | `State = Ending`, matikan autosave | Sama | Sama | Sama |
 | 2 | `WorldStateSave.MarkRunEnded(result, reason)` | Sama | Sama | Sama |
 | 3 | `UIFocusStack.CloseAllUnlocked(RunEnded)`, lalu dorong panel `Cinematic` | Sama | Sama | Sama |
-| 4 | Putar penutup, dengan batas `endSequenceTimeoutSeconds` | `DeathCinematic.Play(reason)` (#53) | Fade hitam `timeExpiredFadeSeconds`, lalu teks gagal kabur | `NarrativeSequencer.PlayEnding(...)` (#99) |
+| 4 | Putar penutup, dengan batas `endSequenceTimeoutSeconds`. Untuk `Won`, batasnya `endingTimeoutSeconds` | `yield return DeathCinematic.Instance.Play(reason)` (#53), dilewati kalau `Instance` bernilai `null` | `NarrativeSequencer.Play("fail_time_expired")` kalau adegan tersedia (#99). Kalau tidak, fade hitam `timeExpiredFadeSeconds`, lalu teks gagal kabur | `NarrativeSequencer.PlayEnding()` tanpa parameter (#99). `RescueEventManager` sudah mengisi `PrepareEnding` |
 | 5 | `WorldStateSave.DeleteRunSave()` | Sama | Sama | Sama |
 | 6 | `LocalStatsManager.RecordRunEnd(result, reason, currentDay, seed)` (#57) | Sama | Sama | Sama |
 | 7 | `WorldStateSave.ClearRunEndMarker()` | Sama | Sama | Sama |
@@ -182,7 +191,7 @@ RescueEventManager  ------------->  GameManager.TriggerWinSequence()      ─┘
 
 Langkah 4 memakai waktu tak terskala untuk batas tunggunya. Kalau `DeathCinematic` atau `NarrativeSequencer` belum tersedia, langkah ini dilewati. Kegagalan sinematik tidak boleh menghentikan permadeath.
 
-**Layar akhir:** menampilkan penyebab, hari tercapai, dan seed dari `RunSeedManager.CurrentSeedText` (#89). Tombol aktif setelah `gameOverInputDelaySeconds` waktu tak terskala.
+**Layar akhir:** menampilkan penyebab, hari tercapai, seed dari `RunSeedManager.CurrentSeedText` (#89), dan `LocalStatsManager.CurrentRun` (#57). Tombol aktif setelah `gameOverInputDelaySeconds` waktu tak terskala.
 
 | Tombol | Aksi |
 |---|---|
@@ -212,7 +221,7 @@ Menutup jendela memakai alur yang sama lewat `Application.wantsToQuit`. Saat sta
 7. Di build pengembangan, catat tiap channel yang masih punya pendengar lewat `GameEventRegistry.ListenerCount`, sebagai peringatan kebocoran. Pada titik ini jumlahnya seharusnya 0.
 8. `GameEventRegistry.ClearAll()`. Nilai sticky lama dan pendengar yang bocor hilang.
 9. `managersRoot.SetActive(true)`. Pendengar persisten berlangganan kembali lewat `OnEnable`, `UIFocusStack` menerbitkan ulang statusnya, dan `RunLifecycle` memasang ulang langganannya.
-10. Panggil `ResetForNewRun()` pada tiap `orderedServices` sesuai urutan bootstrap. `GameManager` membersihkan `savedShipLoot`, mengatur `currentDay = 1`, `hasEscaped = false`, `IsRunEnding = false`, dan membuat salinan `GameBalanceConfig` yang baru.
+10. Panggil `ResetForNewRun()` pada tiap `orderedServices` sesuai urutan bootstrap. `GameManager` membersihkan `savedShipLoot`, `shipOutcome` dan `hasArrivedOnIsland` (#74), mengatur `currentDay = 1`, `hasEscaped = false`, `IsRunEnding = false`, dan membuat salinan `GameBalanceConfig` yang baru.
 11. `yield return Resources.UnloadUnusedAssets()`, lalu `GC.Collect()`. Keduanya aman karena layar sedang loading.
 
 **Yang dijamin setelah reset:**
@@ -262,7 +271,7 @@ Panel `Loading` mengubah bar dengan `Mathf.MoveTowards` dan `Time.unscaledDeltaT
 
 - Manager persisten dan per scene berlangganan di `OnEnable` dan melepas di `OnDisable`, mengikuti `GameEventBus`. Berlangganan di `Start` atau `Awake` dilarang.
 - Event statis di luar `EventChannel<T>` dilarang, termasuk `DayNightDirector.OnDaybreak` lama.
-- `AudioManager` memindahkan langganannya dari `Start` ke `OnEnable` dan `OnDisable`, dengan `EventChannel<DaybreakEvent>` dan `EventChannel<NightfallEvent>`.
+- `AudioManager` tidak lagi mendengar `DaybreakEvent` dan `NightfallEvent` untuk musik, karena pemilihan musik pindah ke `CombatMusicDirector` (#114). Pendengar baru tetap memakai `OnEnable` dan `OnDisable`.
 - Lambda yang menangkap variabel dilarang sebagai pendengar.
 - Langkah 7 pada reset menjadi pemeriksaan otomatisnya.
 

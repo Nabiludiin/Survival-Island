@@ -60,7 +60,11 @@
 | `AIAttack` | `Player`, `NPC`, `Structure` | `EnemyAttack` (#109) |
 | `Explosion` | `Player`, `Enemy`, `NPC`, `Structure` | Ledakan dan Fireball |
 | `Ground` | `Terrain`, `Structure`, `Obstacle` | Cek pijakan, #21, #86 |
-| `Sunlight` | `Terrain`, `Structure`, `Obstacle` | `SunlightExposure` (#63) |
+| `Sunlight` | `Terrain`, `Structure`, `Obstacle` | `SunlightExposure` (#63), `HydrationSystem` (`RainwaterCollector.RefreshSkyExposure`, #43) |
+| `EnemyBody` | `Enemy` | `SleepSystem` (#67) dan `WorldStateSave` (#80), untuk memeriksa musuh di sekitar pemain |
+| `CastLanding` | `Water`, `Terrain`, `Structure`, `Obstacle` | `FishingSystem` (#55) |
+| `RegrowBlock` | `Structure`, `Player`, `NPC`, `HeavyItem` | `ResourceRespawn` (#73) |
+| `Water` | `Water` | `SwimmingController` (#13) |
 
 ## 2. Detail Logika & Fungsi
 
@@ -73,6 +77,15 @@ Trigger raksasa di `ZoneManager` bisa menghentikan raycast, karena secara bawaan
 - **Pengganti `Physics.Raycast`:** `PhysicsQuery.Raycast(ray, out hit, distance, mask)` selalu mengirim `QueryTriggerInteraction.Ignore`.
 - **Overlap tanpa garbage:** `PhysicsQuery.OverlapSphere(position, radius, mask, buffer)` memakai `OverlapSphereNonAlloc` dan buffer milik pemanggil.
 - **Target unik:** `PhysicsQuery.CollectUniqueDamageables(hits, count, results)` mengambil `IDamageable` lewat parent dan membuang duplikat (#59).
+- **SphereCast:** `PhysicsQuery.SphereCast(ray, radius, out hit, distance, mask)`, selalu dengan `QueryTriggerInteraction.Ignore` (#17).
+- **Kapsul:** `PhysicsQuery.CheckCapsule(bottom, top, radius, mask)`, selalu dengan `QueryTriggerInteraction.Ignore`. Dipakai `PlayerTraversal.CanStandUp` (#101).
+- **Kotak:** `PhysicsQuery.OverlapBox(center, halfExtents, rotation, mask, buffer)`, memakai `OverlapBoxNonAlloc` dan `QueryTriggerInteraction.Ignore`. Dipakai validasi `BuildManager` (#79).
+
+**Pengecualian tertulis untuk air:** tiga fungsi ini sengaja memakai `QueryTriggerInteraction.Collide`, karena collider `Water` adalah trigger.
+
+- `PhysicsQuery.RaycastIncludingTriggers(ray, out hit, distance, mask)`, khusus query yang memang mencari collider `Water` (#55).
+- `PhysicsQuery.RaycastWater(origin, dir, dist, out hit)`, memakai mask `Water` (#13).
+- `PhysicsQuery.OverlapWater(pos, radius, buffer)`, memakai mask `Water` (#13).
 
 ### Layer Collision Matrix
 
@@ -121,6 +134,7 @@ Karena collider tubuh bukan trigger, raycast dengan `QueryTriggerInteraction.Ign
 - `HitboxModifier` di luar layer `EnemyHitbox`.
 - Objek `NavMeshAgent` di luar layer `Enemy` dan `NPC`.
 - Script yang masih memanggil `Physics.Raycast` tanpa `PhysicsQuery`, lewat pencarian teks.
+- Komponen `IInteractable` yang tidak punya collider di layer `Interactable`, `WorldItem`, `HeavyItem`, atau `NPC` (#17).
 
 ## 3. Hubungan dengan Sistem Lain
 

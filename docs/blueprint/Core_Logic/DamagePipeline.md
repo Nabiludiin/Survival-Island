@@ -22,7 +22,7 @@ public struct DamageInfo
     public GameObject source;     // Boleh null untuk lingkungan. Hanya sah pada frame yang sama
     public string sourceId;       // EnemyData.enemyId atau itemId. Dipakai statistik dan layar akhir
     public Vector3 hitPoint;
-    public Vector3 hitDirection;  // Arah datangnya serangan, untuk #51 dan #95
+    public Vector3 hitDirection;  // Arah gerak serangan, dari sumber ke target. #51 memakai kebalikannya, dan #95 memakai nilai ini langsung
     public BodyPart bodyPart;     // Nilai awal Torso untuk damage tanpa hitbox
     public float infection;       // Tambahan infeksi. 0 kalau bukan serangan zombie
     public bool byPlayer;         // Berasal dari pemain, untuk friendly fire dan statistik
@@ -120,6 +120,8 @@ public struct DamageResistance
 
 `EnemyData.resistances` dan `BuildableData.resistances` memakai struct ini. Fungsi bersama `DamageResistanceTable.Apply(resistances, in info)` mengembalikan damage setelah armor, dengan batas bawah `minDamageAfterArmor` untuk musuh. Daftar pendek ini dicari berurutan, tanpa `Dictionary`.
 
+`DamageResistanceTable.GetMultiplier(resistances, DamageType, BodyPart)` mengembalikan pengali armor tanpa menghitung damage (#95).
+
 **Contoh Zombie Militer (angka final di #25):**
 
 | Jenis | Bagian tubuh | Pengali | Hasil dari 30 damage |
@@ -158,26 +160,34 @@ Dengan begitu, GDD tetap terpenuhi karena badan tahan peluru, dan pemain punya c
 
 `EnemyHealth` tidak mengembalikan dirinya ke pool. Mayat dan ragdoll diatur #95, dan pengembalian dilakukan pemilik state di `EnemyAI`.
 
+**`public void SetInvulnerable(bool value)`**: saat aktif, `TakeDamage` diabaikan (#72).
+
 **`public void SetHPMultiplier(float value)`** mengatur `hpMultiplier`, lalu mengisi ulang `CurrentHP = data.maxHP * value`.
 
-**`OnSpawned()`**: `IsAlive = true`, `CurrentHP = data.maxHP * hpMultiplier`. **`OnReturned()`**: `hpMultiplier = 1`, dan daftar `Damaged` serta `Died` tidak dihapus paksa, karena pendengarnya sudah lepas lewat `OnDisable`.
+**`OnSpawned()`**: `IsAlive = true`, `CurrentHP = data.maxHP * hpMultiplier`, dan `SetInvulnerable(false)`. **`OnReturned()`**: `hpMultiplier = 1`, dan daftar `Damaged` serta `Died` tidak dihapus paksa, karena pendengarnya sudah lepas lewat `OnDisable`.
 
 ### `BaseHealth`
 
-`BaseHealth : MonoBehaviour, IDamageable, ISaveable` berada di tiap prefab struktur. `BuildManager` tidak lagi menempelkannya saat bangun.
+`BaseHealth : MonoBehaviour, IDamageable` berada di tiap prefab struktur, tanpa `ISaveable`. `BuildManager` tidak lagi menempelkannya saat bangun.
 
 | Variabel | Tipe | Nilai awal | Fungsi |
 |---|---|---|---|
 | `data` | `BuildableData` | Dari prefab | `maxHP` dan `resistances` |
 | `CurrentHP` | `float` | `data.maxHP` | HP saat ini |
-| `StructureId` | `string` | Dibuat `BuildManager` | ID stabil untuk #80 |
+| `StructureId` | `string` | Dibuat `StructureRegistry.NewStructureId()` | ID stabil untuk #80 |
+| `HpRatio` | `float` | 1 | `CurrentHP / data.maxHP` (#47) |
+| `HpRatioChanged` | `event Action<float>` | Kosong | Event per objek untuk `StructureVisual` (#47) |
+| `LastDamageTime` | `float` | 0 | Waktu damage terakhir (#47) |
+
+**`public void Initialize(BuildableData data, string id, float hp)`** mengisi data, ID, dan HP saat dibangun atau dipulihkan (#47).
 
 **Pengali bawaan bangunan:**
 
 | Jenis | Pengali | Alasan |
 |---|---|---|
 | `Bullet` dan `Melee` | 0 | Pemain tidak bisa merusak dinding sendiri. Bongkar bangunan ada di #79 |
-| `Fire`, `Explosion`, `Structural` | 1 | Serangan zombie, bencana, dan ledakan |
+| `Explosion`, `Structural` | 1 | Serangan zombie, bencana, dan ledakan |
+| `Fire` | Dari `BuildableData.resistances`: 1 untuk kayu, 0 untuk batu | Mengikuti material (#47) |
 
 **`TakeDamage`**: kurangi HP, terbitkan `StructureDamagedEvent { structureId, hpRatio }`. Saat HP habis, terbitkan `StructureDestroyedEvent { structureId, position }`, lalu nonaktifkan dan hapus objek. Bangunan jarang dibuat dan dihancurkan, jadi tidak memakai `ObjectPooler`. Runtuhan beruntun diatur #79, dan **perbaikan diatur #47**, lewat `public void Repair(float amount)`.
 
@@ -191,11 +201,12 @@ Serangan zombie ke dinding memakai `DamageType.Structural`, sehingga pengali `Me
 
 1. Kalau `isDead`, abaikan.
 2. Terapkan aturan friendly fire. Kalau hasilnya 0, abaikan.
-3. Kalau serangan dari musuh, kalikan dengan `DifficultyProfile.enemyDamageMultiplier`.
-4. Panggil `ReduceHP(amount, info.type, info)`.
-5. Kalau `info.infection > 0`, panggil `AddInfection(info.infection)`. Nilainya berasal dari `AttackData.infection` (#109), dan tabel per jenis musuh ada di #64.
-6. Catat `lastDamageTime = Time.time`, untuk jeda pemulihan #111.
-7. Terbitkan `PlayerDamagedEvent { info, remainingHP }`.
+3. Kalau serangan dari musuh dan `Time.time < PlayerPinnedState.graceUntil`, buang damage. Kalau serangan dari musuh selain `Attacker` saat `IsPinned`, kalikan dengan `pinned.otherAttackerDamageMultiplier` (#110). Damage lingkungan dan status tidak terpengaruh.
+4. Kalau serangan dari musuh, kalikan dengan `DifficultyProfile.enemyDamageMultiplier`.
+5. Panggil `ReduceHP(amount, info.type, info)`.
+6. Kalau `info.infection > 0`, panggil `AddInfection(info.infection)`. Nilainya berasal dari `AttackData.infection` (#109), dan tabel per jenis musuh ada di #64.
+7. Catat `lastDamageTime = Time.time`, untuk jeda pemulihan #111.
+8. Terbitkan `PlayerDamagedEvent { info, remainingHP }`.
 
 **`private void ReduceHP(float amount, DamageType type, in DamageInfo info)`** menyimpan `lastDamageType = type` setiap kali HP berkurang, lalu mengurangi HP. Kalau HP habis, panggil `TriggerDeath(DeathReasonMap.From(type))`.
 
@@ -249,7 +260,7 @@ public static class ExplosionDamage
 |---|---|---|---|---|
 | Peluru dan melee pemain | Tidak mungkin | Tertahan, damage 0 | 0 | Penuh |
 | Peluru NPC | Tertahan, damage 0 | Tertahan, damage 0 | 0 | Penuh, dengan `byPlayer = false` |
-| Ledakan buatan pemain (`byPlayer = true`) | Dikali `playerExplosionSelfMultiplier` | Dikali `playerExplosionSelfMultiplier` | Penuh | Penuh |
+| Ledakan dan api buatan pemain (`byPlayer = true`) | Dikali `playerExplosionSelfMultiplier` | Dikali `playerExplosionSelfMultiplier` | Penuh | Penuh |
 | Ledakan lingkungan, Fireball, dan Zombie Beku | Penuh | Penuh | Penuh | Penuh |
 | Serangan musuh | Penuh | Penuh | `Structural` penuh | Tidak mengenai, karena mask `AIAttack` tidak memuat `Enemy` |
 
@@ -289,7 +300,7 @@ Target memeriksa aturan ini di `TakeDamage`, jadi senjata tidak perlu tahu jenis
 - **`source` sudah kembali ke pool:** `source` hanya boleh dipakai pada frame damage. Sistem yang perlu data lebih lama memakai `sourceId`.
 - **Game dijeda:** jalur ini hanya berjalan saat dipanggil. Tidak ada damage baru saat waktu berhenti, karena sumbernya memakai `Time.deltaTime` atau input gameplay.
 - **Permadeath:** HP musuh tidak disimpan. `CurrentHP` bangunan dan pemain ikut save run, sehingga terhapus bersama `WorldStateSave.DeleteRunSave()` (#82).
-- **Save:** `BaseHealth` menyimpan `StructureId`, `CurrentHP`, dan `data.id` lewat `ISaveable` (#80). Musuh tidak disimpan, sesuai #88.
+- **Save:** data struktur ditulis `StructureRegistry` ke `world_structures` lewat `StructureRecord`, bukan oleh `BaseHealth` (#79, `WorldStateSave.md`). Musuh tidak disimpan, sesuai #88.
 - **Mati dan menang pada frame yang sama:** `GameManager.IsRunEnding` menahan panggilan kedua (#82).
 - **Pemain mati saat damage beruntun:** `isDead` menahan `TriggerDeath` kedua, jadi `DeathReason` memakai damage yang pertama membunuh.
 - **Damage 0 atau negatif:** diabaikan, dan pemulihan selalu lewat fungsi pemulihan.
