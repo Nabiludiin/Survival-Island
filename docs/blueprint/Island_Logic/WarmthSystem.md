@@ -43,6 +43,7 @@
 | `snowWaterCold` | 30 | Air di Region 3, tanpa batas bawah |
 | `clothesHeat` | 20 | `Gear_WarmClothes` |
 | `torchHeat` | 20 | Obor yang dipegang |
+| `protectedFloor` | 30 | Usulan. Batas bawah `Warmth` selama `IsProtected()`. Sama dengan `freezeExitThreshold`, jadi pemain tidak membeku |
 | `campfireHeat` | 40 | Dalam `campfire.warmthRadius` 5 meter |
 | `indoorHeat` | 25 | Bangunan tertutup atau `InteriorZone` |
 | `shelterCheckSeconds` | 2 | Jeda pemeriksaan bangunan |
@@ -64,7 +65,7 @@
 | `Blizzard` | Dingin | -2 | Ditambah pada Region 3 (#115) |
 | Air | Dingin | -15 atau -30 | `isInWater` (#13) |
 
-Pakaian atau obor saja cukup menahan Region 3, sesuai GDD. Hanya `Blizzard` yang memaksa pemain mencari api atau bangunan saat memakai satu perlindungan.
+Pakaian atau obor saja mencegah frostbite, sesuai GDD bagian 5. Selisih panas dan dingin bisa negatif, misalnya saat `Blizzard`, tetapi `protectedFloor` menahan `Warmth` di atas ambang beku, jadi pemain hanya kehilangan cadangan panas (usulan 8).
 
 ## 2. Detail Logika & Fungsi
 
@@ -81,7 +82,10 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 5. Kalau `isInWater`: tambahkan `waterCold`, atau `snowWaterCold` dengan `floor = 0` di `Snow`.
 6. `delta = (heat - cold) * dt`.
 7. Kalau `delta < 0`: `Warmth = Max(Warmth + delta, Min(floor, Warmth))`. Kalau tidak, `Warmth = Min(100, Warmth + delta)`.
-8. Jalankan `UpdateFreezing()`.
+8. Kalau `IsProtected()`: `Warmth = Max(Warmth, protectedFloor)`.
+9. Jalankan `UpdateFreezing()`.
+
+**`private bool IsProtected()`:** `!isInWater`, dan `wornClothingInstanceId != -1` atau `isTorchHeld`.
 
 **`UpdateFreezing()`:** `true` kalau `Warmth <= freezeEnterThreshold`, `false` kalau `Warmth >= freezeExitThreshold`, dan tetap di antaranya. Terbitkan `WarmthChangedEvent { warmth, isFreezing }` kalau `IsFreezing` berubah, atau nilai bulat `Warmth` berubah.
 
@@ -89,7 +93,7 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 
 **Batas bawah menjaga GDD:** hujan dan air di region lain menurunkan `Warmth` tanpa pernah menyentuh 20, jadi frostbite hanya terjadi di Region 3.
 
-**`public void ApplyColdBurst(float amount)`:** `Warmth = Max(0, Warmth - amount)`, lalu `UpdateFreezing()`. Dipakai Zombie Beku (#25) dengan `frozenBurstWarmthLoss` 25.
+**`public void ApplyColdBurst(float amount)`:** `Warmth = Max(IsProtected() ? protectedFloor : 0, Warmth - amount)`, lalu `UpdateFreezing()`. Dipakai Zombie Beku (#25) dengan `frozenBurstWarmthLoss` 25.
 
 ### Bangunan tertutup
 
@@ -120,7 +124,7 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 **`TorchController.OnEquip()`:**
 
 1. Kalau `CanLight()` gagal, tampilkan notifikasi `Terlalu berangin` (#22), dan tetap padam.
-2. Nyalakan `Light` dan partikel, lalu `IsLit = true`.
+2. Nyalakan `Light` dan partikel, pasang `LightSource` dengan `isHeld = true` (#98), lalu `IsLit = true`. Sumber ini tidak dihitung dalam tarikan cahaya.
 3. `WarmthSystem.SetTorchHeld(true)`.
 
 **`TorchController.OnUnequip()`:**
@@ -163,6 +167,7 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 | `SleepSystem` (#67) | Membaca `IsFreezing` |
 | `SpecialZombieAI` (#25) | Memanggil `ApplyColdBurst` |
 | `AISensory` (#49) | Boleh membaca `TorchController.IsLit`. Aturan deteksinya milik #49 |
+| `LightSourceSystem` (#98) | Obor pegang memasang `LightSource` dengan `isHeld = true` |
 
 ## 4. Kasus Khusus
 
@@ -189,15 +194,17 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 
 1. **Bentuk `Warmth`:** rekomendasi nilai 0 sampai 100, dengan pemilik `WarmthSystem`. Ini mendukung `ApplyColdBurst` dan indikator HUD.
 2. **Hujan dan air di luar Region 3:** rekomendasi hanya menurunkan `Warmth` sampai batas aman, jadi frostbite tetap khusus Region 3. Efek nyatanya adalah cadangan panas berkurang.
-3. **Durasi obor dan padam:** rekomendasi 300 detik, `Rain` memadamkan setelah 20 detik, sedangkan `Storm` dan `Blizzard` memadamkan langsung. `CampfireManager` memakai aturan yang berbeda untuk hujan, karena api unggun lebih besar.
+3. **Durasi obor dan padam:** rekomendasi 300 detik, `Rain` memadamkan setelah 20 detik, sedangkan `Storm` dan `Blizzard` memadamkan langsung. `CampfireManager` memakai aturan yang berbeda untuk hujan, karena api unggun lebih besar. **Menyimpang dari GDD:** obor padam dan tidak bisa dinyalakan ulang di tempat terbuka saat `Blizzard`, jadi pemain yang hanya membawa obor tetap membeku, padahal GDD bagian 5 menyebut "membawa obor". Keputusannya di #85.
 4. **Slot pakaian:** rekomendasi satu slot di luar inventori, tanpa durabilitas pada versi awal. Bahan kulit hewan sudah menjadi biayanya.
 5. **Obor saat membawa Heavy Item:** rekomendasi tidak boleh. GDD menyebut barang berat, dan pemain jadi perlu pakaian hangat untuk perjalanan bolak-balik.
 6. **Ambang `Warmth`:** rekomendasi membeku pada 20, sehingga stamina habis pada sekitar detik ke-24. Ini sedikit lebih lambat dari perhitungan `GameBalanceConfig.md`, yaitu 20 detik.
+7. **Sumber angka dingin cuaca (#115, menunggu persetujuan):** saat ini `blizzardCold` (2) dan `GameBalanceConfig.weather.effects.warmthLossPerSec` memegang nilai yang sama. Usulan: hapus `blizzardCold`, lalu baca `RegionalWeather.Instance.GetEffects(currentRegion).warmthLossPerSec`. Akibatnya `Snow` ikut menambah dingin 0,5 per detik. Belum diterapkan, karena batasan #115 menyebut efek suhu milik #65.
+8. **Batas bawah saat terlindung:** rekomendasi `protectedFloor` 30 untuk pakaian hangat atau obor menyala, sehingga `Blizzard` dan Zombie Beku tidak membekukan pemain yang terlindung. Pengecualian: air es Region 3 tetap bisa membekukan pemakai pakaian. Ini aturan tambahan yang menyimpang dari GDD bagian 5, dan perlu keputusan di #85.
 
 ## 6. Skenario Tes
 
 1. Masuk Region 3 tanpa perlindungan. **Hasil:** `Warmth` mencapai 20 dalam sekitar 4 detik, stamina habis dalam sekitar 20 detik berikutnya, lalu HP turun 1 per detik.
-2. Dalam kondisi itu, pakai pakaian hangat. **Hasil:** `Warmth` berhenti turun. Pakaian saja tidak memulihkan, jadi `IsFreezing` tetap `true` sampai mendekati api.
+2. Dalam kondisi itu, pakai pakaian hangat. **Hasil:** pada tick berikutnya `Warmth` naik ke 30, dan `IsFreezing` menjadi `false`. Pakaian tidak memulihkan lebih dari itu.
 3. Nyalakan obor di Region 3 dari `Warmth` 100. **Hasil:** `Warmth` tidak turun selama obor menyala.
 4. Lepas obor. **Hasil:** `Warmth` turun dalam 0,5 detik.
 5. Berdiri dalam 5 meter dari api unggun di Region 3. **Hasil:** `Warmth` naik 20 per detik. Berjalan keluar radius. **Hasil:** turun lagi.
@@ -207,5 +214,7 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 9. Paksa `Rain` saat obor menyala. **Hasil:** padam setelah 20 detik. Paksa `Storm`. **Hasil:** padam langsung.
 10. Biarkan obor menyala 300 detik. **Hasil:** item hilang, dan notifikasi muncul.
 11. Angkat suku cadang saat memegang obor. **Hasil:** obor disimpan, panas obor hilang, dan durasi tetap berkurang.
-12. Terkena ledakan Zombie Beku. **Hasil:** `Warmth` turun 25 sekali.
+12. Terkena ledakan Zombie Beku tanpa perlindungan. **Hasil:** `Warmth` turun 25 sekali. Ulangi dengan pakaian dan `Warmth` 40. **Hasil:** `Warmth` berhenti di 30, dan pemain tidak membeku.
 13. Simpan dengan pakaian dan `Warmth` 60, lalu muat. **Hasil:** nilai sama. Mati dan mulai run baru. **Hasil:** `Warmth` 100, tanpa pakaian.
+14. Pegang obor menyala. **Hasil:** `LightSource` terdaftar dengan `isHeld = true`, dan tidak menambah peluang tarikan zombie.
+15. Paksa `Blizzard` di Region 3 dengan pakaian dari `Warmth` 100. **Hasil:** `Warmth` turun 2 per detik, berhenti di 30, dan tidak ada frostbite.

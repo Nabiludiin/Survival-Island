@@ -1,8 +1,8 @@
 # Blueprint: AIDirector.cs
 **Lokasi:** `docs/blueprint/left-4-dead/AIDirector.md`
-**Deskripsi Utama:** Mengatur tempo serangan zombie setiap malam dan kurva kesulitan menuju hari ke-60. Director menentukan berapa banyak dan seberapa beringas, sedangkan `SpawnManager` (#62) menentukan jenis dan tempatnya.
+**Deskripsi Utama:** Mengatur tempo serangan zombie setiap malam dan kurva kesulitan menuju hari ke-60 serta sesudahnya. Director menentukan berapa banyak dan seberapa beringas, sedangkan `SpawnManager` (#62) menentukan jenis dan tempatnya.
 **Issue:** #27
-**Rujukan GDD:** Bagian 3 (Horde malam dan batas 60 hari) dan bagian 5 (ancaman malam per region). Siklus empat tahap dan semua angka adalah usulan dari `docs/CATATAN_MEKANIK.md`, belum ada di GDD.
+**Rujukan GDD:** Bagian 3 (Horde malam, dan zombie semakin kuat setelah hari ke-60) dan bagian 5 (ancaman malam per region). Aturan zombie semakin kuat ada di GDD, tetapi siklus empat tahap, rancangan pengali, dan semua angka adalah usulan dari `docs/CATATAN_MEKANIK.md`, belum ada di GDD.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -27,8 +27,9 @@ public struct WaveRequest
     public int count, maxLarge;
     public float specialShare;
     public WaveModifiers modifiers;
-    public string reason;           // Mob, Panic, CampCounter
+    public string reason;           // Mob, Panic, CampCounter, RemoteTakeover (#90)
     public string forcedEnemyId;    // Kosong kecuali CampCounter
+    public Vector3? origin;         // #90. null berarti sekitar pemain
 }
 ```
 
@@ -59,9 +60,37 @@ public struct WaveRequest
 | 50 | 26 | 55-80 | 28 | 140 | 0,40 | 3 | 1,40 | 1,12 | 1,20 | 0,80 |
 | 60 | 30 | 45-70 | 30 | 180 | 0,50 | 4 | 1,50 | 1,15 | 1,25 | 0,75 |
 
-- **Jumlah:** `mobSize` dan `maxAlive` berhenti di 30, mengikuti batas di `CATATAN_MEKANIK.md`. Mega mob 50 milik #50.
+- **Jumlah:** `mobSize` dan `maxAlive` berhenti di 30 sampai hari ke-60, mengikuti batas di `CATATAN_MEKANIK.md`. Mega mob 50 milik #50.
 - **Jenis:** `specialShare` adalah porsi varian khusus dalam satu gelombang. Jenisnya diambil dari `RegionSpawnTable` (#62), jadi Region 1 tetap hanya berisi zombie standar, sesuai GDD.
 - **Beringas:** selain darah dan damage, jeda serangan makin pendek, mengikuti saran "kesulitan mengubah perilaku" di `REFERENSI_MUSUH_L4D.md`.
+
+### Setelah hari ke-60 (usulan)
+
+GDD bagian 3 menetapkan zombie semakin kuat setelah hari ke-60, tetapi tidak memberi angka. Karena itu kurva tidak berhenti pada baris hari 60. Baris itu menjadi nilai dasar, lalu `EvaluateCurve(day)` mengalikan hasilnya:
+
+```
+hariLewat     = Max(0, day - GameManager.TargetDay)
+pengaliJumlah = Min(postTargetCountMax,  1 + postTargetCountPerDay  * hariLewat)
+pengaliHP     = Min(postTargetHpMax,     1 + postTargetHpPerDay     * hariLewat)
+pengaliDamage = Min(postTargetDamageMax, 1 + postTargetDamagePerDay * hariLewat)
+```
+
+| Nilai `ThreatKey` | Setelah hari ke-60 |
+|---|---|
+| `mobSize`, `nightBudget` | Dikali `pengaliJumlah`, lalu dibulatkan |
+| `hpMultiplier` | Dikali `pengaliHP` |
+| `damageMultiplier` | Dikali `pengaliDamage` |
+| `maxAlive`, `maxLarge`, kecepatan, jeda serang, `specialShare` | Tetap seperti baris hari 60 |
+
+| Hari | `mobSize` diminta | `nightBudget` | HP | Damage |
+|---|---|---|---|---|
+| 60 | 30 | 180 | 1,50 | 1,25 |
+| 70 | 36 | 216 | 1,80 | 1,38 |
+| 85 | 45 | 270 | 2,25 | 1,56 |
+| 110 ke atas | 45 | 270 | 3,00 | 1,88 |
+
+- **Batas performa:** zombie aktif tetap dibatasi `maxAlive` 30 lewat langkah 4 di `TrySpawnMob`, sama dengan `SpawnManager.maxZombiesAlive`, dan di bawah target 30 sampai 50 zombie di `HordeCrowdManager`. Jadi `nightBudget` menambah total zombie per malam tanpa menambah beban per frame.
+- **Batas adil:** semua pengali berhenti pada batasnya, dan kecepatan tetap di bawah `maxZombieSpeed`, supaya run yang sangat panjang tetap bisa dimenangkan.
 
 ### Angka penyetelan lain
 
@@ -89,6 +118,9 @@ public struct WaveRequest
 | `GameBalanceConfig.aiDirector.heldGrowthMax` | 0,5 | Tambahan ukuran paling besar |
 | `GameBalanceConfig.aiDirector.holdMobLargeCount` | 3 | Mob ditahan kalau varian besar sebanyak ini masih hidup |
 | `GameBalanceConfig.aiDirector.maxZombieSpeed` | 7,8 | Batas kecepatan, di bawah lari pemain 8 m/s |
+| `GameBalanceConfig.aiDirector.postTargetCountPerDay` / `postTargetCountMax` | 0,02 / 1,5 | Pengali jumlah per hari setelah hari ke-60, dan batasnya (usulan) |
+| `GameBalanceConfig.aiDirector.postTargetHpPerDay` / `postTargetHpMax` | 0,02 / 2 | Pengali HP per hari setelah hari ke-60, dan batasnya (usulan) |
+| `GameBalanceConfig.aiDirector.postTargetDamagePerDay` / `postTargetDamageMax` | 0,01 / 1,5 | Pengali damage per hari setelah hari ke-60, dan batasnya (usulan) |
 
 ## 2. Detail Logika & Fungsi
 
@@ -126,8 +158,8 @@ Keluar lebih awal kalau `CurrentPhase == Inactive`, `isHeld`, `isOverridden`, at
 3. `want = RoundToInt(Threat.mobSize * regionMult * difficulty.enemyCountMultiplier * grow)`. `regionMult` dari `RegionChangedEvent.Last.to`.
 4. `count = Min(want, Threat.maxAlive - AliveZombies, Threat.nightBudget - spawnedTonight)`.
 5. Kalau `count < minWaveSize`, `mobTimer = waveRetrySeconds`, `heldSeconds += waveRetrySeconds`, lalu keluar. Kalau `nightBudget` sudah habis, Director tidak meminta mob lagi malam itu.
-6. Panggil `SpawnManager.Instance.RequestWave(in request)`, dengan alasan `Mob`.
-7. `spawnedTonight += jumlah yang benar-benar muncul`, `heldSeconds = 0`, dan `mobTimer` diisi nilai acak dari jeda mob lewat `RunSeedManager.Instance.GetStream(RandomStreamId.Enemy)`.
+6. Panggil `int SpawnManager.Instance.RequestWave(in WaveRequest r)`, dengan alasan `Mob`. Nilai kembalinya adalah jumlah yang diterima (#62). Slot yang gagal dibuang `SpawnManager`, lalu memanggil `RefundBudget(1)`.
+7. `spawnedTonight += jumlah yang diterima`, `heldSeconds = 0`, dan `mobTimer` diisi nilai acak dari jeda mob lewat `RunSeedManager.Instance.GetStream(RandomStreamId.Enemy)`.
 
 **`BuildModifiers()`** mengisi `WaveModifiers` dari `Threat`, lalu `damage` dikali `difficulty.enemyDamageMultiplier`. `SpawnManager` mengisi `EnemyHealth.hpMultiplier`, lalu `EnemyAI.ApplyWaveModifiers(in modifiers)`. Kecepatan akhir dibatasi `maxZombieSpeed`.
 
@@ -146,7 +178,8 @@ Keluar lebih awal kalau `CurrentPhase == Inactive`, `isHeld`, `isOverridden`, at
 | `RequestPanicWave(int size, string reason)` | #14, #70 | Melewati tahap dan `heldSeconds`, tetapi tetap mematuhi `maxAlive`. Menambah `spawnedTonight` |
 | `RequestCampCounter(string enemyId, int count)` | #94 | Gelombang dengan `forcedEnemyId`. Boleh saat Relax, dan tidak memakai `nightBudget` |
 | `RefundBudget(int count)` | `SpawnManager.ReturnStuck` | Mengurangi `spawnedTonight`, supaya zombie macet tidak memotong malam itu |
-| `AddExternalSpawn(int count)` | `SunlightExposure` (#63) | Menambah `spawnedTonight` untuk zombie yang bangkit dari tempat sembunyi. Kalau `count >= mobSize`, mob pertama dilewati |
+| `GetPostTargetModifiers(int day)` | #50 | Mengembalikan `WaveModifiers` berisi `pengaliHP` dan `pengaliDamage`, sedangkan kecepatan dan jeda serang bernilai 1. Sampai hari ke-60, semua nilainya 1 |
+| `AddExternalSpawn(int count)` | `SunlightExposure.ReportEmergence()` saat `NightfallEvent` (#63, #62) | Menambah `spawnedTonight` untuk zombie yang bangkit dari tempat sembunyi. Kalau `count >= mobSize`, mob pertama dilewati |
 
 ## 3. Hubungan dengan Sistem Lain
 
@@ -157,11 +190,11 @@ Keluar lebih awal kalau `CurrentPhase == Inactive`, `isHeld`, `isOverridden`, at
 | Sistem | Hubungan |
 |---|---|
 | `SpawnManager` (#62) | Dipanggil langsung lewat `RequestWave`. Menyediakan `AliveZombies` dan `AliveLarge` |
-| `HordeManager` (#50) | Saat Blood Moon, `isOverridden = true`. Spawn massal milik #50 |
+| `HordeManager` (#50) | Saat Blood Moon, `isOverridden = true`. Spawn massal milik #50, dan memakai `GetPostTargetModifiers` setelah hari ke-60 |
 | `SleepSystem` (#67) | Saat tidur, `isHeld = true`. Anggaran dan tahap ditahan. Penyergapan memakai `RequestAmbush` |
 | `SunlightExposure` (#63) | Zombie Desa yang bangkit saat malam dihitung lewat `AddExternalSpawn(count)`, dan mengurangi mob pertama |
 | `CombatMusicDirector` (#114) | Membaca `DirectorPhaseChangedEvent` dan `Intensity` |
-| `HordeCrowdManager` (#93) | Batas `maxAlive` menentukan bebannya. Manager itu tidak mengatur jumlah |
+| `HordeCrowdManager` (#93) | Batas `maxAlive` menentukan bebannya, termasuk setelah hari ke-60. Manager itu tidak mengatur jumlah |
 | `DevConsole` (#56) | Mendaftarkan `director`, `directorphase <nama>`, dan memakai `setday`, `settime`, serta `balance` |
 
 ## 4. Kasus Khusus
@@ -173,7 +206,7 @@ Keluar lebih awal kalau `CurrentPhase == Inactive`, `isHeld`, `isOverridden`, at
 - **Tidur melewati fajar:** `DaybreakEvent` tetap datang, dan Director menjadi `Inactive`.
 - **Pemain berpindah region:** `Threat` tetap, tetapi `regionMult` dan isi `RegionSpawnTable` mengikuti region baru pada mob berikutnya.
 - **`setday` di tengah malam:** Director memakai hari baru mulai `NightfallEvent` berikutnya. Perintah `director refresh` menghitung ulang seketika.
-- **Hari di luar kurva:** nilai dibatasi pada baris hari 1 dan hari 60.
+- **Hari di luar kurva:** nilai di bawah hari 1 memakai baris hari 1. Setelah hari ke-60, nilainya memakai baris hari 60 ditambah pengali di bagian 1. Tidak ada batas hari, hanya batas pengali.
 - **Pemain di dalam base:** Director tetap berjalan. Base memang tempat berlindung, dan zombie menyerang dindingnya (#78).
 
 ## 5. Keputusan Desain
@@ -187,6 +220,8 @@ Keluar lebih awal kalau `CurrentPhase == Inactive`, `isHeld`, `isOverridden`, at
 3. **Pengali Region 4:** rekomendasi 1,2 kali, sebagai arti "secara masif" di GDD.
 4. **Batas kecepatan:** rekomendasi 7,8 m/s, supaya pemain tanpa beban tetap bisa kabur.
 5. **Hewan siang:** rekomendasi tidak diskalakan Director. Issue ini hanya menyebut zombie, dan GDD menyebut hewan sebagai penjaga teritori.
+6. **Zombie semakin kuat setelah hari ke-60:** GDD tidak memberi angka. Rekomendasi pengali per hari di `GameBalanceConfig.aiDirector`: jumlah +2 persen sampai 1,5 kali, HP +2 persen sampai 2 kali, dan damage +1 persen sampai 1,5 kali. Perlu diuji bersama jumlah peluru.
+7. **Zombie aktif setelah hari ke-60:** rekomendasi `maxAlive` tetap 30, supaya performa tidak berubah. Alternatifnya, naik sampai 40 lewat `capOverride`, tetapi perlu diuji dengan `HordeCrowdManager`.
 
 ## 6. Skenario Tes
 
@@ -197,6 +232,8 @@ Keluar lebih awal kalau `CurrentPhase == Inactive`, `isHeld`, `isOverridden`, at
 5. `setday 20` di Region 3, dan jaga 3 Zombie Militer tetap hidup. **Hasil:** mob ditahan, lalu ukurannya lebih besar setelah Militer mati.
 6. Tidur saat malam. **Hasil:** tidak ada gelombang baru, dan `phaseTimer` berhenti.
 7. Mulai Blood Moon lewat #50. **Hasil:** Director berhenti, lalu lanjut setelah `BloodMoonEndedEvent`.
-8. Di Region 1, `setday 60`. **Hasil:** hanya zombie standar yang muncul.
+8. Di Region 1, `setday 60`, dan `setday 85`. **Hasil:** hanya zombie standar yang muncul pada keduanya.
 9. Keluar ke menu saat malam, lalu lanjutkan. **Hasil:** `spawnedTonight` tetap, dan anggaran tidak terisi ulang.
 10. Jalankan dengan seed yang sama, tanpa perbedaan tindakan. **Hasil:** jeda mob sama.
+11. `setday 70`, tunggu malam, lalu `director`. **Hasil:** `nightBudget` 216, HP 1,8 kali, damage sekitar 1,38 kali, dan `maxAlive` tetap 30.
+12. `setday 200`, tunggu malam. **Hasil:** `nightBudget` 270, HP 3 kali, damage sekitar 1,88 kali, zombie aktif tidak lebih dari 30, dan FPS dicatat ke lembar playtest.

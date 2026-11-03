@@ -30,7 +30,7 @@ public struct SpawnEntry
     public bool useBushPoints; // Zombie Lumut, muncul di titik semak (#25)
 }
 
-public enum DespawnReason : byte { Killed, Burned, ReturnedToDen, Harvested, Stuck, OffNavMesh, TooFar, RegionUnloaded, Debug }
+public enum DespawnReason : byte { Killed, Burned, ReturnedToDen, Harvested, Stuck, OffNavMesh, TooFar, RegionUnloaded, Sacrificed, Debug }
 ```
 
 ### Isi tabel (sesuai GDD bagian 5)
@@ -54,6 +54,7 @@ Varian Runner, Tank, dan Spitter mengikuti keputusan #25, dan ditambahkan sebaga
 | `GroupId` | Kelompok, dipakai Gagak (#61) |
 | `IsEngaged` | Diisi `EnemyAI` dan `WildlifeAI` saat mengejar atau menyerang |
 | `IsDormantCounted` | `true` saat `Submerged`, sehingga tidak dihitung sebagai musuh aktif |
+| `IsSacrificing` | `public bool`. Diisi `LuckyMachine` (#72) saat vakum, dan dikosongkan di `OnSpawned` |
 | `lastPosition`, `stuckTimer` | Pengaman macet |
 
 ### Variabel `SpawnManager`
@@ -88,7 +89,6 @@ Varian Runner, Tank, dan Spitter mengikuti keputusan #25, dan ditambahkan sebaga
 | `stuckForceSeconds` | 45 | Dikembalikan walaupun terlihat |
 | `cleanupSeconds` | 30 | Jeda sebelum sapu bersih setelah transisi |
 | `dayAnimalsAlive` | 4 | Target hewan hidup saat siang |
-| `maxBudgetReduction` | 0,5 | Batas pengurangan anggaran horde dari sarang yang hancur (#112) |
 
 ## 2. Detail Logika & Fungsi
 
@@ -102,7 +102,7 @@ Varian Runner, Tank, dan Spitter mengikuti keputusan #25, dan ditambahkan sebaga
 | `RegionLoadStateChangedEvent` `Unloading` | `DespawnRegion(region)` pada frame yang sama |
 | `RegionLoadStateChangedEvent` `Loaded` | Kalau `Logistic` dan siang, `PopulateHidingSpots()` |
 | `SleepStateChangedEvent` | Selama tidur, tick tidak memunculkan musuh baru. `RequestAmbush` tetap jalan |
-| `LairClearedEvent` (#112) | Tambah `regionBudgetReduction[region]` sebesar `clearedBudgetReduction`, paling besar `maxBudgetReduction`. Nilai ini mengurangi `count` di `RequestWave` sebagai rasio |
+| `LairClearedEvent` (#112) | Tambah `regionBudgetReduction[region]` sebesar `lair.clearedBudgetReduction`, paling besar `lair.maxBudgetReduction` (`ZombieLair.md`). Nilai ini mengurangi `count` di `RequestWave` sebagai rasio |
 | `RunEndedEvent` | Hentikan coroutine |
 
 **`SweepWrongPhase()`** mengembalikan musuh yang salah waktu dan berada di luar pandangan, misalnya hewan yang tersesat saat malam, kecuali `IsDormantCounted`, zombie yang dilindungi #112, dan musuh hasil override aktif.
@@ -126,7 +126,7 @@ Tick ini hanya mengisi hewan pada siang hari.
 
 1. Kalau tidur, kembalikan 0. Saat tidur, hanya `RequestAmbush` yang boleh memunculkan musuh.
 2. `count = r.count * (1 - regionBudgetReduction[activeRegion])`, lalu batasi dengan `CurrentZombieCap - AliveZombies` dan sisa pool.
-3. Masukkan `count` slot ke antrean, bersama `r.modifiers`, `r.maxLarge`, `r.specialShare`, dan `r.forcedEnemyId`. Kembalikan `count`, yang dipakai Director sebagai jumlah yang muncul.
+3. Masukkan `count` slot ke antrean, bersama `r.modifiers`, `r.maxLarge`, `r.specialShare`, `r.forcedEnemyId`, dan `r.origin`. Kembalikan `count`, yang dipakai Director sebagai jumlah yang muncul.
 4. `Update` mengerjakan paling banyak `maxSpawnsPerFrame` slot, memakai `PickEntry()` dan `FindSpawnPoint()`. Kalau `forcedEnemyId` terisi, jenisnya tidak diacak.
 5. `PickEntry()` memberi bobot 0 pada entri `isSpecial` kalau porsinya sudah `specialShare`, dan pada `ZombieData.isLarge` kalau jumlahnya sudah `maxLarge`.
 6. Setelah keluar dari pool: `EnemyHealth.SetHPMultiplier(r.modifiers.hp)`, lalu `EnemyAI.ApplyWaveModifiers(in r.modifiers)`.
@@ -150,6 +150,8 @@ Tick ini hanya mengisi hewan pada siang hari.
 ### Titik spawn
 
 **`private bool FindSpawnPoint(ref RandomStream rng, out Vector3 point)`**, diulang sampai `attemptsPerSpawn`:
+
+Kalau `WaveRequest.origin` terisi (#90, gelombang `RemoteTakeover`), langkah 1 sampai 2 memakai titik itu sebagai pusat dengan sudut 360 derajat, bukan posisi pemain.
 
 1. **Arah:** kalau `rng.NextFloat01() < behindChance`, sudut acak dalam `behindHalfAngleDeg` di sekitar arah belakang kamera. Kalau tidak, sudut 360 derajat penuh.
 2. **Jarak:** `rng.Range(minDistance, maxDistance)`.
@@ -197,14 +199,15 @@ Rekomendasi (lihat bagian 5):
 
 | Fungsi | Pemanggil | Isi |
 |---|---|---|
-| `void Despawn(GameObject go, DespawnReason r)` | `EnemyAI`, `WildlifeAI`, #95 | Hapus dari daftar lalu `ReturnToPool`. Satu-satunya jalur kembali di Fase 2 |
+| `void Despawn(GameObject go, DespawnReason r)` | `EnemyAI`, `WildlifeAI`, #95, #72 | Hapus dari daftar lalu `ReturnToPool`. Satu-satunya jalur kembali di Fase 2. Alasan `Sacrificed` tidak memanggil `RefundBudget` |
 | `int RequestWave(in WaveRequest r)` | #27 | Lihat "Gelombang dari Director" |
 | `void ReturnStuck(EnemyInstance e)` | #25, #94 | `Despawn(Stuck)` lalu `RefundBudget(1)` |
+| `int ReturnRaidersNear(Vector3 center, float radius)` | #90 | `Despawn(go, DespawnReason.TooFar)` untuk zombie di sekitar base. Mengembalikan jumlahnya |
 | `int AliveZombies { get; }`, `int AliveLarge { get; }` | #27 | Zombie hidup, tanpa `IsDormantCounted` |
 | `void RequestAmbush(Vector3 center, int count, float radius)` | #67, #80 | Memakai tabel malam, cincin `radius`, dan `AISensory.ForceAware`. Berlaku saat tidur |
 | `SpawnOverrideHandle PushOverride(in SpawnOverride o)` | #50, #70 | Lihat di bawah |
 | `void PopOverride(SpawnOverrideHandle h)` | #50, #70 | Melepas satu override |
-| `void RequestBurst(RegionSpawnTable table, int count, Vector3 center, float radius)` | #50 | Memunculkan bertahap dengan `maxSpawnsPerFrame`, abaikan `behindChance`, tetap di luar pandangan |
+| `void RequestBurst(RegionSpawnTable table, int count, Vector3 center, float radius, in WaveModifiers modifiers)` | #50 | Memunculkan bertahap dengan `maxSpawnsPerFrame`, abaikan `behindChance`, tetap di luar pandangan. `modifiers` diisi seperti `RequestWave`. Tanpa parameter itu, semua pengali bernilai 1 |
 | `void DebugSpawn(string enemyId, int count)` | #56 | Di depan pemain, tanpa syarat pandangan |
 | `void DebugReturnAll()` | #56 | Semua kembali ke pool |
 | `int EngagedEnemyCount { get; }` | #80 | Jumlah `IsEngaged` |
@@ -242,11 +245,13 @@ Beberapa override boleh aktif. Yang terakhir didorong menang untuk `table`, nila
 | `SleepSystem` (#67), `WorldStateSave` (#80) | `RequestAmbush`, `EngagedEnemyCount` |
 | `DevConsole` (#56) | `DebugSpawn`, `DebugReturnAll`, `spawnstat` |
 | `AITraversal` (#94) | Memanggil `ReturnStuck`, dan membaca `campCounterEnemyId` |
+| `LuckyMachine` (#72) | Mengisi `EnemyInstance.IsSacrificing`, dan memanggil `Despawn` dengan alasan `Sacrificed` |
+| `RemoteBaseSimulation` (#90) | Memanggil `ReturnRaidersNear`, dan memakai `WaveRequest.origin` |
 | `ThreatSystem` (#108), `HordeCrowdManager` (#93) | Memakai musuh yang muncul, tanpa mengatur spawn |
 
 ## 4. Kasus Khusus
 
-- **Objek pool:** `EnemyInstance.OnSpawned()` mengosongkan `stuckTimer`, `IsEngaged`, dan `IsDormantCounted`. Reset HP mengikuti #59, dan reset agen serta state mengikuti pemilik masing-masing. `SetHPMultiplier` dipanggil setelah objek keluar dari pool.
+- **Objek pool:** `EnemyInstance.OnSpawned()` mengosongkan `stuckTimer`, `IsEngaged`, `IsDormantCounted`, dan `IsSacrificing`. Reset HP mengikuti #59, dan reset agen serta state mengikuti pemilik masing-masing. `SetHPMultiplier` dipanggil setelah objek keluar dari pool.
 - **Pool kosong:** `SpawnFromPool` mengembalikan `null`, dan tick berikutnya mencoba lagi.
 - **Game dijeda:** semua loop memakai `WaitForSeconds`, jadi berhenti saat `timeScale = 0`. Event transisi tetap diterima, tetapi tidak ada spawn.
 - **Tidur:** tick berhenti. Pengaman macet tetap jalan, karena waktu dipercepat.

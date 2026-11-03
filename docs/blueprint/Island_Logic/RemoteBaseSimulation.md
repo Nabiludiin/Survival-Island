@@ -61,6 +61,7 @@ Semua bernama `GameBalanceConfig.remoteBase.<nama>`.
 | `raidChanceMax` | 0,9 | Batas peluang |
 | `basePower` | 150 | Kekuatan hari ke-1 |
 | `powerPerDay` | 20 | Tambahan per hari |
+| `maxPower` | 2550 | Batas kekuatan sebelum pengali ukuran dan Blood Moon, setara hari ke-121 (usulan) |
 | `bloodMoonMultiplier` | 2 | Pengali saat Blood Moon (#50) |
 | `referenceStructures` | 12 | Ukuran base acuan |
 | `sizeFactorMin` / `sizeFactorMax` | 0,75 / 1,5 | Batas pengali ukuran |
@@ -99,7 +100,7 @@ Dihitung sekali saat `NightfallEvent`, sehingga save dan load tidak mengubah has
 
 ```
 peluang   = min(raidChanceMax, raidChanceBase + raidChancePerDay × hari)
-kekuatan  = (basePower + powerPerDay × (hari - 1))
+kekuatan  = min(maxPower, basePower + powerPerDay × (hari - 1))
             × clamp(jumlahStruktur / referenceStructures, sizeFactorMin, sizeFactorMax)
             × (Blood Moon ? bloodMoonMultiplier : 1)
 pertahanan = Σ dinding atau pintu (score tier × rasio HP)
@@ -220,7 +221,7 @@ Hantaman langsung diterapkan pada panggilan itu, dan tidak masuk `RaidPlan`, seh
 - **Pemain membangun saat simulasi berjalan di cluster jauh:** tidak mungkin, karena pembangunan butuh pemain dekat, sehingga cluster sudah nyata.
 - **Jebakan di region tidak dimuat:** `BaseTrap` tidak berjalan. Hanya `TakeDamage` yang dipanggil.
 - **Isi peti hancur:** tumpah ke `RegionStateStore` sesuai `raft/StorageChest.md`.
-- **Hari ke-60:** kalau run berakhir, `RunEndedEvent` membatalkan semua rencana.
+- **Hari ke-60:** bukan akhir run, jadi simulasi tetap berjalan dan kekuatan terus naik sampai `maxPower`. Kalau run berakhir, `RunEndedEvent` membatalkan semua rencana.
 
 ## 5. Keputusan Desain
 
@@ -234,6 +235,7 @@ Hantaman langsung diterapkan pada panggilan itu, dan tidak masuk `RaidPlan`, seh
 4. **Banyak base:** rekomendasi boleh, dengan batas `maxRaidedClusters` 2, dan pos sementara di bawah 4 struktur tidak diserang.
 5. **Bencana saat ditinggal:** rekomendasi tetap kena, dihitung #70.
 6. **Notifikasi tanpa radio:** rekomendasi pemain selalu tahu, walaupun tidak ada alasan dalam cerita. Ini lebih adil untuk game permadeath.
+7. **Kekuatan setelah hari ke-60:** rekomendasi tetap naik 20 per hari, sampai `maxPower` 2550, supaya base masih bisa bertahan pada run yang sangat panjang.
 
 ## 6. Skenario Tes
 
@@ -253,3 +255,4 @@ Gunakan `DevConsole` untuk mengatur hari dan teleport.
 12. Picu gempa saat base ditinggal. **Hasil:** dinding `survivesEarthquake` tidak rusak.
 13. Jeda game saat serangan. **Hasil:** HP tidak berubah.
 14. Mati saat rencana berjalan, lalu mulai run baru. **Hasil:** tidak ada rencana tersisa.
+15. `setday 200`, lalu tinggalkan base saat malam. **Hasil:** serangan tetap dihitung, dan kekuatan dasar berhenti di 2550.

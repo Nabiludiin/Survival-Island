@@ -32,7 +32,8 @@
 | `InputBindingsChangedEvent` | Minta ulang teks prompt yang sedang tampil |
 | `ThrowableChangedEvent` | Tampilkan ikon dan jumlah barang lempar |
 | `ActiveObjectiveChangedEvent` | Tampilkan judul dan progres, dengan sorotan selama `objective.hudFlashSeconds` |
-| `DayChangedEvent` | `Sisa hari = time.runDayLimit - newDay + 1` |
+| `DayChangedEvent` | Sampai hari ke-60: `Sisa hari = GameManager.TargetDay - newDay + 1`. Setelah itu: `Target hari ke-60 terlewat` |
+| `DayLimitPassedEvent` | Tulis `Target hari ke-60 terlewat`. Saat `OnEnable` setelah load, baca `GameManager.IsPastTargetDay` |
 | `ShipHandChangedEvent` | Tampilkan berat tangan di `ShipPhase` |
 
 **`public void UpdateAmmo(int inMagazine, int reserve)`**: tulis `inMagazine / reserve`. Saat keduanya 0, teks berkedip.
@@ -80,4 +81,5 @@
 5. Ganti item hotbar. **Hasil:** `HotbarView` berubah.
 6. Ambil barang di kapal. **Hasil:** berat tangan berubah, dan penanda sekoci tampil.
 7. Sembunyikan crosshair. **Hasil:** penanda serangan ikut tersembunyi.
-8. Pada hari ke-10 dengan batas 60. **Hasil:** Sisa hari tertulis 51.
+8. Pada hari ke-10 dengan target 60. **Hasil:** Sisa hari tertulis 51.
+9. Pada hari ke-61 dan ke-100. **Hasil:** teks `Target hari ke-60 terlewat`, tanpa angka negatif.

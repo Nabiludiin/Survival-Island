@@ -88,7 +88,6 @@ Manager hanya mengisi `Instance` di `Awake`. Pekerjaan yang bergantung pada mana
 |---|---|---|
 | `GameBalanceConfig.run.endSequenceTimeoutSeconds` | 15 | Batas tunggu sinematik sebelum alur akhir tetap berlanjut |
 | `GameBalanceConfig.run.endingTimeoutSeconds` | 120 | Batas tunggu adegan akhir saat `Won`, karena takeoff dan ending lebih panjang dari 15 detik (#99) |
-| `GameBalanceConfig.run.timeExpiredFadeSeconds` | 3 | Fade hitam saat hari ke-60 berakhir |
 | `GameBalanceConfig.run.gameOverInputDelaySeconds` | 1 | Tombol layar akhir aktif setelah jeda ini, supaya tidak tertekan tanpa sengaja |
 | `GameBalanceConfig.run.saveWaitTimeoutSeconds` | 5 | Batas tunggu `SaveCompletedEvent` saat keluar ke menu |
 | `GameBalanceConfig.run.sceneLoadMinShowSeconds` | 0,5 | Waktu tampil minimum layar loading |
@@ -163,11 +162,11 @@ Manager hanya mengisi `Instance` di `Awake`. Pekerjaan yang bergantung pada mana
 
 ### Alur akhir run tunggal
 
-Tiga penyebab akhir run memakai satu jalur:
+Dua penyebab akhir run memakai satu jalur. Melewati hari ke-60 bukan akhir run, sesuai GDD bagian 3:
 
 ```text
 SurvivalStats  --PlayerDiedEvent-->  GameManager.TriggerGameOver(reason)  ─┐
-GameManager.CheckDay60Milestone  -->  TriggerGameOver(TimeExpired)         ├─> RunEndedEvent ─> RunLifecycle
+                                                                           ├─> RunEndedEvent ─> RunLifecycle
 RescueEventManager  ------------->  GameManager.TriggerWinSequence()      ─┘
 ```
 
@@ -177,17 +176,17 @@ RescueEventManager  ------------->  GameManager.TriggerWinSequence()      ─┘
 
 **`IEnumerator RunEndSequence(RunResult result, DeathReason reason)`**:
 
-| Langkah | Tindakan | `Died` | `TimeExpired` | `Won` |
-|---|---|---|---|---|
-| 1 | `State = Ending`, matikan autosave | Sama | Sama | Sama |
-| 2 | `WorldStateSave.MarkRunEnded(result, reason)` | Sama | Sama | Sama |
-| 3 | `UIFocusStack.CloseAllUnlocked(RunEnded)`, lalu dorong panel `Cinematic` | Sama | Sama | Sama |
-| 4 | Putar penutup, dengan batas `endSequenceTimeoutSeconds`. Untuk `Won`, batasnya `endingTimeoutSeconds` | `yield return DeathCinematic.Instance.Play(reason)` (#53), dilewati kalau `Instance` bernilai `null` | `NarrativeSequencer.Play("fail_time_expired")` kalau adegan tersedia (#99). Kalau tidak, fade hitam `timeExpiredFadeSeconds`, lalu teks gagal kabur | `NarrativeSequencer.PlayEnding()` tanpa parameter (#99). `RescueEventManager` sudah mengisi `PrepareEnding` |
-| 5 | `WorldStateSave.DeleteRunSave()` | Sama | Sama | Sama |
-| 6 | `LocalStatsManager.RecordRunEnd(result, reason, currentDay, seed)` (#57) | Sama | Sama | Sama |
-| 7 | `WorldStateSave.ClearRunEndMarker()` | Sama | Sama | Sama |
-| 8 | Tutup `Cinematic`, dorong layar akhir | `GameOver` | `GameOver` | `WinScreen` |
-| 9 | `State = AwaitingChoice`, tunggu pilihan pemain | Ulangi atau Menu | Ulangi atau Menu | Menu |
+| Langkah | Tindakan | `Died` | `Won` |
+|---|---|---|---|
+| 1 | `State = Ending`, matikan autosave | Sama | Sama |
+| 2 | `WorldStateSave.MarkRunEnded(result, reason)` | Sama | Sama |
+| 3 | `UIFocusStack.CloseAllUnlocked(RunEnded)`, lalu dorong panel `Cinematic` | Sama | Sama |
+| 4 | Putar penutup, dengan batas `endSequenceTimeoutSeconds`. Untuk `Won`, batasnya `endingTimeoutSeconds` | `yield return DeathCinematic.Instance.Play(reason)` (#53), dilewati kalau `Instance` bernilai `null` | `NarrativeSequencer.PlayEnding()` tanpa parameter (#99). `RescueEventManager` sudah mengisi `PrepareEnding` |
+| 5 | `WorldStateSave.DeleteRunSave()` | Sama | Sama |
+| 6 | `LocalStatsManager.RecordRunEnd(result, reason, currentDay, seed)` (#57) | Sama | Sama |
+| 7 | `WorldStateSave.ClearRunEndMarker()` | Sama | Sama |
+| 8 | Tutup `Cinematic`, dorong layar akhir | `GameOver` | `WinScreen` |
+| 9 | `State = AwaitingChoice`, tunggu pilihan pemain | Ulangi atau Menu | Menu |
 
 Langkah 4 memakai waktu tak terskala untuk batas tunggunya. Kalau `DeathCinematic` atau `NarrativeSequencer` belum tersedia, langkah ini dilewati. Kegagalan sinematik tidak boleh menghentikan permadeath.
 
@@ -303,7 +302,7 @@ Panel `Loading` mengubah bar dengan `Mathf.MoveTowards` dan `Time.unscaledDeltaT
 - **Game dijeda:** semua penantian di blueprint ini memakai `WaitForSecondsRealtime` dan `Time.unscaledDeltaTime`. Alur tetap berjalan walaupun `Time.timeScale` bernilai 0.
 - **Mati saat menu terbuka:** panel non-locked ditutup lewat `CloseAllUnlocked`, dengan alasan `RunEnded`. Lihat #83.
 - **Mati dan menang pada frame yang sama:** panggilan pertama ke `GameManager` menang. Sisanya diabaikan oleh `IsRunEnding`.
-- **Hari ke-60 berakhir saat helikopter terbang:** `TriggerWinSequence` sudah mengatur `hasEscaped = true` dan `IsRunEnding = true`, jadi `CheckDay60Milestone` tidak berpengaruh.
+- **Hari ke-60 terlewat:** run tetap berjalan, dan `RunLifecycle` tidak bereaksi. Kalau helikopter sudah terbang, `IsRunEnding` membuat `AdvanceDay` keluar lebih awal.
 - **Save dan load:** posisi di menu tidak disimpan. Save pertama dibuat setelah tiba di pulau, jadi "Lanjutkan" tidak pernah membuka Fase 1.
 - **Permadeath:** save dihapus setelah sinematik, dan penanda akhir run dibuat sebelum sinematik.
 - **Game ditutup paksa saat akhir run:** penanda `run_end.marker` berisi `result`, `reason`, `currentDay`, dan `seed`. Saat boot berikutnya, `RecoverInterruptedEnd()` menghapus save, mencatat statistik, lalu menghapus penandanya. Pemain tidak bisa lolos dari permadeath dengan mematikan game saat sinematik.
@@ -333,8 +332,7 @@ Panel `Loading` mengubah bar dengan `Mathf.MoveTowards` dan `Time.unscaledDeltaT
 3. **Setelah menang:** save dihapus, tampil `WinScreen`, lalu kembali ke `MainMenu`. Run yang sudah menang tidak bisa dilanjutkan.
 4. **Save di Fase 1:** tidak ada. Menutup game saat di kapal membuang run tersebut, karena Fase 1 hanya 60 detik.
 5. **Keluar saat bermain:** panel `Pause` memiliki Simpan dan Keluar ke Menu. Ini mengikuti Save & Quit di `SaveSystem.md`.
-6. **Penutup gagal kabur:** fade hitam sederhana dan teks, sampai #99 menyediakan adegan.
-7. **`DeathReason.None`:** nilai baru untuk `RunEndedEvent` saat menang, supaya nilai bawaan enum tidak terbaca sebagai `Starvation`.
+6. **`DeathReason.None`:** nilai baru untuk `RunEndedEvent` saat menang, supaya nilai bawaan enum tidak terbaca sebagai `Starvation`.
 
 ## 6. Skenario Tes
 
@@ -347,7 +345,7 @@ Panel `Loading` mengubah bar dengan `Mathf.MoveTowards` dan `Time.unscaledDeltaT
 7. Tekan Esc berkali-kali di layar `GameOver`. **Hasil:** tidak terjadi apa-apa, dan `Time.timeScale` tetap 0.
 8. Klik Ulangi dari Kapal. **Hasil:** `ShipPhase` dimuat, `Time.timeScale` bernilai 1, kursor terkunci, dan `currentDay` bernilai 1.
 9. Ubah volume, mati, lalu mulai run baru. **Hasil:** volume dan tombol tidak berubah, dan statistik tetap ada.
-10. Jalankan `setday 60` lalu tunggu jam melewati 24:00. **Hasil:** alur sama seperti mati, dengan `RunResult.TimeExpired`.
+10. Jalankan `setday 60` lalu tunggu jam melewati 24:00. **Hasil:** run tetap berjalan, `State` tetap `OnIsland`, dan `RunEndedEvent` tidak terkirim.
 11. Panggil `TriggerWinSequence` lalu turunkan HP ke 0 saat adegan berjalan. **Hasil:** hasil tetap `Won`, dan `RunEndedEvent` terkirim sekali.
 12. Matikan proses game saat sinematik kematian, lalu buka lagi. **Hasil:** Lanjutkan tidak tampil, save sudah hilang, dan statistik mencatat run tersebut.
 13. Mati lalu mulai run baru sebanyak lima kali sambil memantau log. **Hasil:** tidak ada peringatan kebocoran pendengar, event tidak ganda, dan jumlah objek pool tetap.

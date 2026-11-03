@@ -16,7 +16,7 @@
 | 11 | `EnemyHitbox` | Collider kepala, badan, dan kaki | Hanya menerima raycast |
 | 12 | `NPC` | Kapsul NPC | Menahan peluru, tanpa damage bawaan (#59) |
 | 13 | `Interactable` | Peti, sekoci, Diary, Lucky Machine, kargo | Target interaksi `E` |
-| 14 | `WorldItem` | Item jatuh | Hanya menyentuh `Terrain`, `Structure`, dan `Obstacle` |
+| 14 | `WorldItem` | Item jatuh | Hanya menyentuh `Terrain`, `Structure`, `Obstacle`, dan trigger `Water` |
 | 15 | `Terrain` | Unity Terrain dan lantai kapal | Permukaan dibaca lewat #86 |
 | 16 | `Structure` | Bangunan pemain dan jembatan | Tag `BaseWall` atau `BaseDoor` |
 | 17 | `StructureGhost` | Hologram bangunan | Tidak bertabrakan dengan apa pun |
@@ -65,6 +65,8 @@
 | `CastLanding` | `Water`, `Terrain`, `Structure`, `Obstacle` | `FishingSystem` (#55) |
 | `RegrowBlock` | `Structure`, `Player`, `NPC`, `HeavyItem` | `ResourceRespawn` (#73) |
 | `Water` | `Water` | `SwimmingController` (#13) |
+| `FireReach` | `Structure`, `Obstacle`, `Enemy`, `Player`, `NPC` | `FireSystem` (#97). `Player` dan `NPC` hanya untuk damage `FireArea`, karena keduanya tidak punya `Flammable` |
+| `Occupant` | `Player`, `NPC`, `Enemy` | `BaseNavigation` (#78) |
 
 ## 2. Detail Logika & Fungsi
 

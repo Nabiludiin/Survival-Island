@@ -1,8 +1,8 @@
 # Blueprint: ZombieLair.cs & InteriorZone.cs
 **Lokasi:** `docs/blueprint/left-4-dead/ZombieLair.md`
-**Deskripsi Utama:** Tempat persembunyian zombie dan area tertutup yang gelap, sehingga menjelajah saat siang tetap berisiko tanpa melanggar aturan sinar matahari.
+**Deskripsi Utama:** Tempat persembunyian zombie dan area tertutup yang gelap, sehingga menjelajah saat siang menjadi lebih berisiko, walaupun zombie tetap terlindung dari sinar matahari.
 **Issue:** #112
-**Rujukan GDD:** Usulan, belum ada di GDD. Sistem ini nonaktif sampai developer menyetujui. Rekomendasi: sebaiknya dipakai. GDD bagian 3 menyebut horde keluar dari persembunyiannya saat malam, dan menyatakan tidak ada zombie yang berkeliaran di siang hari. Zombie yang diam di ruang tertutup tidak melanggar kedua aturan itu.
+**Rujukan GDD:** Usulan, belum ada di GDD. Sistem ini nonaktif sampai developer menyetujui. Rekomendasi: sebaiknya dipakai, kalau GDD bagian 3 diubah lebih dulu. GDD bagian 3 menyebut horde keluar dari persembunyiannya saat malam, dan menyatakan tidak ada zombie yang berkeliaran di siang hari. GDD bagian 3 juga menyatakan ancaman utama siang hari murni berasal dari Hewan Buas. Usulan ini menambah ancaman zombie siang di dalam ruangan, sehingga melanggar aturan "murni Hewan Buas". Sistem ini hanya boleh aktif kalau GDD bagian 3 diubah, dan keputusannya dicatat di #85.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -73,7 +73,7 @@ Zombie Desa tidak memakai sarang ini. GDD bagian 5 menetapkan mereka bersembunyi
 
 `EnvironmentDirector` (#92) mengganti profil cahaya dan kabut, dan `RegionalWeather` (#115) meredam suara cuaca. Tiap `InteriorZone` juga membawa `NoBuildVolume`, sehingga `BuildManager` menolak bangunan di dalamnya.
 
-**`public bool Contains(Vector3 pos)`** memakai `collider.bounds.Contains`, dan bisa dipanggil `SunlightExposure` (#63).
+**`public static bool Contains(Vector3 pos)`** memeriksa semua `InteriorZone` yang aktif, memakai `collider.bounds.Contains` pada tiap zona. Fungsi ini dipanggil `SunlightExposure.CheckExposure` dan penolakan titik di `SpawnManager.FindSpawnPoint` (#63).
 
 ### Pemunculan
 
@@ -112,7 +112,7 @@ Saat siang, zombie sarang memakai `NavMeshAgent.areaMask` yang hanya memuat Area
 
 **`DaybreakEvent`:** zombie sarang tidak terbakar selama `Contains` bernilai `true`. Zombie yang sedang di luar zona mengikuti #63.
 
-**`NightfallEvent`:** `areaMask` kembali penuh. Sebanyak `nightReleaseRatio` dari `remainingCount` keluar lewat `exitPoints` menjadi anggota horde, dengan menyerahkan kendali ke `SpawnManager` (#62). Sisanya tetap `Dormant`. Saat `DaybreakEvent` berikutnya, jumlah sarang diisi ulang sampai `dormantCount`, kecuali `isCleared`.
+**`NightfallEvent`:** kalau `LairData.region != Logistic`, `areaMask` kembali penuh, dan sebanyak `nightReleaseRatio` dari `remainingCount` keluar lewat `exitPoints` menjadi anggota horde, dengan menyerahkan kendali ke `SpawnManager` (#62). Sisanya tetap `Dormant`. Kalau `LairData.region == Logistic`, `nightReleaseRatio` tidak berlaku: `areaMask` tetap `Interior`, dan semua penghuni tetap di dalam ruangan, karena GDD bagian 5 hanya menyebut Zombie Desa sebagai ancaman malam Region 4 (usulan 3). Saat `DaybreakEvent` berikutnya, jumlah sarang diisi ulang sampai `dormantCount`, kecuali `isCleared`.
 
 ### Loot
 
@@ -125,7 +125,7 @@ Saat siang, zombie sarang memakai `NavMeshAgent.areaMask` yang hanya memuat Area
 1. Isi `isNestDestroyed = true` dan `isCleared = true`.
 2. Bangunkan semua zombie yang tersisa.
 3. Terbitkan `LairClearedEvent { lairId, region }`.
-4. `SpawnManager` (#62) mengurangi anggaran horde region itu sebesar `clearedBudgetReduction`, dengan batas `maxBudgetReduction`.
+4. `SpawnManager` (#62) mengurangi anggaran horde region itu sebesar `GameBalanceConfig.lair.clearedBudgetReduction`, dengan batas `maxBudgetReduction`. Nilainya dibaca dari data sarang, jadi tidak perlu dibawa `LairClearedEvent`.
 
 `isCleared` juga berlaku di lokasi tanpa sarang, saat `remainingCount == 0`, tetapi tanpa pengurangan horde. Lokasi itu hanya berhenti terisi ulang.
 
@@ -175,11 +175,11 @@ Saat siang, zombie sarang memakai `NavMeshAgent.areaMask` yang hanya memuat Area
 
 **Usulan yang menunggu developer (dicatat di #85):**
 
-1. **Zombie boleh diam di dalam ruangan saat siang.** Rekomendasi: boleh, karena tidak "berkeliaran" dan tidak terkena sinar. Kalau ditolak, sistem tetap `enabled = false`.
+1. **Zombie boleh diam di dalam ruangan saat siang.** Zombie itu tidak "berkeliaran" dan tidak terkena sinar, tetapi menambah ancaman zombie siang di dalam ruangan, sehingga melanggar "murni Hewan Buas" di GDD bagian 3. Rekomendasi: boleh, setelah GDD bagian 3 diubah. Kalau ditolak, sistem tetap `enabled = false`.
 2. **Lokasi:** gua Region 1 dan 2, bunker Region 3, serta gudang dan rumah runtuh Region 4. Rekomendasi: pakai.
 3. **Zombie standar di Region 4:** GDD hanya menyebut Zombie Desa sebagai ancaman malam di region itu. Rekomendasi: pakai zombie standar di dalam ruangan, dalam jumlah kecil, karena Zombie Desa harus bersembunyi di air atau lumpur.
 4. **Menghancurkan sarang mengurangi horde:** 10 persen per sarang, paling banyak 30 persen per region. Rekomendasi: pakai, sebagai alasan menyerang sarang. Horde tetap datang sesuai GDD.
-5. **Sarang menyumbang horde malam:** separuh keluar saat malam, dan terisi lagi saat fajar. Rekomendasi: pakai, sesuai kalimat GDD "keluar dari persembunyiannya".
+5. **Sarang menyumbang horde malam:** separuh keluar saat malam, dan terisi lagi saat fajar, kecuali lokasi Region 4. Rekomendasi: pakai, sesuai kalimat GDD "keluar dari persembunyiannya".
 6. **Batas pengejaran:** berhenti di pintu saat siang, lewat `areaMask`. Rekomendasi: pakai.
 7. **Senter membangunkan zombie setelah 2 detik.** Rekomendasi: pakai, supaya pemain menyeimbangkan cahaya dan risiko.
 
@@ -200,3 +200,4 @@ Saat siang, zombie sarang memakai `NavMeshAgent.areaMask` yang hanya memuat Area
 13. Bunuh 3 zombie, simpan, lalu muat. **Hasil:** `remainingCount` sesuai, dan zombie muncul lagi `Dormant`.
 14. Jauhi sarang sampai 60 meter. **Hasil:** zombie kembali ke pool. Dekati lagi. **Hasil:** zombie yang dipakai ulang punya HP penuh dan `areaMask` yang benar.
 15. Mati, lalu mulai run baru. **Hasil:** semua sarang kembali utuh.
+16. Tunggu `NightfallEvent` di luar gudang desa Region 4, lalu bangunkan penghuninya. **Hasil:** tidak ada zombie standar yang keluar dari ruangan, dan horde Region 4 hanya berisi Zombie Desa.

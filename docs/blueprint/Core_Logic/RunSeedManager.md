@@ -82,6 +82,7 @@ public class RunLayout
     public string[] shipNpcIds;         // NPC yang muncul di kapal pada run ini
     public int[] shipNpcPointByNpc;     // NPC -> titik di kapal
     public DisasterScheduleEntry[] disasterSchedule;   // Hari, jenis, dan skala
+    public int disasterScheduleThroughDay;             // Hari terakhir yang sudah dijadwalkan
 }
 
 [Serializable]
@@ -166,7 +167,7 @@ ulong DeriveSeed(uint seed, RandomStreamId id, ulong keyHash)
 |---|---|
 | Peta, posisi region, seam, dan jembatan | GDD bagian 5, dan #88 |
 | Urutan dan isi Diary Bab 1, 2, dan 3 | GDD bagian 4 |
-| Syarat menang: rakit helikopter dan lepas landas sebelum hari ke-60 berakhir | GDD bagian 3, `GLOSSARY.md` |
+| Syarat menang: rakit helikopter dan lepas landas, tanpa batas waktu | GDD bagian 3, `GLOSSARY.md` |
 | Item awal: `Base_Kail`, `Base_Pistol`, dan `Base_Pisau` | `GLOSSARY.md` |
 | Jumlah kayu jembatan dan jumlah suku cadang | `GameBalanceConfig.region` |
 | Jadwal Blood Moon | Tetap di #50, di luar issue ini |
@@ -180,7 +181,9 @@ ulong DeriveSeed(uint seed, RandomStreamId id, ulong keyHash)
 
 1. **Suku cadang:** `Fork(PartLocation, 0)`, `Shuffle` indeks titik di `PartSpawnPointTable`, lalu ambil sebanyak `GameBalanceConfig.region.helicopterPartCount` titik pertama yang memenuhi `minPartPointSpacing`.
 2. **NPC:** `Fork(NPC, 0)`, pilih NPC dari daftar #76, dan pasangkan ke titik kapal yang sudah dibuat tangan.
-3. **Bencana:** `Fork(Disaster, 0)`, lalu jalankan hari 1 sampai 60 satu per satu sambil menghitung cooldown dari `DisasterData` (#70). Karena jadwal dihitung sekali dan disimpan, `setday 59` tetap memberi jadwal yang sama.
+3. **Bencana:** `Fork(Disaster, 0)`, lalu jalankan blok pertama, yaitu hari 1 sampai `GameBalanceConfig.disaster.scheduleBlockDays` (60), satu per satu sambil menghitung cooldown dari `DisasterData` (#70). Karena jadwal dihitung sekali dan disimpan, `setday 59` tetap memberi jadwal yang sama.
+
+**`public void EnsureDisasterScheduleThrough(int day)`** melanjutkan jadwal tanpa batas: selama `disasterScheduleThroughDay < day`, hitung nomor blok berikutnya, panggil `DisasterScheduler.Build` lewat `Fork(Disaster, nomorBlok)` dengan jadwal lama sebagai `previous`, tambahkan hasilnya di belakang `disasterSchedule`, lalu perbarui `disasterScheduleThroughDay`. Blok ditentukan oleh seed dan nomor blok, jadi hasilnya tidak bergantung pada kapan fungsi dipanggil.
 
 **`bool RunLayoutValidator.Validate(RunLayout layout, uint seed, out string failure)`** memeriksa:
 
@@ -262,7 +265,7 @@ Layar akhir membaca seed sebelum reset, karena `ResetForNewRun()` baru berjalan 
 | `LootSpawnerSystem`, `RegionLootTable` (#103) | Memakai `Fork`. Tabel dan bobot milik #103 |
 | `HeavyItemSystem` (#69) | Membaca `CurrentLayout.partPointByPart`, dan mengurus penyebarannya |
 | `NPCRoster` (#76), `ShipInteractable` | Membaca `CurrentLayout.shipNpcIds` |
-| `DisasterManager` (#70) | Membaca `CurrentLayout.disasterSchedule`. Isi `DisasterData` milik #70 |
+| `DisasterManager` (#70) | Membaca `CurrentLayout.disasterSchedule`, dan memanggil `EnsureDisasterScheduleThrough`. Isi `DisasterData` milik #70 |
 | `RegionalWeather` (#115), `WeatherManager` | `Fork(Weather, (int)region * 10000 + slot)`, dengan `slot` berupa total jam game dibagi `GameBalanceConfig.weather.weatherIntervalGameHours` |
 | `BeachSupplyManager` (#71) | `Fork(BeachSupply, currentDay)` |
 | `SpawnManager` (#62), `AIDirector` (#27) | Memakai aliran `Enemy` |
@@ -296,7 +299,7 @@ Layar akhir membaca seed sebelum reset, karena `ResetForNewRun()` baru berjalan 
 
 - Tiap sistem punya aliran sendiri, dan `System.Random` tidak dipakai.
 - Aliran berkunci dipakai untuk hal yang harus sama pada seed yang sama.
-- Jadwal bencana dihitung sekali dan disimpan, supaya `setday` tetap konsisten.
+- Jadwal bencana dihitung per blok dan disimpan, supaya `setday` tetap konsisten dan run bisa berlanjut setelah hari ke-60.
 
 **Usulan yang menunggu developer (dicatat di #85):**
 
@@ -307,6 +310,7 @@ Layar akhir membaca seed sebelum reset, karena `ResetForNewRun()` baru berjalan 
 5. **Jaminan bekal kapal:** minimal 3 makanan, 2 peluru, dan 1 minuman di seluruh kapal.
 6. **Batas bencana:** bencana besar tidak sebelum hari ke-3, dan berjarak minimal 4 hari.
 7. **Isi layar akhir:** seed ditampilkan kecil bersama nomor versi.
+8. **Jadwal setelah hari ke-60:** bencana dibuat per blok 60 hari saat dibutuhkan, sehingga file save tidak membesar sebelum waktunya.
 
 ## 6. Skenario Tes
 
@@ -324,3 +328,4 @@ Layar akhir membaca seed sebelum reset, karena `ResetForNewRun()` baru berjalan 
 12. Hapus sebagian titik di `PartSpawnPointTable` hingga kurang dari 5, lalu mulai Run Baru. **Hasil:** `safeLayout` dipakai, kesalahan tercatat, dan game tidak berhenti.
 13. Buka file save. **Hasil:** seed, status aliran, dan `layout` tersimpan.
 14. Cari `Random.` di script gameplay. **Hasil:** hanya efek tampilan yang memakainya.
+15. Jalankan `setday 130`, simpan, lalu lanjutkan. Bandingkan dengan run seed sama yang berjalan sampai hari ke-61 lebih dulu. **Hasil:** `disasterScheduleThroughDay` 180, dan isi jadwal sama.

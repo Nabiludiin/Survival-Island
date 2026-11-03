@@ -94,7 +94,7 @@ Mode `Repair` adalah mode awal palu (#79). Klik kiri dibaca `EquipmentManager`, 
 4. Kalau `Time.time - health.LastDamageTime < repairBlockedAfterDamageSeconds`, kembalikan `UnderAttack`.
 5. Kalau `!InventoryManager.Instance.HasItem(repairItemId, repairCostPerSwing)`, kembalikan `NoMaterial`, dan sebut nama bahannya.
 6. Kurangi bahan dengan `RemoveItem(repairItemId, repairCostPerSwing)`.
-7. `health.Repair(data.maxHP * repairHpRatioPerSwing)`. Fungsi ini sudah ditetapkan `DamagePipeline.md`, dan nilainya dibatasi `maxHP`.
+7. `health.Repair(data.maxHP * repairHpRatioPerSwing * NPCRoster.GetSkillMultiplier(NPCSkill.Crafter))` (#76). Fungsi ini sudah ditetapkan `DamagePipeline.md`, dan nilainya dibatasi `maxHP`.
 8. Kurangi durabilitas palu sebesar `hammerDecayPerRepairSwing`.
 9. Atur `nextSwingTime = Time.time + repairSwingSeconds`.
 10. Mainkan animasi ayun, suara, dan efek serpihan dari pool `FX_RepairHit`. Kirim `NoiseEmittedEvent` lewat `NoiseEmitter` palu dengan radius `noiseRadiusPerSwing`.

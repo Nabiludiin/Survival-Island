@@ -18,7 +18,7 @@ Saat `GameBalanceConfig.stealth.enabled = false`, setiap zombie langsung berstat
 
 ```csharp
 public enum AwarenessLevel : byte { Unaware, Suspicious, Aware }
-public enum NoiseSourceKind : byte { Movement, Landing, Gunshot, Melee, Tool, Container, Decoy, Structure }
+public enum NoiseSourceKind : byte { Movement, Landing, Gunshot, Melee, Tool, Container, Decoy, Structure, Throwable }
 ```
 
 **Noise Sphere bukan collider.** Bentuknya hanya angka radius, lalu pendengar menghitung jarak sendiri. Dengan begitu tidak ada trigger tambahan yang mengganggu query fisika (#87).
@@ -62,6 +62,8 @@ public enum NoiseSourceKind : byte { Movement, Landing, Gunshot, Melee, Tool, Co
 
 `ZombieData` (#25) menambah `sightMultiplier` dan `hearingMultiplier`, keduanya bernilai awal 1.
 
+`Throwable` (#96) dipakai suara barang lempar. Musuh tanpa target memakai suara ini sesuai `ThreatSystem.md`.
+
 ## 2. Detail Logika & Fungsi
 
 ### Kerucut pandang
@@ -69,7 +71,7 @@ public enum NoiseSourceKind : byte { Movement, Landing, Gunshot, Melee, Tool, Co
 **`public void Tick(float dt)`**, dipanggil `AISensoryHub`:
 
 1. Kalau `hub.IgnoreStealth` atau `stealth.enabled == false`: `Detection01 = 1`, `Level = Aware`, `LastStimulusPosition = posisi pemain`, lalu selesai.
-2. `range = sightRange * data.sightMultiplier * hub.PlayerVisibility`.
+2. `range = sightRange * data.sightMultiplier * hub.PlayerVisibility * hub.WeatherSight` (#115).
 3. Hitung `sqrDist` ke pemain. Kalau lebih dari `range²`, `CanSeePlayer = false` tanpa raycast.
 4. Kalau jarak lebih dari `closeSenseRange`, cek sudut: `Vector3.Angle(transform.forward, arah) <= sightAngleDeg / 2`. Di luar kerucut, `CanSeePlayer = false`.
 5. Garis pandang: `PhysicsQuery.Raycast` dari mata zombie ke kamera pemain dengan `PhysicsMasks.AIVision`. Kalau terhalang, ulangi ke dada pemain. Tidak mengenai apa pun berarti terlihat.
@@ -115,7 +117,7 @@ Saat diam, event tidak dikirim, supaya tidak ada beban tanpa guna. Saat tidur, c
 
 **`AISensory.HandleNoise(NoiseEmittedEvent e)`:**
 
-1. `d` = jarak ke `e.position`. `r = e.radius * data.hearingMultiplier`. Kalau `d > r`, selesai.
+1. `d` = jarak ke `e.position`. `r = e.radius * data.hearingMultiplier * hub.WeatherHearing` (#115). Kalau `d > r`, selesai.
 2. Kalau `d > r * wallMuffle`, jalankan satu raycast `AIVision` ke sumber suara. Kalau terhalang, suara tidak terdengar. Raycast hanya dipakai di lapisan luar ini, supaya 50 zombie tidak menembak ray setiap langkah pemain.
 3. `LastStimulusPosition = e.position` dan `sinceLastStimulus = 0`.
 4. Kalau `Gunshot`: `Detection01 = 1`.
@@ -131,7 +133,7 @@ Saat diam, event tidak dikirim, supaya tidak ada beban tanpa guna. Saat tidur, c
 | `Suspicious` | `AIState.Idle`, berjalan ke `LastStimulusPosition`, lalu menengok | Jalan |
 | `Aware` | Target dari #108, `AIState.Chase` | Lari |
 
-**`AISensoryHub.HuntHint`** adalah posisi pemain dengan geseran acak sejauh `huntHintRadius`, yang diperbarui setiap `huntHintSeconds`. Zombie tetap datang ke sekitar pemain sesuai GDD, tetapi baru mengunci pemain kalau melihat atau mendengarnya. Inilah ruang untuk mengendap-endap.
+**`AISensoryHub.HuntHint`** adalah posisi pemain dengan geseran acak sejauh `huntHintRadius`, yang diperbarui setiap `huntHintSeconds`. Saat memperbarui `HuntHint`, kalau `SetLightAttraction` aktif, lempar `chance` dengan aliran `Gameplay` (#89). Kalau kena, `HuntHint` memakai titik tarikan, bukan posisi pemain (#98). Zombie tetap datang ke sekitar pemain sesuai GDD, tetapi baru mengunci pemain kalau melihat atau mendengarnya. Inilah ruang untuk mengendap-endap.
 
 ### `AISensoryHub`
 
@@ -139,6 +141,8 @@ Saat diam, event tidak dikirim, supaya tidak ada beban tanpa guna. Saat tidur, c
 - **`Update()`:** kalau `Time.deltaTime == 0`, selesai. Proses paling banyak `sensorsPerFrame` sensor. `dt` tiap sensor adalah `Time.time - lastTick`, dan sensor dilewati kalau belum `sensorTickSeconds`.
 - **`PlayerVisibility`:** `crouchVisibility` atau `sprintVisibility` atau 1, dikali `externalVisibility`.
 - **`public void SetVisibilityModifier(float value)`:** titik sambung untuk #98 dan `FlashlightController`. Nilai awal 1. Aturan cahayanya bukan bagian issue ini.
+- **`public void SetLightAttraction(Vector3 point, float chance)`** (#98): mengisi titik tarikan cahaya dan peluangnya untuk `HuntHint`.
+- **`public void SetWeatherModifiers(float sight, float hearing)`** (#115): mengisi properti `WeatherSight` dan `WeatherHearing`, keduanya bernilai awal 1.
 - **Nilai UI:** ambil `Detection01` tertinggi setiap 0,25 detik. Kirim `PlayerDetectionChangedEvent { level01, isAware }` kalau selisihnya lebih dari 0,02.
 - **`BloodMoonStartedEvent`:** `IgnoreStealth = true`, sampai `BloodMoonEndedEvent`. Semua sensor, termasuk yang baru muncul, menjadi `Aware` pada tick berikutnya. Ini memenuhi aturan "mengabaikan Stealth" di #50. Target markas tetap diatur #50 dan #108.
 

@@ -118,6 +118,7 @@ public bool SecondaryHeld => actions.Gameplay.SecondaryAction.IsPressed();
 public bool SecondaryReleased => actions.Gameplay.SecondaryAction.WasReleasedThisFrame();
 public bool ReloadPressed => actions.Gameplay.Reload.WasPressedThisFrame();
 public bool FlashlightPressed => actions.Gameplay.Flashlight.WasPressedThisFrame();
+public bool OpenDiaryPressed => actions.Gameplay.OpenDiary.WasPressedThisFrame();
 public bool DropHeavyItemPressed => actions.Gameplay.DropHeavyItem.WasPressedThisFrame();
 public bool SkipPressed => actions.UI.Skip.WasPressedThisFrame();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

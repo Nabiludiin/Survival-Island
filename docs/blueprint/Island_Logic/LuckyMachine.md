@@ -8,7 +8,7 @@
 
 | Kelas | Jenis | Fungsi |
 |---|---|---|
-| `LuckyMachine` | Turunan `IslandInteractable`, `ISaveable` | Status mesin, kuota, putaran, dan pemberian hadiah |
+| `LuckyMachine` | Turunan `IslandInteractable`, `ISaveable` lewat `RegionStateStore` (#88), dengan `saveId` dari `SaveIdTag`, bukan lewat `Register` di `WorldStateSave` | Status mesin, kuota, putaran, dan pemberian hadiah |
 | `LuckyMachineCage` | Komponen trigger | Deteksi, gerbang, dan vakum |
 | `LuckyMachineData` | ScriptableObject | Kuota dan tabel hadiah |
 | `LuckyRewardData` | ScriptableObject | Satu hadiah |
@@ -47,7 +47,7 @@ public class LuckyRewardData : ScriptableObject
 public class WeaponModifierData : ScriptableObject
 {
     public string modifierId;
-    public float damageMultiplier = 1f, speedMultiplier = 1f;
+    public float damageMultiplier = 1f, speedMultiplier = 1f, durabilityMultiplier = 1f;
     public int magazineBonus;
     public bool indestructible;       // inst.durability = -1 (#113)
 }
@@ -105,7 +105,14 @@ Tiap baris dihitung terpisah, dan tidak dijumlahkan. Musuh lain bisa ditambah di
 
 ### Lokasi
 
-Satu mesin di `Region3_Snow`, koordinat usulan (350, 2050), sekitar 160 meter dari `S3` dan 180 meter dari Helipad. Alasannya ada di bagian 5.
+**Usulan (#85), belum disetujui developer.** Dua mesin, supaya contoh erupsi Region 1 di GDD bagian 7 bisa dimainkan.
+
+| Mesin | Scene | Posisi | Kuota tumbal | Mode gratis |
+|---|---|---|---|---|
+| Utama | `Region3_Snow` | (350, 2050), sekitar 160 meter dari `S3` dan 180 meter dari Helipad | Ya | Ya |
+| Bencana | `Region1_Volcano` | Ditentukan di Editor, dekat area base awal, dalam sekitar 240 meter lari (30 detik x `sprintSpeed` 8) | Tidak. Prefab tanpa `LuckyMachineCage`, jadi `storedSpins` selalu 0 | Ya |
+
+Alasannya ada di bagian 5.
 
 ## 2. Detail Logika & Fungsi
 
@@ -197,7 +204,7 @@ Kandang berbentuk lorong dengan dua sisi terbuka, supaya musuh yang mengejar pem
 
 ### Tak bisa rusak
 
-- **Fire Axe:** `Reward_FireAxe` memakai `ItemData.maxDurability = -1`. `DurabilitySystem.UseItem` selesai lebih awal kalau nilainya `-1`.
+- **Fire Axe:** `Reward_FireAxe` memakai `ItemData.maxDurability = -1`. `DurabilitySystem.UseItem` selesai lebih awal kalau nilainya `-1`. Saat pukulan `MeleeCombatSystem` mengenai target, panggil `Flammable.TryIgnite(fire.fireAxeIgniteChance, true)` (#97).
 - **Laser Pistol:** `GunController` memakai `WeaponData` khusus dan `mod_indestructible`. `inst.durability = -1` (#58, #113).
 
 ## 3. Hubungan dengan Sistem Lain
@@ -219,6 +226,8 @@ Kandang berbentuk lorong dengan dua sisi terbuka, supaya musuh yang mengejar pem
 | `UIFocusStack` (#83), `HUDManager` | Panel dan hitung mundur |
 | `RegionStreaming`, `WorldStateSave` (#88, #80) | Status lewat `RegionStateStore` |
 | `LocalStatsManager` (#57) | Boleh mendengar event putaran |
+| `MeleeCombatSystem`, `FireSystem` (#97) | Fire Axe menyalakan target |
+| `ProgressionSafety` (#116) | `IsProtected(item)` |
 
 ## 4. Kasus Khusus
 
@@ -232,7 +241,8 @@ Kandang berbentuk lorong dengan dua sisi terbuka, supaya musuh yang mengejar pem
 - **Beruang tidak mau jauh dari teritori:** batas beruang 25 meter (`WildlifeAI.md`). Mesin harus diletakkan dalam jangkauan sarang, dan ini dicek di Editor.
 - **Pemain masuk kandang:** tag `Player` diabaikan. Saat gerbang tertutup, gerbang tidak menjebak pemain, karena pemain tetap bisa keluar lewat sisi lain.
 - **Hadiah di `rewardPoint` tertimpa:** `WorldItem` boleh bertumpuk, dan `Interactable` tetap bisa dipilih.
-- **Yang disimpan (lewat `RegionStateStore`):** `quotaProgress`, `storedSpins`, `freeWindowEndGameHour`, `freeSpinsUsed`, `gateState`, `grantCounts`, dan `pendingSkins`. Buff tersimpan di `player_effects` (#20). Modifier dan skin tersimpan pada `ItemInstance`.
+- **Yang disimpan (lewat `RegionStateStore`, dengan `saveId` dari `SaveIdTag`):** `quotaProgress`, `storedSpins`, `freeWindowEndGameHour`, `freeSpinsUsed`, `gateState`, `grantCounts`, dan `pendingSkins`. Buff tersimpan di `player_effects` (#20). Modifier dan skin tersimpan pada `ItemInstance`.
+- **Item terlindung (#116):** mesin tidak boleh mengonsumsi item yang memenuhi `ProgressionSafety.IsProtected(item)`. Versi saat ini tidak memakai item sebagai biaya. Aturan ini mengikat kalau biaya item ditambahkan.
 - **Permadeath:** semua dihapus lewat `RunLifecycle` (#82). Buff, skin, modifier, dan kuota tidak terbawa ke run berikutnya.
 
 ## 5. Keputusan Desain
@@ -243,7 +253,7 @@ Kandang berbentuk lorong dengan dua sisi terbuka, supaya musuh yang mengejar pem
 
 1. **Nasib `AddEnergy`:** dihapus. Energi dari tiap kematian bertentangan dengan GDD, yang meminta musuh tertentu dijebak.
 2. **Arti "permanen":** selama satu run. GDD bagian 3 menyatakan game diulang sepenuhnya dari awal, dan skin ikut hilang.
-3. **Lokasi mesin:** satu mesin di Region 3, koordinat (350, 2050). Dua contoh GDD, Zombie Militer dan Beruang Kutub, hidup di Region 3. Region 1 dan Region 3 tidak bersebelahan (#88), dan musuh tidak menyeberang ke region yang belum dimuat, jadi mesin di Region 1 tidak bisa memenuhi kuota. **Akibatnya:** saat erupsi, pemain yang berada jauh dari Region 3 kehilangan mode gratis. Alternatifnya adalah mesin kedua di Region 1 khusus mode gratis.
+3. **Lokasi mesin:** rekomendasi dua mesin, sesuai tabel Lokasi. Mesin Region 3 memegang kuota, karena dua contoh GDD, Zombie Militer dan Beruang Kutub, hidup di Region 3. Region 1 dan Region 3 tidak bersebelahan (#88), dan musuh tidak menyeberang ke region yang belum dimuat, jadi mesin di Region 1 tidak bisa memenuhi kuota. Mesin kedua di Region 1 khusus mode gratis, karena satu mesin di Region 3 membuat contoh erupsi GDD tidak bisa dimainkan dari Region 1: `S1` di (1500, 1000) berjarak lurus sekitar 1.550 meter dari (350, 2050), sedangkan lari 30 detik hanya menempuh 240 meter. Pilihan lain: tetap satu mesin, dan developer mengubah contoh di GDD bagian 7. **Kalau dua mesin disetujui:** `grantCounts` dan `pendingSkins` harus dipakai bersama kedua mesin, karena `isUnique` dan `maxGrants` berlaku per run. Bentuk penyimpanan bersamanya belum ditulis di `WorldStateSave.md`.
 4. **Batas putaran gratis:** 3 per jendela, sedangkan GDD hanya menyebut 30 detik. Tanpa batas, pemain bisa mendapat sampai 7 putaran.
 5. **Tabungan putaran:** 1, dan gerbang menutup setelah kuota penuh.
 6. **Kuota terpisah:** 5 Zombie Militer dan 3 Beruang Kutub dihitung sendiri-sendiri, dan masing-masing memberi 1 putaran.
@@ -273,3 +283,8 @@ Kandang berbentuk lorong dengan dua sisi terbuka, supaya musuh yang mengejar pem
 15. Pindah region saat kuota 3 dari 5, lalu kembali. **Hasil:** hitungan tetap 3.
 16. Simpan, tutup paksa, muat, lalu putar. **Hasil:** hasil sama seperti sebelum dimuat (#89).
 17. Mati, lalu mulai run baru. **Hasil:** kuota nol, buff hilang, skin hilang, dan `Reward_FireAxe` tidak ada.
+18. Pukul zombie dengan `Reward_FireAxe` berulang. **Hasil:** sekitar 25 persen pukulan menyalakan target.
+19. Cari pemanggilan `Register` di `LuckyMachine`. **Hasil:** tidak ada. Lepas region mesin, lalu muat lagi. **Hasil:** kuota dan hadiah tetap sama.
+20. Kalau dua mesin disetujui: berdiri di area base Region 1, picu `MajorDisasterStartedEvent`, lalu lari ke mesin Bencana. **Hasil:** mesin tercapai dalam 30 detik, dan putaran gratis bisa dipakai.
+21. Kalau dua mesin disetujui: pancing Zombie Militer ke mesin Bencana. **Hasil:** tidak ada kandang, dan kuota tidak berubah.
+22. Kalau dua mesin disetujui: dapatkan `lucky_laser` dari mesin Bencana, lalu putar mesin Utama. **Hasil:** `lucky_laser` tidak keluar lagi.

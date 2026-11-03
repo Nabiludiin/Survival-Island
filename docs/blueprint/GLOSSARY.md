@@ -18,7 +18,7 @@ Developer sudah menyetujui keputusan berikut.
 | Status haus | Ada. `Thirst` menjadi status inti bersama `Hunger` dan `Infection` |
 | Frostbite | `Stamina` terkuras dulu. Setelah habis, `HP` yang terkuras |
 | Syarat jembatan | Nilai awal 500 kayu, dan bisa disetel lewat `GameBalanceConfig` |
-| Syarat menang | Helikopter lepas landas sebelum hari ke-60 berakhir |
+| Syarat menang | Helikopter lepas landas. Hari ke-60 adalah target, dan melewatinya membuat zombie semakin kuat |
 | Headshot | 2x damage |
 | Tombol interaksi | `E` di Fase 1 dan Fase 2. Klik kiri dipakai item aktif |
 | Referensi combat | Left 4 Dead (L4D) saja |
@@ -58,12 +58,12 @@ Developer sudah menyetujui keputusan berikut.
 | Enum | Nilai | Pemilik |
 |---|---|---|
 | `GamePhase` | `SinkingShip`, `IslandSurvival` | `GameManager` |
-| `RunResult` | `Won`, `Died`, `TimeExpired` | `GameManager` |
+| `RunResult` | `Won`, `Died` | `GameManager` |
 | `RegionType` | `Volcano`, `Amazon`, `Snow`, `Logistic` | `ZoneManager` |
 | `ItemType` | `Material`, `Consumable`, `Weapon`, `Tool`, `KeyItem` | `ItemData` |
 | `ShipInteractableKind` | `Item`, `NPC` | `ShipInteractable` |
 | `DamageType` | `Bullet`, `Melee`, `Fire`, `Explosion`, `Frost`, `Starvation`, `Dehydration`, `Infection`, `Structural`, `Fall`, `Drown`, `Poison` | `DamagePipeline` (#59) |
-| `DeathReason` | `None` (nilai pertama, dipakai `RunEndedEvent` saat menang, usulan #82), `Starvation`, `Dehydration`, `Zombified`, `KilledByEnemy`, `Frostbite`, `Drowned`, `Fall`, `Fire`, `Explosion`, `Poison`, `LeftOnShip`, `TimeExpired` | `DamagePipeline` (#59) |
+| `DeathReason` | `None` (nilai pertama, dipakai `RunEndedEvent` saat menang, usulan #82), `Starvation`, `Dehydration`, `Zombified`, `KilledByEnemy`, `Frostbite`, `Drowned`, `Fall`, `Fire`, `Explosion`, `Poison`, `LeftOnShip` | `DamagePipeline` (#59) |
 | `BodyPart` | `Head`, `Torso`, `Leg` | `HitboxModifier` |
 | `SurfaceType` | `Pasir`, `Rumput`, `Tanah`, `Batu`, `Salju`, `Lumpur`, `Kayu`, `Logam` | `SurfaceDetection` (#86) |
 | `WeatherType` | `Clear`, `Rain`, `Fog`, `Storm`, `Snow`, `Blizzard` | `WeatherManager`, ditambah #115 |
@@ -100,6 +100,7 @@ Developer sudah menyetujui keputusan berikut.
 | `CraftingStationType` | `Hand`, `WoodBench`, `MedicalBench` (#64), `Campfire` (#44) | `CraftingManager` (#77) |
 | `CraftResult` | Hasil `RequestCraft` | `CraftingManager` (#77) |
 | `ToolClass` | `None`, `Axe`, `Pickaxe`, `Knife` | `ResourceRespawn` (#73) |
+| `NodeType` | `Tree`, `Rock`, `MedicalHerb` | `ResourceNode` |
 | `NodeStatus` | `Standing`, `Depleted` | `ResourceRespawn` (#73) |
 | `HitResult` | `Hit`, `Rejected` | `ResourceRespawn` (#73) |
 | `DurabilityState` | `NoDurability`, `Normal`, `Low`, `Broken`, `Destroyed` | `DurabilitySystem` (#113) |
@@ -118,14 +119,14 @@ Developer sudah menyetujui keputusan berikut.
 | `SlotSide` | `Left`, `Right` | `StorageChest` (#46) |
 | `SleepBlockReason` | Alasan tidur ditolak | `SleepSystem` (#67) |
 | `SleepWakeReason` | Alasan bangun, termasuk `None` saat mulai tidur | `SleepSystem` (#67) |
-| `SaveReason` | `ArrivedOnIsland`, `WakeUp`, `Daybreak`, `QuitToMenu`, `AppQuit`, `Manual`, `BridgeComplete` (#68) | `WorldStateSave` (#80) |
+| `SaveReason` | `ArrivedOnIsland`, `WakeUp`, `Daybreak`, `QuitToMenu`, `AppQuit`, `Manual`, `BridgeComplete` (#68), `DisasterEnded` (#70), `PartInstalled` (#14) | `WorldStateSave` (#80) |
 | `SaveProblem` | `None`, `Corrupt`, `NewerVersion`, `OldVersionNoMigration` | `WorldStateSave` (#80) |
 | `WeaponFireMode` | `SemiAuto`, `Auto` | `GunController` (#58) |
 | `AttackPhase` | `None`, `Windup`, `Active`, `Recovery` | `EnemyAttack` (#109) |
 | `SpeedSource` | Sumber pengali kecepatan `EnemyAI`, termasuk `LegHit` (#95) dan `Trap` (#26) | `EnemyAI` |
 | `TargetKind` | `Player`, `NPC`, `BaseAnchor`, `Lure` | `ThreatSystem` (#108) |
 | `AwarenessLevel` | `Unaware`, `Suspicious`, `Aware` | `AISensory` (#49) |
-| `NoiseSourceKind` | `Movement`, `Landing`, `Gunshot`, `Melee`, `Tool`, `Container`, `Decoy`, `Structure` | `AISensory` (#49) |
+| `NoiseSourceKind` | `Movement`, `Landing`, `Gunshot`, `Melee`, `Tool`, `Container`, `Decoy`, `Structure`, `Throwable` (#96) | `AISensory` (#49) |
 | `AnimalAttackKind` | `Bite`, `Pounce`, `VenomBite`, `Charge`, `FlockDive` | `WildlifeAI` (#61) |
 | `DespawnReason` | Alasan kembali ke pool | `SpawnManager` (#62) |
 | `HidingKind` | `Water`, `Mud` | `SunlightExposure` (#63) |
@@ -139,7 +140,7 @@ Developer sudah menyetujui keputusan berikut.
 | `LairKind` | `Cave`, `MilitaryBunker`, `VillageWarehouse`, `RuinedHouse` | `ZombieLair` (#112) |
 | `GateKind` | `Bridge`, `DiaryChapter`, `FollowsPrevious` | `RegionGateSystem` (#68) |
 | `PartState` | `Lying`, `Carried`, `Installed` | `HeavyItemSystem` (#69) |
-| `DropReason` | `Manual`, `HeavyHit`, `Pinned`, `Water`, `Death`, `Installed` | `HeavyItemSystem` (#69) |
+| `DropReason` | `Manual`, `HeavyHit`, `Pinned`, `Water`, `Death`, `Installed`, `Unstuck` (#116) | `HeavyItemSystem` (#69) |
 | `WaterKind` | `Sea`, `River`, `Lake` | `SwimmingController` (#13) |
 | `WaterMode` | `None`, `Wading`, `Swimming` | `SwimmingController` (#13) |
 | `EnvEventId` | Lapisan event `EnvironmentDirector`, misalnya `Eruption` dan `BloodMoon` | `EnvironmentDirector` (#92) |

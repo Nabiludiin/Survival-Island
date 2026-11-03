@@ -124,7 +124,7 @@ Lucky Machine tidak punya pop-up, karena mesin itu sengaja menjadi kejutan pemai
 ## 4. Kasus Khusus
 
 - **Game dijeda:** `Update` memakai `Time.deltaTime`, jadi semua timer berhenti. Saat `isPaused`, panel disembunyikan sementara dan muncul lagi setelah jeda. Pop-up baru tidak dimulai saat jeda.
-- **Sticky event setelah load:** `WorldStateSave` mengirim ulang `DaybreakEvent`, `NightfallEvent`, dan lainnya. Pop-up yang sudah ada di `seen` diabaikan, dan yang belum memang pantas muncul.
+- **Sticky event setelah load:** `DayNightDirector` dan pemilik event lain mengirim ulang event sticky di `OnRestoreFinished`. Pop-up yang sudah ada di `seen` diabaikan, dan yang belum memang pantas muncul.
 - **Fase 1 yang singkat:** hanya `ship_loot` yang muncul di kapal, supaya 60 detik tidak habis untuk membaca. Pop-up itu punya `allowDuringDanger = true`.
 - **Banyak pemicu bersamaan:** misalnya pindah region saat malam tiba. Antrean menampilkan satu per satu menurut prioritas, dengan jeda `minGapSeconds`.
 - **Dipotong sebelum dibaca:** pop-up yang tampil kurang dari `minSeenSeconds` karena run berakhir tidak ditandai, sehingga muncul lagi lain kali.

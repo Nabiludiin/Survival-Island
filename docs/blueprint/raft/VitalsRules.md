@@ -23,20 +23,25 @@
 | Fungsi | Dipanggil oleh | Kegunaan |
 |---|---|---|
 | `TakeDamage(in DamageInfo)` | Lihat #59 | Damage dari luar |
-| `ApplyVitalDamage(float amount, DamageType type)` | Internal | Damage kondisi, tanpa `PlayerDamagedEvent` |
+| `ApplyVitalDamage(float amount, DamageType type)` | `SurvivalStats`, #20 | Publik. Damage kondisi, tanpa `PlayerDamagedEvent` |
 | `RestoreHP(float)`, `RestoreHunger(float)`, `RestoreThirst(float)` | `ItemUseSystem` (#66), #67 | Pemulihan langsung |
+| `RestoreStamina(float)` | `SleepSystem` (#67) | Pemulihan stamina langsung |
 | `QueueRestore(float hunger, float thirst, float seconds)` | `ItemUseSystem` (#66) | Pemulihan bertahap |
 | `AddInfection(float)`, `ReduceInfection(float)` | #59, `InfectionSystem` (#64) | Mengubah infeksi |
 | `bool SpendStamina(float amount, StaminaUse use)` | Pengontrol, melee, #13, #101 | Mengurangi stamina. Mengembalikan `false` kalau ditolak |
 | `bool CanUseStamina(StaminaUse use)` | Pengontrol, melee | Pemeriksaan tanpa mengurangi |
 | `SetDrowning(bool)` | `SwimmingController` (#13), `ShipHazardManager` (#75) | Kondisi tenggelam |
 | `SetPenalty(VitalPenaltySource, float maxStaminaMultiplier, float staminaRegenMultiplier)` | #64, #69, #20 | Penalti dari sistem lain |
+| `SetMaxBonus(float hpMultiplier, float staminaMultiplier)` | `StatusEffectManager` (#20), untuk buff `Permanent` Lucky Machine (#72) | Pengali naik untuk `MaxHP` dan `MaxStamina`. Nilai awal 1. Nama fungsi adalah usulan |
+| `SetRegenBlocked(bool)` | `StatusEffectManager` (#20) | Menahan regenerasi stamina |
 | `SetDrainMultiplier(float)` | `SleepSystem` (#67) | Pengali lapar dan haus. Nilai awal 1 |
 | `SetDrainEnabled(bool)` | `ShipPlayerController` (#75) | Mematikan lapar dan haus di Fase 1 |
 | `SetInvulnerable(bool)` | `DevConsole` (#56), #74 | Menahan HP di 1, dan infeksi di 99 |
+| `DebugSetVital(string name, float value)` | `DevConsole` (#56) | Dibungkus `#if UNITY_EDITOR \|\| DEVELOPMENT_BUILD`. Mengisi satu status lewat perintah `setvital` |
+| `DebugKill(DeathReason reason)` | `DevConsole` (#56) | Dibungkus `#if UNITY_EDITOR \|\| DEVELOPMENT_BUILD`. Meneruskan ke `TriggerDeath` |
 
 ```csharp
-public enum StaminaUse { Sprint, Jump, Melee, Swim, Climb }
+public enum StaminaUse { Sprint, Jump, Melee, Swim, Climb, Struggle }
 public enum VitalPenaltySource { Hunger, Thirst, Infection, Cold, Heavy, StatusEffect }
 
 [Flags]
@@ -153,11 +158,12 @@ Nilai dijaga pada rentang 0 sampai maksimum. `isSprinting` diisi otomatis saat `
 | Melee | `meleeStaminaCost` sekali | `MeleeCombatSystem` | Tetap boleh saat lelah, dengan pengali |
 | Berenang | `swimStaminaPerSec` per detik | `SwimmingController` (#13) | Stamina habis menjadi kondisi tenggelam |
 | Memanjat | `climbStaminaPerSec` per detik saat bergerak | `PlayerTraversal` (#101) | Stamina habis berarti pelan, tanpa jatuh |
+| Aksi lepas | Menurut #110 | `PlayerPinnedState` (#110) | `SpendStamina` boleh mengembalikan `false` saat stamina 0, tanpa menghentikan aksi lepas |
 
 **`public bool SpendStamina(float amount, StaminaUse use)`**:
 
 1. Kalau `use` adalah `Sprint` atau `Jump`, dan `IsExhausted`, kembalikan `false`.
-2. Kalau `use` adalah `Jump` dan `Stamina < amount`, kembalikan `false`.
+2. Kalau `use` adalah `Jump` dan `Stamina < amount`, kembalikan `false`. Kalau `use` adalah `Struggle` dan `Stamina <= 0`, kembalikan `false`.
 3. `Stamina = Mathf.Max(0, Stamina - amount)`, lalu `lastStaminaUseTime = Time.time`.
 4. Kalau `Stamina <= 0`, `IsExhausted = true`.
 5. Kembalikan `true`.
@@ -170,15 +176,17 @@ Melee saat lelah tetap berhasil, supaya pemain tidak kehilangan pilihan bertahan
 
 1. Kalau `isFreezing`, kurangi `frostbiteStaminaDrainPerSec * dt`, atur `lastStaminaUseTime`, lalu selesai.
 2. Hitung `regenMultiplier`, yaitu hasil kali semua penalti aktif.
-3. Kalau `Time.time - lastStaminaUseTime >= staminaRegenDelaySeconds`, tambahkan `staminaRegenPerSec * regenMultiplier * dt`.
-4. Batasi `Stamina` sampai `MaxStamina * maxStaminaMultiplier`.
+3. Kalau `SetRegenBlocked(true)` aktif, lewati pemulihan. Kalau `Time.time - lastStaminaUseTime >= staminaRegenDelaySeconds`, tambahkan `staminaRegenPerSec * regenMultiplier * dt`.
+4. Batasi `Stamina` sampai `MaxStamina * maxStaminaMultiplier * bonusStamina`.
 5. Kalau `IsExhausted` dan `Stamina >= exhaustedRecoverThreshold`, `IsExhausted = false`.
 
 **Efek kelelahan:** lari dan lompat ditolak, suara napas berat (#23 dan #52) dimulai dari `VitalWarningFlags.Exhausted`, serta melee melemah. Pemain masih bisa berjalan.
 
 ### Penalti tiap status
 
-`SurvivalStats` menyimpan satu pasang nilai per `VitalPenaltySource`, lalu menghitung `maxStaminaMultiplier` sebagai nilai terkecil dan `regenMultiplier` sebagai hasil kali.
+`SurvivalStats` menyimpan satu pasang nilai per `VitalPenaltySource`, lalu menghitung `regenMultiplier` sebagai hasil kali. `VitalPenaltySource.StatusEffect` dikecualikan dari perhitungan nilai terkecil: `maxStaminaMultiplier = (terkecil dari sumber lain) x nilai StatusEffect`, supaya buff di atas 1 tidak hilang (#20).
+
+**Bonus maksimum (#72):** `SetPenalty` mengambil nilai terkecil, sehingga pengali 1,1 akan kalah. Karena itu, buff `Permanent` memakai `SetMaxBonus`, dan hasilnya dikalikan dengan penalti. Saat bonus naik, HP saat ini tidak ikut naik otomatis.
 
 | Sumber | Syarat | Batas stamina | Regenerasi stamina | Penalti lain | Diisi oleh |
 |---|---|---|---|---|---|
@@ -218,7 +226,7 @@ ZoneManager --RegionChangedEvent--> WarmthSystem (#65) --WarmthChangedEvent { wa
 
 ### Urutan dalam satu frame
 
-`SurvivalStats.Update()`, kalau `!isDead`: `TickDrains`, `TickRestore`, `TickStamina`, `TickHP`, pemeriksaan `Infection >= MaxInfection`, lalu penerbitan event kalau sudah waktunya.
+`SurvivalStats.Update()`, kalau `!isDead`: `TickDrains`, `TickRestore`, `TickStamina`, `TickHP`, lalu penerbitan event kalau sudah waktunya. Tidak ada pemeriksaan kematian dari nilai `Infection`, karena GDD bagian 3 menetapkan pemain mati saat HP habis.
 
 ## 3. Hubungan dengan Sistem Lain
 
@@ -273,7 +281,7 @@ ZoneManager --RegionChangedEvent--> WarmthSystem (#65) --WarmthChangedEvent { wa
 1. **Kerusakan tidak bertumpuk:** hanya kondisi tertinggi yang berlaku, mengikuti pola Raft di `CATATAN_MEKANIK.md`. Pilihan lain adalah bertumpuk, tetapi HP bisa habis terlalu cepat saat beberapa status buruk bersamaan.
 2. **Urutan prioritas:** tenggelam, frostbite, kelaparan, dehidrasi, infeksi, lalu pemulihan, sesuai checklist issue.
 3. **Pemulihan HP alami:** ada, 0,25 per detik, dengan syarat lapar dan haus minimal 50, infeksi di bawah 50, dan 12 detik tanpa diserang.
-4. **Damage infeksi:** 0,3 per detik mulai `Infection` 75. GDD menyebut HP habis karena infeksi, sedangkan `SurvivalStats.md` lama hanya mati di 100.
+4. **Damage infeksi:** 0,3 per detik mulai `Infection` 75. GDD menyebut HP habis karena infeksi, jadi `Infection` 100 tidak membunuh langsung, dan HP tetap turun lewat baris 5.
 5. **Biaya stamina:** lari 10 per detik, lompat 8, melee 15, berenang 6 per detik, dan memanjat 5 per detik.
 6. **Kelelahan:** setelah stamina habis, lari dan lompat terkunci sampai stamina 25. Melee tetap bisa, dengan damage 70 persen dan jeda 1,5x.
 7. **Penalti lapar dan haus rendah:** di bawah 25, batas stamina menjadi 75 persen, atau regenerasi stamina setengah.
@@ -286,7 +294,7 @@ ZoneManager --RegionChangedEvent--> WarmthSystem (#65) --WarmthChangedEvent { wa
 3. Masuk Region 3 tanpa pakaian hangat. **Hasil:** stamina habis sekitar 20 detik, lalu HP turun 1 per detik. Alasan kematian `Frostbite`.
 4. Pakai pakaian hangat saat HP sedang turun. **Hasil:** HP berhenti turun dalam satu pemeriksaan `WarmthSystem`, dan stamina mulai pulih.
 5. Terima pukulan zombie saat lapar 80, haus 80, infeksi 0. **Hasil:** HP tidak pulih selama 12 detik, lalu naik 0,25 per detik.
-6. Atur `Infection` 60. **Hasil:** tidak pulih dan tidak ada damage. Atur 80. **Hasil:** HP turun 0,3 per detik.
+6. Atur `Infection` 60. **Hasil:** tidak pulih dan tidak ada damage. Atur 80. **Hasil:** HP turun 0,3 per detik. Atur 100 dengan HP penuh. **Hasil:** pemain tidak langsung mati, dan HP tetap turun 0,3 per detik.
 7. Lari sampai stamina habis. **Hasil:** lari berhenti, ikon lelah tampil, dan pemain baru bisa lari lagi setelah stamina 25.
 8. Tekan lompat saat stamina 5. **Hasil:** lompatan ditolak.
 9. Pukul zombie saat stamina 0. **Hasil:** serangan tetap terjadi, dengan damage 70 persen dan jeda lebih panjang.

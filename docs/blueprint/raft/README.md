@@ -20,7 +20,7 @@ Fokus utamanya adalah manajemen sumber daya tubuh (Lapar, Haus, Infeksi), mengum
 
 ### 3. Gathering & Fishing
 *   **Gathering:** Menyorot pohon/batu dengan kapak/beliung dan menahan tombol klik kiri untuk menambah `Kayu` atau `Batu` ke dalam `InventoryManager`.
-*   **Fishing (Kail Pancing):** Menggunakan item dasar *Kail*. Saat dilempar ke badan air (laut/sungai), jalankan jeda *Random.Range* sebelum pelampung tenggelam. Pemain harus menekan tombol tepat waktu untuk mendapatkan *Ikan Mentah*.
+*   **Fishing (Kail Pancing):** Menggunakan item dasar *Kail*. Saat dilempar ke badan air (laut/sungai), jalankan jeda *Random.Range* sebelum pelampung tenggelam. Pemain menekan tombol saat gigitan, lalu menjaga *Tension Bar*, sesuai `FishingSystem.md`, untuk mendapatkan *Ikan Mentah*.
 
 ## 📂 Rekomendasi Script (Untuk Claude)
 Saat mengerjakan folder ini, Claude harus fokus membuat *script* berikut:

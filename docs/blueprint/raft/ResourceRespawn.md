@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/raft/ResourceRespawn.md`
 **Deskripsi Utama:** Aturan alat panen, status habis pada `ResourceNode`, jadwal tumbuh kembali berbasis hari game, kepadatan node per region, dan item jatuh yang memakai pool.
 **Issue:** #73
-**Rujukan GDD:** Bagian 1 (bertahan 60 hari), bagian 5 (kayu dan batu Region 1, jembatan 500 kayu, material medis Region 2). Tabel alat dan jadwal tumbuh adalah usulan.
+**Rujukan GDD:** Bagian 1 (target 60 hari, dan run bisa berlanjut sesudahnya), bagian 5 (kayu dan batu Region 1, jembatan 500 kayu, material medis Region 2). Tabel alat dan jadwal tumbuh adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -165,6 +165,13 @@ Dari 120 pohon Region 1, minimal 80 berada dalam 200 meter dari titik mulai. Den
 
 **Kelapa:** `CoconutPickup : PickupInteractable, IRegrowable` menjadwalkan `coconutRespawnDays` saat diambil. `Regrow()` mengosongkan `isConsumed`, lalu menampilkan buahnya.
 
+**Batu kecil dan ranting (#116):** `StonePickup : PickupInteractable, IRegrowable` memakai pola yang sama, dengan jadwal `resource.stoneRespawnDays`. Usulan nilai awal 2 hari, belum ada di `GameBalanceConfig.md`.
+
+- **`public int CountActiveStones(RegionType region)`** menghitung `StonePickup` yang masih tersedia di region itu.
+- **`public void ForceRegrowStones(RegionType region, int minimum)`** memanggil `Regrow()` sampai jumlah aktif mencapai `minimum`.
+
+**Api (#97):** `ResourceNode` pohon dan tanaman memasang `Flammable` dengan profil `Flame_Vegetation`. Akhir bakar memanggil `ForceDeplete(false)`.
+
 ### Mengejar waktu
 
 Status memakai jam absolut. Saat region kembali, `RestoreState` mengisi `Status` dan `RegrowAtGameHour`, lalu node yang habis mendaftar lewat `MarkDepleted`. `MarkDepleted` memulai `CheckRoutine()` pada frame berikutnya kalau belum berjalan, jadi node yang waktunya sudah lewat langsung tumbuh. Region dimuat saat pemain masih jauh (#88), sehingga pemain tidak melihat pohon muncul mendadak.
@@ -186,7 +193,8 @@ Status memakai jam absolut. Saat region kembali, `RestoreState` mengisi `Status`
 | `RunSeedManager` (#89) | Aliran `Gameplay` |
 | `HydrationSystem` (#43) | Kelapa lewat `coconutRespawnDays` |
 | `InfectionSystem` (#64) | Varian node, sesuai tabel `InfectionSystem.md` |
-| `DisasterManager` (#70), `FireSystem` (#97) | `ForceDeplete` |
+| `DisasterManager` (#70), `FireSystem` (#97) | `ForceDeplete`, dan `Flammable` pada pohon dan tanaman |
+| `ProgressionSafety` (#116) | `CountActiveStones` dan `ForceRegrowStones` |
 | `NoiseEmitter` (#49) | Dipakai `MeleeCombatSystem` saat memukul node |
 
 **Batas pekerjaan:** bercocok tanam di #48, dan loot di titik tetap milik `LootSpawnerSystem`.

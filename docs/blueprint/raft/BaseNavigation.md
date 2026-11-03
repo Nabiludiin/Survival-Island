@@ -62,6 +62,7 @@ Lebar lubang pintu 1,4 meter, supaya agen `Humanoid` dengan radius 0,4 meter bis
 | Area | Dipakai oleh | `areaMask` |
 |---|---|---|
 | `DoorLink` | `npcLink` di tiap pintu | Dimuat agen NPC. Tidak dimuat agen musuh |
+| `Interior` (#112) | Dipasang lewat `NavMeshModifierVolume` di dalam `InteriorZone` | Satu-satunya area zombie sarang saat siang |
 
 ### Variabel `BaseNavigation`
 
@@ -75,6 +76,7 @@ Lebar lubang pintu 1,4 meter, supaya agen `Humanoid` dengan radius 0,4 meter bis
 | `pathCheckQueue` | `Queue<EnemyAI>` | Kosong | Antrean pemeriksaan jalur |
 | `sharedPath` | `NavMeshPath` | Dibuat sekali | Dipakai ulang oleh semua pemeriksaan |
 | `overlapBuffer` | `Collider[]` | Ukuran 32 | Buffer pencarian struktur |
+| `baseAnchor` | `BaseAnchor` | `null` | Target markas di pusat base (#108, #50) |
 
 ```csharp
 public struct BreachTarget
@@ -173,7 +175,7 @@ Zombie yang masuk selama pintu terbuka memang terjadi, dan menjadi risiko membia
 
 - HP dan pengali mengikuti `Door_Wood` di `raft/BuildMenu.md`.
 - Tag `BaseDoor` menjadi target `AttackBuilding`, sama seperti `BaseWall`.
-- Saat `Locked`, damage `Structural` dikali `lockedDamageMultiplier`, lewat `BaseHealth.SetDamageMultiplier` dari `BaseDoor`.
+- Saat `Locked`, `BaseDoor` memanggil `BaseHealth.SetDamageMultiplier(DamageType.Structural, lockedDamageMultiplier)`, dan mengembalikan pengalinya ke 1 saat tidak `Locked`.
 - Saat pintu hancur, `StructureDestroyedEvent` melepas penyerangnya. Rangka, daun, dan `npcLink` hilang bersama objek, sehingga lubang terbuka untuk semua agen.
 
 ### Pemain di dalam base
@@ -210,9 +212,22 @@ Atap tidak disyaratkan, karena zombie tidak memanjat dinding, dan base awal bisa
 4. Kalau `agent.pathStatus == PathComplete`, `blockedTimer = 0`.
 5. Kalau `PathPartial` atau `PathInvalid`, tambah `blockedTimer` sebesar waktu sejak pemeriksaan terakhir.
 6. Kalau `blockedTimer >= blockedConfirmSeconds`, panggil `BaseNavigation.TryAssignBreachTarget(this, out BreachTarget t)`.
-7. Kalau berhasil, atur `currentBreach = t`, lalu `AIState.AttackBuilding`. Kalau gagal, tetap `Chase` menuju titik terdekat, dan `blockedTimer = 0`.
+7. Kalau berhasil, atur `currentBreach = t`, lalu `AIState.AttackBuilding`. Kalau gagal, `blockedTimer = 0`, dan zombie mengikuti `AITraversal.GetResponse` (#94), bukan hanya tetap `Chase` ke titik terdekat.
 
 Pemain yang berdiri di atas batu tanpa jalur tidak memicu serangan apa pun, karena tidak ada struktur yang ditemukan pada langkah berikutnya.
+
+### `BaseAnchor`
+
+`BaseAnchor : ITargetable` adalah objek di pusat base, dengan `Kind = BaseAnchor`, `Damageable = null`, dan `ThreatWeight` 1 (#108, #50).
+
+**`IsTargetable`** bernilai `true` hanya kalau semua syarat berikut terpenuhi:
+
+1. Blood Moon sedang berjalan.
+2. Base ada, yaitu minimal satu struktur.
+3. Region anchor sudah dimuat: `RegionStreaming.IsLoaded(GetRegionAt(anchor))`.
+4. Jarak pemain ke anchor `<= bloodMoon.baseEngageDistance`.
+
+**`public bool TryGetBaseAnchor(out Vector3 anchor)`** mengembalikan `false` kalau belum ada struktur. Fungsi ini dipakai #50, #54, #76, dan #108.
 
 ### Memilih dinding atau pintu
 
@@ -290,7 +305,10 @@ public class BreachSlots
 | `SleepSystem` (#67) | Memakai `IsInsideBase` |
 | `RemoteBaseSimulation` (#90) | Tidak memakai sistem ini saat base ditinggal |
 | `WildlifeAI` (#61) | Hewan memakai `TargetUnreachable` saat terhalang |
-| `RegionStreaming` (#88) | Bangunan nonaktif bersama region |
+| `RegionStreaming` (#88) | Bangunan nonaktif bersama region, dan syarat `BaseAnchor.IsTargetable` |
+| `ThreatSystem` (#108), `HordeManager` (#50), #54, #76 | Membaca `BaseAnchor` dan `TryGetBaseAnchor` |
+| `AITraversal` (#94) | Respons saat `TryAssignBreachTarget` gagal |
+| `ZombieLair` (#112) | Memakai Area `Interior` |
 
 **Batas pekerjaan:** HP dan perbaikan dinding di #47, jebakan di #26, dan menu bangun di #79.
 
@@ -330,6 +348,7 @@ public class BreachSlots
 4. **Definisi di dalam base:** minimal 3 dari 4 arah terhalang dinding atau pintu dalam 6 meter. Atap tidak wajib.
 5. **Jumlah penyerang:** 4 per dinding dan 3 per pintu. Sisanya menunggu.
 6. **Zombie di lantai atas:** tidak bisa naik. Bangunan bertingkat aman dari gigitan langsung, tetapi bisa runtuh kalau penopangnya hancur.
+7. **Cara menghitung pusat base:** belum ditentukan di dokumen mana pun. Keputusan ini menunggu developer.
 
 ## 6. Skenario Tes
 

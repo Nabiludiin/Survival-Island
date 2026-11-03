@@ -36,7 +36,8 @@ Logika tembakan dipisah menjadi dua lapis, supaya pemain dan NPC memakai sistem 
 | `recoilPitch` / `recoilYaw` | 1,2 / 0,4 | 0,6 / 0,2 | 0 / 0 | Dikirim ke `AddRecoil` |
 | `noiseRadius` | 35 | 20 | 25 | Radius Noise Sphere, dalam meter |
 | `wearPerShot` | 0,25 | 0 | 0 | Keausan per tembakan |
-| `muzzleFlashTag` / `impactTag` | `VFX_Muzzle` / `VFX_Impact` | `VFX_LaserMuzzle` / `VFX_LaserImpact` | `VFX_Muzzle` / `VFX_Impact` | Tag `ObjectPooler` |
+| `muzzleFlashTag` / `impactTag` | `VFX_Muzzle` / `VFX_Impact` | `VFX_LaserMuzzle` / `VFX_LaserImpact` | `VFX_Muzzle` / `VFX_Impact` | Tag di `GameBalanceConfig.vfx.catalog` (#15) |
+| `cameraShakeScale` | 0,6 | 1 | 0 | Skala getaran kamera. Dibaca `CameraShake` saat menerima `WeaponFiredEvent` (#24). Nilai selain `Base_Pistol` adalah usulan |
 
 ### Variabel `GunCore`
 
@@ -64,7 +65,6 @@ Logika tembakan dipisah menjadi dua lapis, supaya pemain dan NPC memakai sistem 
 | `GameBalanceConfig.gun.dryClickCooldown` | 0,25 | Jeda suara klik kosong |
 | `GameBalanceConfig.gun.npcFireMaxAngle` | 10 | Sudut maksimum NPC boleh menembak ke target |
 | `GameBalanceConfig.gun.movingSpeedThreshold` | 0,5 | Kecepatan pemain yang dianggap bergerak, m/s |
-| `GameBalanceConfig.gun.vfxLifetimeSeconds` | 0,5 | Umur muzzle flash dan impact sebelum kembali ke pool |
 
 ## 2. Detail Logika & Fungsi
 
@@ -77,8 +77,9 @@ Logika tembakan dipisah menjadi dua lapis, supaya pemain dan NPC memakai sistem 
 3. Geser arah ray secara acak di dalam kerucut `currentSpread`. Memakai `UnityEngine.Random`, karena hasilnya tidak memengaruhi isi dunia.
 4. `PhysicsQuery.Raycast(ray, out hit, stats.maxRange, PhysicsMasks.Shoot)`. Mask ini tidak memuat `Player` dan kapsul `Enemy`, dan `PhysicsQuery` selalu memakai `QueryTriggerInteraction.Ignore`, jadi collider pemain dan trigger zona tidak menghentikan peluru.
 5. Kalau kena, isi `DamageInfo { amount = stats.damage, type = Bullet, source = shooter, sourceId = itemId, hitDirection = ray.direction, bodyPart = Torso, infection = 0, byPlayer }`, lalu panggil `DamageRouter.ApplyHit(hit, info)`. Pengali kepala 2x, armor, dan friendly fire dihitung jalur #59.
-6. Ambil efek impact dari pool pada `hit.point`, menghadap `hit.normal`.
+6. Panggil `VFXManager.Instance.PlayImpact(hit, overrideTag)` (#15).
 7. `currentSpread = Min(currentSpread + spreadPerShot, spreadMax)`.
+8. Setelah raycast selesai, terbitkan `ShotResolvedEvent { itemId, hitEnemy, isHeadshot, byPlayer }` (#57) satu kali per tembakan, termasuk senjata dengan banyak peluru. `WeaponFiredEvent` tetap ada.
 
 Peluru tidak menembus objek dan tidak punya objek fisik, sesuai `PhysicsLayers.md`. Air tidak ada di mask `Shoot`.
 
@@ -93,9 +94,9 @@ Peluru tidak menembus objek dan tidak punya objek fisik, sesuai `PhysicsLayers.m
 5. Buat ray dari `WorldCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f))`. Kamera dunia dipakai sesuai `FirstPersonCamera.md`, jadi recoil benar-benar menggeser bidikan.
 6. Panggil `GunCore.Fire`. Kalau ditolak jeda, selesai.
 7. `magazineAmmo--`, lalu `DurabilitySystem.ApplyWear(instance, wearPerShot)`.
-8. Muzzle flash dari pool di layer `PlayerViewmodel`, lalu SFX.
+8. `VFXManager.Instance.Play(muzzleFlashTag, pos, rot, muzzlePoint, viewmodel: true)`, `armsAnim.Play(AnimIds.Fire)` (#12), lalu SFX.
 9. `FirstPersonCamera.AddRecoil(recoilPitch, Random.Range(-recoilYaw, recoilYaw))`.
-10. `NoiseEmitter.EmitGunshot(noiseRadius)` (#49), yang menerbitkan `NoiseEmittedEvent`.
+10. `NoiseEmitter.Emit(GameBalanceConfig.stealth.noiseGunshot, NoiseSourceKind.Gunshot)` (#49), yang menerbitkan `NoiseEmittedEvent`.
 11. Terbitkan `AmmoChangedEvent` dan `WeaponFiredEvent`.
 12. Kalau `magazineAmmo == 0` dan cadangan ada, atur `autoReloadTime = Time.time + autoReloadDelay`.
 
@@ -114,7 +115,7 @@ Klik kosong tidak mengirim Noise Sphere.
 **`public void StartReload()`**, dipicu `InputManager.ReloadPressed` di `Update` atau reload otomatis:
 
 1. Tolak kalau sudah reload, magazine penuh, cadangan 0, atau item `Broken`.
-2. `isReloading = true`, `reloadEndTime = Time.time + reloadSeconds`, lalu mainkan animasi (#12) dan SFX.
+2. `isReloading = true`, `reloadEndTime = Time.time + reloadSeconds`, lalu `armsAnim.PlayReload(reloadSeconds, clipSeconds)` (#12) dan SFX.
 
 **`FinishReload()`**, saat `Time.time >= reloadEndTime`:
 
@@ -127,7 +128,7 @@ Peluru baru berkurang di akhir reload, jadi reload yang batal tidak membuang apa
 
 ### Gangguan reload
 
-**`CancelReload()`** hanya mengatur `isReloading = false` dan `autoReloadTime = -1`.
+**`CancelReload()`** mengatur `isReloading = false` dan `autoReloadTime = -1`, lalu memanggil `armsAnim.CancelAction()` (#12).
 
 | Gangguan | Hasil | Alasan |
 |---|---|---|
@@ -151,9 +152,8 @@ Berlari tetap boleh menembak, tanpa aturan tambahan selain spread gerak. Pemulih
 
 ### Muzzle flash dan impact
 
-- Keduanya diambil lewat `ObjectPooler.Instance.SpawnFromPool(tag, pos, rot)`, tanpa `Instantiate` dan `Destroy`.
-- `PooledEffect : IPoolable` memutar partikel di `OnSpawned`, lalu kembali ke pool setelah `vfxLifetimeSeconds`.
-- Saat #15 selesai, pemanggilan ini berpindah ke `VFXManager` tanpa mengubah alur tembak.
+- Muzzle flash: `VFXManager.Instance.Play(tag, pos, rot, muzzlePoint, viewmodel: true)`. Impact: `VFXManager.Instance.PlayImpact(hit, overrideTag)`, dengan `overrideTag` berisi `impactTag` senjata, atau `null` kalau tag itu `VFX_Impact` (#15).
+- `PooledEffect` dipindah ke `VFXManager.md`, dan umur efek dibaca dari `GameBalanceConfig.vfx.catalog`.
 - Efek pemain memakai layer `PlayerViewmodel`. Efek NPC tetap di layer dunia.
 
 ### Senjata lain
@@ -165,6 +165,7 @@ Berlari tetap boleh menembak, tanpa aturan tambahan selain spread gerak. Pemulih
   3. Panggil `GunCore.Fire` dengan `byPlayer = false`.
   4. Kirim suara lewat `NoiseEmitter`, tanpa `AmmoChangedEvent`.
   5. Saat magazine habis, tunggu `reloadSeconds`, lalu isi ulang tanpa memakai inventori.
+- **Usulan #103, berlaku kalau usulan senjata disetujui:** `Wpn_SMG` (`Auto`, damage 18, magazine 30, jeda 0,09 detik, `Ammo_9mm`) dan `Wpn_Rifle` (`SemiAuto`, damage 45, magazine 20, jeda 0,3 detik, jarak 90 m, suara 45 m, `Ammo_556`).
 
 ### Item inti dan rusak
 
@@ -172,11 +173,11 @@ Mengikuti usulan yang sudah tertulis di `ToolRepairSystem.md`: `Base_Pistol` bis
 
 ### Upgrade
 
-**`public void RecalculateStats()`** memanggil `WeaponStatCalculator.Get`, lalu menyimpan hasilnya di `GunCore.stats`. `speed` membagi `secondsBetweenShots` dan `reloadSeconds`. Kalau `magazineAmmo` lebih besar dari kapasitas baru, isinya dibiarkan sampai ditembakkan.
+Statistik dibaca lewat `WeaponStatCalculator.Get` saat senjata dipasang (`OnEquip`) (#113). **`public void RecalculateStats()`** memanggil `WeaponStatCalculator.Get`, lalu menyimpan hasilnya di `GunCore.stats`. `speed` membagi `secondsBetweenShots` dan `reloadSeconds`. Kalau `magazineAmmo` lebih besar dari kapasitas baru, isinya dibiarkan sampai ditembakkan.
 
 ## 3. Hubungan dengan Sistem Lain
 
-**Event yang dikirim:** `AmmoChangedEvent { inMagazine, reserve }` (sticky), dan `WeaponFiredEvent { itemId, position, byPlayer }` (baru).
+**Event yang dikirim:** `AmmoChangedEvent { inMagazine, reserve }` (sticky), `WeaponFiredEvent { itemId, position, byPlayer }` (baru), dan `ShotResolvedEvent { itemId, hitEnemy, isHeadshot, byPlayer }` (#57).
 
 **Event yang didengar:** `InventoryChangedEvent` (kalau `itemId == ammoItemId`, terbitkan `AmmoChangedEvent` lagi), dan `PlayerPinnedEvent` (membatalkan reload).
 
@@ -192,13 +193,15 @@ Mengikuti usulan yang sudah tertulis di `ToolRepairSystem.md`: `Base_Pistol` bis
 | `HUDManager` | Mendengar `AmmoChangedEvent`, lalu memanggil `UpdateAmmo` |
 | `NPCCompanion`, `NPCRoster` (#76) | `NPCGunUser` dan `NPC_Pistol` |
 | `LuckyMachine` (#72) | Sumber `Reward_LaserPistol` dan modifier |
-| `CameraShake` (#24), `LocalStatsManager` (#57) | Boleh mendengar `WeaponFiredEvent` |
+| `CameraShake` (#24) | Mendengar `WeaponFiredEvent`, dan membaca `cameraShakeScale` |
+| `LocalStatsManager` (#57) | Mendengar `WeaponFiredEvent` dan `ShotResolvedEvent` |
+| `VFXManager` (#15), `AnimationController` (#12) | Efek tembakan, dan animasi tangan lewat `armsAnim` |
 
 **Batas pekerjaan:** getaran kamera di #24, hit marker di #51, dan pusat efek partikel di #15.
 
 ## 4. Kasus Khusus
 
-- **Objek pool:** `PooledEffect.OnReturned` menghentikan partikel dan membersihkan sisa partikelnya. `OnSpawned` memutar dari awal. `GunController` sendiri bukan objek pool (#60). `NPCGunUser` mengisi ulang magazine saat NPC keluar dari pool.
+- **Objek pool:** reset `PooledEffect` diatur `VFXManager.md`. `GunController` sendiri bukan objek pool (#60). `NPCGunUser` mengisi ulang magazine saat NPC keluar dari pool.
 - **Game dijeda:** semua waktu memakai `Time.time` dan `Time.deltaTime`, jadi reload, jeda tembak, dan spread berhenti. Input `Gameplay` mati lewat #83.
 - **Permadeath:** isi magazine dan cadangan terhapus bersama save run (#82). `Base_Pistol` di run baru kembali ke `startingMagazine`.
 - **Save:** `magazineAmmo` dan `durability` tersimpan di `ItemInstance`, dan cadangan tersimpan sebagai tumpukan `Ammo_9mm` (#66). `isReloading` tidak disimpan. Reload yang berjalan saat save batal tanpa mengurangi peluru.

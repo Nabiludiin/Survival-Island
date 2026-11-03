@@ -64,7 +64,6 @@ public struct EndingContext
 | `ending_alone` | Menang tanpa NPC hidup | `PlayEnding` | MC terbang sendiri | 15 detik |
 | `ending_with_npc` | Menang dengan minimal 1 NPC hidup, ada yang hilang | `PlayEnding` | MC bersama yang tersisa | 15 detik |
 | `ending_all_saved` | Menang, semua NPC kapal selamat | `PlayEnding` | Semua selamat | 20 detik |
-| `fail_time_expired` | `TimeExpired` | `RunLifecycle`, menggantikan fade sementara | Helikopter tidak pernah terbang | 8 detik |
 
 ### Pemilihan ending
 
@@ -166,7 +165,7 @@ Trigger layer `ZoneTrigger` di `Region3_Snow`, sekaligus `ISaveable` lewat `Regi
 
 | Sistem | Hubungan |
 |---|---|
-| `RunLifecycle` (#82) | Memanggil `PlayDuringLoad`, `PlayEnding`, dan `Play("fail_time_expired")` |
+| `RunLifecycle` (#82) | Memanggil `PlayDuringLoad` dan `PlayEnding` |
 | `AsyncSceneLoader` | `Progress`, dan `AllowActivation` |
 | `UIFocusStack` (#83) | Panel `Cinematic`, `SetGameplayTimeScale` |
 | `InputManager` (#18) | `SkipPressed` |
@@ -202,7 +201,7 @@ Trigger layer `ZoneTrigger` di `Region3_Snow`, sekaligus `ISaveable` lewat `Regi
 **Usulan yang menunggu developer (dicatat di #85):**
 
 1. **Alat:** rekomendasi rangkaian teks dan gambar untuk versi awal, karena murah dan mudah diterjemahkan. Timeline bisa menyusul tanpa mengubah pemanggil.
-2. **Daftar adegan:** rekomendasi delapan adegan pada tabel, termasuk `fail_time_expired` di luar checklist.
+2. **Daftar adegan:** rekomendasi tujuh adegan pada tabel.
 3. **Ending:** rekomendasi tiga ending berdasarkan NPC, tanpa memengaruhi hadiah.
 4. **Lewati:** rekomendasi hanya setelah pernah ditonton, sesuai checklist. Ending memakai aturan yang sama, kecuali diubah dengan `alwaysSkippable`.
 5. **Penyimpanan catatan:** rekomendasi `PlayerPrefs`, karena satu nilai per adegan dan sudah aman dari permadeath.

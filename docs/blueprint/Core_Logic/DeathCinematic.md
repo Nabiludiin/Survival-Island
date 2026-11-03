@@ -50,7 +50,6 @@ Player (CharacterController, IslandPlayerController atau ShipPlayerController)
 | `Drowned` | `Sink` | Ragdoll dengan `drag` tinggi, dan kamera tetap di bawah air |
 | `Zombified` | `Zombify` | Tanpa ragdoll, sesuai `InfectionSystem.md`. Pandangan hijau penuh, kontrol dilepas, napas berubah menjadi erangan, lalu fade, dengan durasi `GameBalanceConfig.infection.zombifyCinematicSeconds` (4) |
 | `LeftOnShip` | `Blackout` | Tanpa ragdoll. Air naik, lalu layar hitam |
-| `TimeExpired` | Tidak dipakai | `RunLifecycle` memakai fade hitam sendiri |
 
 ### Angka penyetelan
 

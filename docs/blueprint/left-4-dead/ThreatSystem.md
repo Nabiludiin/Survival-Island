@@ -97,7 +97,7 @@ skor = kindWeight * t.ThreatWeight
      - crowdPenalty * jumlah pengincar lain pada t
 ```
 
-Target dilewati kalau `IsTargetable` salah, `Kind` tidak ada di `allowedKinds`, jarak di luar `senseRange`, atau `TargetId == unreachableId`. `terlihat` dibaca dari hasil tersimpan `AISensory.CanSee(t)` (#49), jadi tidak ada raycast tambahan.
+Target dilewati kalau `IsTargetable` salah, `Kind` tidak ada di `allowedKinds`, jarak di luar `senseRange`, atau `TargetId == unreachableId`. `terlihat` dibaca dari hasil tersimpan `AISensory.CanSee(t)` (#49), jadi tidak ada raycast tambahan. `CanSee` hanya mengembalikan hasil untuk pemain dan `CurrentTarget`, dan kandidat lain bernilai `false`.
 
 **Contoh zombie, pemain 20 meter dan tidak terlihat, NPC 5 meter dan terlihat:**
 
@@ -165,7 +165,7 @@ Saat Blood Moon tanpa base, `BaseAnchor` tidak sah, dan zombie memburu pemain.
 | **Tetap hilang atau belum pernah terlihat, `huntsUnseen` benar** | Tujuan menjadi posisi pemain ditambah acak dalam `huntOffsetRadius`, diperbarui tiap `huntUpdateSeconds`. Sesuai `Claude.md` (aggro penuh), tetapi tidak tepat, sehingga bersembunyi tetap berguna |
 | **Tetap hilang, `huntsUnseen` salah** | Target dilepas. Musuh kembali ke `Idle` atau `ReturnToTerritory` |
 | **Jalur terhalang base** | Target tetap. `BaseNavigation` memberi `currentBreach`, dan `EnemyAI` masuk `AttackBuilding` |
-| **Tidak terjangkau, tanpa struktur** | Setelah `unreachableSeconds` di `PathPartial` atau `PathInvalid`, `unreachableId = TargetId` selama `unreachableBanSeconds`, lalu dinilai ulang. Kalau tinggal satu target, zombie berjalan ke titik terdekat. Aturan anti-exploit milik #94, dan pengaman macet milik #62 |
+| **Tidak terjangkau, tanpa struktur** | Setelah `unreachableSeconds` di `PathPartial` atau `PathInvalid`, `unreachableId = TargetId` selama `unreachableBanSeconds`, lalu dinilai ulang. Kalau tinggal satu target, `EnemyAI` mengikuti `AITraversal.GetResponse` (#94), bukan hanya berjalan ke titik terdekat. Aturan anti-exploit milik #94, dan pengaman macet milik #62 |
 | **Suara tanpa target** | Musuh tanpa target menuju posisi `NoiseEmittedEvent` terbaru dari `AISensory`, dalam mode mencari |
 
 ### Performa (#93)
@@ -185,7 +185,7 @@ Saat Blood Moon tanpa base, `BaseAnchor` tidak sah, dan zombie memburu pemain.
 |---|---|
 | `EnemyAI` | Mengganti `playerTransform` dengan `CurrentTarget`, dan memanggil `Register`, `Unregister`, serta `ReportAttacker` |
 | `WildlifeAI` (#61) | Memakai `Threat_Animal` |
-| `AISensory` (#49) | Menyediakan `CanSee` dan suara terakhir |
+| `AISensory` (#49) | Menyediakan `CanSee`, dan suara terakhir lewat `LastStimulusPosition` |
 | `BaseNavigation` (#78) | `currentBreach`, dan pemasangan `BaseAnchor` |
 | `HordeManager` (#50) | Mengirim event Blood Moon |
 | `NPCCompanion`, `NPCRoster` (#76) | Memasang `ITargetable` |
@@ -198,7 +198,7 @@ Saat Blood Moon tanpa base, `BaseAnchor` tidak sah, dan zombie memburu pemain.
 
 ## 4. Kasus Khusus
 
-- **Objek pool:** `EnemyAI.OnSpawned` mendaftar dan mengosongkan `ThreatState`, dengan `nextEvalTime` baru. `OnReturned` memanggil `Unregister`, yang mengurangi `chaserCounts` dan mengosongkan rujukan target.
+- **Objek pool:** `EnemyAI.OnSpawned` mendaftar dan mengosongkan `ThreatState`, dengan `nextEvalTime` baru. `OnReturned` memanggil `Unregister`, yang mengurangi `chaserCounts` dan mengosongkan rujukan target. `Unregister` aman dipanggil dua kali, karena `LuckyMachine` (#72) memanggilnya saat vakum mulai, dan `EnemyAI.OnReturned` memanggilnya lagi.
 - **Game dijeda:** `Update` tetap berjalan, tetapi `Time.time` tidak maju, jadi tidak ada penilaian baru.
 - **Permadeath dan save:** tidak ada data yang disimpan. Musuh tidak disimpan (#88). Setelah load, musuh baru memilih target sendiri. `BaseAnchor` dibangun ulang dari struktur tersimpan.
 - **Pemain pindah region:** musuh yang dikembalikan ke pool (#62) memanggil `Unregister`. Musuh yang tetap mengejar mengikuti aturan biasa.
@@ -240,7 +240,7 @@ Saat Blood Moon tanpa base, `BaseAnchor` tidak sah, dan zombie memburu pemain.
 8. Bunuh NPC yang diincar. **Hasil:** zombie langsung memilih target lain, tanpa error null.
 9. Bersembunyi di balik batu setelah terlihat. **Hasil:** zombie ke posisi terakhir, mencari 3 detik, lalu bergerak mendekat tanpa langsung tepat.
 10. Masuk ke base tertutup. **Hasil:** target tetap pemain, lalu zombie menyerang dinding.
-11. Berdiri di batu yang tidak terjangkau, tanpa struktur. **Hasil:** setelah 6 detik target dicoret kalau ada target lain. Tanpa target lain, zombie berdiri di titik terdekat.
+11. Berdiri di batu yang tidak terjangkau, tanpa struktur. **Hasil:** setelah 6 detik target dicoret kalau ada target lain. Tanpa target lain, zombie mengikuti `AITraversal.GetResponse`.
 12. Dekati serigala, lalu lari melewati batas pengejaran. **Hasil:** target dilepas, dan serigala `ReturnToTerritory`.
 13. Bunyikan tembakan di dekat serigala yang jauh. **Hasil:** serigala tidak memilih suara sebagai target.
 14. Bunyikan tembakan di dekat zombie tanpa target. **Hasil:** zombie menuju sumber suara.

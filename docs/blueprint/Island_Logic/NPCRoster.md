@@ -1,6 +1,6 @@
 # Blueprint: NPCRoster.cs & NPCData
 **Lokasi:** `docs/blueprint/Island_Logic/NPCRoster.md`
-**Deskripsi Utama:** Data NPC dari kapal, skill pasif, perintah pemain, dan kehidupan NPC di base. Melengkapi `NPCCompanion`, yang hanya punya `Follow`, `Attack`, dan `Idle`.
+**Deskripsi Utama:** Data NPC dari kapal, skill pasif, perintah pemain, dan kehidupan NPC di base. Melengkapi `NPCCompanion.md`.
 **Issue:** #76 (melengkapi #29)
 **Rujukan GDD:** Bagian 3 (NPC punya skill khusus, misalnya mempercepat crafting atau ahli medis) dan bagian 4 (base sebagai tempat NPC berlindung). Daftar NPC, angka skill, perintah, dan kebutuhan NPC adalah usulan.
 
@@ -9,7 +9,7 @@
 | Kelas | Jenis | Fungsi |
 |---|---|---|
 | `NPCData` | ScriptableObject | Data tetap per NPC |
-| `NPCRoster` | Manager per scene `IslandPhase`, `ISaveable` (`world_npcs`) | Daftar NPC hidup, skill aktif, dan penyimpanan |
+| `NPCRoster` | Manager per scene `IslandPhase`, `ISaveable` (`SaveId = world_npcs`, `LoadOrder = 120`) | Daftar NPC hidup, skill aktif, dan penyimpanan |
 | `NPCCompanion` | MonoBehaviour di prefab NPC | FSM, `IInteractable`, `ITargetable`, dan `IDamageable` |
 
 ```csharp
@@ -27,6 +27,7 @@ public class NPCData : ScriptableObject
     public NPCSkill skill;
     public WeaponData weapon;      // null berarti tidak menembak
     public GameObject prefab;
+    public BarkSet barkSet;        // Ucapan NPC (#100). NPCBarks membaca maxHP untuk rasio luka
 }
 ```
 
@@ -90,11 +91,13 @@ Nilai lain sudah ada: `infection.medicVaccineMultiplier` 1,25, dan `crafting.npc
 | Skill | Syarat aktif | Sistem | Efek |
 |---|---|---|---|
 | `Medic` | NPC hidup | `InfectionSystem` (#64) | Dosis vaksin x`infection.medicVaccineMultiplier` |
-| `Crafter` | NPC hidup, dan `State == Work` | `CraftingStation` (#77) | Waktu crafting x`crafting.npcCrafterSpeedMultiplier` |
+| `Crafter` | NPC hidup, dan `State == Work` | `CraftingManager` (#77) | Waktu crafting x`crafting.npcCrafterSpeedMultiplier` |
 | `Crafter` | NPC hidup, dan di base | `BuildingIntegrity` (#47) | `repairHpRatioPerSwing` x`npc.builderRepairMultiplier` |
 | `Cook` | NPC hidup, dan `State == Work` | `CampfireManager` (#44) | Laju masak x`npc.cookSpeedMultiplier` |
 
-**`private void RefreshSkills()`** dipanggil saat state NPC berubah, NPC mati, atau load selesai. Fungsi ini memanggil `CraftingStation.SetNpcSpeedMultiplier(GetSkillMultiplier(Crafter))`. Sistem lain membaca saat dibutuhkan.
+**Infeksi (#117):** kalau `NPCInfection` aktif, hasil akhirnya `1 + (nilaiSkill - 1) x NPCInfection.GetSkillFactor(npcId)`, untuk NPC terbaik yang hidup. Saat sistem itu nonaktif, `GetSkillFactor` mengembalikan 1, jadi tabel di atas tetap berlaku.
+
+**`private void RefreshSkills()`** dipanggil saat state NPC berubah, NPC mati, atau load selesai. Saat tukang aktif atau berhenti, fungsi ini memanggil `CraftingManager.Instance.SetNpcSpeedMultiplier(GetSkillMultiplier(Crafter))`, yang bernilai `crafting.npcCrafterSpeedMultiplier` atau 1. Sistem lain membaca saat dibutuhkan.
 
 ### State
 
@@ -115,6 +118,10 @@ Nilai lain sudah ada: `infection.medicVaccineMultiplier` 1,25, dan `crafting.npc
 
 **Pendeteksian musuh:** memakai `PhysicsQuery.OverlapSphere(posisi, detectRadius, Layer Enemy, buffer)` lalu cek garis pandang dengan `PhysicsMasks.AIVision`. Buffer milik NPC, supaya tanpa alokasi.
 
+**Menghindari api (#97):** `Think` memanggil `FireSystem.Instance.IsNearFire(pos, margin)` untuk menghindari `FireArea`. NPC tidak memasang `Flammable`.
+
+**Menolong pemain yang diterkam (#110):** NPC `Follow` atau `Attack` dalam `pinned.npcHelpRadius` mendengar `PlayerPinnedEvent`, lalu menyerang `PlayerPinnedState.Attacker.DamageTarget`. Kemajuan `npcHelpProgressPerSec` dihitung `PlayerPinnedState`. NPC `StayAtBase`, `Work`, dan `TakeCover` tidak menolong.
+
 ### Perintah pemain
 
 `NPCCompanion : IInteractable`. `IslandInteractable.md` mencatat NPC membuka menu perintah. **Usulan:** tiap tekan `E` berganti ke perintah berikutnya, tanpa panel baru, dan prompt menampilkan perintah berikutnya.
@@ -126,6 +133,18 @@ Nilai lain sudah ada: `infection.medicVaccineMultiplier` 1,25, dan `crafting.npc
 | `Follow` | `State = Follow` | Selalu |
 | `Wait` | `State = Idle` | Selalu |
 | `ReturnToBase` | `StayAtBase`, lalu `Work` saat siang, atau `TakeCover` saat malam | `BaseNavigation.TryGetBaseAnchor` berhasil. Kalau tidak, tampilkan `Belum ada base` |
+
+### Aksi infeksi (usulan, #117)
+
+`NPCCommand` hanya berisi `Follow`, `Wait`, dan `ReturnToBase`. Kalau `NPCInfection` aktif, urutan `E` di NPC juga memuat aksi berikut, sesuai syarat di `NPCInfection.md`:
+
+| Aksi | Pemanggilan | Syarat tampil |
+|---|---|---|
+| `Beri vaksin` | `NPCInfection.TryVaccinate(npcId)` | Tahap 2 atau lebih |
+| `Karantina` | Perintah karantina di `NPCInfection` | Tahap 2 atau lebih |
+| `Usir` | Konfirmasi, lalu `RemoveNpc(npcId)` | Tahap apa saja |
+
+Saat sistem nonaktif, ketiganya tidak tampil.
 
 ### Di dalam base
 
@@ -140,7 +159,7 @@ Nilai lain sudah ada: `infection.medicVaccineMultiplier` 1,25, dan `crafting.npc
 
 `NPCCompanion` memasang `ITargetable` dengan `Kind = NPC`, `ThreatWeight` 0,6 atau 0,3 saat `TakeCover`, dan `Damageable = this`. Zombie dan hewan bisa mengincarnya, sesuai skor di `ThreatSystem.md`. Peluru pemain tertahan tanpa damage (#59).
 
-**`TakeDamage(in DamageInfo info)`**: kurangi `hp`. Kalau `hp <= 0`, panggil `Die(reason)`.
+**`TakeDamage(in DamageInfo info)`**: kurangi `hp`, panggil `NPCInfection.Instance.AddFromDamage(npcId, in info)` (#117), lalu kalau `hp <= 0`, panggil `Die(reason)`.
 
 **`private void Die(DeathReason reason)`**:
 
@@ -149,6 +168,22 @@ Nilai lain sudah ada: `infection.medicVaccineMultiplier` 1,25, dan `crafting.npc
 3. Terbitkan `NPCDiedEvent { npcId, reason }`.
 4. `NPCRoster.RefreshSkills()`. Skill hilang permanen sampai run berakhir.
 5. Mayat tetap ada 60 detik, lalu dihapus.
+
+### Fungsi lewat data
+
+Fungsi berikut bekerja juga saat objek NPC nonaktif, karena membaca `NPCRecord`. `Die` di `NPCCompanion` bersifat private, jadi sistem lain memakai fungsi ini.
+
+**`public void ApplyRemoteDamage(string npcId, float amount)`:** kurangi `NPCRecord.hp`, dan kalau habis, panggil `KillNpc(npcId, DeathReason.KilledByEnemy)`.
+
+**`public void KillNpc(string npcId, DeathReason reason)`**, dipanggil `RemoteBaseSimulation` (#90) dan `NPCInfection` (#117):
+
+1. Keluar kalau `NPCRecord.isAlive` sudah `false`.
+2. Kalau objek aktif, jalankan `companion.Die(reason)` lewat fungsi internal, dan selesai.
+3. Kalau objek nonaktif: `isAlive = false`, terbitkan `NPCDiedEvent { npcId, reason }`, lalu `RefreshSkills()`.
+
+**`public void RemoveNpc(string npcId)`**, untuk mengusir NPC: `isAlive = false`, NPC berjalan pergi lalu dihapus, `NPCExpelledEvent { npcId }` terkirim, dan `NPCDiedEvent` tidak dikirim. `RefreshSkills()` dipanggil.
+
+**`public IReadOnlyList<string> GetAliveNpcIds()`** membaca `NPCRecord.isAlive`. Dipakai `RescueEventManager.BuildEndingContext` (#14).
 
 ### Tanpa kebutuhan makan
 
@@ -159,31 +194,33 @@ NPC tidak punya `Hunger` atau `Thirst`. HP pulih hanya di base.
 Sesuai `RegionStreaming.md`:
 
 - **`Follow`:** kalau tertinggal, `Warp` ke titik NavMesh valid di belakang pemain.
-- **`StayAtBase`, `Work`, `TakeCover`:** catat ke `NPCRecord`, lalu matikan objek. Saat region kembali, nyalakan dan `Warp`. `RemoteBaseSimulation` (#90) memanggil `ApplyRemoteDamage(npcId, amount)` untuk NPC yang dimatikan. HP nol berarti `Die(KilledByEnemy)`.
+- **`StayAtBase`, `Work`, `TakeCover`:** catat ke `NPCRecord`, lalu matikan objek. Saat region kembali, nyalakan dan `Warp`. `RemoteBaseSimulation` (#90) memanggil `ApplyRemoteDamage(npcId, amount)` untuk NPC yang dimatikan. HP nol berarti `KillNpc(npcId, DeathReason.KilledByEnemy)`.
 - **Skill saat objek mati:** `GetSkillMultiplier` membaca `NPCRecord`, bukan objek.
 
 ## 3. Hubungan dengan Sistem Lain
 
-**Event yang dikirim:** `NPCDiedEvent { npcId, reason }` dari `NPCCompanion` (sudah ada), dan `NPCStateChangedEvent { npcId, state }` (baru).
+**Event yang dikirim:** `NPCDiedEvent { npcId, reason }` dari `NPCCompanion` (sudah ada), dan dari `KillNpc` saat objek nonaktif, `NPCStateChangedEvent { npcId, state }` (baru), dan `NPCExpelledEvent { npcId }` (#117).
 
-**Event yang didengar:** `NightfallEvent`, `DaybreakEvent`, `PlayerBaseStateChangedEvent`, `StructureDestroyedEvent`, serta event `Unloading` `RegionStreaming`. `NPCRescuedEvent` tidak didengar, karena daftar dikirim lewat `SpawnRescued`.
+**Event yang didengar:** `NightfallEvent`, `DaybreakEvent`, `PlayerBaseStateChangedEvent`, `StructureDestroyedEvent`, `PlayerPinnedEvent` (#110), serta event `Unloading` `RegionStreaming`. `NPCRescuedEvent` tidak didengar, karena daftar dikirim lewat `SpawnRescued`.
 
 | Sistem | Hubungan |
 |---|---|
 | `LifeboatExtraction` (#74) | Memanggil `SpawnRescued`. Membaca nama dan skill untuk ringkasan |
 | `RunSeedManager` (#89) | `shipNpcIds` |
 | `InfectionSystem` (#64) | `GetSkillMultiplier(Medic)` |
-| `CraftingStation` (#77) | `SetNpcSpeedMultiplier` |
+| `CraftingManager` (#77) | `SetNpcSpeedMultiplier` |
 | `BuildingIntegrity` (#47) | `GetSkillMultiplier(Crafter)` |
 | `CampfireManager` (#44) | `GetSkillMultiplier(Cook)` |
 | `ThreatSystem` (#108) | `ITargetable`, dan `chaserCounts` per NPC |
 | `DamagePipeline` (#59) | `IDamageable`, serta aturan friendly fire |
 | `GunController` (#58) | `NPCGunUser` dan `NPC_Pistol` |
 | `BaseNavigation` (#78) | `npcLink`, `RequestNpcPass`, `IsInsideBase`, dan `TryGetBaseAnchor` |
-| `PlayerPinnedState` (#110) | NPC `Follow` atau `Attack` menolong |
-| `RemoteBaseSimulation` (#90) | `ApplyRemoteDamage`, dan membaca `members` |
-| `NPCInfection` (#117) | Nonaktif sampai disetujui. Tidak ada aturan infeksi di sini |
-| `NPCBarks` (#100) | Membaca state dan event untuk ucapan |
+| `PlayerPinnedState` (#110) | NPC `Follow` atau `Attack` menolong. Kemajuan dihitung di sana |
+| `RemoteBaseSimulation` (#90) | `ApplyRemoteDamage`, `KillNpc`, dan membaca `members` |
+| `NPCInfection` (#117) | `KillNpc`, `RemoveNpc`, `GetSkillFactor`, dan aksi infeksi di interaksi NPC. Aturan infeksi ada di `NPCInfection.md`, dan nonaktif sampai disetujui |
+| `RescueEventManager` (#14) | `GetAliveNpcIds` |
+| `FireSystem` (#97) | `IsNearFire` |
+| `NPCBarks` (#100) | Membaca state, event, `NPCData.barkSet`, dan `maxHP`. Klip diputar lewat `AudioSource` `NPCCompanion` |
 
 **Batas pekerjaan:** membawa NPC di kapal (#74), efek buff umum (#20), dan infeksi NPC (#117).
 
@@ -197,7 +234,7 @@ Sesuai `RegionStreaming.md`:
 - **Dua NPC dan satu tempat kerja:** tempat kerja boleh dipakai lebih dari satu NPC, karena hanya ada satu NPC per jenis skill.
 - **Blood Moon (#50):** NPC `TakeCover` tetap menjadi target kalau terlihat dalam 8 meter (#108).
 - **NPC `Follow` saat pemain mati:** `RunEndedEvent` menghentikan semua. Tidak ada `NPCDiedEvent`.
-- **Yang disimpan di `world_npcs`:** `npcId`, `isAlive`, `hp`, `state`, `command`, `position`, dan `yaw`. **Yang tidak disimpan:** target dan jalur. Setelah load, objek dibuat ulang dari data, NPC mati tidak dibuat, dan `RefreshSkills()` dipanggil di `OnRestoreFinished`.
+- **Yang disimpan di `world_npcs` (`LoadOrder = 120`):** `npcId`, `isAlive`, `hp`, `state`, `command`, `position`, dan `yaw`. **Yang tidak disimpan:** target dan jalur. Setelah load, objek dibuat ulang dari data, NPC mati tidak dibuat, dan `RefreshSkills()` dipanggil di `OnRestoreFinished`.
 - **Permadeath:** semua NPC dan data dihapus lewat `RunLifecycle` (#82). Pemain harus menyelamatkan NPC lagi dari kapal.
 
 ## 5. Keputusan Desain
@@ -215,6 +252,7 @@ Sesuai `RegionStreaming.md`:
 7. **Pemulihan:** hanya di base, 0,5 HP per detik. Tidak memakai item.
 8. **Perintah:** `E` berganti antara ikuti, tunggu, dan kembali ke base, tanpa panel baru.
 9. **Malam:** NPC yang diperintah kembali ke base otomatis berlindung, dan pulang kerja saat fajar. NPC `Follow` tetap ikut pemain.
+10. **Aksi infeksi:** `Beri vaksin`, `Karantina`, dan `Usir` masuk ke urutan `E`, hanya kalau `NPCInfection` disetujui (#117).
 
 **Perubahan kontrak yang diperlukan:** `NPCCompanion`, `BuildingIntegrity`, `CampfireManager`, dan `BaseNavigation`.
 
@@ -236,3 +274,9 @@ Sesuai `RegionStreaming.md`:
 14. Simpan dengan satu NPC mati, lalu muat. **Hasil:** NPC mati tidak muncul, dan skill sesuai.
 15. Jeda game. **Hasil:** NPC berhenti berpikir dan berjalan.
 16. Mati, lalu mulai run baru. **Hasil:** tidak ada NPC di pulau sebelum kapal selesai.
+17. Biarkan NPC `Work` di region yang dilepas mati oleh `RemoteBaseSimulation`. **Hasil:** `KillNpc` menerbitkan `NPCDiedEvent` sekali walaupun objek nonaktif, dan skill hilang.
+18. Usir NPC saat `NPCInfection` aktif. **Hasil:** `NPCExpelledEvent` terkirim, dan `NPCDiedEvent` tidak.
+19. Biarkan pemain diterkam dengan NPC `Follow` dalam 8 meter, lalu ulangi dengan NPC `Work`. **Hasil:** NPC pertama menyerang penyerang, dan NPC kedua tidak.
+20. Lempar Molotov di jalur NPC. **Hasil:** NPC menghindari `FireArea`.
+21. Panggil `GetAliveNpcIds` dengan satu NPC mati. **Hasil:** ID NPC itu tidak ada di daftar.
+22. Aktifkan dan hentikan `Work` tukang. **Hasil:** `CraftingManager.SetNpcSpeedMultiplier` menerima 1,5, lalu 1.

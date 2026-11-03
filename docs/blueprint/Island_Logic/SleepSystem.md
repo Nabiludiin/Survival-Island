@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/Island_Logic/SleepSystem.md`
 **Deskripsi Utama:** Tidur di Kasur untuk melewati malam dengan waktu dipercepat, lengkap dengan syarat, risiko, pemulihan, hukuman di pantai, dan pemicu autosave.
 **Issue:** #67
-**Rujukan GDD:** Bagian 3 (siklus siang dan malam, batas 60 hari) dan bagian 4 (fungsi base, dan peringatan Diary Bab 1 agar tidak tidur di pantai). Mekanik tidur, angka, dan rincian hukumannya adalah usulan, karena GDD hanya menyebut peringatan itu.
+**Rujukan GDD:** Bagian 3 (siklus siang dan malam, target 60 hari) dan bagian 4 (fungsi base, dan peringatan Diary Bab 1 agar tidak tidur di pantai). Mekanik tidur, angka, dan rincian hukumannya adalah usulan, karena GDD hanya menyebut peringatan itu.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -120,8 +120,7 @@ Pemeriksaan musuh memakai `PhysicsQuery.OverlapSphere` dengan `PhysicsMasks.Enem
 **`public bool TrySleep(BedInteractable bed)`**:
 
 1. Kalau `GetBlockReason() != None`, tampilkan notifikasi, lalu kembalikan `false`.
-2. Kalau `GameManager.Instance.currentDay == GameManager.MaxDay` dan jam di atas 06:00, tampilkan `ConfirmDialog` bahwa hari ke-60 akan berakhir saat tertidur. Lanjut hanya kalau pemain setuju.
-3. Panggil `BeginSleep(bed)`.
+2. Panggil `BeginSleep(bed)`.
 
 **`private void BeginSleep(BedInteractable bed)`**:
 
@@ -171,7 +170,7 @@ void Update()
 
 Karena tiap langkah paling besar 0,25 jam, frame panjang tidak bisa melompati jam atau batas 18:00 dan 06:00. Rumus lama juga tidak punya pelindung untuk `Time.deltaTime` yang besar pada kecepatan tinggi.
 
-**Pengecekan hari ke-60:** `AdvanceDay` berada di dalam `AdvanceClock`, jadi `CheckDay60Milestone` tetap dipanggil tepat satu kali. Tidur melewati 24:00 pada hari ke-60 berakhir dengan `TimeExpired`, sehingga butuh konfirmasi pada langkah 2 di atas. Tidur sesudah 00:00 pada hari yang sama tidak melewati batas.
+**Pengecekan hari ke-60:** `AdvanceDay` berada di dalam `AdvanceClock`, jadi `CheckDay60Milestone` tetap dipanggil tepat satu kali. Tidur melewati 24:00 pada hari ke-60 tidak mengakhiri run dan tidak butuh konfirmasi. `DayLimitPassedEvent` terkirim sekali, dan tidur berlanjut.
 
 ### Selama tidur
 
@@ -290,11 +289,11 @@ interruptAtGameHour = startGameHour + HoursUntilDaybreak() * progress;
 |---|---|
 | `DayNightDirector` | `IsNight`, `TotalGameHours`, `SetTimeMultiplierOverride`, dan `ClearTimeMultiplierOverride` |
 | `SurvivalStats` (#111) | `SetDrainMultiplier`, `RestoreHP`, `RestoreStamina`, dan `SpendStamina` |
-| `GameManager` | `currentDay` dan `MaxDay` |
+| `GameManager` | `currentDay` |
 | `BuildMenu`, `BuildManager` (#79) | Kasur adalah `BuildableData` |
 | `BaseNavigation` (#78) | `IsInsideBase` |
 | `SurfaceDetection` (#86) | `IsNearSand` |
-| `UIFocusStack` (#83) | `SleepPanel`, dan `ConfirmDialog` |
+| `UIFocusStack` (#83) | `SleepPanel` |
 | `SpawnManager` (#62), `AIDirector` (#27), `HordeManager` (#50) | Mendengar `SleepStateChangedEvent`. `RequestAmbush` dipanggil langsung |
 | `WarmthSystem` (#65), `DisasterManager` (#70), `TideManager` (#91) | Syarat dan pemicu bangun |
 | `WorldStateSave` (#80) | Mendengar `SaveRequestedEvent`, dan menolak autosave selama `IsSleeping` |
@@ -342,7 +341,6 @@ interruptAtGameHour = startGameHour + HoursUntilDaybreak() * progress;
 5. **Pemulihan:** **tidur memulihkan HP dan stamina.** HP 2 per jam game hanya di dalam base, dengan syarat lapar dan haus tidak nol serta infeksi di bawah 50. Stamina penuh kalau tidur minimal 4 jam dan tidak terbangun paksa. Rekomendasi: pakai, karena memberi alasan membangun Kasur.
 6. **Tidur di pantai:** berarti kasur dalam 8 meter dari pasir. Selalu ada penyergapan, air pasang membangunkan dan mengurangi 30 stamina, dan tidak ada pemulihan.
 7. **Spawner saat tidur:** berhenti, diganti gangguan yang dihitung sekali saat tidur: 25 persen di dalam base, 60 persen di luar, dan 100 persen di pantai.
-8. **Tidur saat hari ke-60:** diizinkan, dengan konfirmasi bahwa batas waktu akan terlewati.
 
 ## 6. Skenario Tes
 
@@ -361,7 +359,7 @@ interruptAtGameHour = startGameHour + HoursUntilDaybreak() * progress;
 13. Bangun Kasur 5 meter dari pasir. **Hasil:** prompt `Terlalu dekat pantai`, penyergap muncul sekitar 10 meter, dan tidak ada pemulihan.
 14. Jalankan `settide high` saat tidur di dekat pantai. **Hasil:** bangun dengan `TideRising`, dan stamina berkurang 30.
 15. Selama tidur, hitung spawn di `eventlog 1`. **Hasil:** tidak ada `EnemySpawnedEvent`, kecuali dari gangguan.
-16. Jalankan `setday 60`, lalu tidur pukul 20:00. **Hasil:** `ConfirmDialog` muncul. Setujui. **Hasil:** `RunResult.TimeExpired` terjadi saat melewati 24:00, dan terjadi sekali.
+16. Jalankan `setday 60`, lalu tidur pukul 20:00. **Hasil:** tidak ada dialog konfirmasi. Saat melewati 24:00, `DayLimitPassedEvent` terkirim sekali, `RunEndedEvent` tidak terkirim, dan pemain bangun normal pada hari ke-61.
 17. Turunkan frame lewat `DevConsole` sampai 5 FPS saat tidur. **Hasil:** tidak ada jam yang terlewat, dan event tetap berurutan.
 18. Bangun di dalam base setelah tidur semalam dengan HP 50. **Hasil:** HP 74, dan stamina penuh.
 19. Tidur saat `Infection` 60. **Hasil:** HP tidak bertambah dari tidur.

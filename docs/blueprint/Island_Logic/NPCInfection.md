@@ -112,7 +112,7 @@ NPC medis yang terinfeksi tahap 4 tidak memberi pengali, karena skill-nya mati.
 1. NPC berhenti, `NPCState.Idle`, dan memainkan animasi `turnSeconds`. Selama itu, vaksin masih bisa menyelamatkannya kalau suntikan sudah berjalan.
 2. Catat `position` dan `insideBase = BaseNavigation.IsInsideBase(position)`.
 3. `NPCRoster.KillNpc(npcId, DeathReason.Zombified)`, yang menerbitkan `NPCDiedEvent` dan mencabut skill.
-4. `ObjectPooler.Instance.SpawnFromPool("zombie_standar", position, rotasi)` lewat `SpawnManager`, dengan `DespawnReason` biasa. Di Region lain pun jenisnya tetap standar, karena GDD menyebut zombie standar ada di semua region, dan model pakaian NPC dipasang sebagai varian tampilan.
+4. `ObjectPooler.Instance.SpawnFromPool(enemyId, position, rotasi)` lewat `SpawnManager`, dengan `DespawnReason` biasa. `enemyId` bernilai `zombie_desa` kalau NPC berada di Region 4 (`Logistic`), karena GDD bagian 5 hanya menyebut Zombie Desa di sana, dan `zombie_standar` di Region 1, 2, dan 3. Model pakaian NPC dipasang sebagai varian tampilan.
 5. Terbitkan `NPCTurnedEvent { npcId, position, insideBase }`, kirim suara `turnNoiseRadius` lewat `NoiseEmitter` (#49), lalu tampilkan notifikasi.
 
 **Akibat di base:** kalau `insideBase`, zombie muncul di dalam dinding. Dinding tidak melindungi, dan NPC lain dekatnya menjadi target `ThreatSystem` biasa, jadi bisa digigit dan ikut terinfeksi. Tidak ada aturan penularan tambahan.
@@ -173,7 +173,7 @@ Tembakan pemain ke NPC mengikuti aturan friendly fire di #59, dan tidak ada atur
 2. **Kenaikan:** rekomendasi lewat gigitan dengan nilai sama seperti pemain, ditambah 1,5 per jam setelah digigit.
 3. **Biaya vaksin:** rekomendasi satu dosis biasa dari stok pemain, tanpa barang tambahan.
 4. **Waktu berubah:** rekomendasi ditunda sampai malam, karena GDD membuat zombie terbakar saat siang.
-5. **Jenis zombie:** rekomendasi `zombie_standar` di semua region.
+5. **Jenis zombie:** rekomendasi `zombie_standar` di Region 1, 2, dan 3, serta `zombie_desa` di Region 4, sesuai `SpawnManager.md`.
 6. **Berubah saat ditinggal:** rekomendasi dihitung data lewat #90, tanpa zombie sungguhan.
 7. **Aksi lain:** rekomendasi karantina dan usir, tanpa struktur baru.
 8. **Skill:** rekomendasi melemah di tahap 3, mati di tahap 4, kembali setelah sembuh, dan hilang permanen kalau berubah.
@@ -181,7 +181,7 @@ Tembakan pemain ke NPC mengikuti aturan friendly fire di #59, dan tidak ada atur
 
 ## 6. Skenario Tes
 
-Nyalakan `enabled` lewat `DevConsole` sebelum tes 2 sampai 13.
+Nyalakan `enabled` lewat `DevConsole` sebelum tes 2 sampai 13 dan tes 15.
 
 1. Biarkan `enabled = false`, lalu pukul NPC dengan zombie. **Hasil:** tidak ada infeksi, dan menu tanpa `Beri vaksin`.
 2. Pukul NPC dengan zombie standar. **Hasil:** nilai 5, `isProgressing = true`.
@@ -197,3 +197,4 @@ Nyalakan `enabled` lewat `DevConsole` sebelum tes 2 sampai 13.
 12. Tinggalkan NPC ke region jauh, majukan waktu sampai berubah. **Hasil:** base terkena 120 damage, tanpa zombie baru saat kembali.
 13. Simpan pada tahap 3, keluar, lalu lanjutkan. **Hasil:** nilai, tahap, dan ikon sama.
 14. Mati, lalu mulai run baru. **Hasil:** semua NPC sehat.
+15. Capai 100 di Region 4 saat malam. **Hasil:** yang muncul `zombie_desa`, bukan `zombie_standar`.

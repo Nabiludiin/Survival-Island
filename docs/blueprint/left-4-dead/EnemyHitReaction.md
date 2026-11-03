@@ -89,7 +89,7 @@ Dibaca dari `info.bodyPart`, yang diisi `HitboxModifier.Apply`.
 | `Head` | Lama stagger dikali `headStaggerMultiplier` |
 | `Torso` | Normal |
 | `Leg` | `EnemyAI.SetSpeedMultiplier(SpeedSource.LegHit, legSlowMultiplier)` selama `legSlowSeconds`. Diperpanjang kalau kena lagi, tanpa bertumpuk |
-| Armor | Kalau `DamageResistanceTable.GetMultiplier(type, bodyPart) < armorNoFlinchBelow`, `poise` tidak bertambah, dan keluar efek percikan logam dari pool |
+| Armor | Kalau `DamageResistanceTable.GetMultiplier(type, bodyPart) < armorNoFlinchBelow`, `poise` tidak bertambah, dan keluar percikan logam lewat `VFXManager.Instance.Play("VFX_MetalSpark", pos, rot)` (#15) |
 
 Zombie Militer yang ditembak di badan tidak terhuyung, tetapi ditembak di kepala (pengali 1) masih menambah `poise`. Celah kepala di `DamagePipeline.md` jadi terasa.
 
@@ -99,7 +99,7 @@ Zombie Militer yang ditembak di badan tidak terhuyung, tetapi ditembak di kepala
 
 1. Tolak kalau `!data.canBeStaggered` atau `Time.time < staggerImmuneUntil`.
 2. `EnemyAttack.Interrupt(false)`.
-3. `EnemyAI.RequestState(AIState.Stagger)`, `agent.isStopped = true`, dan mainkan animasi (#12).
+3. `EnemyAI.RequestState(AIState.Stagger)`, `agent.isStopped = true`, dan `anim.Play(AnimIds.Stagger)` (#12).
 4. `reactionEndTime = Time.time + seconds`, `staggerImmuneUntil = reactionEndTime + staggerImmunitySeconds`, dan `accumulatedPoise = 0`.
 5. Saat waktunya habis, `agent.isStopped = false`, lalu `EnemyAI` kembali ke `Chase`.
 
@@ -111,7 +111,7 @@ Zombie Militer yang ditembak di badan tidak terhuyung, tetapi ditembak di kepala
 
 1. Kalau `!data.canBeKnockedBack`, lanjut ke `ApplyStagger(staggerSeconds)`, lalu selesai.
 2. Kalau `!agent.enabled` atau `agent.isOnOffMeshLink`, lanjut ke `ApplyStagger`, lalu selesai. Link #94 tidak boleh terganggu.
-3. `EnemyAttack.Interrupt(false)`, `RequestState(AIState.Knockback)`, `agent.isStopped = true`, `agent.ResetPath()`, dan `agent.updateRotation = false`.
+3. `EnemyAttack.Interrupt(false)`, `RequestState(AIState.Knockback)`, `agent.isStopped = true`, `agent.ResetPath()`, `agent.updateRotation = false`, dan `anim.Play(AnimIds.Knockback)` (#12).
 4. `knockbackVelocity = dir.flattened * distance * knockbackMultiplier / knockbackSeconds`.
 5. Selama `knockbackSeconds`, panggil `agent.Move(knockbackVelocity * Time.deltaTime)`, dengan kecepatan yang berkurang linier.
 6. Saat selesai, `agent.updateRotation = true`. Kalau `!agent.isOnNavMesh`, cari lewat `NavMesh.SamplePosition`, lalu `agent.Warp`. Kalau gagal, kembali ke pool.
@@ -136,7 +136,7 @@ Shove tidak memberi damage dan tidak membatalkan reload. Di kapal, `ShipShove` (
 | Kelompok | Bisa `Knockback` | Bisa `Stagger` | Hasil Shove |
 |---|---|---|---|
 | Zombie biasa dan hewan kecil | Ya | Ya | Terdorong lalu terhuyung |
-| Zombie Militer, Tank (#25), Beruang Kutub | Tidak | Ya, dengan `poise` tinggi | Bunyi gagal, tanpa stagger |
+| Zombie Militer, Beruang Kutub | Tidak | Ya, dengan `poise` tinggi | Bunyi gagal, tanpa stagger |
 
 ### Urutan mati
 
@@ -146,7 +146,7 @@ Shove tidak memberi damage dan tidak membatalkan reload. Di kapal, `ShipShove` (
 2. Panggil `SpawnDrop(info)`.
 3. Pilih bentuk mayat:
    - `Explosion` atau `Melee` dengan Knockback, dan `CorpseBudget.TryAcquireRagdoll()` berhasil: ragdoll.
-   - Selain itu: animasi mati.
+   - Selain itu: `anim.Play(AnimIds.Die)` (#12).
 4. Daftarkan ke `CorpseBudget`.
 5. Jalankan `corpseRoutine`.
 
@@ -154,9 +154,9 @@ Shove tidak memberi damage dan tidak membatalkan reload. Di kapal, `ShipShove` (
 
 **`corpseRoutine`:**
 
-1. Tunggu `corpseHoldSeconds`. Kalau `data.leavesCarcass`, serahkan ke #61, lalu berhenti di sini.
+1. Tunggu `corpseHoldSeconds`. Kalau `data.leavesCarcass`, aktifkan `AnimalCarcass` pada prefab hewan, lalu berhenti di sini. Pudar dan pengembalian diatur `AnimalCarcass` (#61).
 2. Pudarkan renderer lewat `MaterialPropertyBlock` selama `corpseFadeSeconds`.
-3. `ObjectPooler.Instance.ReturnToPool(poolTag, gameObject)`.
+3. `SpawnManager.Instance.Despawn(gameObject, DespawnReason.Killed)` (#62), supaya daftar musuh hidup tetap benar. Hanya di Fase 1 musuh langsung kembali lewat `ObjectPooler.Instance.ReturnToPool(poolTag, gameObject)`.
 
 ### Batas mayat
 
@@ -173,16 +173,16 @@ Shove tidak memberi damage dan tidak membatalkan reload. Di kapal, `ShipShove` (
 1. Lewati kalau `dropTable == null` atau `dropsThisNight >= maxDropsPerNight`.
 2. Lewati kalau bukan `info.byPlayer` dan `info.source` tidak bertag `NPC`. Zombie yang mati karena matahari (#63), tumbal Lucky Machine (#72), dan bencana jadi tidak menghasilkan drop.
 3. Lempar peluang `dropChance` memakai `RunSeedManager.GetStream(Gameplay)`.
-4. Ambil isi dari `dropTable` (#103), lalu `WorldItem.Spawn(inst, amount, position, despawns: true)` (#66).
+4. `RegionLootTable.TryRoll(dropTable, LootPointKind.Any, GameManager.currentDay, ref RunSeedManager.GetStream(Gameplay), out item, out amount)` (#103), lalu `WorldItem.Spawn(inst, amount, position, despawns: true)` (#66).
 
-| Varian | Peluang | Isi usulan |
-|---|---|---|
-| Zombie standar | 8 persen | `Ammo_9mm` 1 sampai 3, atau `Mat_Cloth` 1 |
-| Zombie Tribal | 15 persen | Bahan medis Region 2. ID final di #103 |
-| Zombie Lumut | 15 persen | Bahan medis Region 2. ID final di #103 |
-| Zombie Militer | 40 persen | `Ammo_9mm` 3 sampai 6 |
-| Zombie Beku | 8 persen | `Mat_Cloth` 1 sampai 2 |
-| Zombie Desa | 10 persen | `Ammo_9mm` 1 sampai 3 |
+| Varian | `dropTable` | Peluang | Isi usulan |
+|---|---|---|---|
+| Zombie standar | `Drop_Zombie_Standard` | 8 persen | `Ammo_9mm` 1 sampai 3, atau `Mat_Cloth` 1 |
+| Zombie Tribal | `Drop_Zombie_Tribal` | 15 persen | Bahan medis Region 2. ID final di #103 |
+| Zombie Lumut | `Drop_Zombie_Moss` | 15 persen | Bahan medis Region 2. ID final di #103 |
+| Zombie Militer | `Drop_Zombie_Military` | 40 persen | `Ammo_9mm` 3 sampai 6 |
+| Zombie Beku | `Drop_Zombie_Frozen` | 8 persen | `Mat_Cloth` 1 sampai 2 |
+| Zombie Desa | `Drop_Zombie_Village` | 10 persen | `Ammo_9mm` 1 sampai 3 |
 
 Hasil paling banyak pada zombie standar: 0,08 × 2 = 0,16 peluru per mayat, kalau semua drop berupa peluru. Peluru tetap langka, karena hasil ini jauh di bawah satu peluru per zombie. HP final zombie ada di #25.
 
@@ -200,7 +200,9 @@ Hasil paling banyak pada zombie standar: 0,08 × 2 = 0,16 peluru per mayat, kala
 | `HitboxModifier` | Mengisi `bodyPart` |
 | `ShipHazardManager` (#75) | Memakai `ApplyKnockback` |
 | `RegionLootTable` (#103), `ItemUseSystem` (#66), `RunSeedManager` (#89) | Drop |
-| `WildlifeAI` (#61) | Mengambil bangkai `leavesCarcass` |
+| `WildlifeAI`, `AnimalCarcass` (#61) | Mengambil bangkai `leavesCarcass` |
+| `SpawnManager` (#62) | `Despawn(gameObject, DespawnReason.Killed)` |
+| `VFXManager` (#15), `AnimationController` (#12) | Percikan armor, dan `anim.Play` |
 | `PhysicsLayers` (#87) | Layer `Ragdoll` dan `EnemyHitbox` |
 | `InputManager` (#18), `SurvivalStats` (#111) | Tombol Shove dan stamina |
 
@@ -235,7 +237,7 @@ Hasil paling banyak pada zombie standar: 0,08 × 2 = 0,16 peluru per mayat, kala
 2. **Shove:** tombol `V`, tanpa damage, dengan biaya 10 stamina dan jeda 0,8 detik.
 3. **Efek kaki:** kecepatan 60 persen selama 2 detik.
 4. **Mayat:** 6 detik diam, 1,5 detik memudar, maksimal 12 mayat dan 4 ragdoll aktif.
-5. **Musuh besar:** Zombie Militer, Tank, dan Beruang Kutub kebal dorongan.
+5. **Musuh besar:** Zombie Militer dan Beruang Kutub kebal dorongan.
 
 ## 6. Skenario Tes
 

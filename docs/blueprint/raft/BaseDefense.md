@@ -88,9 +88,10 @@ public class TrapData : ScriptableObject
 1. Isi `DamageInfo { amount = damagePerHit, type = data.damageType, source = gameObject, sourceId = data.trapId, hitPoint = posisi musuh, bodyPart = Leg, byPlayer = true }`, lalu panggil `v.target.TakeDamage`.
 2. Kalau `slowMultiplier < 1`, panggil `v.ai.ApplySpeedModifier(SpeedSource.Trap, slowMultiplier, slowSeconds)`.
 3. Isi `nextHitTime = Time.time + hitIntervalSeconds`.
-4. Munculkan `hitVfxPoolTag` lewat `ObjectPooler.Instance.SpawnFromPool`. `VFXManager` (#15) yang mengembalikannya ke pool.
+4. Panggil `VFXManager.Instance.Play(hitVfxPoolTag, pos, rot)` (#15). `hitVfxPoolTag` harus terdaftar di `GameBalanceConfig.vfx.catalog`.
 5. Kalau `noiseRadius > 0`, panggil `NoiseEmitter` dengan radius itu.
 6. Kalau `selfDamagePerHit > 0`, kirim `DamageInfo { amount = selfDamagePerHit, type = Structural, byPlayer = false }` ke `BaseHealth` milik jebakan.
+7. Untuk `Campfire`, panggil `Flammable.TryIgnite(fire.campfireTrapIgniteChancePerTick, byPlayer)` pada musuh di dalam zona, setiap tick damage (#97).
 
 Damage memakai `IDamageable` kapsul musuh, sehingga melewati `HitboxModifier`. `bodyPart = Leg` hanya dipakai armor (`DamageResistanceTable`) dan #95. `byPlayer = true` membuat kematian masuk statistik pemain.
 

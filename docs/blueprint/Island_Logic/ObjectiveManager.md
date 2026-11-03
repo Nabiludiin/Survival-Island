@@ -2,11 +2,11 @@
 **Lokasi:** `docs/blueprint/Island_Logic/ObjectiveManager.md`
 **Deskripsi Utama:** Tiga bab Diary dengan lokasi dan hadiahnya, serta daftar tujuan bertahap yang tampil di HUD dan tetap maju walaupun pemain mengerjakannya tidak berurutan.
 **Issue:** #81
-**Rujukan GDD:** Bagian 4 (Diary Bab 1 sampai 3 dan Blueprint Jembatan), bagian 1 dan 3 (syarat menang), serta bagian 5 (urutan region dan logistik). Tempat Bab 2 dan 3, hadiah Bab 1, serta tampilan HUD adalah usulan.
+**Rujukan GDD:** Bagian 4 (Diary Bab 1 sampai 3 dan Blueprint Jembatan), bagian 1 dan 3 (syarat menang), serta bagian 5 (urutan region dan logistik). Tempat Bab 2 dan 3 adalah usulan yang menyimpang dari GDD bagian 4, yang menempatkan buku Diary di shelter tua. Hadiah Bab 1 dan tampilan HUD adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 
-`ObjectiveManager` adalah singleton di scene `IslandPhase` (#82) dan `ISaveable` dengan `SaveId = world_objectives`. Tujuan didorong event, tanpa `Update`. `DiaryManager` hanya menampilkan isi bab.
+`ObjectiveManager` adalah singleton di scene `IslandPhase` (#82) dan `ISaveable` dengan `SaveId = world_objectives` dan `LoadOrder = 110`. Tujuan didorong event, tanpa `Update`. `DiaryManager` hanya menampilkan isi bab.
 
 ```csharp
 public enum DiaryRewardKind { None, GiveItem, RevealObjectives }
@@ -23,8 +23,8 @@ public struct DiaryReward
 public class DiaryEntry : ScriptableObject
 {
     public int chapter;                // 1 sampai 3
-    public string title;
-    [TextArea] public string body;
+    public string titleKey;            // diary.ch<chapter>.title (#104)
+    public string bodyKey;             // diary.ch<chapter>.body (#104)
     public RegionType region;          // Lokasi buku
     public Vector3 markerPosition;     // Data, karena region bisa tidak dimuat
     public int requiresChapter;        // 0 berarti tanpa syarat. Hanya mengatur penanda arah
@@ -59,25 +59,25 @@ public class ObjectiveData : ScriptableObject
 
 ### Bab Diary
 
-| Bab | Tempat | Hadiah | Isi sesuai GDD |
+| Bab | Tempat (Bab 2 dan 3 usulan) | Hadiah | Isi sesuai GDD |
 |---|---|---|---|
 | 1 | Shelter tua hancur, Region 1 | `Kit_Campfire` x1 | Jangan tidur di pantai, zombie terbakar matahari, cara membuat api unggun, memancing dengan kail di tebing karang |
-| 2 | Pos kemah penulis di tepi jurang, Region 1 | Blueprint Jembatan (`RegionGateSystem.hasBridgeBlueprint`), dan tujuan kelompok 2 | Penulis terinfeksi, vaksin dari getah dan jamur Region 2, Blueprint Jembatan |
-| 3 | Pos terakhir penulis di hutan, Region 2 | Petunjuk helipad, dan tujuan kelompok 3 | Helipad dan landasan di puncak es, suku cadang tertinggal di desa |
+| 2 | Usulan: pos kemah penulis di tepi jurang, Region 1 | Blueprint Jembatan (`RegionGateSystem.HasBridgeBlueprint`), dan tujuan kelompok 2 | Penulis terinfeksi, vaksin dari getah dan jamur Region 2, Blueprint Jembatan |
+| 3 | Usulan: pos terakhir penulis di hutan, Region 2 | Petunjuk helipad, dan tujuan kelompok 3 | Helipad dan landasan di puncak es, suku cadang tertinggal di desa |
 
-Bab 2 harus berada di Region 1, karena jembatan menuju Region 2 membutuhkan isi bab ini. Bab 3 berada di Region 2, supaya pemain menemukannya setelah menyeberang.
+**Usulan yang menyimpang dari GDD:** GDD bagian 4 menempatkan buku Diary di shelter tua, dan tidak menyebut bab yang tersebar. Usulan ini menaruh Bab 2 di Region 1, karena jembatan menuju Region 2 membutuhkan isi bab ini, dan Bab 3 di Region 2, supaya pemain menemukannya setelah menyeberang. Keputusannya ada di bagian 5.
 
 ### Daftar tujuan
 
 | `order` | `objectiveId` | Judul HUD | Terlihat sejak | Syarat selesai |
 |---|---|---|---|---|
 | 1 | `obj_base` | Bangun base awal | Awal | `BuildCount`: `objective.baseWallCount` struktur `Wall_` dan 1 `Door_` |
-| 2 | `obj_wood` | Kumpulkan kayu `n`/500 | Bab 2 | `ItemTotal`: kayu di inventori + setoran `BridgeSite` >= `region.bridgeWoodCost` |
+| 2 | `obj_wood` | `Kumpulkan kayu n/<region.bridgeWoodCost>`, dengan angka dibaca dari `GameBalanceConfig` saat HUD diperbarui | Bab 2 | `ItemTotal`: kayu di inventori + setoran `BridgeSite` >= `region.bridgeWoodCost` |
 | 3 | `obj_bridge` | Bangun jembatan | Bab 2 | `BridgeBuilt`: `RegionUnlockedEvent` untuk `Amazon` |
 | 4 | `obj_vaccine` | Buat vaksin | Bab 2 | `ItemCrafted`: `rec_vaccine` |
 | 5 | `obj_region3` | Capai Region 3 | Bab 3 | `RegionEntered`: `Snow` |
 | 6 | `obj_region4` | Capai Region 4 | Bab 3 | `RegionEntered`: `Logistic` |
-| 7 | `obj_parts` | Angkut suku cadang `n`/5 | Bab 3 | `PartsInstalled`: `HelicopterPartInstalledEvent.installed` >= `total` |
+| 7 | `obj_parts` | Angkut suku cadang `n`/`total` | Bab 3 | `PartsInstalled`: `HelicopterPartInstalledEvent.installed` >= `total` |
 | 8 | `obj_takeoff` | Lepas landas | Bab 3 | `Escaped`: `RunEndedEvent` dengan `RunResult.Won` |
 
 Kalau tidak ada tujuan terlihat yang belum selesai, HUD menampilkan tujuan cadangan `Cari bab Diary berikutnya`, dengan penanda ke bab terkecil yang belum ditemukan.
@@ -88,7 +88,6 @@ Kalau tidak ada tujuan terlihat yang belum selesai, HUD menampilkan tujuan cadan
 |---|---|---|
 | `GameBalanceConfig.objective.baseWallCount` | 4 | Dinding untuk `obj_base` |
 | `GameBalanceConfig.objective.hudFlashSeconds` | 3 | Lama sorotan tujuan baru di HUD |
-| `GameBalanceConfig.time.runDayLimit` | 60 | Batas hari. Bagian baru dari `time` |
 
 ## 2. Detail Logika & Fungsi
 
@@ -104,7 +103,7 @@ Kalau tidak ada tujuan terlihat yang belum selesai, HUD menampilkan tujuan cadan
 **`private void GrantRewards(DiaryEntry entry)`**: keluar kalau `grantedRewards` sudah memuat bab ini. Untuk tiap hadiah:
 
 - `GiveItem`: `InventoryManager.AddItem(item, amount)`. Kalau inventori penuh, sisanya menjadi `WorldItem` di dekat buku (#66).
-- **Blueprint Jembatan:** bukan entri `rewards`. `RegionGateSystem` mendengar `DiaryChapterFoundEvent` dengan `chapter == 2`, lalu mengisi `hasBridgeBlueprint = true` dan menyimpannya di `world_gates` (#68). Jadi Blueprint tidak memakai slot, dan tidak bisa hilang, dibuang, atau hancur (#116).
+- **Blueprint Jembatan:** bukan entri `rewards`. `RegionGateSystem` mendengar `DiaryChapterFoundEvent` dengan `chapter == 2`, lalu mengisi `hasBridgeBlueprint = true` dan menyimpannya di `world_gates` (#68). Jadi Blueprint tidak memakai slot, dan tidak bisa hilang, dibuang, atau hancur. Semua pembaca memakai properti `RegionGateSystem.HasBridgeBlueprint` (#116).
 - `RevealObjectives`: cukup dengan `foundChapters`, karena `IsVisible` membacanya.
 
 **`private bool IsVisible(ObjectiveData o)`** = `o.revealedByChapter == 0 || foundChapters.Contains(o.revealedByChapter)`.
@@ -150,12 +149,16 @@ Kalau tidak ada tujuan terlihat yang belum selesai, HUD menampilkan tujuan cadan
 `HUDManager` hanya mendengar event. Ia tidak mengubah status tujuan.
 
 - Mendengar `ActiveObjectiveChangedEvent`: tampilkan `title` dan `current/target` di pojok kanan atas. Sorot selama `hudFlashSeconds` ketika berubah.
-- Mendengar `DayChangedEvent`: tampilkan `Sisa hari: runDayLimit - newDay + 1`. Hari ke-60 tampil sebagai `Sisa hari: 1`, sesuai keputusan menang sebelum hari ke-60 berakhir.
+- Mendengar `DayChangedEvent`: sampai hari ke-60, tampilkan `Sisa hari: GameManager.TargetDay - newDay + 1`. Hari ke-60 tampil sebagai `Sisa hari: 1`. Setelah itu (`GameManager.IsPastTargetDay`), tampilkan `Target hari ke-60 terlewat`, tanpa angka negatif.
 - Progres kayu diperbarui dari `InventoryChangedEvent` (`itemId == Mat_Wood`) lewat `RefreshProgress()`, dan paling sering 2 kali per detik.
 
 ### Baca ulang
 
 Tombol `OpenDiary` (`J`) membuka `DiaryArchivePanel` lewat `UIFocusStack.Push`. Isinya daftar `foundChapters` dan daftar tujuan selesai. Memilih bab memanggil `DiaryManager.OpenDiary(entry)`. Bab yang belum ditemukan tidak tampil. Membaca ulang tidak memberi hadiah lagi.
+
+`DiaryArchivePanel` juga mendapat tab `Arsip` berisi `LoreEntry` dari `LoreCollectibles` (#100), dikelompokkan per `RegionType`. Memilih baris membuka panel `LoreReader` dan tidak memberi hadiah.
+
+`DiaryManager.OpenDiary` membaca teks bab lewat `LocalizationManager.Get(titleKey)` dan `LocalizationManager.Get(bodyKey)` (#104).
 
 ## 3. Hubungan dengan Sistem Lain
 
@@ -173,7 +176,9 @@ Tombol `OpenDiary` (`J`) membuka `DiaryArchivePanel` lewat `UIFocusStack.Push`. 
 | `CompassSystem` (#30), `NotificationManager` (#22) | Penanda arah dan pesan |
 | `ProgressionSafety` (#116) | Membaca `foundChapters`, dan melindungi buku Diary |
 | `SleepSystem` (#67) | Teks peringatan pantai Bab 1 |
-| `WorldStateSave` (#80) | `world_objectives` |
+| `WorldStateSave` (#80) | `world_objectives`, `LoadOrder = 110`. Menyimpan bab Diary yang ditemukan dan objektif |
+| `LoreCollectibles` (#100) | Tab `Arsip` pada `DiaryArchivePanel` |
+| `LocalizationManager` (#104) | Teks `DiaryEntry` |
 
 **Batas pekerjaan:** pop-up panduan kontrol di #16, catatan lore tambahan di #100, dan syarat akses region di #68.
 
@@ -192,11 +197,11 @@ Tombol `OpenDiary` (`J`) membuka `DiaryArchivePanel` lewat `UIFocusStack.Push`. 
 
 ## 5. Keputusan Desain
 
-**Sudah ditetapkan GDD:** isi tiga bab, shelter tua sebagai tempat Bab 1, dan Blueprint Jembatan dari Bab 2.
+**Sudah ditetapkan GDD:** isi tiga bab, buku Diary di shelter tua, dan Blueprint Jembatan dari Bab 2.
 
 **Usulan yang menunggu developer (dicatat di #85):**
 
-1. **Tempat Bab 2 dan 3:** rekomendasi Bab 2 di pos kemah penulis di Region 1, dan Bab 3 di Region 2.
+1. **Tempat Bab 2 dan 3 (menyimpang dari GDD bagian 4):** rekomendasi Bab 2 di pos kemah penulis di Region 1, dan Bab 3 di Region 2. Developer perlu memilih di #85: (a) GDD diubah agar bab tersebar, atau (b) satu buku di shelter, dengan bab terbuka bertahap oleh pemicu lain. Kalau memilih (b), tabel bab dan gerbang `S2` di `RegionGateSystem.md` perlu disesuaikan.
 2. **Hadiah api unggun Bab 1:** rekomendasi memberi satu `Kit_Campfire` dan tetap membiarkan `rec_campfire` terbuka sejak awal, sesuai `CraftingStation.md`. Pilihan lain adalah mengunci resep sampai Bab 1, tetapi pemain bisa kesulitan memasak sebelum menemukan shelter.
 3. **Bentuk Blueprint Jembatan:** rekomendasi berupa penanda `hasBridgeBlueprint` di `RegionGateSystem` (#68), bukan item, agar tidak bisa hilang dan tidak memakai slot.
 4. **Tujuan tersembunyi sebelum babnya ditemukan:** rekomendasi disembunyikan, supaya Region 3 dan suku cadang tetap menjadi kejutan Bab 3.
@@ -208,7 +213,7 @@ Tombol `OpenDiary` (`J`) membuka `DiaryArchivePanel` lewat `UIFocusStack.Push`. 
 2. Tekan `E` pada buku Bab 1. **Hasil:** panel terbuka, game terjeda, `Kit_Campfire` masuk inventori, dan `DiaryChapterFoundEvent` terkirim.
 3. Baca lagi lewat `J`. **Hasil:** isi sama, dan `Kit_Campfire` tidak bertambah.
 4. Bangun 4 dinding dan 1 pintu. **Hasil:** `obj_base` selesai, lalu HUD menampilkan `Cari bab Diary berikutnya`.
-5. Temukan Bab 2. **Hasil:** `RegionGateSystem.hasBridgeBlueprint` bernilai `true`, dan HUD menampilkan progres kayu.
+5. Temukan Bab 2. **Hasil:** `RegionGateSystem.HasBridgeBlueprint` bernilai `true`, dan HUD menampilkan progres kayu.
 6. Setor 200 kayu, dan pegang 300 kayu. **Hasil:** `obj_wood` selesai, dan `obj_bridge` aktif.
 7. Lewat `DevConsole`, pindah ke Region 4 sebelum Bab 3. **Hasil:** tidak ada notifikasi. Saat Bab 3 ditemukan, `obj_region4` sudah terlewati.
 8. Hancurkan satu dinding base. **Hasil:** `obj_base` tetap selesai.
@@ -217,3 +222,6 @@ Tombol `OpenDiary` (`J`) membuka `DiaryArchivePanel` lewat `UIFocusStack.Push`. 
 11. Isi inventori sampai penuh, lalu temukan Bab 1. **Hasil:** `Kit_Campfire` muncul sebagai `WorldItem` di dekat buku.
 12. Simpan setelah Bab 2, keluar, lalu lanjutkan. **Hasil:** bab, tujuan, dan penanda sama, tanpa notifikasi ulang.
 13. Mati, lalu mulai run baru. **Hasil:** arsip kosong, dan semua tujuan mulai dari awal.
+14. `setday 60`, lalu `setday 61`. **Hasil:** HUD berubah dari `Sisa hari: 1` menjadi `Target hari ke-60 terlewat`, dan tujuan aktif tidak berubah.
+15. Temukan satu lore, lalu buka tab `Arsip`. **Hasil:** barisnya tampil di region yang benar, membuka `LoreReader`, dan tidak memberi hadiah.
+16. Ganti bahasa, lalu baca Bab 1. **Hasil:** judul dan isi mengikuti bahasa baru.

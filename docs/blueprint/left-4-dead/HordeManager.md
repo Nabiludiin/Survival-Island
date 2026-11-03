@@ -13,7 +13,8 @@
 
 | Variabel | Tipe | Nilai awal | Fungsi |
 |---|---|---|---|
-| `IsActive` | `bool` | `false` | Blood Moon sedang berjalan. Dibaca `SleepSystem` (#67) |
+| `IsActive` | `bool` | `false` | Blood Moon sedang berjalan. Dibaca `DisasterManager` (#70) |
+| `IsBloodMoonActive` | `bool` | `false` | Properti `=> IsActive`, dipakai `GetBlockReason` di `SleepSystem` (#67) |
 | `activeDay` | `int` | -1 | Hari saat malam ini mulai |
 | `lastBloodMoonDay` | `int` | -1 | Mencegah mulai dua kali |
 | `wavesSpawned` | `int` | 0 | Gelombang yang sudah keluar |
@@ -41,7 +42,7 @@
 
 **Patokan malam:** 1 malam sekitar 450 detik. Empat gelombang berakhir pada detik 290, sehingga sisa malam diisi `sustainAlive`.
 
-**Ukuran gelombang:** `baseWaveSize + (nomorEvent - 1) * waveSizePerEvent`, dengan `nomorEvent = day / intervalDays`. Hari ke-10 berisi 12, dan hari ke-60 berisi 32 zombie per gelombang.
+**Ukuran gelombang:** `Min(maxAlive, baseWaveSize + (nomorEvent - 1) * waveSizePerEvent)`, dengan `nomorEvent = day / intervalDays`. Hari ke-10 berisi 12, hari ke-60 berisi 32, dan hari ke-70 berisi 36 zombie per gelombang. Ukurannya berhenti di 50.
 
 ## 2. Detail Logika & Fungsi
 
@@ -53,7 +54,7 @@
 
 Jadwal tetap dan tidak memakai `RunSeedManager`, sesuai `RunSeedManager.md`.
 
-**Peringatan:** saat `HourChangedEvent.hour == warningHour` dan `IsBloodMoonDay(GameManager.currentDay)`, kirim `Bulan merah akan terbit malam ini` lewat `NotificationManager` (#22). Pemain punya sekitar 6 jam game untuk bersiap.
+**Peringatan:** saat `HourChangedEvent.hour == warningHour` dan `IsBloodMoonDay(GameManager.currentDay)`, kirim `Bulan merah akan terbit malam ini` lewat `NotificationManager` (#22), dan terbitkan `BloodMoonWarningEvent { day }` (#114), tepat satu kali per hari. Pemain punya sekitar 6 jam game untuk bersiap.
 
 ### Mulai
 
@@ -100,10 +101,10 @@ Hanya `EnvironmentDirector` (#92) yang menulis fog dan cahaya. Blood Moon adalah
 2. `GetBurstCenter(out center)`.
 3. **Gelombang utama**, saat `wavesSpawned < waveCount`:
    - `count = Min(ukuran gelombang, maxAlive - SpawnManager.AliveZombies)`.
-   - Kalau `count > 0`, panggil `SpawnManager.Instance.RequestBurst(tablesByRegion[region], count, center, burstRadius)`.
+   - Kalau `count > 0`, panggil `SpawnManager.Instance.RequestBurst(tablesByRegion[region], count, center, burstRadius, AIDirector.Instance.GetPostTargetModifiers(activeDay))`.
    - `wavesSpawned++`, lalu `waveTimer = waveIntervalSeconds`.
 4. **Tahap jaga**, setelah itu:
-   - `count = sustainAlive - AliveZombies`. Kalau `> 0`, panggil `RequestBurst` dengan jumlah itu.
+   - `count = sustainAlive - AliveZombies`. Kalau `> 0`, panggil `RequestBurst` dengan jumlah itu dan `modifiers` yang sama.
    - `waveTimer = sustainCheckSeconds`.
 
 `RequestBurst` memunculkan zombie bertahap sesuai `maxSpawnsPerFrame`, dan tetap di luar pandangan. Budget `AIDirector` tidak terpakai, karena Director sedang berhenti.
@@ -145,7 +146,7 @@ Zombie yang tersisa terbakar saat fajar lewat `SunlightExposure` (#63). `HordeMa
 | `BaseNavigation` (#78) | `TryGetBaseAnchor` |
 | `RegionStreaming` (#88) | `IsLoaded`, `GetRegionAt` |
 | `HordeCrowdManager` (#93) | Menanggung beban zombie lewat aturan LOD-nya, tanpa perubahan |
-| `SleepSystem` (#67) | Membaca `IsActive`, untuk alasan `BloodMoon` |
+| `SleepSystem` (#67) | Membaca `IsBloodMoonActive`, untuk alasan `BloodMoon` |
 | `DisasterManager` (#70) | Membaca `IsActive`, untuk aturan bentrok |
 | `CombatMusicDirector` (#114), `AmbientAudio` (#52) | Mendengar event untuk musik dan suara |
 | `DevConsole` (#56) | `bloodmoon start`, `bloodmoon stop`, `bloodmoon status` |
@@ -156,13 +157,13 @@ Zombie yang tersisa terbakar saat fajar lewat `SunlightExposure` (#63). `HordeMa
 
 - **Pool dipakai ulang:** `HordeManager` tidak menyimpan rujukan zombie. Zombie memakai reset dari `EnemyInstance`. `IgnoreStealth` dibaca dari `AISensory`, sehingga zombie baru langsung `Aware`, sedangkan zombie setelah Blood Moon kembali normal.
 - **Game dijeda:** `waveTimer` memakai `Time.deltaTime`, jadi berhenti.
-- **Tidur:** `SleepSystem` menolak tidur saat `IsActive`. Pemain yang entah bagaimana tidur (misalnya lewat `DevConsole`) tidak memicu gelombang baru, sesuai `SleepSystem.md`.
+- **Tidur:** `SleepSystem` menolak tidur saat `IsBloodMoonActive`. Pemain yang entah bagaimana tidur (misalnya lewat `DevConsole`) tidak memicu gelombang baru, sesuai `SleepSystem.md`.
 - **Base dihancurkan saat malam:** `TryGetBaseAnchor` gagal, sehingga zombie memburu pemain. Gelombang berikutnya berpusat di pemain.
 - **Pemain jauh dari base:** horde berpusat pada pemain, dan `RemoteBaseSimulation` (#90) menghitung kerusakan base.
 - **Pemain pindah region:** tabel gelombang berikutnya mengikuti `GetRegionAt(center)`. Region tujuan harus sudah dimuat, sesuai #88.
 - **Zombie Desa di Region 4:** tabel tetap dipakai. `RequestBurst` mengikuti aturan `hidesFromSun` di `SpawnManager`, sehingga mereka naik dari air atau lumpur kalau titiknya ada.
 - **Bentrok dengan bencana:** lapisan Blood Moon punya prioritas lebih tinggi, tetapi aturan mulai bencana milik #70. Kalau erupsi aktif saat Blood Moon, batu pijar tetap jatuh.
-- **Hari ke-60:** malam hari ke-60 tetap Blood Moon. Kalau `RunEndedEvent` terkirim, `HordeManager` langsung membersihkan override tanpa mengirim event.
+- **Hari ke-60:** malam hari ke-60 tetap Blood Moon, dan jadwal berlanjut ke hari ke-70, 80, dan seterusnya. Kalau `RunEndedEvent` terkirim, `HordeManager` langsung membersihkan override tanpa mengirim event.
 - **Save saat Blood Moon:** yang disimpan `lastBloodMoonDay`, `IsActive`, `activeDay`, `wavesSpawned`, dan `waveTimer`. Setelah `OnRestoreFinished`, override dan lapisan dipasang lagi, lalu `BloodMoonStartedEvent` dikirim ulang, karena event itu tidak sticky. Zombie tidak disimpan. Mereka muncul lagi lewat gelombang berikutnya.
 - **Lompat waktu (`setday`, `settime`):** kalau `settime` melewati fajar, `DaybreakEvent` menutup event. Kalau `NightfallEvent` dikirim berkali-kali, `lastBloodMoonDay` mencegah mulai ganda.
 - **Permadeath:** `RunLifecycle` (#82) menghapus save, dan `HordeManager` hilang bersama scene. `OnDisable` melepas event. Override tidak perlu dilepas, karena `SpawnManager` juga dibuat ulang.
@@ -176,9 +177,9 @@ Zombie yang tersisa terbakar saat fajar lewat `SunlightExposure` (#63). `HordeMa
 1. **Pemakaian sistem:** pakai. GDD hanya menyebut horde malam biasa.
 2. **Satu malam penuh:** dari `NightfallEvent` sampai `DaybreakEvent`, dan zombie tetap terbakar saat fajar, sesuai GDD bagian 3.
 3. **Hanya visual pada cuaca:** cuaca tetap berjalan, dan hanya warna langit serta kabut yang ditimpa.
-4. **Empat gelombang, lalu jaga 20 zombie:** ukuran 12 pada hari ke-10, sampai 32 pada hari ke-60, dengan batas 50.
+4. **Empat gelombang, lalu jaga 20 zombie:** ukuran 12 pada hari ke-10, 32 pada hari ke-60, lalu terus naik sampai batas 50.
 5. **Serbuan mengikuti pemain kalau base jauh:** kalau pemain lebih dari 120 meter dari base, horde berpusat pada pemain, dan base dihitung lewat #90. Ini sesuai batas region dimuat di #88.
-6. **Hari ke-60 ikut Blood Moon:** menjadi puncak akhir run.
+6. **Hari ke-60 ikut Blood Moon:** menjadi puncak menuju target. Blood Moon berlanjut setelah hari ke-60, dengan pengali HP dan damage dari `AIDirector.md`.
 7. **Peringatan jam 12:00:** satu notifikasi pada hari yang sama. Tanpa hitung mundur HUD.
 
 **Perubahan kontrak yang diperlukan:** `BaseAnchor` dan `TryGetBaseAnchor` di `raft/BaseNavigation.md`, warna langit dan waktu transisi lapisan `BloodMoon` di `Island_Logic/EnvironmentProfile.md`, serta baris `world_bloodmoon` di `Core_Logic/WorldStateSave.md`.
@@ -195,7 +196,7 @@ Sebelum tes, atur `balance bloodMoon.enabled 1`.
 6. Berdiri 8 meter dari zombie di luar base. **Hasil:** zombie menyerang pemain.
 7. Tes tanpa base. **Hasil:** zombie memburu pemain, dan gelombang berpusat pada pemain.
 8. Berada 300 meter dari base. **Hasil:** horde berpusat pada pemain, dan jalur zombie tidak menuju base.
-9. Catat jumlah zombie saat puncak di hari ke-60. **Hasil:** tidak melewati 50, dan FPS dicatat ke lembar playtest.
+9. Catat jumlah zombie saat puncak di hari ke-60 dan hari ke-120. **Hasil:** tidak melewati 50, zombie hari ke-120 memakai pengali HP dan damage, dan FPS dicatat ke lembar playtest.
 10. Tunggu fajar. **Hasil:** warna kembali, `BloodMoonEndedEvent` terkirim, batas spawn kembali normal, dan zombie terbakar.
 11. Coba tidur saat Blood Moon. **Hasil:** ditolak dengan pesan `Malam ini terlalu berbahaya`.
 12. Simpan saat gelombang kedua, lalu muat. **Hasil:** suasana merah kembali, dan gelombang berlanjut dari `wavesSpawned` tersimpan.

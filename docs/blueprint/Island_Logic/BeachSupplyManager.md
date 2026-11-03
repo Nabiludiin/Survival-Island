@@ -56,6 +56,7 @@ Mengikuti GDD: Air Minum Bersih, Makanan Kaleng, Peluru, dan Resource langka. Ti
 | `Mat_Scrap` (langka) | 3 | 3 | 5 | 12 |
 | `Seed_Potato` (langka) | 2 | 2 | 3 | 5 |
 | `Med_Antibiotic` (langka) | 1 | 0 | 2 | 8 |
+| `Item_Battery` (langka, #98) | 1 | 5 | 8 | 10 |
 
 `Med_Vaccine` tidak masuk tabel, karena GDD menetapkan vaksin baru hanya dari bahan Region 2.
 
@@ -69,14 +70,14 @@ Mengikuti GDD: Air Minum Bersih, Makanan Kaleng, Peluru, dan Resource langka. Ti
 
 **`HandleDaybreak(DaybreakEvent e)`**: kalau `pendingDay == currentDay`, panggil `Deliver(pendingDay)`.
 
-Jadwalnya hari ke-7, 14, 21, 28, 35, 42, 49, dan 56, yaitu 8 kiriman per run.
+Jadwalnya hari ke-7, 14, 21, dan seterusnya, tanpa hari terakhir. Sampai hari ke-60 ada 8 kiriman, dan kiriman berikutnya datang pada hari ke-63, 70, dan seterusnya.
 
 ### Jumlah dan titik
 
 **`private void BuildDelivery(int day, out int[] pointByCrate, out RollResult[] contents)`** adalah fungsi murni:
 
 1. `var s = RunSeedManager.Instance.Fork(RandomStreamId.BeachSupply, day)`.
-2. `count = Min(crateCountBase + day / 14 * crateCountPerTwoWeeks, crateCountMax)`. Hasilnya 2, 3, 3, 4, 4, 4, 4, 4 kargo.
+2. `count = Min(crateCountBase + day / 14 * crateCountPerTwoWeeks, crateCountMax)`. Hasilnya 2, 3, 3, 4, lalu tetap 4 kargo, termasuk setelah hari ke-60.
 3. `s.Shuffle(indeks titik)`, lalu ambil titik `isReachable`.
 4. Untuk tiap kargo, ambil `rollsPerCrate` isi dari `LootTable` tier yang sesuai.
 5. Isi pertama pada kargo pertama selalu `Drink_CleanWater` atau `Food_Can`, supaya kiriman tidak pernah hanya berisi barang lain.
@@ -113,7 +114,7 @@ Syarat tinggi juga diperiksa di Editor, sehingga titik di data sudah benar. Deng
 
 1. `state.isOpened[i] = true`, dan mainkan animasi.
 2. Tiap isi menjadi `WorldItem` lewat `WorldItemManager.Spawn(..., despawns: false)`, sama seperti peti di #17. Pemain tidak perlu ruang inventori.
-3. Kirim `NoiseEmittedEvent` dengan radius `openNoiseRadius` (#49).
+3. `NoiseEmitter.Emit(openNoiseRadius, NoiseSourceKind.Container)` dari komponen di prefab kargo (#49).
 4. Terbitkan `LocalStatsManager` lewat `BeachCrateOpenedEvent { day }`.
 5. Kalau semua kargo sudah dibuka, hapus penanda kompas.
 
@@ -155,7 +156,7 @@ Tier memberi air dan makanan lebih dulu pada pekan awal, karena pemain masih mem
 
 ## 3. Hubungan dengan Sistem Lain
 
-**Event yang dikirim:** `BeachSupplyArrivedEvent`, `BeachCrateOpenedEvent` (baru), dan `NoiseEmittedEvent`.
+**Event yang dikirim:** `BeachSupplyArrivedEvent`, `BeachCrateOpenedEvent` (baru), dan `NoiseEmittedEvent` (lewat `NoiseEmitter`).
 
 **Event yang didengar:** `DayChangedEvent`, `DaybreakEvent`, `HourChangedEvent`, dan `RegionLoadStateChangedEvent`.
 
@@ -182,7 +183,7 @@ Tier memberi air dan makanan lebih dulu pada pekan awal, karena pemain masih mem
 - **Lewat batas saat tidak dimuat:** `HandleHour` tetap jalan karena manager berada di `IslandPhase`. Kargo yang tidak muncul tetap kedaluwarsa.
 - **Region 1 dilepas:** kargo kembali ke pool, dan `state` tetap ada. Dimunculkan lagi saat `Loaded`.
 - **`setday` atau tidur melewati fajar:** `DaybreakEvent` tetap terkirim karena tidur berhenti saat fajar. `setday 7` memberi `pendingDay`, dan kargo muncul pada fajar berikutnya.
-- **Hari terakhir:** kiriman ke-8 pada hari ke-56. Hari ke-60 bukan kelipatan 7.
+- **Setelah hari ke-60:** kiriman ke-8 pada hari ke-56, dan ke-9 pada hari ke-63. Isi tetap memakai tier `Hari 42+`, jadi makanan, air, dan peluru terus tersedia. Jumlah penyergap tetap dibatasi `ambushAnimalsMax` dan `ambushZombiesMax`.
 - **Bencana:** kiriman tidak dibatalkan. Saat badai, pasang naik, tetapi kargo masih di atas level 0,85 pada siang hari.
 
 ## 5. Keputusan Desain
@@ -198,6 +199,7 @@ Tier memberi air dan makanan lebih dulu pada pekan awal, karena pemain masih mem
 5. **Isi berubah menurut hari:** tiga tier di tabel. Rekomendasi: pakai.
 6. **Barang langka:** `Mat_Scrap`, `Seed_Potato`, dan `Med_Antibiotic`, tanpa vaksin. Daftar ini bisa diperpanjang setelah #103 selesai.
 7. **`SaveId`:** `world_supply_beach`, terpisah dari #54, karena `Register` menolak `SaveId` ganda.
+8. **Setelah hari ke-60:** kiriman terus berjalan tiap 7 hari dengan 4 kargo dan tier `Hari 42+`. Rekomendasi: pakai, supaya run panjang tetap mungkin dimenangkan. Jumlah peluru perlu diuji bersama pengali HP di `AIDirector.md`.
 
 ## 6. Skenario Tes
 
@@ -213,3 +215,4 @@ Tier memberi air dan makanan lebih dulu pada pekan awal, karena pemain masih mem
 10. Berada di Region 3 saat kiriman datang. **Hasil:** notifikasi tetap muncul, dan kargo muncul saat Region 1 dimuat.
 11. Bangun struktur di dekat titik kargo lewat `DevConsole`. **Hasil:** titik lain terpilih.
 12. Cek titik di Editor. **Hasil:** semua `isReachable` bernilai `true` dan berada di atas level 0,85.
+13. `setday 63`, lalu tunggu fajar. **Hasil:** 4 kargo muncul dengan isi tier `Hari 42+`.

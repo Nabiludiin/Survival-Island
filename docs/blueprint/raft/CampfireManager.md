@@ -10,6 +10,8 @@
 
 `CampfireManager : IslandInteractable, ISaveable` berada di prefab `Build_Campfire`. Tidak ada manager global, sehingga pemain boleh punya beberapa api unggun. Panel `CampfirePanel : UIPanel` memakai `UIPanelId.Campfire` yang sudah ada di #83, dan tidak menjeda game.
 
+Prefab `Build_Campfire` juga memasang komponen `BaseTrap` dan anak `TriggerZone`, dengan `TrapKind.Campfire` yang aktif hanya saat `IsLit` (#26), serta `LightSource` (#98).
+
 ### Data resep
 
 Resep memasak adalah `CookingRecipe`, turunan `CraftingRecipe` (#77), dengan `station = CraftingStationType.Campfire`. Jadi semua resep berada di satu `RecipeDatabase`, dan `CraftingManager` tidak menampilkan resep api unggun di panelnya.
@@ -150,7 +152,7 @@ Atap dibaca lewat `PhysicsQuery.Raycast` ke atas dengan `PhysicsMasks.Sunlight`,
 
 | Status | `IsLit` | Tindakan |
 |---|---|---|
-| `Cooking` | `true` | `progressSeconds += sim`. Saat mencapai `craftSeconds`: `output` baru dari `CreateResult()`, `input = null`, `state = Done` |
+| `Cooking` | `true` | `progressSeconds += sim * NPCRoster.GetSkillMultiplier(NPCSkill.Cook)` (#76). Bahan bakar tidak ikut dipercepat. Saat mencapai `craftSeconds`: `output` baru dari `CreateResult()`, `input = null`, `state = Done` |
 | `Cooking` | `false` | Tidak berubah. Progres ditahan, tidak hilang |
 | `Done` | `true`, dan `canBurn` | `overcookSeconds += sim`. Saat mencapai `burnAfterSeconds`: `output` diganti `Food_Burnt`, `state = Burnt` |
 | `Done` | `false` | Tidak berubah. Api mati tidak membuat gosong |
@@ -181,7 +183,7 @@ Baris memuat satu item. Klik kanan pada tumpukan mengisi baris kosong satu per s
 2. Kalau `sisa > 0`, tampilkan `Inventori penuh`, kembalikan `false`.
 3. Kosongkan baris, lalu `state = Empty`.
 
-**`private void Ignite()`** dan **`private void Extinguish(string message)`** mengatur `IsLit`, partikel api lewat `VFXManager` (#15), suara, dan cahaya (#98). Kalau `Ignite` dipanggil saat `Storm` tak beratap, kembalikan penolakan `Terlalu berangin`.
+**`private void Ignite()`** dan **`private void Extinguish(string message)`** mengatur `IsLit`, partikel api lewat `VFXManager` (#15), suara, dan cahaya. Keduanya memanggil `LightSource.SetLit`, dan api unggun tidak dihitung dalam tarikan cahaya (#98). Kalau `Ignite` dipanggil saat `Storm` tak beratap, kembalikan penolakan `Terlalu berangin`.
 
 ### Sumber panas
 
@@ -208,6 +210,8 @@ Saat `StructureDestroyedEvent` untuk `StructureId` milik api ini: panggil `Extin
 | `HydrationSystem` (#43) | Merebus air kotor |
 | `FishingSystem` (#55), `WildlifeAI` (#61) | Sumber `Food_RawFish` dan `Food_RawMeat` |
 | `WarmthSystem` (#65), `LightSourceSystem` (#98), `FireSystem` (#97) | Membaca api menyala |
+| `BaseDefense` (#26) | `BaseTrap` dan `TriggerZone` di prefab |
+| `NPCRoster` (#76) | `GetSkillMultiplier(NPCSkill.Cook)` |
 | `RegionalWeather` (#115) | `GetWeather` |
 | `DayNightDirector` | `TotalGameHours` |
 | `BaseHealth` (#59) | HP api unggun |

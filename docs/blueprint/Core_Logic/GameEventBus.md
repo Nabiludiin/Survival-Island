@@ -13,7 +13,7 @@
 | Pemasangan | Lewat kode, tanpa Inspector | Aset ditarik di Inspector |
 | Salah sambung | Terdeteksi saat compile | Baru terlihat saat bermain |
 | Data event | Struct bertipe, tanpa garbage | Perlu kelas channel per tipe |
-| Jumlah event (sekitar 50) | Hanya sekitar 50 struct | Sekitar 50 struct, kelas, dan aset |
+| Jumlah event (sekitar 110) | Hanya sekitar 110 struct | Sekitar 110 struct, kelas, dan aset |
 | Manager persisten | Tidak bergantung pada scene | Perlu referensi aset |
 | Risiko | Pendengar lupa dilepas | Pendengar lupa dilepas |
 
@@ -87,6 +87,7 @@ Sistem baru menambahkan event ke tabel ini, bukan membuat jalur sendiri. Kolom S
 | Waktu | `DaybreakEvent` | `day` | `DayNightDirector` | Ya |
 | Waktu | `NightfallEvent` | `day` | `DayNightDirector` | Ya |
 | Waktu | `DayChangedEvent` | `newDay` | `GameManager` | Ya |
+| Waktu | `DayLimitPassedEvent` | `day` | `GameManager` | Ya |
 | Waktu | `HourChangedEvent` | `hour` | `DayNightDirector` | Ya |
 | Pemain | `VitalsChangedEvent` | `hp`, `stamina`, `hunger`, `thirst`, `infection` | `SurvivalStats`, 4 kali per detik | Ya |
 | Pemain | `WarmthChangedEvent` | `warmth`, `isFreezing` | `WarmthSystem` | Ya |
@@ -164,7 +165,7 @@ Sistem baru menambahkan event ke tabel ini, bukan membuat jalur sendiri. Kolom S
 | Lucky Machine | `LuckyMachineFreeWindowChangedEvent` | `isActive`, `seconds` | `LuckyMachine` | Ya |
 | Lucky Machine | `LuckyMachineSpinResolvedEvent` | `rewardId` | `LuckyMachine` | Tidak |
 | NPC | `NPCRescuedEvent` | `npcId` | `LifeboatExtraction` | Tidak |
-| NPC | `NPCDiedEvent` | `npcId`, `reason` | `NPCCompanion` | Tidak |
+| NPC | `NPCDiedEvent` | `npcId`, `reason` | `NPCCompanion`, `NPCRoster` | Tidak |
 | NPC | `NPCStateChangedEvent` | `npcId`, `state` | `NPCCompanion` | Tidak |
 | NPC | `NPCInfectionChangedEvent` | `npcId`, `value`, `stage` | `NPCInfection` | Tidak |
 | NPC | `NPCTurnedEvent` | `npcId`, `position`, `insideBase` | `NPCInfection` | Tidak |
@@ -181,7 +182,7 @@ Sistem baru menambahkan event ke tabel ini, bukan membuat jalur sendiri. Kolom S
 | Run | `RunStartedEvent` | `seed`, `isNewRun` | `RunLifecycle` | Ya |
 | Run | `PhaseChangedEvent` | `phase` | `GameManager` | Ya |
 | Run | `RunEndedEvent` | `RunResult`, `DeathReason`. `reason` bernilai `DeathReason.None` saat menang | `GameManager` | Tidak |
-| Run | `SaveRequestedEvent` | `reason` (`SaveReason`). Didengar `WorldStateSave` | `RunLifecycle`, `SleepSystem`, `DevConsole`, serta `WorldStateSave` untuk `DaybreakEvent` | Tidak |
+| Run | `SaveRequestedEvent` | `reason` (`SaveReason`). Didengar `WorldStateSave` | `RunLifecycle`, `SleepSystem`, `DevConsole`, `RegionGateSystem`, `RescueEventManager`, `DisasterManager`, serta `WorldStateSave` untuk `DaybreakEvent` | Tidak |
 | Run | `SaveCompletedEvent` | `succeeded` | `WorldStateSave` | Tidak |
 | Run | `NarrativeStateChangedEvent` | `sceneId`, `isPlaying` | `NarrativeSequencer` | Ya |
 | UI | `UIFocusChangedEvent` | `isGameplayBlocked`, `isPaused` | `UIFocusStack` | Ya |

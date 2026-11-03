@@ -12,7 +12,7 @@ Modul ini mengubah game *survival-crafting* biasa menjadi *Action-Horror* yang m
 *   **☀️ Siang Hari (06:00 - 18:00):** 
     *   *Spawn:* Hewan Buas (Serigala, Babi Hutan, Jaguar).
     *   *Behavior:* *Territorial*. Melakukan *Wander* (berkeliling acak). Hanya menyerang jika pemain masuk ke radius *Aggro* mereka.
-    *   *Pembersihan Zombie:* Tepat saat matahari terbit (06:00), *script* harus mencari semua objek ber-tag "Zombie". Mainkan partikel api, kurangi HP mereka dengan cepat hingga mati (Zombie terbakar matahari).
+    *   *Pembersihan Zombie:* Saat matahari terbit (06:00), zombie terbakar sesuai `SunlightExposure.md`. `FindGameObjectsWithTag` dilarang (#87).
 *   **🌙 Malam Hari (18:00 - 06:00):**
     *   *Spawn:* *Horde Zombie* (Zombie Biasa, Zombie Armor, Zombie Lumut sesuai Region).
     *   *Behavior:* *Hyper-Aggressive*. Secara konstan melakukan pencarian path (*Pathfinding*) menuju lokasi pemain. Jika pemain berada di dalam *Base*, Zombie akan mengubah target untuk menyerang dan menghancurkan Dinding *Base*.

@@ -27,7 +27,7 @@ Batas tahap 4 sama dengan `GameBalanceConfig.vitals.infectionDamageThreshold` (7
 | 1 | 0 sampai kurang dari 25 | x1 | x1 | Pulih normal | 0 | Bar infeksi saja |
 | 2 | 25 sampai kurang dari 50 | x0,9 | x1 | Pulih normal | 0,15 | Notifikasi `Mulai demam` |
 | 3 | 50 sampai kurang dari 75 | x0,75 | x0,75 | Tidak pulih | 0,4 | Ikon infeksi dan napas berat |
-| 4 | 75 sampai kurang dari 100 | x0,5 | x0,5 | -0,3 per detik | 0,8 | Bar berkedip dan peringatan |
+| 4 | 75 sampai 100 | x0,5 | x0,5 | -0,3 per detik | 0,8 | Bar berkedip dan peringatan |
 
 Penglihatan adalah angka intensitas 0 sampai 1 untuk `PostProcessController` (#23). Bentuk efeknya milik #23.
 
@@ -45,7 +45,7 @@ Nilai ini mengisi `AttackData.infection` (#109). `DamageInfo.infection` membawan
 | Zombie Desa | `zombie_desa` | `GameBalanceConfig.infection.gainVillage` | 6 | Cepat dan sering memukul |
 | Hewan buas | Semua `AnimalData` | Tetap 0 | 0 | GDD hanya menyebut serangan zombie |
 
-Runner, Tank, dan Spitter mengikuti keputusan #25. Serangan yang mengenai dinding (`Structural`) tidak menambah infeksi.
+Runner, Tank, dan Spitter adalah pola pada Zombie Desa, Zombie Militer, dan Zombie Tribal, jadi tidak punya nilai infeksi sendiri (#25). Serangan yang mengenai dinding (`Structural`) tidak menambah infeksi.
 
 ### Angka penyetelan
 
@@ -154,7 +154,7 @@ Checklist #45 menulis `Antibiotik untuk infeksi`. Maksudnya infeksi luka, bukan 
 
 ### Urutan kematian `Zombified`
 
-1. `SurvivalStats.Update()` menemukan `Infection >= MaxInfection`, lalu memanggil `TriggerDeath(DeathReason.Zombified)`. Baris HP 5 di `VitalsRules.md` juga berakhir di alasan yang sama, lewat `DeathReasonMap`.
+1. `SurvivalStats.TickHP` menjalankan baris HP 5 di `VitalsRules.md` selama `Infection >= infectionDamageThreshold`, termasuk saat `Infection` tertahan di `MaxInfection`. `Infection` 100 tidak membunuh langsung, karena GDD bagian 3 menetapkan pemain mati saat HP habis. Saat HP habis, `ReduceHP` memanggil `TriggerDeath(DeathReason.Zombified)` lewat `DeathReasonMap`.
 2. `SurvivalStats` menerbitkan `PlayerDiedEvent { Zombified }`.
 3. `GameManager.TriggerGameOver` menerbitkan `RunEndedEvent`, lalu `RunLifecycle.RunEndSequence` berjalan (#82).
 4. `DeathCinematic.Play(DeathReason.Zombified)` (#53): pandangan menjadi hijau penuh, kontrol dilepas, napas berubah menjadi erangan, lalu fade selama `zombifyCinematicSeconds`. Ragdoll tidak dipakai.
@@ -216,6 +216,7 @@ Checklist #45 menulis `Antibiotik untuk infeksi`. Maksudnya infeksi luka, bukan 
 7. **Node medis:** jamur dengan tangan, getah dengan Pisau, hanya di Region 2.
 8. **NPC medis:** vaksin 25 persen lebih kuat selama NPC hidup, tanpa syarat jarak.
 9. **Peran Antibiotik:** hanya untuk infeksi luka, tidak menyembuhkan gigitan zombie.
+10. **Laju HP saat `Infection` 100:** rekomendasi tetap 0,3 per detik lewat baris HP 5. Pilihan lain yang tetap sesuai GDD adalah laju lebih tinggi saat `Infection` 100. Kematian instan di 100 menyimpang dari GDD bagian 3, jadi hanya boleh dipakai kalau developer memutuskannya di #85.
 
 ## 6. Skenario Tes
 
@@ -235,7 +236,7 @@ Checklist #45 menulis `Antibiotik untuk infeksi`. Maksudnya infeksi luka, bukan 
 14. Pukul `Node_SapTree` dengan tangan. **Hasil:** ditolak dengan pesan `Butuh Pisau`. Pukul dengan Pisau. **Hasil:** `Mat_TreeSap` jatuh setelah 2 pukulan.
 15. `additem Mat_TreeSap 2`, `additem Mat_Mushroom 2`, lalu rakit di `MedicalBench`. **Hasil:** 1 vaksin baru setelah 10 detik.
 16. Minum `Med_Antibiotic` saat `Infection` 50. **Hasil:** ditolak kalau tidak ada `WoundInfection`, dan infeksi tetap.
-17. `setvital infection 100`. **Hasil:** `RunEndedEvent` dengan `Zombified`, adegan hijau, layar `GameOver`, lalu Ulangi dari Kapal.
+17. `setvital infection 100`. **Hasil:** pemain tidak langsung mati, dan HP turun 0,3 per detik. Lalu `setvital hp 1`, dan tunggu HP habis. **Hasil:** `RunEndedEvent` dengan `Zombified`, adegan hijau, layar `GameOver`, lalu Ulangi dari Kapal.
 18. Biarkan HP habis di tahap 4 tanpa serangan. **Hasil:** alasan kematian `Zombified`.
 19. Simpan di `Infection` 60, keluar, lalu lanjutkan. **Hasil:** nilai 60, tahap 3, dan penalti aktif tanpa menunggu pukulan.
 20. Mati, lalu mulai run baru. **Hasil:** `Infection` 0, tahap 1, dan penalti hilang.

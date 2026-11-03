@@ -211,7 +211,7 @@ Hasilnya dihitung saat item dipasang atau berubah, lalu disimpan oleh pengendali
 
 **Usulan yang menunggu developer:**
 
-1. **Sistem perbaikan dan upgrade dipakai:** rekomendasi ya. GDD tidak menyebutnya, tetapi alat dan senjata perlu bertahan selama 60 hari.
+1. **Sistem perbaikan dan upgrade dipakai:** rekomendasi ya. GDD tidak menyebutnya, tetapi alat dan senjata perlu bertahan selama 60 hari, dan bisa lebih lama.
 2. **Biaya dan stasiun:** tabel di bagian 1, dengan biaya sesuai tingkat kerusakan.
 3. **Batas maksimum turun:** ya untuk item non-inti, 10 persen per perbaikan sampai 6 kali. Dengan begitu, Fire Axe tetap bernilai sebagai hadiah.
 4. **Rusak dan hancur:** durabilitas 0 berarti rusak dan bisa diperbaiki. Item hancur hanya kalau sudah melewati batas perbaikan.

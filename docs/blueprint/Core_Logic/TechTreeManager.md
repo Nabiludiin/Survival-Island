@@ -1,8 +1,8 @@
 # Blueprint: TechTreeManager.cs
 **Lokasi:** `docs/blueprint/Core_Logic/TechTreeManager.md`
-**Deskripsi Utama:** Sistem progresi yang mengunci dan membuka resep tingkat lanjut, serta syarat cerita seperti blueprint jembatan.
-**Issue:** #34, #68, #77, #80
-**Rujukan GDD:** Bagian 4 dan 5 (Diary Bab 2 memberi Blueprint Jembatan). Pohon lainnya adalah usulan.
+**Deskripsi Utama:** Sistem progresi yang mengunci dan membuka resep tingkat lanjut.
+**Issue:** #34, #77, #80
+**Rujukan GDD:** Usulan, belum ada di GDD. Blueprint Jembatan dari Diary Bab 2 (GDD bagian 4) tidak dikelola sistem ini.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -15,11 +15,11 @@ public class TechNode { public string nodeID; public bool isUnlocked; public str
 |---|---|---|
 | `techTree` | `List<TechNode>` | Semua node |
 
-**Node wajib:** `node_bridge_blueprint`, tanpa `requiredNodeID`. `RegionGateSystem.HasBridgeBlueprint` membaca node ini (#68).
+**Bukan isi sistem ini:** Blueprint Jembatan. Statusnya hanya ada di `RegionGateSystem.hasBridgeBlueprint`, tersimpan di `world_gates`, dan diisi saat `DiaryChapterFoundEvent` Bab 2 (#68). Bentuk ini masih usulan di `RegionGateSystem.md` dan `ObjectiveManager.md`, dan menunggu konfirmasi developer.
 
 ## 2. Detail Logika & Fungsi
 
-**`public bool IsUnlocked(string nodeId)`**: mengembalikan status node. Dipakai `CraftingStation.md`, `ObjectiveManager.md`, dan #68.
+**`public bool IsUnlocked(string nodeId)`**: mengembalikan status node. Dipakai `CraftingStation.md` dan `BuildMenu.md`.
 
 **`public void UnlockNode(string id)`**:
 
@@ -36,8 +36,7 @@ public class TechNode { public string nodeID; public bool isUnlocked; public str
 | Sistem | Hubungan |
 |---|---|
 | `CraftingManager` (#77) | Membaca `IsUnlocked`, dan menyimpan status lewat `world_recipes` |
-| `RegionGateSystem` (#68) | Membaca `node_bridge_blueprint` |
-| `ObjectiveManager` (#81) | Membuka node dari hadiah Diary |
+| `BuildMenu` (#79), `BuildingIntegrity` (#47), `BaseDefense` (#26) | Membaca `IsUnlocked` lewat `unlockNodeId` |
 
 ## 4. Kasus Khusus
 
@@ -51,11 +50,11 @@ public class TechNode { public string nodeID; public bool isUnlocked; public str
 
 **Sudah ditetapkan dokumen lain:** `IsUnlocked` (`CraftingStation.md`), dan penyimpanan (`WorldStateSave.md`).
 
-**Menunggu developer:** isi pohon teknologi di luar `node_bridge_blueprint` masih usulan.
+**Menunggu developer:** isi pohon teknologi masih usulan. Bentuk Blueprint Jembatan sebagai penanda di `RegionGateSystem` juga menunggu konfirmasi.
 
 ## 6. Skenario Tes
 
 1. Buka node tanpa prasyarat. **Hasil:** `IsUnlocked` bernilai `true`, dan event terkirim sekali.
 2. Buka node dengan prasyarat terkunci. **Hasil:** ditolak.
-3. Temukan Diary Bab 2. **Hasil:** `node_bridge_blueprint` terbuka, dan jembatan bisa dibangun.
+3. Temukan Diary Bab 2. **Hasil:** tidak ada node yang berubah, `RegionGateSystem.HasBridgeBlueprint` bernilai `true`, dan jembatan bisa dibangun.
 4. Simpan, keluar, lalu lanjutkan. **Hasil:** status node sama.

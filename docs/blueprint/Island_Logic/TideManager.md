@@ -32,7 +32,6 @@ Hanya laut yang bergerak. Sungai dan danau di scene region tetap diam.
 | `GameBalanceConfig.tide.colliderStepMeters` | 0,15 m | Jarak gerak collider per langkah |
 | `GameBalanceConfig.tide.wadeDepth` | 0,35 m | Kedalaman mulai terasa berat |
 | `GameBalanceConfig.tide.wadeStaminaPerSec` | 2 | Stamina hilang saat mengarungi air |
-| `GameBalanceConfig.tide.wadeSpeedMultiplier` | 0,75 | Kecepatan saat mengarungi air |
 | `GameBalanceConfig.tide.highAreaCost` | 20 | Biaya Area NavMesh `Tidal` saat `IsHigh` |
 
 ## 2. Detail Logika & Fungsi
@@ -72,9 +71,8 @@ Pasang siang tampak nyata, tetapi hanya menjadi `IsHigh` kalau ada badai (0,6 + 
 **`void TickPlayer()`**, hanya kalau pemain berada di `tideZone`:
 
 1. `SurfaceDetection.Instance.TryGetTerrainSurfaceAtXZ(posisi, out s)`, lalu `depth = WaterY - s.groundHeight`.
-2. Kalau `depth >= wadeDepth` dan `SwimmingController` (#13) tidak aktif: `SpendStamina(wadeStaminaPerSec * dt, StaminaUse.Swim)` dan `SetSpeedModifier(SpeedModifierId.Water, wadeSpeedMultiplier)`.
-3. Kalau keluar dari kondisi itu, kembalikan pengali ke 1 sekali saja.
-4. Kalau `Level >= warnLevel`, air sedang naik, dan belum diperingatkan malam ini, kirim notifikasi `Air mulai pasang, jauhi pantai` (#22).
+2. Kalau `depth >= wadeDepth` dan `SwimmingController.Mode != WaterMode.Swimming`: `SpendStamina(wadeStaminaPerSec * dt, StaminaUse.Swim)`. `SwimmingController` (#13) menjadi satu-satunya pemilik `SpeedModifierId.Water`, jadi sistem ini tidak menulis pengali kecepatan.
+3. Kalau `Level >= warnLevel`, air sedang naik, dan belum diperingatkan malam ini, kirim notifikasi `Air mulai pasang, jauhi pantai` (#22).
 
 Pemain tidak didorong dan isi inventori tidak hanyut. Air yang lebih dalam diserahkan ke `SwimmingController`.
 

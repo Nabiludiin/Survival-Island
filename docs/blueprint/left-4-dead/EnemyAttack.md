@@ -32,7 +32,20 @@
 | `animTrigger` | `Attack` | `Bite` | `HeavyAttack` | Trigger Animator |
 | `telegraphClip` | `Zombie_Growl` | `Zombie_Growl` | `Zombie_Roar` | Suara tanda |
 
-`Zombie_Heavy_Hit` memakai pola Tank L4D: 1,5 detik setelah kena dan 1,0 detik setelah meleset. Nilai per varian ditetapkan #25, dan hewan oleh #61. `EnemyData` mendapat field `AttackData primaryAttack`.
+`Zombie_Heavy_Hit` memakai pola Tank L4D: 1,5 detik setelah kena dan 1,0 detik setelah meleset. Zombie Militer memakai aset ini. Hewan ditetapkan #61.
+
+**Aset per varian (#25).** Field lain mengikuti `Zombie_Standard_Hit`, sampai disetel.
+
+| Aset | `damage` | `infection` | Catatan |
+|---|---|---|---|
+| `Zombie_Tribal_Hit` | 10 | `gainTribal` (6) | Serangan utama Tribal |
+| `Zombie_Tribal_Snare` | `tribalDamagePerSec` (5) | `gainTribal` (6) | Selama menahan, `SpecialZombieAI.md` |
+| `Zombie_Lumut_Lunge` | 30 | `gainMoss` (8) | |
+| `Zombie_Beku_Hit` | 10 | `gainFrozen` (5) | |
+| `Zombie_Desa_Pounce` | 12 | `gainVillage` (6) | |
+| `Zombie_Rock_Throw` | 10 | 0 | `windupSeconds` 1 |
+
+**Infeksi (#64):** `AttackData.infection` diisi dari `GameBalanceConfig.infection.gain*` per jenis zombie (Standard 5, Tribal 6, Moss 8, Military 10, Frozen 5, Village 6), dan 0 untuk semua `AnimalData`. Serangan `Structural` tidak menambah infeksi. `EnemyData` mendapat field `AttackData primaryAttack`.
 
 ### Variabel `EnemyAttack`
 
@@ -85,7 +98,7 @@ Satu zombie standar: `0,5 + 0,15 + 1,2 = 1,85` detik per pukulan, atau sekitar 8
 **`BeginPhase(Windup)`**:
 
 1. `phaseTimer = windupSeconds`, `swingHits.Clear()`, `hitAny = false`, dan `animEventFired = false`.
-2. `agent.isStopped = true`, dan `SetTrigger(animTrigger)`.
+2. `agent.isStopped = true`, dan `anim.PlayAttack(animTrigger)` (#12). `AE_AttackHit()` diterima `AnimationController`, yang berada di objek Animator, lalu diteruskan ke `EnemyAttack.AE_AttackHit()`.
 3. Jalankan tanda serangan.
 
 **`Update`** selama Windup: putar musuh menghadap target sampai `trackingRatio` berlalu. Setelah itu arah terkunci, jadi pemain bisa menghindar ke samping.
@@ -108,7 +121,7 @@ Damage terikat ke momen animasi, dengan cadangan timer:
 **Serangan ke pemain atau NPC:**
 
 1. `center = transform.position + forward * hitOffset + Vector3.up`.
-2. `count = PhysicsQuery.OverlapSphere(center, hitRadius, PhysicsMasks.AIAttack, buffer)`, dengan buffer statis 16 elemen.
+2. `count = PhysicsQuery.OverlapSphere(center, hitRadius, PhysicsMasks.AIAttack, buffer)`. Di Fase 2, `buffer` adalah `HordeCrowdManager.Instance.AttackBuffer` (#93). Di Fase 1, buffer statis 16 elemen.
 3. `PhysicsQuery.CollectUniqueDamageables(buffer, count, results)`.
 4. Untuk tiap hasil, lewati kalau berupa bangunan, sudah ada di `swingHits`, atau di luar `arcDegrees`.
 5. Lewati kalau `PhysicsQuery.Raycast` dari dada musuh ke target terhalang `PhysicsMasks.AIVision`, supaya pukulan tidak menembus dinding.
@@ -144,7 +157,7 @@ Damage terikat ke momen animasi, dengan cadangan timer:
 | Tanda | Isi |
 |---|---|
 | Animasi | Ancang-ancang jelas selama `windupSeconds`, misalnya lengan terangkat (#12) |
-| Suara | `telegraphClip` 3D lewat `AudioManager` di awal Windup |
+| Suara | `ThreatAudioEmitter.PlayTell(telegraphClip)` pada prefab musuh di awal Windup, supaya memakai sumber 3D dan batas suara (#114). Kalau prefab tidak punya emitter, lewati suara dan catat peringatan di Editor |
 | Arah | Terbitkan `EnemyAttackTelegraphEvent { position, attackId }`, hanya kalau targetnya pemain, dan dibatasi `telegraphMinInterval`. `CombatFeedbackUI` (#51) menampilkan penanda kalau asalnya di luar pandangan |
 
 ### Dibatalkan oleh stagger

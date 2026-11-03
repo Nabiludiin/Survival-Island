@@ -68,7 +68,7 @@ public interface IPinAttacker
 3. Panggil `PlayerTraversal.ForceDetach()` kalau memanjat, lalu `PlayerTraversal.SetLocked(true)`.
 4. Panggil `PlayerInteractor.SetEnabled(false)`, dan `FirstPersonCamera.SetForcedLook(attacker.LookTarget)`.
 5. Terbitkan `PlayerPinnedEvent { attackerId, isPinned = true }`. `EquipmentManager` memasang `EquipLock.Pinned`, `UIFocusStack` menutup panel, dan `HeavyItemSystem` menjatuhkan barang.
-6. Kirim getaran `Pinned` lewat `CameraShake` (#24), lalu kembalikan `true`.
+6. `CameraShake.Play(CameraShakeKind.Pinned)` (#24), lalu kembalikan `true`.
 
 Kalau `false`, penyerang menjalankan jeda sendiri tanpa menahan pemain.
 

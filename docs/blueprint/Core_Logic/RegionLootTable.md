@@ -152,7 +152,7 @@ Peluang titik kosong hanya ditentukan `lootPointEmptyChance` atau `warehouseEmpt
 
 ### Pengisian ulang
 
-Titik loot tidak terisi lagi selama 60 hari (usulan). Sumber yang berulang sudah ada: panen (#73), kargo mingguan (#71), dan kotak suplai (#54). Dengan begitu, area yang sudah dijarah tetap kosong, dan pemain terdorong ke region berikutnya.
+Titik loot tidak terisi lagi sepanjang run, termasuk setelah hari ke-60 (usulan). Sumber yang berulang sudah ada dan tidak berhenti setelah hari ke-60: panen (#73), kargo mingguan (#71), dan kotak suplai (#54). Dengan begitu, area yang sudah dijarah tetap kosong, dan pemain terdorong ke region berikutnya.
 
 ### Armor pemain
 
@@ -197,7 +197,7 @@ Tidak ada armor pemain di versi awal (usulan). `Infection` tetap naik sesuai `At
 
 1. **Senjata baru:** tambah `Wpn_Machete`, `Wpn_SMG`, dan `Wpn_Rifle`, dengan `Ammo_556` sebagai peluru kedua. Rekomendasi: pakai. Pistol, Pisau, dan Kapak saja tidak memberi alasan menjelajah.
 2. **Armor pemain:** rekomendasi tidak ada di versi awal, dan tidak mengubah infeksi.
-3. **Isi ulang titik loot:** rekomendasi tidak terisi lagi selama 60 hari.
+3. **Isi ulang titik loot:** rekomendasi tidak terisi lagi sepanjang run. Run setelah hari ke-60 mengandalkan sumber berulang.
 4. **Skala:** rekomendasi memakai pengali per lokasi dan hari seperti tabel angka di atas.
 5. **Isi tetap:** rekomendasi tiga barang unik di titik tetap, bukan diacak.
 

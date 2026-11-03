@@ -22,7 +22,7 @@ public interface ISaveable
     void OnRestoreFinished();       // Mengirim ulang event sticky dan menyegarkan tampilan
 }
 
-public enum SaveReason { ArrivedOnIsland, WakeUp, Daybreak, QuitToMenu, AppQuit, Manual, BridgeComplete }
+public enum SaveReason { ArrivedOnIsland, WakeUp, Daybreak, QuitToMenu, AppQuit, Manual, BridgeComplete, DisasterEnded, PartInstalled }
 public enum SaveProblem { None, Corrupt, NewerVersion, OldVersionNoMigration }
 ```
 
@@ -143,11 +143,12 @@ Semua berada di `Application.persistentDataPath`.
 | Seed dan susunan run | Dipanggil langsung | `RunSeedManager` (#89) | `RunSeedSaveData` |
 | Hari dan fase | Dipanggil langsung | `GameManager` | `currentDay`, `hasEscaped`, `hasArrivedOnIsland`, `shipOutcome` dengan `lostNpcIds`, dan `wasTainted` |
 | Jam dunia | `world_clock` | `DayNightDirector` | `currentTimeOfDay`, `TotalGameHours`, dan `isNight` |
-| Akses region dan jembatan | `world_gates` | `RegionGateSystem` (#68) | Kayu tersetor, jembatan selesai, dan region terbuka |
+| Akses region dan jembatan | `world_gates` | `RegionGateSystem` (#68) | Kayu tersetor, jembatan selesai, region terbuka, dan `hasBridgeBlueprint` |
 | Status region | `regionStoreJson` | `RegionStateStore` (#88) | Node panen, peti loot, `WorldItem`, dan `lastUnloadedGameHour` |
 | Tas | `player_carry` | `CarryCapacity` (#118) | `equippedBag` |
 | Inventori | `player_inventory` | `InventoryManager` | Slot berisi, `ItemInstance`, dan `nextInstanceId` |
 | Hotbar | `player_equipment` | `EquipmentManager` (#60) | `EquipmentSaveData` |
+| Barang lempar | `world_throwables` | `ThrowableSystem` (#96) | `selectedIndex` |
 | Status tubuh | `player_vitals` | `SurvivalStats` (#111) | `HP`, `Stamina`, `Hunger`, `Thirst`, `Infection`, `IsExhausted`, dan sisa pemulihan |
 | Infeksi, penyakit, dan efek | `player_infection`, `player_disease`, `player_effects` | #64, #45, #20 | Tahap dan sisa waktu |
 | Kehangatan | `player_warmth` | `WarmthSystem` (#65) | Nilai kehangatan dan pakaian |
@@ -166,7 +167,8 @@ Semua berada di `Application.persistentDataPath`.
 | Lore | `world_lore` | `LoreCollectibles` (#100) | Temuan lore dalam run ini |
 | Peta | `world_map` | `WorldMapSystem` (#105) | `WorldMapSaveData`, hanya kalau `GameBalanceConfig.map.enabled = true` |
 | Barang hanyut (usulan, kalau #106 disetujui) | `world_debris` | `DebrisRetrieval` (#106) | `nextSpawnGameHour` |
-| Kargo dan suplai | `world_supply` | #71, #54 | Kargo yang belum diambil |
+| Kargo pantai | `world_supply_beach` | `BeachSupplyManager` (#71) | Kargo yang belum diambil |
+| Suplai udara | `world_supply` | `SupplyDropManager` (#54) | Jadwal dan status suplai |
 | Hasil simulasi base | `world_remotebase` | `RemoteBaseSimulation` (#90) | Hasil yang belum diterapkan |
 | Lucky Machine | Lewat `RegionStateStore` | `LuckyMachine` (#72) | Kuota dan hadiah |
 
@@ -202,6 +204,8 @@ Semua berada di `Application.persistentDataPath`.
 | `AppQuit` | `Application.wantsToQuit`, dan `OnApplicationPause(true)` di Android | Ya, selalu tulis |
 | `Manual` | `DevConsole` (#56) | Ya, selalu tulis |
 | `BridgeComplete` | `RegionGateSystem` (#68) | Diperiksa |
+| `DisasterEnded` | `DisasterManager` (#70) | Diperiksa |
+| `PartInstalled` | `RescueEventManager` (#14) | Diperiksa |
 
 ### Menulis tanpa merusak file lama
 
@@ -292,14 +296,14 @@ Urutan ini mengikuti `RunLifecycle.ContinueRun()`.
 | 3 | 30 | `world_gates` | `RegionStreaming` membaca `IsUnlocked` |
 | 4 | 40 | `player_carry` | Slot tas harus benar sebelum isi inventori (#118) |
 | 5 | 50 | `player_inventory` | Sumber `ItemInstance` |
-| 6 | 60 | `player_equipment` | Merujuk `instanceId` (#60) |
+| 6 | 60 | `player_equipment`, `world_throwables` | Merujuk `instanceId` (#60), dan barang lempar di inventori (#96) |
 | 7 | 70 | `player_vitals`, `player_infection`, `player_disease`, `player_effects`, `player_warmth` | Mengisi status |
 | 8 | 80 | `player_transform` | Menentukan region awal |
 | 9 | 90 | `world_structures` | Memakai `GetStructureRoot`, dan item untuk peti |
 | 10 | 100 | `world_fire`, `LightFixture` per `StructureId`, `world_parts`, `world_helicopter` | Data pulau. `world_fire` dan `LightFixture` merujuk struktur, jadi setelah `world_structures` |
 | 11 | 110 | `world_objectives`, `world_recipes`, `world_lore` | Data progres |
 | 12 | 120 | `world_npcs` | Butuh posisi pemain dan bangunan |
-| 13 | 130 | `world_npc_infection`, `world_disasters`, `world_bloodmoon`, `world_supply`, `world_remotebase`, `ai_director`, dan `world_debris` (usulan, kalau #106 disetujui) | Merujuk data di atas. `world_npc_infection` setelah data NPC |
+| 13 | 130 | `world_npc_infection`, `world_disasters`, `world_bloodmoon`, `world_supply_beach`, `world_supply`, `world_remotebase`, `ai_director`, dan `world_debris` (usulan, kalau #106 disetujui) | Merujuk data di atas. `world_npc_infection` setelah data NPC |
 | 14 | 135 | `world_map` | Penanda sistem dipasang pemiliknya lebih dulu. Hanya kalau `GameBalanceConfig.map.enabled = true` |
 
 `RestoreState` hanya mengisi data dan tidak boleh mengirim event. Exception ditangkap per sistem, dicatat, lalu sistem itu memakai nilai awal.

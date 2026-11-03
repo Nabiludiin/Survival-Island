@@ -146,7 +146,7 @@ Lalu, hanya kalau nilainya berubah:
 - `SurvivalStats.SetPenalty(VitalPenaltySource.StatusEffect, maxStamina, regen)`.
 - `IslandPlayerController.SetSpeedModifier(SpeedModifierId.StatusEffect, speed)`.
 - `SurvivalStats.SetRegenBlocked(blockRegen)`.
-- `SurvivalStats.SetMaxHpMultiplier(maxHp)` (#72).
+- `SurvivalStats.SetMaxBonus(maxHp, 1f)` (#72). Bonus stamina tetap lewat `SetPenalty` di atas.
 
 Semua efek yang aktif dikalikan, sehingga urutan pemberian efek tidak mengubah hasil. `VitalsRules.md` perlu aturan khusus untuk sumber `StatusEffect`, karena buff di atas 1 tidak boleh hilang oleh perhitungan nilai terkecil.
 

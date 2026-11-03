@@ -120,8 +120,8 @@ public class GameBalanceConfig : ScriptableObject
 | Target | Nilai | Alasan |
 |---|---|---|
 | Panjang satu hari game | 15 menit | Siang dan malam masing-masing sekitar 7,5 menit |
-| Total 60 hari | 15 jam | Batas terlama satu run |
-| Run menang umum | 10 sampai 15 jam | Pemain cepat selesai sebelum hari ke-60 |
+| Total 60 hari | 15 jam | Target. Run boleh lebih panjang, tetapi zombie semakin kuat setelah hari ke-60 |
+| Run menang umum | 10 sampai 15 jam | Pemain cepat selesai sebelum hari ke-60, dan yang lebih lambat tetap bisa menang |
 
 Sebelumnya `timeMultiplier = 50` menghasilkan 28,8 menit per hari dan 28,8 jam total. Angka itu terlalu panjang untuk game permadeath yang mengulang dari awal.
 
@@ -202,7 +202,7 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 
 | Bagian | Issue | Isi |
 |---|---|---|
-| `run` | #82, #99 | endSequenceTimeoutSeconds 15, timeExpiredFadeSeconds 3, gameOverInputDelaySeconds 1, saveWaitTimeoutSeconds 5, sceneLoadMinShowSeconds 0,5, endingTimeoutSeconds 120 |
+| `run` | #82, #99 | endSequenceTimeoutSeconds 15, gameOverInputDelaySeconds 1, saveWaitTimeoutSeconds 5, sceneLoadMinShowSeconds 0,5, endingTimeoutSeconds 120 |
 | `ui` | #83 | panelFadeSeconds 0,15, pausedMusicVolumeDb -12, pauseAudioFadeSeconds 0,2 |
 | `input` | #18 | rebindTimeoutSeconds 5 |
 | `streaming` | #88 | loadDistance 150, unloadDistance 250, urgentDistance 40, checkIntervalSeconds 0,5, maxLoadedRegions 2, stallNoticeSeconds 2, stallPanelSeconds 10, safePositionIntervalSeconds 1, unusedAssetsMinIntervalSeconds 120, baseMemoryLimitMB 1000, regionMemoryLimitMB 1200, regionBatchLimit 600, baseBatchLimit 300, regionLoadTimeLimitSeconds 8 |
@@ -224,7 +224,7 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 | `disease` | #45 | foodPoisonGameHours 3, venomGameHours 2, bleedingGameHours 6, foodPoisonDamagePerSec 0,25, venomDamagePerSec 0,5, bleedingDamagePerSec 0,3, bleedChance 0,25, bleedMinDamage 15, overlayMaxAlpha 0,18, overlayPulseSeconds 2,5 |
 | `statusEffects` | #20 | maxActive 8, supplementSeconds 60, supplementSpeedMultiplier 1,2, expiringWarningSeconds 5 |
 | `crafting` | #77 | maxQueue 5, stationRangeMeters 4, leaveGraceMeters 2, stationCheckSeconds 0,5, hitPauseSeconds 1,5, npcCrafterSpeedMultiplier 1,5 |
-| `resource` (tambahan) | #73 | rockDropMin 4, rockDropMax 6, pickaxeDecayPerUse 1, knifeDecayPerHarvest 0,5, coconutRespawnDays 3, regrowJitterHours 6, regrowMinPlayerDistance 25, regrowClearRadius 3, regrowChecksPerFrame 20, dropChunkSize 4, dropSettleSeconds 3, dropMaxFallMeters 4, minNodesPerRegion sesuai tabel kepadatan |
+| `resource` (tambahan) | #73 | rockDropMin 4, rockDropMax 6, pickaxeDecayPerUse 1, knifeDecayPerHarvest 0,5, coconutRespawnDays 3, regrowJitterHours 6, regrowMinPlayerDistance 25, regrowClearRadius 3, regrowChecksPerFrame 20, dropChunkSize 4, dropSettleSeconds 3, dropMaxFallMeters 4, minNodesPerRegion sesuai tabel kepadatan, stoneRespawnDays 2 |
 | `repair` | #113 | lowRatio 0,2, maxLossPerRepair 0,1, maxRepairs 6, repairSeconds 3, upgradeSeconds 6 |
 | `upgrade` | #113 | damageBonus 0,1, magazineBonus 2, speedBonus 0,1, durabilityBonus 0,25, maxPerItem 2, maxDamageMultiplier 4 |
 | `fishing` | #55 | Jarak dan tenaga lempar (castMinDistance 6, castMaxDistance 25, leashDistance 32), waktu gigit 12 sampai 30 detik, biteWindowSeconds 2, serta angka Tension Bar (tensionRisePerSec 0,30, tensionFallPerSec 0,35, progressPerSec 0,10). Target 1 porsi sekitar 60 detik |
@@ -246,20 +246,20 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 | `spawn` | #62 | Jeda dan batas spawn, batas zombie dan hewan, jarak, arah belakang, pengaman macet, sapu bersih, target hewan, dan batas pengurangan anggaran dari sarang |
 | `sunlight` | #63 | Jeda cek sinar, sudut matahari, durasi terbakar, batas berlindung, jam sembunyi, waktu turun dan naik, boost, dan jumlah Zombie Desa siang |
 | `specialZombie` | #25 | Angka perilaku varian: jerat Tribal, amarah Lumut, lambat Militer, ledakan Beku, terkaman Desa, dan pengaman macet varian besar. Statistik HP dan kecepatan ada di aset `ZombieData` |
-| `aiDirector` | #27 | `threatCurve` per hari, pengali region, waktu tahap Director, intensitas, ukuran mob, dan batas kecepatan zombie |
+| `aiDirector` | #27 | `threatCurve` per hari, pengali region, waktu tahap Director, intensitas, ukuran mob, batas kecepatan zombie, dan pengali setelah hari ke-60: postTargetCountPerDay 0,02, postTargetCountMax 1,5, postTargetHpPerDay 0,02, postTargetHpMax 2, postTargetDamagePerDay 0,01, postTargetDamageMax 1,5 (usulan) |
 | `crowd` | #93 | Kapasitas agen, batas tick per frame, interval per tingkatan, ambang update tujuan, kelompok, avoidance, buffer overlap, dan stagger animasi |
 | `pinned` | #110 | enabled, kemajuan lepas, biaya stamina, pengali status, Pisau, bantuan NPC, batas tertahan, batas penyerang lain, dan waktu kebal |
 | `trap` | #26 | Damage, jeda, keausan, dan suara Spike Trap, kawat, dan api unggun, serta batas jebakan per region |
 | `throwable` | #96 | enabled, gaya, sumbu, radius, damage, durasi, dan noise tiap barang, serta bidikan, jeda lempar, dan batas Suar |
 | `lair` | #112 | enabled, radius aktif, pemicu Dormant, pintu keluar, HP sarang, pengurangan horde, dan porsi zombie yang keluar saat malam |
-| `warmth` | #65 | tickSeconds 0,5; freezeEnterThreshold 20; freezeExitThreshold 30; ambientHeat 5; regionSnowCold 20; blizzardCold 2; rainCold/rainFloor 8/40; stormCold/stormFloor 12/30; waterCold/waterFloor 15/30; snowWaterCold 30; clothesHeat 20; torchHeat 20; campfireHeat 40; indoorHeat 25; shelterCheckSeconds 2; shelterProbeDistance 6; torchBurnSeconds 300; torchRainExtinguishSeconds 20 |
+| `warmth` | #65 | tickSeconds 0,5; freezeEnterThreshold 20; freezeExitThreshold 30; ambientHeat 5; regionSnowCold 20; blizzardCold 2; rainCold/rainFloor 8/40; stormCold/stormFloor 12/30; waterCold/waterFloor 15/30; snowWaterCold 30; clothesHeat 20; torchHeat 20; protectedFloor 30 (usulan); campfireHeat 40; indoorHeat 25; shelterCheckSeconds 2; shelterProbeDistance 6; torchBurnSeconds 300; torchRainExtinguishSeconds 20 |
 | `heavyItem` | #69 | pickupHoldSeconds 0,5; dropDamageThreshold 25; dropForwardDistance 1,2; validSampleSeconds 1; navSampleRadius 2; recoveryCheckSeconds 5; discoverRadius 40 |
 | `swimming` | #13 | idleStaminaPerSec 2; swimSpeedMultiplier 0,5; wadeSpeedMultiplier 0,7; wadeEnterDepth 0,5; swimEnterDepth 1,3; swimExitDepth 1,0; maxBreathSeconds 30; breathRecoverPerSec 10; sinkingBreathMultiplier 2; sinkSpeed 0,5; verticalSwimSpeed 1,5; surfaceEyeOffset 0,3; waterCheckSeconds 0,1; landingProbeDistance 30 |
 | `region` (tambahan) | #68 | bridgeDepositHoldSeconds 1; ravineMinWidth 30; gateVerifySeconds 2; ravineFallDamage 20 |
-| `tide` | #91 | lowWaterY, dayAmplitude, highThreshold, warnLevel, stormSurgeLevel 0,25, surgeRatePerGameHour, colliderStepMeters, wadeDepth, wadeStaminaPerSec, wadeSpeedMultiplier, highAreaCost 20 |
+| `tide` | #91 | lowWaterY, dayAmplitude, highThreshold, warnLevel, stormSurgeLevel 0,25, surgeRatePerGameHour, colliderStepMeters, wadeDepth, wadeStaminaPerSec, highAreaCost 20 |
 | `environment` | #92 | weatherLayers, regionBlendSeconds, weatherBlendSeconds, eventBlendSeconds, interiorBlendSeconds, applyIntervalSeconds, maxFogDensity, defaultMinAmbientLuminance 0,035, eruptionRemoteWeight |
 | `weather` (tambahan) | #115 | effects (tabel `WeatherEffects` per cuaca), minSevereDay, dan presentBlendSeconds 6. `weatherIntervalGameHours` tetap memakai nilai #84 |
-| `disaster` | #70 | fireballIntervalSeconds, fireballRingMin/Max, fireballMarkerSeconds 2,5, fireballRadius, fireballDamageCenter/Edge, fireballStructureDamage, fireballTreeChance 0,25, eruptionOffscreenHits, quakeDamageRatio, quakePulses, maxStructuresPerFrame, stormPulseSeconds, stormStructureDamage, treeFallSeconds 45, treeFallRingMin/Max 12/30 m, treeFallRadius, treeFallDamage, treeFallStructureDamage |
+| `disaster` | #70 | scheduleBlockDays 60, fireballIntervalSeconds, fireballRingMin/Max, fireballMarkerSeconds 2,5, fireballRadius, fireballDamageCenter/Edge, fireballStructureDamage, fireballTreeChance 0,25, eruptionOffscreenHits, quakeDamageRatio, quakePulses, maxStructuresPerFrame, stormPulseSeconds, stormStructureDamage, treeFallSeconds 45, treeFallRingMin/Max 12/30 m, treeFallRadius, treeFallDamage, treeFallStructureDamage, quakeRemoteDamagePerHit 75, quakeRemoteHits 4 |
 | `beachSupply` | #71 | intervalDays 7, crateCountBase, crateCountPerTwoWeeks, crateCountMax, rollsPerCrate, crateLifetimeGameHours, crateMinLevel, openHoldSeconds, openNoiseRadius, ambushTriggerDistance, ambushAnimalsBase, ambushZombiesBase |
 | `supplyDrop` | #54 | Saklar enabled false, dailyChance 0,10, minDay 3, cooldownDays 3, jam jatuh 8 sampai 14, jarak titik jatuh 120 sampai 260, serta angka pesawat, parasut, suar, dan kedaluwarsa peti |
 | `bloodMoon` | #50 | Saklar enabled false, intervalDays 10, warningHour 12, waveCount 4, baseWaveSize 12, waveSizePerEvent 4, maxAlive 50, sustainAlive 20, burstRadius 45, baseEngageDistance 120, dan jeda gelombang |
@@ -267,13 +267,12 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 | `npc` | #76 | thinkSeconds 0,25, jarak ikut 5 dan 2,5, teleportDistance 40, detectRadius 15, attackLeashDistance 12, baseRegenPerSec 0,5, workSearchRadius 30, cookSpeedMultiplier 1,25, builderRepairMultiplier 1,25, dan avoidancePriority 70 |
 | `npcInfection` | #117 | enabled false, gainMultiplier 1, selfProgressPerGameHour 1,5, cureBelow 10, stage3SkillFactor 0,5, stage3SpeedMultiplier 0,85, stage4SpeedMultiplier 0,6, quarantineMinDistance 15, turnSeconds 3, turnNoiseRadius 25, remoteTurnDamage 120, remoteBiteInfection 15 |
 | `objective` | #81 | baseWallCount 4, hudFlashSeconds 3 |
-| `time` (tambahan) | #81 | Bukan bagian baru. Tambah field runDayLimit 60 ke `TimeBalance` yang sudah ada |
 | `loot` | #103 | warehouseEmptyChance 0,25, chestRollsMin/Max 1/3, bodyRollsMin/Max 1/2, amountMulVolcano 1, amountMulAmazon 1,1, amountMulLogistic 1,25, amountMulSnow 1,4, rareWeightPerDay 0,02, rareWeightMaxMul 2, amountBonusPer10Days 0,1. Memakai `runSeed.lootPointEmptyChance` 0,5 yang sudah ada |
-| `remoteBase` | #90 | Jarak: remoteDistance 80, returnDistance 60, distanceCheckSeconds 2, clusterRadius 30. Serangan: minStructuresForRaid 4, maxRaidedClusters 2, firstRaidDay 3, raidChanceBase 0,5, raidChancePerDay 0,01, raidChanceMax 0,9, basePower 150, powerPerDay 20, bloodMoonMultiplier 2, referenceStructures 12, sizeFactorMin/Max 0,75/1,5, varianceFraction 0,15. Pertahanan: scoreWallWood/Stone 10/25, scoreTrap 15, scoreNpcGuard 20, mitigationK 200, maxMitigation 0,8. Penerapan: hitChunk 60, doorWeight 2, trapWearFraction 0,3, raidStartHourMin/Max 20/23, raidEndHour 5. NPC: npcInjuryChanceMax 0,6, npcInjuryDamage 40, npcDeathChanceOnBreach 0,35, npcGuardDeathMultiplier 0,5, npcGuardMinHpRatio 0,25. Peralihan: takeoverZombiesPerPower 0,02, takeoverMaxZombies 12 |
+| `remoteBase` | #90 | Jarak: remoteDistance 80, returnDistance 60, distanceCheckSeconds 2, clusterRadius 30. Serangan: minStructuresForRaid 4, maxRaidedClusters 2, firstRaidDay 3, raidChanceBase 0,5, raidChancePerDay 0,01, raidChanceMax 0,9, basePower 150, powerPerDay 20, maxPower 2550, bloodMoonMultiplier 2, referenceStructures 12, sizeFactorMin/Max 0,75/1,5, varianceFraction 0,15. Pertahanan: scoreWallWood/Stone 10/25, scoreTrap 15, scoreNpcGuard 20, mitigationK 200, maxMitigation 0,8. Penerapan: hitChunk 60, doorWeight 2, trapWearFraction 0,3, raidStartHourMin/Max 20/23, raidEndHour 5. NPC: npcInjuryChanceMax 0,6, npcInjuryDamage 40, npcDeathChanceOnBreach 0,35, npcGuardDeathMultiplier 0,5, npcGuardMinHpRatio 0,25. Peralihan: takeoverZombiesPerPower 0,02, takeoverMaxZombies 12 |
 | `fire` | #97 | Batas api aktif (maxBurning 24, maxAreas 8, maxCarvedAreas 4), jeda tick, peluang menyala dari area, jeda nyala ulang, batas lompatan vegetasi, pengali cuaca, lama memadamkan, angka area Fireball, serta peluang Fire Axe dan jebakan api unggun |
-| `light` | #98 | Jeda tick, cahaya alam per kondisi, pengali keterlihatan, batas sumber, lampu real-time 6, bayangan 1, dan struktur cahaya 24, aturan cuaca, kedip, tarikan zombie, dan ambang cahaya Zombie Lumut |
+| `light` | #98 | Jeda tick, cahaya alam per kondisi, pengali keterlihatan, batas sumber, lampu real-time 6, bayangan 1, dan struktur cahaya 24, aturan cuaca, kedip, tarikan zombie, dan ambang cahaya Zombie Lumut, interiorMaxRealtimeLights 3 |
 | `flashlight` | #98 | maxBattery 100, drainPerSec 0,2, batteryRecharge 100 |
-| `rescue` | #14 | engineWarmupSeconds 120, engineNoiseRadius 60, engineNoiseIntervalSeconds 5, warmupPanicWaveSize 15, finalNightWaveSize 25, abortDistance 40 |
+| `rescue` | #14 | engineWarmupSeconds 120, engineNoiseRadius 60, engineNoiseIntervalSeconds 5, warmupPanicWaveSize 15, targetNightWaveSize 25, abortDistance 40 |
 | `deathCinematic` | #53 | ragdollForce 300, explosionForceMultiplier 3, sinkDrag 4, slowMoScale 0,35, slowMoSeconds 1,2, cameraRiseSeconds 1,5, cameraHeight 2,5, cameraDistance 3, orbitDegreesPerSecond 12, holdSeconds 3,5, collapseHoldSeconds 5, fadeSeconds 1,5, messageSeconds 2, skipAfterSeconds 2 |
 | `stats` | #57 | flushIntervalSeconds 60 |
 | `narrative` | #99 | beatFadeSeconds 0,5, musicFadeSeconds 1, skipHintSeconds 3, watchdogExtraSeconds 10 |

@@ -77,14 +77,18 @@ Satu baris per `WeatherType`, disimpan sebagai `GameBalanceConfig.environment.we
 
 Hasilnya ditulis oleh **`private void Apply(in EnvState s)`** ke `RenderSettings.fogColor`, `RenderSettings.fogDensity`, `RenderSettings.ambientLight`, `sun.color`, dan `sun.intensity`, hanya kalau berubah lebih dari ambang kecil.
 
+`RenderSettings.ambientLight` dikalikan `SettingsManager.Instance.brightness` (#19). Kalau luminansi hasilnya di bawah `minAmbientLuminance`, naikkan sampai batas itu.
+
 Rotasi matahari ditulis dari `DayNightDirector.Instance.SunRotation`. `RenderSettings.ambientMode` tetap `Flat`, sehingga `DynamicGI.UpdateEnvironment` tidak dipanggil dan tidak ada lonjakan beban.
 
 ### Lapisan event
 
-| ID | Prioritas | Warna fog | Tambahan fog | Pengali matahari | Pemanggil |
-|---|---|---|---|---|---|
-| `BloodMoon` | 30 | `#6B0F12` | 0,01 | 0,8, warna merah | `HordeManager` (#50) |
-| `Eruption` | 20 | `#A5391F` | 0,008 | 0,6, warna jingga | `DisasterManager` (#70) |
+| ID | Prioritas | Warna fog | Tambahan fog | Pengali matahari | Warna langit | Transisi masuk / keluar | Pemanggil |
+|---|---|---|---|---|---|---|---|
+| `BloodMoon` | 30 | `#6B0F12` | 0,01 | 0,8, warna merah | `#801010` | 20 / 10 detik | `HordeManager` (#50) |
+| `Eruption` | 20 | `#A5391F` | 0,008 | 0,6, warna jingga | Tidak ada | `eventBlendSeconds` | `DisasterManager` (#70) |
+
+Warna langit dan transisi `BloodMoon` adalah usulan dari #50. `PushEventLayer` dan `PopEventLayer` tetap sama.
 
 **`public void PushEventLayer(EnvEventId id, float weight)`** dan **`public void PopEventLayer(EnvEventId id)`** dipanggil langsung, karena pengirimnya memang bergantung pada director ini. Saat erupsi, `DisasterManager` memberi bobot 1 kalau region aktif `Volcano`, dan `eruptionRemoteWeight` di region lain.
 
@@ -142,6 +146,7 @@ Tujuannya: Region 2 dan malam terasa perlu senter, tetapi layar tidak hitam tota
 | `RegionalWeather` (#115) | `GetWeather(region)` |
 | `WeatherManager` | Hanya partikel dan audio. Tidak menulis fog dan cahaya |
 | `ZoneManager`, `ZoneTracker` | Sumber region aktif |
+| `SettingsManager` (#19) | `brightness` |
 | `DisasterManager` (#70), `HordeManager` (#50) | `PushEventLayer`, `PopEventLayer` |
 | `PostProcessController` (#23) | Isi efek layar, di luar issue ini |
 | `AmbientAudio` (#52) | Audio area, di luar issue ini |
@@ -182,3 +187,5 @@ Tujuannya: Region 2 dan malam terasa perlu senter, tetapi layar tidak hitam tota
 8. Picu Blood Moon saat erupsi lewat `DevConsole`. **Hasil:** warna Blood Moon menang. Setelah berakhir, kembali ke warna yang tersisa.
 9. Saat fajar, taruh zombie di Region 2 dalam `Storm`. **Hasil:** aturan #63 tetap berlaku.
 10. Simpan di Region 4 malam hari, lalu load. **Hasil:** suasana langsung benar, tanpa transisi.
+11. Ubah `brightness` ke 0,8 dan 1,2 pada malam gelap. **Hasil:** ambient mengikuti, tanpa turun di bawah `minAmbientLuminance`.
+12. Picu Blood Moon. **Hasil:** langit `#801010`, masuk dalam 20 detik, dan keluar dalam 10 detik.

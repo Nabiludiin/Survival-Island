@@ -45,7 +45,7 @@ Daging adalah `Food_RawMeat` (#66), dan kulit adalah `Mat_Hide` (#77). Beruang m
 
 | Variabel | Tipe | Nilai awal | Fungsi |
 |---|---|---|---|
-| `State` | `AnimalState` | `Wander` | State saat ini |
+| `State` | `AnimalState` | `Wander` | State saat ini. Bisa dibaca publik (#114) |
 | `homePoint` | `Vector3` | Posisi spawn | Pusat teritori |
 | `chaseStartPoint` | `Vector3` | - | Titik saat mulai mengejar |
 | `groupId` | `int` | 0 | Dari `SpawnManager`, dipakai kawanan Gagak |
@@ -77,7 +77,7 @@ Daging adalah `Food_RawMeat` (#66), dan kulit adalah `Mat_Hide` (#77). Beruang m
 | State | Masuk saat | Perilaku | Keluar |
 |---|---|---|---|
 | `Wander` | Spawn, tiba di rumah | Jalan ke titik acak dalam `wanderRadius`, tunggu 2 sampai 6 detik | `Alert` |
-| `Alert` | Pemain terdeteksi | Berhenti, menghadap pemain, dan bersuara selama `alertSeconds` | `Chase`, atau `Wander` kalau pemain hilang |
+| `Alert` | Pemain terdeteksi | Berhenti, menghadap pemain, dan bersuara lewat `ThreatAudioEmitter.PlayTell` (#114) selama `alertSeconds` | `Chase`, atau `Wander` kalau pemain hilang |
 | `Chase` | Tanda selesai, atau kena damage di dalam teritori | Mengejar dengan `chaseSpeed` | `Attack`, `ReturnToTerritory`, `TargetUnreachable` |
 | `Attack` | Masuk jarak serangan | Serangan sesuai `attackKind` | `Chase` |
 | `ReturnToTerritory` | Melewati batas atau menyerah | Berjalan ke `homePoint`, dan memulihkan HP | `Wander` |
@@ -141,7 +141,7 @@ Damage selalu lewat `IDamageable.TakeDamage(in DamageInfo)`, dengan `infection =
 
 - `AmbushPerch` adalah penanda di pohon Region 2, dengan satu penghuni.
 - Saat `Wander`, Jaguar menuju perch terdekat, `agent.enabled = false`, lalu naik ke cabang lewat animasi.
-- Saat pemain berada dalam `pounceTriggerRadius` (9 m) dan tidak terhalang, beri tanda selama `pounceTelegraphSeconds` (0,8), berupa geraman dan daun bergoyang.
+- Saat pemain berada dalam `pounceTriggerRadius` (9 m) dan tidak terhalang, beri tanda selama `pounceTelegraphSeconds` (0,8), berupa geraman lewat `ThreatAudioEmitter.PlayTell` (#114) dan daun bergoyang.
 - Lompat lewat kurva parabola selama `pounceSeconds` (0,6) menuju posisi pemain saat tanda selesai. Mendarat dengan `NavMesh.SamplePosition` dan `agent.Warp`. Kalau gagal, panggil `Despawn` dengan `OffNavMesh`.
 - Kena pemain dalam radius 1,5 m: damage 30, lalu `PlayerPinnedState.TryPin(this)` (#110). `WildlifeAI` memakai `IPinAttacker`. Kalau `TryPin` ditolak, misalnya `pinned.enabled = false`, Jaguar hanya mundur dan jeda ulang berjalan. Selama menahan, damage 5 setiap 0,5 detik.
 - Terkaman batal saat Jaguar menerima `pounceBreakDamage` (40), sesuai pola Hunter di `docs/REFERENSI_MUSUH_L4D.md`.
@@ -154,7 +154,7 @@ Damage selalu lewat `IDamageable.TakeDamage(in DamageInfo)`, dengan `infection =
 
 1. Dalam jarak 12 m, beri tanda menggaruk tanah selama `chargeTelegraphSeconds` (1).
 2. Kunci titik tujuan pada garis lurus sejauh `chargeDistance` (12 m), lalu `agent.speed = chargeSpeed` (10). Tujuan tidak berubah lagi, jadi pemain bisa menghindar ke samping.
-3. Setiap tick, `PhysicsQuery.OverlapSphere` dengan `PhysicsMasks.AIAttack` dan buffer tetap. Kena pemain: damage 18, satu kali per serudukan, plus getaran kamera (#24).
+3. Setiap tick, `PhysicsQuery.OverlapSphere` dengan `PhysicsMasks.AIAttack` dan buffer tetap. Kena pemain: damage 18 berjenis `Melee`, satu kali per serudukan. Tidak ada pemanggilan getaran terpisah. Getaran datang otomatis dari `PlayerDamagedEvent`, sebagai `PlayerHit` (#24).
 4. Kena `Structure` atau `Obstacle` lewat ray pendek `AIVision`: pusing selama `chargeStunSeconds` (2). Dinding tidak menerima damage.
 
 **Kawanan Gagak (`FlockDive`):**
@@ -190,6 +190,11 @@ Bangkai yang tidak dikuliti hilang setelah `carcassLifetimeSeconds`, tetap ada s
 
 Saat fajar dan senja keduanya bisa berpapasan. Mereka saling mengabaikan: tidak saling menargetkan, tidak saling memberi damage, dan hanya saling menghindar lewat agen. Lihat bagian 5.
 
+### Api dan suara
+
+- **Api (#97):** tick AI hewan memanggil `FireSystem.Instance.IsNearFire(pos, margin)`, supaya hewan tidak berjalan ke `FireArea`. Prefab hewan memasang `Flammable` dengan profil `Flame_Animal`.
+- **Suara (#114):** prefab semua hewan memasang komponen `ThreatAudioEmitter` dan aset `EnemyCueSet`.
+
 ## 3. Hubungan dengan Sistem Lain
 
 **Event yang dikirim:** tidak ada dari `WildlifeAI`. `EnemyHealth` mengirim `EnemyHitEvent` dan `EnemyKilledEvent`, serta `NoiseEmitter` mengirim `NoiseEmittedEvent`.
@@ -208,6 +213,8 @@ Saat fajar dan senja keduanya bisa berpapasan. Mereka saling mengabaikan: tidak 
 | `InventoryManager`, `ItemUseSystem` (#66) | Menerima hasil buruan |
 | `CampfireManager` (#44), `CraftingStation` (#77) | Memakai `Food_RawMeat` dan `Mat_Hide` |
 | `LuckyMachine` (#72) | Kandang mengenali tag `Animal` |
+| `FireSystem`, `Flammable` (#97) | `IsNearFire` dan profil `Flame_Animal` |
+| `ThreatAudioEmitter` (#114) | Suara tanda, memakai `EnemyCueSet` |
 | `AITraversal` (#94) | `TraversalAgent` untuk link. Respons target tak terjangkau tetap milik blueprint ini |
 
 ## 4. Kasus Khusus

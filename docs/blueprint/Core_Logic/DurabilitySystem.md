@@ -18,17 +18,19 @@ public enum DurabilityState { NoDurability, Normal, Low, Broken, Destroyed }
 
 ## 2. Detail Logika & Fungsi
 
-**`public static void ApplyWear(ItemInstance inst, float amount)`**:
+**`public static DurabilityState ApplyWear(ItemInstance inst, float amount)`**, sesuai `ToolRepairSystem.md`:
 
-1. Selesai lebih awal kalau `ItemData.maxDurability == -1` atau `inst.durability == -1`. `Reward_FireAxe` dan senjata ber-`mod_indestructible` termasuk di sini (#72).
-2. Kurangi `inst.durability`, dengan batas bawah 0.
-3. Kalau `GetState` berubah, terbitkan `DurabilityStateChangedEvent { instanceId, itemId, state }`.
+1. Kalau `inst.durability < 0`, kembalikan `NoDurability`. `Reward_FireAxe` dan senjata ber-`mod_indestructible` termasuk di sini (#72).
+2. Simpan status lama, lalu `inst.durability = Max(0, durability - amount)`.
+3. Hitung status baru lewat `GetState`.
+4. Kalau `Destroyed`, panggil `InventoryManager.RemoveInstance(instanceId)`. `EquipmentManager` lalu menjalankan alur item hancur.
+5. Kalau status berubah, terbitkan `DurabilityStateChangedEvent { instanceId, itemId, state }`.
 
 **`public static DurabilityState GetState(ItemInstance inst)`** mengikuti tabel di `ToolRepairSystem.md`. Durabilitas 0 berarti `Broken`, bukan langsung hilang.
 
-**`public static float GetEffectiveMax(ItemInstance inst)`** menghitung batas setelah pengurangan dari jumlah perbaikan.
+**`public static float GetEffectiveMax(ItemInstance inst, ItemData data)`** menghitung batas setelah pengurangan dari jumlah perbaikan.
 
-**Item hancur:** hanya status `Destroyed` yang memicu `InventoryManager.RemoveInstance(instanceId)`. Pemanggilnya mengikuti `ToolRepairSystem.md`, lalu `EquipmentManager` menangani item aktif yang hilang.
+**Item hancur:** hanya status `Destroyed` yang memicu `InventoryManager.RemoveInstance(instanceId)`, di dalam `ApplyWear` langkah 4. Lalu `EquipmentManager` menangani item aktif yang hilang.
 
 ## 3. Hubungan dengan Sistem Lain
 

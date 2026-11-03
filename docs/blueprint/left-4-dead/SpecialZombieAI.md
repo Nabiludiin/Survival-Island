@@ -17,9 +17,17 @@ public class EnemyData : ScriptableObject
     public float moveSpeed;
     public DamageResistance[] resistances;   // #59
     public AttackData primaryAttack;         // #109
-    public bool canAttackBuildings;          // #78
+    public ThreatProfile threatProfile;      // #108. Zombie: Threat_Zombie, hewan: Threat_Animal
+    public bool canAttackBuildings;          // #78. true untuk ZombieData, false untuk AnimalData
     public bool isLarge;                     // Pengaman macet dan batas AIDirector
+    public float poise;                      // #95
+    public bool canBeStaggered;              // #95
     public bool canBeKnockedBack;            // #95
+    public float knockbackMultiplier;        // #95
+    public bool leavesCarcass;               // #95, dipakai #61
+    public LootTable dropTable;              // #95, #103
+    public float dropChance;                 // #95
+    public bool immuneToTrapSlow;            // #26. Nilai awal false
     public int traversalMask;                // NavMesh area, #94
 }
 
@@ -27,6 +35,9 @@ public class ZombieData : EnemyData
 {
     public SpecialZombieKind kind;
     public AttackData secondaryAttack;       // Boleh kosong
+    public bool hidesFromSun;                // #63. true hanya zombie_desa
+    public float sightMultiplier = 1f;       // #63, dibaca AISensory
+    public float hearingMultiplier = 1f;     // #63, dibaca AISensory
 }
 
 public enum SpecialZombieKind { None, TribalSnare, MossDisguise, MilitaryArmor, FrozenBurst, VillagePounce }
@@ -34,11 +45,19 @@ public enum SpecialZombieKind { None, TribalSnare, MossDisguise, MilitaryArmor, 
 
 `AnimalData` (#61) mewarisi `EnemyData`. Angka statistik berada di aset `ZombieData`. Angka perilaku berada di `GameBalanceConfig.specialZombie`.
 
+**Bangunan (#78):** hewan yang terhalang tidak menyerang bangunan, dan memakai `AnimalState.TargetUnreachable` (#61).
+
+**Kebal lambat jebakan (#26):** `immuneToTrapSlow = true` diisi untuk varian besar, yaitu Zombie Militer. Tank bukan jenis musuh terpisah, melainkan pola pada Zombie Militer.
+
+**Zombie Lumut (#63):** memakai `BushSpawnPoint` lewat `SpawnEntry.useBushPoints` di `SpawnManager.md`.
+
+**Suara (#114):** prefab semua varian memasang komponen `ThreatAudioEmitter` dan aset `EnemyCueSet`.
+
 ### Statistik awal
 
 | Varian | `enemyId` | Region | HP | Kecepatan | Damage serangan utama | Infeksi | `isLarge` |
 |---|---|---|---|---|---|---|---|
-| Standar | `zombie_standar` | Semua | 50 | 4 | 15 | `infection.gainStandard` 5 | Tidak |
+| Standar | `zombie_standar` | 1, 2, 3, dan Fase 1 | 50 | 4 | 15 | `infection.gainStandard` 5 | Tidak |
 | Tribal | `zombie_tribal` | 2 | 80 | 4 | 10 | `infection.gainTribal` 6 | Tidak |
 | Lumut | `zombie_lumut` | 2 | 120 | 5,5 | 30 | `infection.gainMoss` 8 | Tidak |
 | Militer | `zombie_militer` | 3 | 300 | 3 | 30 | `infection.gainMilitary` 10 | Ya |
@@ -135,7 +154,7 @@ Mengikuti rekomendasi di bagian 5, ketiganya menjadi pola perilaku, bukan `enemy
 ### Zombie Tribal: jerat
 
 1. **`TickSpecial`:** kalau jarak ke pemain ada di antara `tribalRangeMin` dan `tribalRangeMax`, jeda selesai, pemain terlihat (`PhysicsQuery.Raycast` dengan `PhysicsMasks.AIVision` tidak mengenai apa pun), dan `PlayerPinnedEvent.Last.isPinned == false`, mulai ancang-ancang.
-2. **Windup:** agen berhenti, animasi mengayun, dan suara peringatan berbunyi. Jerat mengarah ke posisi pemain saat windup berakhir, jadi pemain bisa menghindar ke samping.
+2. **Windup:** agen berhenti, animasi mengayun, dan suara peringatan berbunyi lewat `ThreatAudioEmitter.PlayTell` (#114). Jerat mengarah ke posisi pemain saat windup berakhir, jadi pemain bisa menghindar ke samping.
 3. **Lempar:** `SpawnFromPool("Tribal_Snare", ...)` di layer `Projectile`, bergerak lurus dengan `tribalProjectileSpeed`.
 4. **Kena pemain:** `TribalBehavior` memakai `IPinAttacker`, lalu memanggil `PlayerPinnedState.Instance.TryPin(this)` (#110). Kalau ditolak, jerat kembali ke pool tanpa efek.
 5. **Menahan:** pemain ditarik `tribalPullSpeed`, dan menerima `tribalDamagePerSec` serta infeksi dari `secondaryAttack`.
@@ -161,12 +180,13 @@ Kalau Tribal yang melepas, panggil `PlayerPinnedState.Instance.ReleaseByAttacker
 | Terkena damage | `rage = 1` |
 | `NoiseEmittedEvent` mencakup posisinya | `rage = 1` |
 | Pemain dalam `mossAlertDistance` dan berdiri | `rage += mossRagePerSec * dt` |
-| Sorotan senter dalam `mossLightDistance`, dalam kerucut, dan garis pandang bebas | `rage += mossRagePerSec * dt` |
+| Sorotan senter dalam `mossLightDistance`, `FlashlightController.IsPointInBeam(pos)` bernilai `true`, dan garis pandang bebas | `rage += mossRagePerSec * dt` |
+| `LightSourceSystem.Instance.GetLightLevelAt(pos) >= light.mossStaticLightLevel` (0,5) (#98) | `rage += mossRagePerSec * dt` |
 | Tidak ada ancaman | `rage -= mossRageDecayPerSec * dt` |
 
 Pemain jongkok (#101) yang tidak menyorotkan senter tidak menaikkan `rage`, kecuali masuk `mossWakeDistance`. Pemain jadi bisa memilih menghindar.
 
-**Tanda samar:** semak di tubuhnya tidak bergoyang saat angin, napas pelan terdengar dalam 6 meter, dan mata berkilat singkat setiap `mossTellMinSeconds` sampai `mossTellMaxSeconds`. Tandanya ada di aset prefab, tanpa ikon HUD.
+**Tanda samar:** semak di tubuhnya tidak bergoyang saat angin, napas pelan terdengar dalam 6 meter, dan mata berkilat singkat setiap `mossTellMinSeconds` sampai `mossTellMaxSeconds`. Tandanya ada di aset prefab, tanpa ikon HUD. Napas tetap berupa aset prefab, bukan `ThreatAudioEmitter.PlayTell` (#114).
 
 **Saat bangun:** animasi bangkit 0,6 detik, lalu `Chase` dengan `primaryAttack`. Zombie tidak bisa kembali menyamar.
 
@@ -192,7 +212,7 @@ Pemeriksaan tidak berjalan saat `AttackBuilding` atau di dalam kandang Lucky Mac
 2. Tunggu `frozenBurstDelaySeconds`, dengan tubuh berkilat sebagai tanda.
 3. `PhysicsQuery.OverlapSphere(pos, frozenBurstRadius, PhysicsMasks.Explosion, buffer)`, lalu `CollectUniqueDamageables`. Kirim `DamageType.Explosion` dengan `byPlayer = false`, sesuai tabel friendly fire di #59.
 4. Kalau pemain termasuk korban dan garis pandang bebas, panggil `WarmthSystem.Instance.ApplyColdBurst(frozenBurstWarmthLoss)`.
-5. Kirim `NoiseEmittedEvent`. Mayat diteruskan ke #95.
+5. `NoiseEmitter.Emit(frozenBurstRadius, NoiseSourceKind.Structure)` dari komponen di prefab Zombie Beku (#49). Jenis `Structure` adalah usulan, karena `NoiseSourceKind` belum punya jenis ledakan. Mayat diteruskan ke #95.
 
 `BurnToAshes` saat fajar dan masuk kandang tidak melewati `Died`, jadi tidak meledak.
 
@@ -221,7 +241,7 @@ Pemeriksaan tidak berjalan saat `AttackBuilding` atau di dalam kandang Lucky Mac
 | `AITraversal` (#94) | Membaca `traversalMask` |
 | `LuckyMachine` (#72) | Kuota dihitung saat masuk kandang, dari `enemyId` |
 
-**Event yang dikirim:** `NoiseEmittedEvent` dari ledakan Beku. **Event yang didengar:** `NoiseEmittedEvent` oleh Lumut, dan `PlayerPinnedEvent` oleh Tribal.
+**Event yang dikirim:** `NoiseEmittedEvent` dari ledakan Beku, lewat `NoiseEmitter`. **Event yang didengar:** `NoiseEmittedEvent` oleh Lumut, dan `PlayerPinnedEvent` oleh Tribal.
 
 ## 4. Kasus Khusus
 

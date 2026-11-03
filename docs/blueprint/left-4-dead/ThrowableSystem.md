@@ -100,7 +100,7 @@ Item aktif tidak berganti saat melempar. Viewmodel item aktif turun sebentar lew
 | Efek | Langkah |
 |---|---|
 | `Fire` | `FireSystem.Instance.SpawnFireArea(pos, radius, durationSeconds, damage, byPlayer = true)`, lalu kirim noise, dan kembali ke pool |
-| `Explosion` | `ExplosionDamage.Apply(pos, radius, info)` dengan `type = Explosion` dan `byPlayer = true`. Munculkan efek ledakan dari pool, getarkan kamera (#24), kirim noise, dan kembali ke pool |
+| `Explosion` | `ExplosionDamage.Apply(pos, radius, info)` dengan `type = Explosion` dan `byPlayer = true`. Munculkan efek ledakan dari pool, panggil `CameraShake.PlayAt(CameraShakeKind.Explosion, pos)` (#24), kirim noise, dan kembali ke pool. Damage ledakan ke pemain tidak menghasilkan getaran kedua |
 | `NoiseOnly` | Kirim noise sekali, lalu kembali ke pool |
 | `Lure` | Nyalakan `Light` dan partikel. Kirim noise tiap `noiseIntervalSeconds` selama `durationSeconds`, lalu kembali ke pool |
 
@@ -181,7 +181,7 @@ Batas issue: ledakan tong ada di `EnvironmentalHazard`, api menyebar di #97, dan
 
 - **Objek pool:** `OnSpawned` mengembalikan kecepatan `Rigidbody` ke 0, mematikan `isKinematic`, `Light`, dan partikel, serta mereset `fuseTimer` dan umur. `OnReturned` memanggil `Physics.IgnoreCollision(..., false)`, supaya pengabaian tidak terbawa.
 - **Game dijeda:** `Time.deltaTime` dan fisika berhenti, jadi sumbu dan Suar ikut berhenti. `UIFocusChangedEvent.isGameplayBlocked` memanggil `CancelAim()`.
-- **Permadeath dan save:** jumlah barang ikut `InventoryManager`. `selectedIndex` tersimpan lewat `ISaveable` dengan kunci `world_throwables`. Proyektil yang masih di udara atau Suar yang menyala tidak disimpan. Semua terhapus saat permadeath.
+- **Permadeath dan save:** jumlah barang ikut `InventoryManager`. `selectedIndex` tersimpan lewat `ISaveable` dengan `SaveId = world_throwables` dan `LoadOrder = 60`, sesudah `player_inventory`. Proyektil yang masih di udara atau Suar yang menyala tidak disimpan. Semua terhapus saat permadeath.
 - **Diterkam (#110) atau membawa Heavy Item:** `locks` tidak `None`, sehingga bidikan batal.
 - **Jatuh ke air:** `Water` adalah trigger dan tidak bertabrakan dengan `Projectile`. Saat `Detonate`, periksa `Physics.CheckSphere(pos, 0,2, 1 << Water, QueryTriggerInteraction.Collide)`. Pengecualian ini mencari trigger air, sesuai aturan `PhysicsLayers.md`. Molotov dan Suar padam tanpa efek. Bom tetap meledak.
 - **Proyektil jatuh ke region yang dilepas:** `maxLifetimeSeconds` mengembalikannya ke pool.

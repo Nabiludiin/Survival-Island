@@ -21,7 +21,7 @@ public struct SafetyFinding { public string checkId; public SafetySeverity sever
 | `lastReport` | `List<SafetyFinding>` | Kosong | Hasil pemeriksaan terakhir |
 | `safePoints` | `Vector3[]` | Ukuran `unstuckRingSize` | Riwayat posisi aman |
 | `regionFallbacks` | `RegionSafePoint[]` | Satu per region | Titik buatan tangan, berupa data |
-| `lastTimeWarningDay` | `int` | 0 | Peringatan waktu paling banyak sekali per hari |
+| `lastTimeWarningDay` | `int` | 0 | Peringatan zombie menguat paling banyak sekali per hari |
 | `unstuckCooldownLeft` | `float` | 0 | Sisa jeda |
 | `unstuckRoutine` | `Coroutine` | `null` | Hitung mundur yang berjalan |
 
@@ -148,7 +148,7 @@ Titik riwayat selalu berupa tempat yang pernah diinjak, sehingga pemain tidak bi
 
 `Blocked` berarti ada bug: catat `Debug.LogError` dengan seed dari `RunSeedManager.CurrentSeedText`, dan tampilkan pesan `Terjadi masalah` di build pengembangan. Sistem tidak pernah mengakhiri run.
 
-### Peringatan waktu
+### Peringatan zombie menguat
 
 **`private float EstimateSecondsNeeded()`**:
 
@@ -158,9 +158,9 @@ Titik riwayat selalu berupa tempat yang pernah diinjak, sehingga pemain tidak bi
 4. Lepas landas: `rescue.engineWarmupSeconds`, kalau belum `Departed`.
 5. Kalikan `estimateMargin`.
 
-**Sisa waktu:** `(runDayLimit - currentDay) * dayLengthSeconds + (24 - jam) / 24 * dayLengthSeconds`.
+**Sisa waktu sampai target:** `(GameManager.TargetDay - currentDay) * dayLengthSeconds + (24 - jam) / 24 * dayLengthSeconds`. Hari ke-60 bukan kekalahan, jadi pemeriksaan ini hanya berjalan kalau `GameManager.IsPastTargetDay == false`. Setelah itu `time_budget` selalu `Ok`.
 
-Kalau sisa kurang dari perkiraan, dan `lastTimeWarningDay != currentDay`: kirim notifikasi `Waktu mungkin tidak cukup. Perkiraan kurang n hari` (#22). Peringatan hanya berupa pesan. Game tetap berjalan, dan run tidak dipaksa berakhir. Akhir run tetap ditentukan `GameManager`.
+Kalau sisa kurang dari perkiraan, dan `lastTimeWarningDay != currentDay`: kirim notifikasi `Zombie akan menguat sebelum helikopter siap. Perkiraan kurang n hari` (#22). Peringatan hanya berupa pesan. Game tetap berjalan, dan run tidak dipaksa berakhir. Akhir run tetap ditentukan `GameManager`.
 
 ### Perintah `DevConsole` (#56)
 
@@ -206,8 +206,7 @@ Perintah pengubah kondisi membuat `IsRunTainted` bernilai `true`.
 - **Teleport ke air pasang:** titik riwayat hanya tercatat di luar air. `regionFallbacks` harus berada di atas batas pasang (#91).
 - **Tersangkut saat tenggelam:** `NotAllowed` tidak berlaku, karena mode `Swimming` boleh. Titik tujuan tetap di darat.
 - **Pemain bisa menyalahgunakan untuk kembali cepat:** titik hanya riwayat 60 detik terakhir (12 x 5 detik), dan ada hitung mundur serta cooldown.
-- **Peringatan waktu saat hampir menang:** tetap muncul kalau memang kurang, dan tidak mengubah apa pun.
-- **`HasBridgeBlueprint`:** sistem ini hanya membaca properti `RegionGateSystem`, sehingga tidak terpengaruh perbedaan penyimpanan antara `ObjectiveManager.md` dan `RegionGateSystem.md`.
+- **Peringatan zombie menguat saat hampir menang:** tetap muncul kalau memang kurang, dan tidak mengubah apa pun.
 
 ## 5. Keputusan Desain
 
@@ -224,7 +223,7 @@ Perintah pengubah kondisi membuat `IsRunTainted` bernilai `true`.
 3. **Batu kecil tumbuh lagi:** rekomendasi jadwal normal di #73, ditambah `ForceRegrowStones` sebagai pengaman.
 4. **Keluar dari tersangkut:** rekomendasi tombol di `Pause`, hitung mundur 5 detik yang batal saat kena damage, cooldown 180 detik, dan barang berat dijatuhkan.
 5. **Waktu pemeriksaan:** rekomendasi tiap pergantian hari, dan setelah load.
-6. **Peringatan waktu:** rekomendasi sekali per hari, dengan margin 1,5. Tidak pernah memaksa game berakhir.
+6. **Peringatan zombie menguat:** rekomendasi sekali per hari sebelum hari ke-60, dengan margin 1,5. Tidak pernah memaksa game berakhir.
 
 ## 6. Skenario Tes
 
@@ -242,6 +241,7 @@ Semua memakai `DevConsole` (#56).
 10. Pukul pemain saat hitung mundur. **Hasil:** batal, dan cooldown tidak terpakai.
 11. Pakai lagi dalam 180 detik. **Hasil:** ditolak `Cooldown`.
 12. Pakai saat membawa `Part_Engine`. **Hasil:** barang jatuh di tempat valid.
-13. `setday 58`, tanpa jembatan, lalu tunggu pergantian hari. **Hasil:** peringatan waktu tampil sekali, dan game tetap berjalan.
+13. `setday 58`, tanpa jembatan, lalu tunggu pergantian hari. **Hasil:** peringatan zombie menguat tampil sekali, dan game tetap berjalan.
 14. `setday 60` dengan helikopter `Ready`, lalu `softlockcheck`. **Hasil:** `time_budget` `Ok` kalau jam masih cukup untuk pemanasan.
 15. Mati, lalu run baru. **Hasil:** `softlockcheck` kembali bersih.
+16. `setday 61`, tanpa jembatan, lalu `softlockcheck`. **Hasil:** `time_budget` `Ok`, peringatan tidak tampil, dan pemeriksaan jalur menang tetap berjalan.

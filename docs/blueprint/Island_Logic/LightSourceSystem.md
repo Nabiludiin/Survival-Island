@@ -50,6 +50,7 @@ Keduanya berkategori `Furniture`, `navMode = None` untuk Obor Dinding dan `Avoid
 | `light.ambientDay` / `ambientNight` | 1 / 0,1 | Cahaya alam |
 | `light.ambientAmazonDay` | 0,45 | Siang di Region 2 |
 | `light.ambientInterior` | 0,1 | Dalam `InteriorZone` (#112) |
+| `light.interiorMaxRealtimeLights` | 3 | Usulan. Batas lampu real-time dalam `InteriorZone` (#112) |
 | `light.stormAmbientMultiplier` | 0,7 | Pengali saat `Storm` dan `Blizzard` |
 | `light.visibilityInDark` / `visibilityInLight` | 0,6 / 1 | Pengali `externalVisibility` |
 | `light.flashlightVisibilityBonus` | 0,3 | Tambahan saat senter menyala |
@@ -112,6 +113,7 @@ kalau Region 2 dan siang: ambient = ambientAmazonDay
 kalau InteriorZone.IsPlayerInside: ambient = ambientInterior
 kalau Storm atau Blizzard: ambient *= stormAmbientMultiplier
 tambahan = jumlah GetContribution(sumber, posisiPemain), untuk sumber yang menyala
+kalau InteriorZone.IsPlayerInside: tambahan hanya dari sumber isHeld, yaitu senter dan obor
 PlayerLightLevel = Clamp01(ambient + tambahan)
 visibility = Lerp(visibilityInDark, visibilityInLight, PlayerLightLevel)
 kalau senter menyala: visibility += flashlightVisibilityBonus
@@ -159,6 +161,7 @@ Saat memperbarui `HuntHint`, hub melempar `chance` dengan aliran `Gameplay` (#89
 3. Sumber terpilih: `realLight.enabled = true`. Lainnya: `realLight.enabled = false`, dengan `emissive` tetap menyala. Peralihan memudar selama 0,25 detik.
 4. Hanya sumber terdekat, di luar senter, yang memakai bayangan, sesuai `maxShadowLights`. Sisanya `LightShadows.None`.
 5. Sumber pada `BurnEffect` dan `FireArea` (#97) ikut bersaing dengan skor yang sama.
+6. Kalau `InteriorZone.IsPlayerInside`, batas lampu real-time memakai `interiorMaxRealtimeLights`, dengan senter dan obor pegang tetap menang (#112).
 
 Sumber di atas `maxRegisteredSources` tetap tampil lewat `emissive`, tetapi tidak dihitung. `BuildManager` menolak struktur cahaya baru di atas `maxLightStructures`, dengan pesan `Terlalu banyak lampu`. `ApplyQuality(int lights, int shadows)` dipanggil #19 untuk mengubah batas sesuai setelan grafis.
 
@@ -224,3 +227,4 @@ Sumber di atas `maxRegisteredSources` tetap tampil lewat `emissive`, tetapi tida
 14. Tidur dengan obor menyala. **Hasil:** bahan bakar berkurang sesuai jam yang dilewati.
 15. Save, load, lalu mati dan mulai run baru. **Hasil:** setelah load, sisa bahan bakar sama. Pada run baru, tidak ada lampu tersisa, dan `PlayerVisibility` kembali mengikuti kondisi awal.
 16. Tekan jeda. **Hasil:** bahan bakar dan isi senter tidak berkurang.
+17. Masuk `InteriorZone` dengan lampu base dekat dinding zona. **Hasil:** keterlihatan hanya naik dari senter atau obor, dan lampu real-time tidak melewati `interiorMaxRealtimeLights`.

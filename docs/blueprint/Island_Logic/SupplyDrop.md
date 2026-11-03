@@ -7,7 +7,7 @@
 
 ## 1. Arsitektur & Variabel Utama
 
-`SupplyDropManager` adalah manager per scene di `IslandPhase`, dan memakai `ISaveable` dengan `SaveId` `world_supply`, yang sudah tercatat di `WorldStateSave.md`. Issue #71 memakai baris yang sama, tetapi datanya terpisah di dalam JSON masing-masing sistem.
+`SupplyDropManager` adalah manager per scene di `IslandPhase`, dan memakai `ISaveable` dengan `SaveId` `world_supply`, yang sudah tercatat di `WorldStateSave.md`.
 
 | Kelas | Jenis | Fungsi |
 |---|---|---|
@@ -62,14 +62,14 @@ public enum SupplyDropState { Idle, Scheduled, PlaneInbound, Descending, Landed 
 
 **`private void HandleDaybreak(DaybreakEvent e)`**, memakai `e.day`:
 
-1. Selesai kalau `!enabled`, `state != Idle`, atau `GameManager.CurrentPhase != IslandSurvival`.
+1. Selesai kalau `!enabled`, `state != Idle`, atau `GameManager.Instance.currentPhase != GamePhase.IslandSurvival`.
 2. Selesai kalau `e.day < minDay`, atau `e.day - lastDropDay <= cooldownDays`.
 3. Selesai kalau `e.day % 7 == 0`, karena hari itu milik Weekly Beach Supply (#71).
 4. `var rng = RunSeedManager.Instance.Fork(RandomStreamId.SupplyDrop, e.day)`.
 5. Kalau `rng.NextFloat01() >= dailyChance`, selesai.
 6. `scheduledHour = rng.Range(dropHourMin, dropHourMax + 1)`, lalu `state = Scheduled`.
 
-Harapan: sekitar 5 event dalam 60 hari. Karena berkunci hari, memuat ulang save tidak mengubah hasil undian.
+Harapan: sekitar 5 event tiap 60 hari, dan undian tetap berjalan setelah hari ke-60. Karena berkunci hari, memuat ulang save tidak mengubah hasil undian.
 
 **`private void HandleHour(HourChangedEvent e)`**: kalau `state == Scheduled` dan `e.hour >= scheduledHour`:
 

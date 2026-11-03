@@ -189,7 +189,11 @@ Dengan begitu, GDD tetap terpenuhi karena badan tahan peluru, dan pemain punya c
 | `Explosion`, `Structural` | 1 | Serangan zombie, bencana, dan ledakan |
 | `Fire` | Dari `BuildableData.resistances`: 1 untuk kayu, 0 untuk batu | Mengikuti material (#47) |
 
-**`TakeDamage`**: kurangi HP, terbitkan `StructureDamagedEvent { structureId, hpRatio }`. Saat HP habis, terbitkan `StructureDestroyedEvent { structureId, position }`, lalu nonaktifkan dan hapus objek. Bangunan jarang dibuat dan dihancurkan, jadi tidak memakai `ObjectPooler`. Runtuhan beruntun diatur #79, dan **perbaikan diatur #47**, lewat `public void Repair(float amount)`.
+**`TakeDamage`**: kalikan damage dengan pengali bawaan dan pengali dari `SetDamageMultiplier`, kurangi HP, terbitkan `StructureDamagedEvent { structureId, hpRatio }`. Saat HP habis, terbitkan `StructureDestroyedEvent { structureId, position }`, lalu nonaktifkan dan hapus objek. Bangunan jarang dibuat dan dihancurkan, jadi tidak memakai `ObjectPooler`. Runtuhan beruntun diatur #79, dan **perbaikan diatur #47**, lewat `public void Repair(float amount)`.
+
+**`public void SetDamageMultiplier(DamageType type, float multiplier)`** menyimpan pengali tambahan per jenis damage, dengan nilai awal 1. Dipakai `BaseDoor` saat `Locked` (#78).
+
+**`public void Remove()`**, untuk bongkar bangunan (#79): terbitkan `StructureDestroyedEvent { structureId, position }`, lalu nonaktifkan dan hapus objek tanpa melewati `TakeDamage`.
 
 Serangan zombie ke dinding memakai `DamageType.Structural`, sehingga pengali `Melee` tidak menghalanginya. Kerusakan dari #90 memanggil `TakeDamage` yang sama, karena fungsi pada objek nonaktif tetap bisa dipanggil (#88).
 
@@ -229,7 +233,7 @@ Damage kondisi dari #111 memanggil `ReduceHP` lewat `ApplyVitalDamage`, tanpa `P
 | `Drown` | `Drowned` |
 | `Poison` | `Poison` |
 
-`Infection >= 100` langsung memakai `Zombified`. `LeftOnShip` (#74) dan `TimeExpired` (#82) tidak melewati damage, tetapi langsung lewat `GameManager.TriggerGameOver`.
+`Infection >= 100` tidak membunuh langsung. Kematian `Zombified` hanya terjadi saat HP habis dengan `DamageType.Infection` (GDD bagian 3, baris HP 5 di `VitalsRules.md`). `LeftOnShip` (#74) tidak melewati damage, tetapi langsung lewat `GameManager.TriggerGameOver`.
 
 ### Ledakan dan target unik
 

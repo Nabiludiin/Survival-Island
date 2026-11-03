@@ -167,7 +167,7 @@ Pohon kelapa berada di Region 1 dan Region 2. Buahnya memakai `PickupInteractabl
 | `RegionStreaming` (#88) | `GetRegionAt`, dan `structureRoot` nonaktif saat region dilepas |
 | `BuildMenu` (#79), `BaseHealth` (#59) | Membangun penampung dan HP-nya |
 | `IslandInteractable` (#17) | Kelas dasar dan `PickupInteractable` |
-| `FarmingSystem` (#48) | Memakai air sebagai bahan siram |
+| `FarmingSystem` (#48) | Satu penyiraman memakai 1 `Drink_DirtyWater`, atau 1 `Drink_CleanWater` kalau air kotor habis |
 | `ResourceRespawn` (#73) | Buah kelapa tumbuh kembali |
 | `WorldStateSave` (#80) | Menyimpan isi penampung |
 | `NotificationManager` (#22) | Peringatan |

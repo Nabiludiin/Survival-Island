@@ -8,7 +8,7 @@
 
 | Kelas | Bentuk | Letak | Fungsi |
 |---|---|---|---|
-| `HeavyItemSystem` | Singleton, `ISaveable` (`world_parts`) | Scene `IslandPhase` | Pemilik status semua suku cadang |
+| `HeavyItemSystem` | Singleton, `ISaveable` (`SaveId = world_parts`, `LoadOrder = 100`) | Scene `IslandPhase` | Pemilik status semua suku cadang |
 | `HeavyItemData` | ScriptableObject | Aset | Data tiap suku cadang |
 | `HeavyItem` | `IInteractable` | Prefab, layer dan tag `HeavyItem` | Benda di dunia |
 | `PartRecord` | Kelas serializable | Di dalam `HeavyItemSystem` | Status satu barang, tetap ada walaupun region dilepas |
@@ -73,11 +73,13 @@ public class PartRecord
 
 **`private void BuildRecords()`** berjalan saat `RunStartedEvent { isNewRun = true }`:
 
-1. Baca `RunSeedManager.CurrentLayout.partPointByPart`.
+1. Baca `RunSeedManager.Instance.CurrentLayout.partPointByPart`.
 2. Untuk indeks `i`, ambil titik dari `PartSpawnPointTable`, lalu isi `records[i]` dengan `state = Lying`, `region = Logistic`, dan `lastValidPosition = titik`.
 3. Buat `instances[i]` sekali lewat `Instantiate` sebagai objek `IslandPhase`, lalu matikan sampai `Region4_Village` berstatus `Loaded`.
 
 Titik dipilih acak dari titik buatan tangan, minimal 10 titik untuk 5 barang, sesuai `RunSeedManager.md`. Barang bukan objek pool, karena jumlahnya tetap dan tidak pernah dibuang.
+
+`PartSpawnPointTable` menyimpan `isReachable` tiap titik, yang diisi lewat pemeriksaan Editor. Titik dengan `isReachable = false` tidak boleh dipakai.
 
 ### Mengambil
 
@@ -112,11 +114,11 @@ Barang tidak masuk inventori. Hanya ada satu `CarriedIndex`, sehingga pemain han
 
 ### Melepas dan menjatuhkan
 
-**`public void Drop(DropReason reason)`** dengan `DropReason { Manual, HeavyHit, Pinned, Water, Death, Installed }`:
+**`public void Drop(DropReason reason)`** dengan `DropReason { Manual, HeavyHit, Pinned, Water, Death, Installed, Unstuck }`:
 
 1. Kalau `!IsCarrying`, keluar.
 2. Lepas barang dari `carryAnchor`, `collider.isTrigger = false`, dan `Rigidbody.isKinematic = false`.
-3. Letakkan `dropForwardDistance` di depan pemain. Kalau `PhysicsQuery.Raycast` ke arah itu mengenai `PhysicsMasks.InteractBlock`, letakkan di kaki pemain.
+3. Letakkan `dropForwardDistance` di depan pemain. Kalau `reason == Pinned`, atau `PhysicsQuery.Raycast` ke arah itu mengenai `PhysicsMasks.InteractBlock`, letakkan di kaki pemain.
 4. `ClearSpeedModifier(SpeedModifierId.HeavyItem)`, `state = Lying`, dan `CarriedIndex = -1`.
 5. Terbitkan `HeavyItemChangedEvent { partId, isCarried = false }`.
 
@@ -127,6 +129,7 @@ Barang tidak masuk inventori. Hanya ada satu `CarriedIndex`, sehingga pemain han
 | Diterkam | `PlayerPinnedEvent.isPinned` | `Pinned` |
 | Berenang | `SwimStateChangedEvent.isSwimming` | `Water`. Barang langsung kembali ke posisi valid |
 | Mati | `PlayerDiedEvent` | `Death`, supaya tidak terlihat melayang di `DeathCinematic` (#53) |
+| Keluar dari tersangkut | `ProgressionSafety.UnstuckRoutine` (#116), sebelum teleport | `Unstuck`. Sama seperti `Manual`, tanpa suara jatuh keras |
 
 Air dangkal yang masih bisa dilewati tidak menjatuhkan barang (#13).
 
@@ -155,6 +158,7 @@ Saat `RegionLoadStateChangedEvent` `Unloading`, barang `Lying` di region itu dis
 ### Penanda dan jumlah terpasang
 
 - **Penemuan:** setiap `recoveryCheckSeconds`, barang dalam `discoverRadius` dari pemain menjadi `isDiscovered = true`.
+- **Petunjuk lore (#100):** dengarkan `LoreHintGrantedEvent` dengan `hintKind = PartLocation`. Buat barang `Lying` dengan indeks terkecil yang belum `isDiscovered` menjadi `isDiscovered = true`, lalu pasang penanda kompas. Abaikan kalau semua sudah ditemukan.
 - **Kompas (#30):** `CompassSystem.SetMarker("part_<partId>", position)` untuk barang `isDiscovered` yang `Lying`. Barang yang dibawa tidak ditandai, tetapi helipad ditandai selama `IsCarrying`.
 - **Jumlah terpasang:** HUD mendengar `HelicopterPartInstalledEvent { partId, installed, total }`, lalu menulis `Suku cadang 2 / 5`.
 
@@ -168,28 +172,34 @@ Saat `RegionLoadStateChangedEvent` `Unloading`, barang `Lying` di region itu dis
 
 Barang yang tergeletak di dalam trigger juga terpasang, sehingga pemain tidak dihukum karena barang jatuh di dekat kerangka.
 
+### Suku cadang terdekat
+
+**`public bool TryGetNearestPart(Vector3 position, out HeavyItemData part)`**, dipakai penanda tujuan #81, mencari barang terdekat yang belum dipasang. Fungsi membaca `records`, sehingga tetap bekerja saat region tidak dimuat. Mengembalikan `false` kalau semua sudah dipasang.
+
 ## 3. Hubungan dengan Sistem Lain
 
 **Event yang dikirim:** `HeavyItemChangedEvent`.
 
-**Event yang didengar:** `RunStartedEvent`, `PlayerDamagedEvent`, `PlayerPinnedEvent`, `PlayerDiedEvent`, `SwimStateChangedEvent` (baru, #13), `RegionLoadStateChangedEvent` (#88), dan `RunEndedEvent`.
+**Event yang didengar:** `RunStartedEvent`, `PlayerDamagedEvent`, `PlayerPinnedEvent`, `PlayerDiedEvent`, `SwimStateChangedEvent` (baru, #13), `RegionLoadStateChangedEvent` (#88), `LoreHintGrantedEvent` (#100), dan `RunEndedEvent`.
 
 | Sistem | Hubungan |
 |---|---|
 | `IslandPlayerController`, `PlayerTraversal` (#101) | `SetSpeedModifier`, dan membaca `IsCarrying` |
 | `EquipmentManager` (#60), `SurvivalStats` (#111), `FirstPersonCamera` (#102) | Mendengar `HeavyItemChangedEvent` |
-| `RunSeedManager` (#89) | `CurrentLayout.partPointByPart` |
+| `RunSeedManager` (#89) | `CurrentLayout.partPointByPart`, dan `PartSpawnPointTable` dengan `isReachable` |
 | `RegionStreaming` (#88) | Status muat dan `GetRegionAt` |
 | `RescueEventManager` (#14) | Memanggil `MarkInstalled`, dan menerbitkan `HelicopterPartInstalledEvent` |
 | `CompassSystem` (#30) | Penanda |
 | `BuildManager` | `PhysicsMasks.BuildOverlap` sudah memuat `HeavyItem`, jadi barang tidak bisa tertimbun bangunan |
-| `ProgressionSafety` (#116) | Membaca `records` |
+| `ProgressionSafety` (#116) | Membaca `records`, dan memanggil `Drop(DropReason.Unstuck)` |
+| `ObjectiveManager` (#81) | `TryGetNearestPart` |
+| `LoreCollectibles` (#100) | Menerbitkan `LoreHintGrantedEvent` |
 
 ## 4. Kasus Khusus
 
 - **Objek pool:** barang tidak memakai pool. Debu saat jatuh memakai `VFXManager`.
 - **Game dijeda:** `Rigidbody` dan timer berhenti, dan input `Q` terkunci oleh `IsGameplayInputBlocked`.
-- **Save:** `world_parts` menyimpan semua `PartRecord`. Barang `Carried` tetap `Carried`, dan dipasang kembali ke `carryAnchor` setelah pemain dipulihkan. `HeavyItemChangedEvent` sticky dikirim ulang. `RestoreState` tidak mengirim event.
+- **Save:** `world_parts` (`LoadOrder = 100`) menyimpan semua `PartRecord`, yaitu posisi dan status tiap barang. Tiap suku cadang memakai ID `part_<indeks>` (#80), terpisah dari `partId` data. Barang `Carried` tetap `Carried`, dan dipasang kembali ke `carryAnchor` setelah pemain dipulihkan. `HeavyItemChangedEvent` sticky dikirim ulang. `RestoreState` tidak mengirim event.
 - **Permadeath:** `world_parts` terhapus bersama save run. Run baru memakai susunan baru dari seed baru.
 - **Serangan saat menyeberang seam:** barang jatuh di sisi tempat pemain berada, dan statusnya tetap tercatat walaupun region dilepas.
 - **Fireball, tembakan, dan ledakan:** barang tidak memakai `IDamageable`, jadi tidak bisa hancur. Peluru berhenti di barang, sesuai `PhysicsMasks.Shoot`.
@@ -229,3 +239,7 @@ Barang yang tergeletak di dalam trigger juga terpasang, sehingga pemain tidak di
 11. Bawa barang ke helipad. **Hasil:** `MarkInstalled` berjalan, kecepatan normal, dan HUD menulis `1 / 5`.
 12. Simpan saat membawa, lalu muat. **Hasil:** barang tetap di tangan, dan efeknya aktif.
 13. Mati lalu mulai run baru. **Hasil:** barang kembali ke titik baru, dan jumlah terpasang 0.
+14. Panggil `TryGetNearestPart` saat `Region4_Village` tidak dimuat. **Hasil:** barang terdekat tetap ditemukan dari `records`.
+15. Temukan lore `PartLocation`. **Hasil:** barang indeks terkecil yang belum ditemukan mendapat penanda. Saat semua sudah ditemukan, tidak ada perubahan.
+16. Pakai `Keluar dari Tersangkut` saat membawa barang. **Hasil:** barang jatuh dengan `Unstuck`, tanpa suara jatuh keras.
+17. Jalankan pemeriksaan Editor pada `PartSpawnPointTable`. **Hasil:** tiap titik punya `isReachable` yang benar.

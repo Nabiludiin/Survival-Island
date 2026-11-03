@@ -27,6 +27,12 @@ public enum SpeedModifierId { Surface, Crouch, Water, HeavyItem, Weather, ItemUs
 
 **Prioritas mode:** `Locked`, `Swimming`, `Climbing`, `Sliding`, `Crouching`, lalu `Ground`.
 
+**Fungsi publik untuk `SwimmingController` (#13):**
+
+- `public void SetMode(TraversalMode mode)`: memasang mode, misalnya `SetMode(TraversalMode.Swimming)`.
+- `public void ClearMode(TraversalMode mode)`: kalau `Mode == mode`, kembali ke `Ground`. Kalau tidak, tidak berubah.
+- `public void SetOverWater(bool value)`: mengisi `isOverWater`, yang dibaca `OnLanded`.
+
 ### Pengali kecepatan
 
 Pengali menggantikan `speed /= 2` di `Claude.md`, sehingga tidak berkurang berulang dan bisa ditumpuk dengan badai.
@@ -289,7 +295,7 @@ Tidak ada vault atau memanjat tepian di versi awal. Lihat bagian 5.
 | `IslandInteractable` (#17) | `ClimbableSurface` mewarisinya |
 | `SurfaceDetection` (#86) | `GetSurfaceAt` |
 | `AISensory`, `NoiseEmitter` (#49) | Membaca `IsCrouching`, dan `EmitLanding` |
-| `SwimmingController` (#13) | Memegang mode `Swimming` |
+| `SwimmingController` (#13) | Memegang mode `Swimming` lewat `SetMode` dan `ClearMode`, serta mengisi `isOverWater` lewat `SetOverWater` |
 | `PlayerPinnedState` (#110) | Memakai `SetLocked` dan `ForceDetach` |
 | `HeavyItemSystem` (#69) | Memegang pengali `HeavyItem` |
 | `AITraversal` (#94) | Musuh di tangga dan tepi, di luar issue ini |

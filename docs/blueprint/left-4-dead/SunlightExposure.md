@@ -102,7 +102,7 @@ Biaya maksimal 50 zombie x 1 ray per 2 detik, hanya saat pagi. Karena tiap zombi
 2. Kalau `!EnemyHealth.IsAlive`, selesai. Zombie sudah dibunuh pemain, jadi mayat mengikuti #95.
 3. `IsBurning = true`. `EnemyAI.EnterBurn()`: `AIState.BurnToAshes`, hentikan FSM dan serangan, `agent.enabled = false`, serta lepaskan `PlayerPinnedState` kalau sedang menahan.
 4. Kirim damage mematikan: `EnemyHealth.TakeDamage` dengan `amount = CurrentHP * 1000`, `type = Fire`, `byPlayer = false`, dan `sourceId = "sunlight"`, sehingga armor tidak bisa menahannya. Karena `IsAlive` menjadi `false`, tembakan pemain berikutnya diabaikan, dan `EnemyKilledEvent` terkirim dengan `byPlayer = false`. `EnemyAI` dan #95 mengabaikan `Died` saat `IsBurning`.
-5. `burnEffect.Play()`, dan mainkan animasi terbakar.
+5. `burnEffect.Play()`, dan `anim.Play(AnimIds.Burn)` (#12).
 6. Selama `burnDurationSeconds`, turunkan skala Y dari `baseScale.y` ke 0.
 7. Panggil `SpawnManager.Instance.Despawn(gameObject, DespawnReason.Burned)`.
 
@@ -120,7 +120,7 @@ Zombie yang terbakar tidak menjatuhkan loot, dan #95 melewati mayat serta ragdol
 **`Submerged`:**
 
 1. `agent.enabled = false`, kapsul `Enemy` dan hitbox `EnemyHitbox` dimatikan, serta `EnemyInstance.IsDormantCounted = true`.
-2. Turun sejauh `buryDepth` selama `submergeSeconds`, lalu `Renderer` dimatikan.
+2. Set bool `AnimIds.Dormant = true` (#12). Turun sejauh `buryDepth` selama `submergeSeconds`, lalu `Renderer` dimatikan.
 3. `SunlightExposure.IsProtected = true`.
 4. FSM berhenti, sehingga tidak ada beban AI.
 
@@ -130,7 +130,7 @@ Zombie yang terbakar tidak menjatuhkan loot, dan #95 melewati mayat serta ragdol
 
 1. Jeda acak sampai `emergeStaggerSeconds`, supaya naik bergelombang.
 2. Pilih `emergePoints` acak, `agent.Warp` ke sana, dengan model mulai dari `buryDepth` di bawahnya.
-3. Nyalakan `Renderer`, hitbox, dan kapsul. Naik selama `emergeSeconds`, sambil memainkan efek dan suara.
+3. Nyalakan `Renderer`, hitbox, dan kapsul. Set `AnimIds.Dormant = false`, panggil trigger `AnimIds.Emerge` (#12), lalu naik selama `emergeSeconds`, sambil memainkan efek dan suara.
 4. `spot.Release(this)`, `IsDormantCounted = false`, dan `IsProtected = false`.
 5. Panggil `AISensory.ForceAware(posisi pemain)` kalau pemain berada dalam jarak `huntHintRadius` x 2. Lainnya memakai perburuan biasa (#49).
 6. `agent.speed = ZombieData.moveSpeed * emergeBoostMultiplier` selama `emergeBoostSeconds`, lalu kembali normal. `AIState.Chase`.

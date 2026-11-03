@@ -162,10 +162,11 @@ Issue menulis `additem wood 50`. Perintah menerima alias pendek lewat `ItemDatab
 
 **`GameManager.DebugSetDay(int day)`**:
 
-1. Tolak kalau `day` di luar rentang 1 sampai `MaxDay`. Hari ke-61 diuji dengan `setday 60` lalu menunggu jam melewati 24:00, sesuai #82.
+1. Tolak kalau `day < 1`. Tidak ada batas atas, jadi hari setelah hari ke-60 bisa diuji langsung.
 2. `currentDay = day`.
 3. Terbitkan `DayChangedEvent { newDay = day }` sekali.
-4. Tidak memanggil `AdvanceDay()` berulang, jadi kargo mingguan (#71), bencana (#70), dan pembusukan tidak mengejar hari yang terlewati.
+4. Panggil `CheckDay60Milestone()`, supaya `DayLimitPassedEvent` terkirim kalau hari ke-60 baru terlewat.
+5. Tidak memanggil `AdvanceDay()` berulang, jadi kargo mingguan (#71), bencana (#70), dan pembusukan tidak mengejar hari yang terlewati.
 
 Sistem yang melihat hari lewat `DayChangedEvent` hanya bereaksi pada hari tujuan. Karena jadwal bencana dibuat dari seed (#89), `setday 59` tetap memberi jadwal yang sama.
 
@@ -263,8 +264,8 @@ Sistem gameplay tidak boleh bergantung pada `DevConsole`. Fungsi bernama `Debug*
 4. Ketik `godmode 1`, lalu biarkan zombie menyerang. **Hasil:** HP berhenti di 1, dan `[CHEAT]` tampil.
 5. Ketik `additem wood 50`. **Hasil:** 50 `Mat_Wood` masuk. Saat inventori penuh, sisanya jatuh.
 6. Ketik `setday 59`. **Hasil:** `currentDay` 59, dan `DayChangedEvent` terkirim sekali. Kargo hari ke-56 tidak muncul.
-7. Ketik `setday 60`, lalu `settime 23.9`. **Hasil:** setelah jam lewat 24:00, alur `TimeExpired` berjalan.
-8. Ketik `setday abc` dan `setday 100`. **Hasil:** pesan cara pakai atau rentang, tanpa error.
+7. Ketik `setday 60`, lalu `settime 23.9`. **Hasil:** setelah jam lewat 24:00, `currentDay` 61, `DayLimitPassedEvent` terkirim sekali, dan run tetap berjalan.
+8. Ketik `setday abc` dan `setday 0`. **Hasil:** pesan cara pakai atau rentang, tanpa error. Ketik `setday 100`. **Hasil:** diterima.
 9. Ketik `balance vitals.hungerDrainPerSec 5`. **Hasil:** lapar turun cepat, dan aset asli tidak berubah.
 10. Ketik `eventlog 1`, lalu bunuh zombie. **Hasil:** `EnemyKilledEvent` tercetak.
 11. Ketik `seed 7F3A-91C2`, lalu Run Baru. **Hasil:** seed itu dipakai, dan peringatan tercatat kalau gagal validasi.

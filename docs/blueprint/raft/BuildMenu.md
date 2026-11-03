@@ -21,7 +21,7 @@
 
 ```csharp
 public enum BuildCategory { Structure, Furniture, Defense }
-public enum BuildSlotKind { Cell, Edge }        // Cell: isi sel. Edge: sisi sel, seperti dinding
+public enum BuildSlotKind { Cell, Edge, WallMount }  // Cell: isi sel. Edge: sisi sel, seperti dinding. WallMount: menempel pada dinding (#98)
 public enum SupportRule { GroundOrWall, FloorOrGround, WallBelow }
 public enum NavObstacleMode { None, Carve, Avoid }   // Rincian di raft/BaseNavigation.md (#78)
 public enum HammerMode { Repair, Build, Upgrade, Demolish }
@@ -64,8 +64,15 @@ Biaya mengikuti target base awal di `GameBalanceConfig.md`: 4 dinding, 1 pintu, 
 | `Stairs_Wood` | Tangga | `Cell` | 16 `Mat_Wood` | 200 | `FloorOrGround` | `None` | Tidak ada |
 | `Bed_Basic` | Kasur (#67) | `Cell` | 20 `Mat_Wood` | 100 | `FloorOrGround` | `Avoid` | Tidak ada |
 | `Chest_Wood` | Peti (#46) | `Cell` | 20 `Mat_Wood` | 150 | `FloorOrGround` | `Avoid` | Tidak ada |
+| `Build_Campfire` | Api unggun (#44) | `Cell` | 1 `Kit_Campfire`, lewat `BeginPlacementFromItem` | 100 (usulan) | `FloorOrGround` | `Avoid` | Tidak ada |
+| `Build_SpikeTrap` | Jebakan paku (#26), kategori `Defense` | `Cell` | 6 `Mat_Wood` + 2 `Mat_Stone` | 60 | `FloorOrGround` | `None` | Tidak ada |
+| `Build_BarbedWire` | Kawat berduri (#26), kategori `Defense` | `Cell` | 4 `Mat_Scrap` + 2 `Mat_Wood` | 80 | `FloorOrGround` | `None` | Tidak ada |
+| `Build_WallTorch` | Obor Dinding (#98), kategori `Furniture` | `WallMount` | 2 `Mat_Wood` + 1 `Mat_Cloth` | 50 | Dinding | `None` | Tidak ada |
+| `Build_Lamp` | Lampu (#98), kategori `Furniture` | `Cell` | 4 `Mat_Wood` + 2 `Mat_Scrap` | 80 | `FloorOrGround` | `Avoid` | Tidak ada |
 
-Data dinding batu ada di #47. Meja crafting (#77), api unggun (#44), dan jebakan (#26) menambah `BuildableData` sendiri lewat aturan yang sama.
+Data dinding batu ada di #47. Meja crafting (#77) menambah `BuildableData` sendiri lewat aturan yang sama.
+
+**Api (#97):** semua prefab bangunan kayu wajib memasang `Flammable` dengan profil `Flame_WoodStructure`. `Wall_Stone` dan `Door_Stone` memakai `Flame_Stone`.
 
 ### Layer pada prefab struktur
 
@@ -152,7 +159,7 @@ Menu dibuka dengan sekali klik, bukan ditahan. `UIFocusStack` mematikan Action M
 | `Mode` | `Pressed` | `Held` | `Released` |
 |---|---|---|---|
 | `Build` | `BuildManager.TryExecuteBuild()` | Tidak ada | Tidak ada |
-| `Repair` | `BuildingIntegrity.TryRepairSwing(target)` (#47) | Mengulang sesuai jeda ayunan | Tidak ada |
+| `Repair` | `BuildingIntegrity.TryRepairSwing()` (#47) | Mengulang sesuai jeda ayunan | Tidak ada |
 | `Upgrade` | Mulai hitung tahan (#47) | Melanjutkan hitung | Membatalkan |
 | `Demolish` | Mulai hitung tahan | Melanjutkan hitung | Membatalkan |
 
@@ -168,7 +175,8 @@ Menu dibuka dengan sekali klik, bukan ditahan. `UIFocusStack` mematikan Action M
 2. Panggil `UpdateGhostPosition()`.
 3. `LastError = ValidatePlacement(...)`.
 4. Pasang `ghostValidMat` kalau `None`, atau `ghostInvalidMat` kalau bukan. Material hanya diganti saat hasilnya berubah.
-5. Kirim teks alasan ke HUD saat `LastError` berubah.
+5. Perbarui `GhostStatusIcon` (#104): ikon centang saat `PlacementError.None`. Saat ditolak: pola garis miring pada `ghostInvalidMat`, ikon silang, dan teks `build.error.<PlacementError>`.
+6. Kirim teks alasan ke HUD saat `LastError` berubah.
 
 ### Rotasi dan snap
 
@@ -215,12 +223,12 @@ Kunci sisi memakai nilai kanonik, sehingga sisi utara sel A dan sisi selatan sel
 |---|---|---|
 | 1 | Ada `Selected` | `NoSelection` |
 | 2 | Jarak ke kamera `<= maxBuildDistance` | `OutOfRange` |
-| 3 | Di luar `NoBuildVolume`, yaitu seam dan link (#88), `BridgeSite` (#68), serta helipad dan titik pasang (#14) | `NoBuildZone` |
+| 3 | Di luar `NoBuildVolume`, yaitu seam dan link (#88), `BridgeSite` (#68), helipad dan titik pasang (#14), serta tiap `DiaryBook` (#81, #116) supaya buku tidak tertimbun | `NoBuildZone` |
 | 4 | Permukaan di bawah tapak terbaca lewat `TryGetSurfaceAt`, atau tapak bertumpu pada struktur | `UnknownSurface` |
 | 5 | `SurfaceDetection.Instance.IsBeachFootprint(...)` bernilai `false` | `Beach` |
 | 6 | Selisih tinggi tanah masih boleh | `TooSteep` |
 | 7 | `level < maxLevels` | `MaxLevel` |
-| 8 | `StructureRegistry.Count < maxStructures` | `MaxStructures` |
+| 8 | `StructureRegistry.Count < maxStructures`. Kategori `Defense` juga di bawah `trap.maxTrapsPerRegion`, tanpa menghitung api unggun (#26). Struktur cahaya baru di bawah `light.maxLightStructures` (24), dengan pesan `Terlalu banyak lampu` (#98) | `MaxStructures` |
 | 9 | `PhysicsQuery.OverlapBox` dengan `PhysicsMasks.BuildOverlap` kosong | `Occupied` kalau mengenai `Player`, `Enemy`, atau `NPC`. `Overlap` kalau mengenai yang lain |
 | 10 | Slot grid kosong | `Overlap` |
 | 11 | `StructureRegistry.HasSupport(data, cell, edge, level)` | `NoSupport` |
@@ -244,6 +252,14 @@ Bahan diperiksa paling akhir, supaya alasan yang tampil adalah hal yang perlu pe
 8. Terbitkan `StructureBuiltEvent { structureId, buildableId }`.
 
 Struktur memakai `Instantiate`, bukan `ObjectPooler`, karena jarang dibuat dan hidup lama (`DamagePipeline.md`). `BaseHealth` sudah ada di prefab.
+
+### Penempatan dari item
+
+**`public void BeginPlacementFromItem(string instanceId, BuildableData data)`** (#44) dipanggil `ItemUseSystem`, misalnya untuk `Kit_Campfire`:
+
+1. Palu tidak diperlukan. `Mode = Build`, `Selected = data`, dan `instanceId` dicatat.
+2. Validasi memakai `ValidatePlacement` yang sama, jadi larangan pantai tetap berlaku. Baris 12 memeriksa item itu, bukan `cost`.
+3. Item berkurang hanya setelah penempatan berhasil. Kalau batal, item tetap utuh.
 
 ### Bongkar bangunan
 
@@ -303,7 +319,7 @@ Runtuhan tidak memanggil dirinya sendiri, jadi tidak ada rekursi. Setiap penghap
 
 GDD bagian 4 memberi dua alasan: bangunan "akan hancur oleh air pasang atau dilarang oleh sistem". Blueprint ini mengikuti **dilarang oleh sistem**, dengan alasan air pasang yang dijelaskan di dalam game:
 
-- Hologram merah dengan pesan `Pasir tidak stabil. Air pasang akan menghanyutkan bangunan ini`.
+- Hologram merah dengan pesan dari kunci `build.error.Beach` (#104), yang berisi `Pasir tidak stabil. Air pasang akan menghanyutkan bangunan ini` di tabel kunci.
 - Diary Bab 1 berisi peringatan yang sama (#81).
 - `TideManager` (#91) tidak perlu merusak bangunan, karena bangunan tidak pernah berdiri di pasir.
 
@@ -350,6 +366,10 @@ public class StructureRecord
 | `PhysicsLayers` (#87) | `BuildSurface`, `BuildOverlap`, `Ground`, dan `PhysicsQuery.OverlapBox` |
 | `DamagePipeline` (#59) | `BaseHealth` memakai `maxHP` dan `resistances` dari `BuildableData` |
 | `RegionStreaming` (#88) | `GetStructureRoot`, `GetRegionAt`, dan lokasi seam untuk `NoBuildVolume` |
+| `ItemUseSystem` (#66), `CampfireManager` (#44) | `BeginPlacementFromItem`, dan `Build_Campfire` |
+| `BaseDefense` (#26) | `Build_SpikeTrap`, `Build_BarbedWire`, dan batas jebakan |
+| `FireSystem` (#97), `LightSourceSystem` (#98) | Profil `Flammable`, dan batas struktur cahaya |
+| `LocalizationManager` (#104) | Teks `build.error.<PlacementError>` |
 | `BaseNavigation` (#78) | Membaca `navMode` |
 | `BuildingIntegrity` (#47) | Mode `Repair` dan `Upgrade`, serta `StructureRegistry.ReplaceInstance` saat upgrade |
 | `StorageChest` (#46), `SleepSystem` (#67) | Menjadi `BuildableData` |

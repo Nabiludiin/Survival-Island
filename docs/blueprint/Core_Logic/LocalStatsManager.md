@@ -108,7 +108,7 @@ File ini terpisah dari `survival_save.json`. `WorldStateSave.DeleteRunSave()` ti
 2. `currentRun.dayReached = day`.
 3. Kalau `DevConsole.IsRunTainted` atau `currentRun.isTainted`: `isCommitted = true`, tulis, lalu selesai (#56).
 4. `CommitCounters()`, `totalRuns++`.
-5. `Won`: `totalWins++`. Selain itu: tambah `deaths[reason]`, dan isi `lastDeathReason`. `TimeExpired` dihitung sebagai penyebab.
+5. `Won`: `totalWins++`. Selain itu: tambah `deaths[reason]`, dan isi `lastDeathReason`.
 6. `longestDaySurvived = Max(longestDaySurvived, day)`, `lastSeed = seed`.
 7. `Flush()`.
 

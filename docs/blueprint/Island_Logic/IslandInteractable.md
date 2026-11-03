@@ -161,17 +161,17 @@ return hit.collider.GetComponentInParent<IInteractable>();
 
 ### Prompt dan highlight
 
-**`RefreshPrompt()`** membuat teks seperti `[E] Buka Peti`, dengan `InputManager.GetBindingDisplay(GameInputAction.Interact)` dan `GetPrompt()`. Kalau tombol diganti, teks ikut berubah (#18). Hasilnya dikirim ke `HUDManager.ShowInteraction(string)`, atau `HideInteraction()` kalau kosong.
+**`RefreshPrompt()`** membuat teks seperti `[E] Buka Peti`, dengan kunci `prompt.format` (`[{input:Interact}] {action}`), `InputManager.GetBindingDisplay(GameInputAction.Interact)`, dan `LocalizationManager.Get(promptKey)` (#104). Kalau tombol diganti, teks ikut berubah (#18). Hasilnya dikirim ke `HUDManager.ShowInteraction(string)`, atau `HideInteraction()` kalau kosong.
 
 Teks hanya dibuat ulang kalau target atau alasan penolakan berubah, supaya tidak menghasilkan garbage per frame. Interaksi tahan juga memanggil `HUDManager.SetInteractionProgress(float)`.
 
 **`InteractHighlight`** adalah komponen bersama `IslandInteractable` dan `ShipInteractable`:
 
-| Status | Warna | Kapan |
-|---|---|---|
-| `Off` | Tanpa outline | Tidak dibidik |
-| `Available` | Kuning muda | `CanInteract` menghasilkan `None` |
-| `Blocked` | Merah | `CanInteract` menghasilkan alasan lain, termasuk tangan penuh di #74 |
+| Status | Warna | Penanda selain warna (#104) | Kapan |
+|---|---|---|---|
+| `Off` | Tanpa outline | Tidak ada | Tidak dibidik |
+| `Available` | Kuning muda | Outline utuh dan ikon tangan | `CanInteract` menghasilkan `None` |
+| `Blocked` | Merah | Outline putus-putus, ikon gembok, dan teks `InteractBlockReason` | `CanInteract` menghasilkan alasan lain, termasuk tangan penuh di #74 |
 
 Warna dibaca dari `GameBalanceConfig.interact`. Outline memakai `MaterialPropertyBlock` pada renderer outline yang sudah ada, bukan menambah material ke array, supaya tidak mengalokasi saat hover.
 
@@ -191,6 +191,8 @@ Warna dibaca dari `GameBalanceConfig.interact`. Outline memakai `MaterialPropert
 | Field | Nilai awal | Fungsi |
 |---|---|---|
 | `lootTable` | Dari Inspector | `LootTable` dari #103 |
+| `pointKind` | Dari Inspector | `LootPointKind` titik ini (#103) |
+| `guaranteedItems` | Kosong | `ItemStack[]` yang selalu keluar sebelum isi acak (#103) |
 | `dropPoints` | 3 `Transform` | Titik keluarnya item |
 | `isOpened` | `false` | Sudah dibuka |
 
@@ -198,10 +200,12 @@ Warna dibaca dari `GameBalanceConfig.interact`. Outline memakai `MaterialPropert
 
 1. `isOpened = true`, dan mainkan animasi tutup terbuka.
 2. Buat `var rng = RunSeedManager.Instance.Fork(RandomStreamId.IslandLoot, saveId)`, supaya isinya tetap pada seed yang sama dan tidak berubah setelah load (#89).
-3. Tiap isi peti menjadi `WorldItem` lewat `WorldItemManager.Spawn(..., despawns: false)`. Pemain tidak perlu ruang inventori untuk membuka peti.
-4. Kirim `NoiseEmittedEvent` lewat `NoiseEmitter` komponen peti (#49), dengan radius kecil.
+3. Keluarkan `guaranteedItems`.
+4. Lempar jumlah tumpukan sesuai `pointKind`: `loot.chestRollsMin` sampai `loot.chestRollsMax` untuk `Chest`, atau `loot.bodyRollsMin` sampai `loot.bodyRollsMax` untuk `SoldierBody`. Panggil `TryRoll` sebanyak itu.
+5. Tiap isi peti menjadi `WorldItem` lewat `WorldItemManager.Spawn(..., despawns: false)`. Pemain tidak perlu ruang inventori untuk membuka peti.
+6. Kirim `NoiseEmittedEvent` lewat `NoiseEmitter` komponen peti (#49), dengan radius kecil.
 
-Setelah dibuka, `IsAvailable = false`, jadi prompt tidak muncul lagi.
+Setelah dibuka, `IsAvailable = false`, jadi prompt tidak muncul lagi. Mayat tentara memakai komponen yang sama, dengan `HoldSeconds` 1 dan `pointKind = SoldierBody`.
 
 ### Saat membawa Heavy Item
 
@@ -285,3 +289,7 @@ Barang dilepas dengan tombol `DropHeavyItem`, bukan `E` (#69).
 14. Bidik `WorldItem`, lalu biarkan item hilang karena batas waktu. **Hasil:** prompt hilang tanpa error.
 15. Tinggalkan region sampai dilepas saat prompt tampil, lewat `DevConsole`. **Hasil:** tidak ada error referensi.
 16. Bidik Lucky Machine, lalu tekan `E`. **Hasil:** panel `LuckyMachine` terbuka lewat `UIFocusStack`.
+17. Buka peti dengan `guaranteedItems`. **Hasil:** isi tetap keluar lebih dulu, lalu isi acak sesuai `chestRollsMin` dan `chestRollsMax`.
+18. Geledah mayat tentara. **Hasil:** perlu tahan 1 detik, dengan 1 sampai 2 tumpukan.
+19. Bidik peti saat inventori penuh. **Hasil:** outline putus-putus, ikon gembok, dan teks alasan muncul.
+20. Ganti bahasa dan tombol interaksi. **Hasil:** prompt mengikuti `prompt.format`.
