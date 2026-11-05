@@ -12,7 +12,7 @@ Tujuan utama dari modul ini adalah memberikan tekanan waktu (Time Pressure) kepa
 *   **Efek Lingkungan:** Seiring berjalannya waktu, *script* harus memicu *event* visual/audio:
     *   *T = 45s:* Suara alarm kapal semakin keras.
     *   *T = 30s:* Kamera mulai bergetar (*Camera Shake*).
-    *   *T = 15s:* Air mulai masuk membanjiri lantai kapal (*Rising Water Level*).
+    *   *T = 15s:* Air menyebar ke lantai utama (*Rising Water Level*). Dek bawah sudah mulai basah pada *T = 30s*, mengikuti `ShipHazardManager.md` (#75).
     *   *T = 0s:* Layar *Fade to Black* seketika, menghentikan input pemain.
 
 ### 2. Raycast Looting & Interaction
@@ -21,7 +21,7 @@ Tujuan utama dari modul ini adalah memberikan tekanan waktu (Time Pressure) kepa
 
 ### 3. Limited Starting Inventory
 *   **Logika:** Pemain hanya memiliki jumlah *slot* inventori yang sangat terbatas di fase ini (menggambarkan kepanikan dan kapasitas tangan kosong).
-*   **Base Item:** Pemain secara *default* sudah membawa **Kail** dan **Pistol** terlepas dari apa yang mereka pungut.
+*   **Base Item:** Pemain secara *default* sudah membawa **Kail**, **Pistol**, dan **Pisau** terlepas dari apa yang mereka pungut.
 
 ## 📂 Rekomendasi Script (Untuk Claude)
 Saat mengerjakan folder ini, Claude harus fokus membuat *script* berikut:
@@ -30,4 +30,4 @@ Saat mengerjakan folder ini, Claude harus fokus membuat *script* berikut:
 3.  `ShipPlayerController.cs`: Pengontrol pemain khusus Fase 1 (tidak perlu sistem *crafting* atau menembak di fase ini, murni lari dan *looting*).
 
 ## 🔄 Transisi ke Fase 2
-Ketika *Timer* habis (0s), `GameManager` harus menyimpan `List<Item>` yang berhasil diambil (menyimpannya ke `ScriptableObject` atau `DontDestroyOnLoad`), lalu memuat `Scene` Pulau Utama.
+Transisi data dan perpindahan scene mengikuti `LifeboatExtraction.md` (#74): barang tersimpan lewat `GameManager.SaveShipOutcome`, lalu `RunLifecycle.EnterIslandPhase()` memuat pulau.

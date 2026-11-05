@@ -4,7 +4,7 @@ Selamat datang di repositori proyek **Survival Island**. File `README.md` ini ad
 
 Jika Anda adalah Claude, **baca dokumen ini dengan sangat teliti sebelum mengeksekusi atau menulis kode apapun.**
 
-**Status proyek:** tahap desain. Logika game ditulis dulu sebagai blueprint `.md` mengikuti `GDD.md`. Proyek Unity dan *script* C# belum dibuat.
+**Status proyek:** tahap desain. Logika game ditulis dulu sebagai blueprint `.md` mengikuti `GDD.md`. Proyek Unity dan *script* C# belum dibuat. Nama resmi tercatat di `docs/blueprint/GLOSSARY.md`.
 
 ## 📍 Struktur Direktori Utama
 
@@ -66,7 +66,7 @@ GDD.md → Issue GitHub → Blueprint .md → Pull Request → Script C# → Tes
 Sebelum menyentuh folder kode atau logika, baca file berikut agar memahami dunia game dan batasan-batasannya:
 
 1. **`Survival Island/README.md`:** Memahami cerita dan *feel* game.
-2. **`GDD.md` (Game Design Document):** Dokumen paling krusial. Berisi seluruh aturan game, narasi (insiden kapal, diary), mekanik 4 Region (Gunung Berapi, Amazon, Es, Desa), mekanik siang/malam (Hewan vs Zombie terbakar), dan *Win Condition* (merakit Helikopter dan kabur sebelum batas Hari ke-60).
+2. **`GDD.md` (Game Design Document):** Dokumen paling krusial. Berisi seluruh aturan game, narasi (insiden kapal, diary), mekanik 4 Region (Gunung Berapi, Amazon, Es, Desa), mekanik siang/malam (Hewan vs Zombie terbakar), dan *Win Condition* (merakit Helikopter dan kabur, dengan target Hari ke-60. Melewati Hari ke-60 membuat zombie semakin kuat, tetapi bukan Game Over).
 3. **`README.md` (File ini):** Memahami alur kerja, struktur folder, dan instruksi penulisan.
 4. **`Claude.md`:** Berisi cara kerja, perintah eksekusi, dan standar teknis yang harus dipatuhi.
 
@@ -237,7 +237,7 @@ Blueprint lama memakai bagian 1 dan 2 saja. Lengkapi bagian lainnya saat bluepri
 
 - [ ] Sesuai dengan aturan `GDD.md`, atau jelas ditandai sebagai usulan.
 - [ ] Semua poin checklist issue sudah dikerjakan.
-- [ ] Nama kelas, scene, tag, dan enum mengikuti nama resmi dari issue #85.
+- [ ] Nama kelas, scene, tag, dan enum mengikuti `docs/blueprint/GLOSSARY.md`.
 - [ ] Semua sistem yang dipanggil punya blueprint atau issue.
 - [ ] Musuh, peluru, dan objek yang sering muncul memakai `ObjectPooler`.
 - [ ] Reset status saat objek dipakai ulang dari pool sudah dijelaskan.

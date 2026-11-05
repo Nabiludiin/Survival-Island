@@ -21,22 +21,28 @@ Game dibagi menjadi dua fase utama yang saling berkesinambungan.
 **Fase 2: The Island Survival (60 Days Target)**
 -   **Manajemen Status:** 
     *   **Lapar:** Harus diisi dengan memancing (pakai Kail), berburu hewan, atau *looting*.
+    *   **Haus:** Harus diisi dengan Air Minum Bersih, kelapa, atau air hujan yang ditampung. Air kotor bisa diminum dengan risiko sakit.
     *   **Infeksi:** Terkena serangan zombie akan meningkatkan meteran infeksi. MC memulai dengan formula vaksin dan stok vaksin yang sangat sedikit. Vaksin baru hanya bisa dirakit menggunakan material dari Region 2.
+    *   **Kail:** Selain memancing, Kail bisa menarik barang hanyut dari laut, seperti di game Raft.
+    *   **Barang Lempar:** Molotov, Bom Rakitan, Batu, dan Suar bisa dipakai untuk mengendalikan atau memancing kerumunan zombie.
+    *   **Diterkam:** Beberapa musuh, seperti Jaguar dan Zombie Tribal, bisa menahan pemain. Pemain harus melepaskan diri sendiri, misalnya dengan Pisau.
 -   **Siklus Siang & Malam (Ancaman Ganda):**
-    *   **Siang Hari:** **Zombie akan terbakar dan mati jika terkena sinar matahari.** Oleh karena itu, tidak ada zombie yang berkeliaran di siang hari. Ancaman utama di siang hari murni berasal dari **Hewan Buas** yang agresif menjaga teritori dan *resource*.
+    *   **Siang Hari:** **Zombie akan terbakar dan mati jika terkena sinar matahari.** Oleh karena itu, tidak ada zombie yang berkeliaran di luar ruangan pada siang hari. Sebagian zombie bersembunyi diam di ruang gelap seperti gua, bunker, dan gudang, lalu bangun kalau terganggu. Ancaman utama di luar ruangan pada siang hari berasal dari **Hewan Buas** yang agresif menjaga teritori dan *resource*.
     *   **Malam Hari:** Matahari terbenam dan hewan buas kembali ke sarang. Gelapnya malam memicu **Horde Zombie** keluar dari persembunyiannya untuk memburu MC dan menyerang *base*.
+    *   **Blood Moon:** Setiap 10 hari, malam berubah merah dan gerombolan zombie menyerbu *base* pemain secara besar-besaran.
+    *   **Mengendap (Stealth):** Zombie mendeteksi pemain lewat pandangan dan suara, sehingga pemain bisa menghindar dengan mengendap, kecuali saat Blood Moon.
 -   **Syarat Menang & Game Over (Permadeath):** 
     *   **Menang:** Menyelesaikan rakitan Helikopter di Region 3 dan lepas landas.
-    *   **Kalah / Game Over:** Jika MC **mati** (HP habis karena diserang, lapar, atau infeksi), **maka game akan mengulang dari awal (Reset).** Pemain akan kembali ke Fase 1 (berada di dalam kapal pesiar yang tenggelam) dan harus mengambil barang-barang (looting) dari nol lagi.
+    *   **Kalah / Game Over:** Jika MC **mati** (HP habis karena diserang, lapar, haus, atau infeksi), **maka game akan mengulang dari awal (Reset).** Pemain akan kembali ke Fase 1 (berada di dalam kapal pesiar yang tenggelam) dan harus mengambil barang-barang (looting) dari nol lagi.
     *   **Melewati Hari ke-60:** Bukan Game Over. Pemain tetap bisa bertahan dan kabur dengan helikopter, tetapi zombie akan semakin kuat.
 
 ## 4. Mekanik Base Building & Sistem Diary (Tutorial)
 **Aturan Shelter:**
--   **Restriksi Pantai:** Pemain dilarang keras membangun *base* di atas pasir pantai (akan hancur oleh air pasang atau dilarang oleh sistem). *Base* harus dibangun di daratan luar garis pantai.
+-   **Restriksi Pantai:** Pemain dilarang membangun *base* di atas pasir pantai. Sistem menolak penempatan, dan Diary menjelaskan bahwa air pasang akan menghanyutkan bangunan di sana. *Base* harus dibangun di daratan luar garis pantai.
 -   **Fungsi Base:** Sebagai tempat berlindung dari serangan zombie di malam hari, lokasi meja *crafting*, dan tempat NPC berlindung.
 
 **Sistem Diary (Peninggalan Penghuni Lama):**
-MC akan menemukan *shelter* tua yang hancur. Di dalamnya terdapat buku *Diary* yang berfungsi sebagai *guidebook* dan *lore*:
+MC akan menemukan *shelter* tua yang hancur. Di dalamnya terdapat satu buku *Diary* yang berfungsi sebagai *guidebook* dan *lore*. Bab-babnya terbuka bertahap mengikuti progres pemain:
 -   **Diary Bab 1 (Survival Dasar):** Berisi peringatan untuk tidak tidur di pantai, fakta bahwa zombie terbakar oleh matahari siang, cara membuat api unggun, dan cara memakai kail untuk menangkap ikan di tebing karang.
 -   **Diary Bab 2 (Obat & Infeksi):** Menceritakan bagaimana penulis diary terinfeksi dan berhasil meracik vaksin dari getah pohon dan jamur khusus yang hanya tumbuh di Hutan Tropis (Region 2). Diary ini memberikan *Blueprint Jembatan*.
 -   **Diary Bab 3 (Kebenaran & Pelarian):** Penulis mengungkap bahwa ada helipad dan landasan militer di puncak es (Region 3), tetapi suku cadang helikopternya ditinggalkan di desa bawah (Region 4) saat evakuasi gagal. Ini menjadi panduan objektif akhir pemain.
@@ -52,7 +58,7 @@ Pulau terbagi menjadi 4 Region. Pemain harus membuka aksesnya secara bertahap.
 -   **Sudden Event:** Erupsi Gunung Berapi. Langit menjadi merah dan batu pijar jatuh menghancurkan area sekitar, memaksa MC berlindung.
 
 **Region 2: Hutan Tropis Lebat (Amazon-style)**
--   **Syarat Akses:** MC harus mengumpulkan ratusan kayu dari Region 1 untuk membangun jembatan gantung panjang melewati jurang.
+-   **Syarat Akses:** MC harus mengumpulkan ratusan kayu (nilai awal 500, bisa disetel) dari Region 1 untuk membangun jembatan gantung panjang melewati jurang.
 -   **Deskripsi:** Hutan sangat rapat, gelap meski di siang hari, dan penuh tumbuhan rambat.
 -   **Ancaman Siang:** Macan Tutul (Jaguar) yang menyergap dari pohon, dan Ular Berbisa.
 -   **Ancaman Malam:** Zombie Suku/Tribal, Zombie Lumut (bisa berkamuflase dengan semak-semak) dan zombie standar.
@@ -62,7 +68,7 @@ Pulau terbagi menjadi 4 Region. Pemain harus membuka aksesnya secara bertahap.
 -   **Deskripsi:** Area bersalju dengan suhu ekstrem. Di puncaknya terdapat Pangkalan Militer dan **Landasan Helikopter (Helipad)** beserta kerangka helikopter yang belum selesai.
 -   **Ancaman Siang:** Beruang Kutub dan Serigala Salju.
 -   **Ancaman Malam:** Zombie Militer (mengenakan armor anti-peluru, sangat tebal), Zombie Beku dan zombie standar.
--   **Mekanik Khusus:** MC harus menggunakan pakaian hangat atau membawa obor, jika tidak stamina dan HP akan terkuras karena *Frostbite*.
+-   **Mekanik Khusus:** MC harus menggunakan pakaian hangat atau membawa obor, jika tidak stamina akan terkuras lebih dulu, lalu HP, karena *Frostbite*.
 -   **Aktivitas Utama:** Area ini adalah tempat MC harus merakit helikopter, namun *parts*-nya tidak ada di sini.
 
 **Region 4: Reruntuhan Desa (Pusat Lore & Resource Heli)**
@@ -77,7 +83,7 @@ Pulau terbagi menjadi 4 Region. Pemain harus membuka aksesnya secara bertahap.
 -   **Bencana Acak:** Badai Tropis, Gempa Bumi (dapat merusak *base* yang tidak di-upgrade dindingnya), dan Erupsi Gunung. Bencana ini memaksa pemain selalu menyiapkan cadangan material untuk perbaikan.
 
 ## 7. Unique Mechanic: "The Lucky Machine"
-Sebuah mesin eksperimen aneh (gacha/RNG) peninggalan peneliti terdahulu yang bisa memberikan *skin* senjata, *buff* HP/Stamina permanen, atau senjata ajaib ber-damage tinggi (seperti *Laser Pistol* atau *Fire Axe* tak bisa rusak).
+Mesin eksperimen aneh (gacha/RNG) peninggalan peneliti terdahulu yang terdapat di masing-masing region (satu mesin per region). Mesin bisa memberikan *skin* senjata, *enchant* pada alat atau senjata (misalnya tambahan *damage*), *buff* HP/Stamina permanen, atau senjata ajaib ber-damage tinggi (seperti *Laser Pistol* atau *Fire Axe* tak bisa rusak).
 -   **Cara Mengaktifkan:**
     1.  **Tumbal Zombie:** Mesin ini memiliki area vakum/kandang. MC harus memancing dan menjebak musuh tertentu (misal: 5 Zombie Militer dari Region 3, atau 3 Beruang Kutub) ke dalam mesin.
     2.  **Energi Alam (Gratis):** Mesin akan otomatis menyala dan gratis diputar selama 30 detik saat terjadi *Sudden Event* skala besar, seperti saat Gunung Berapi di Region 1 meletus dan menyalurkan listrik statis. MC harus berani keluar *base* di tengah bencana untuk memutar mesin ini.

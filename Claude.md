@@ -76,12 +76,12 @@ Kalau diminta membuat Pull Request, pakai branch `fitur-<nama-sistem>` dari `mai
 
 ## 🏗️ TAHAP 2: STATE MANAGEMENT & DATA STRUCTURE (UNITY PATTERNS)
 Gunakan pendekatan `Singleton` untuk Manager dan `ScriptableObjects` untuk data item agar rapi.
-- **GameManager.cs:** Mengatur `CurrentPhase` (Enum: `SINKING_SHIP`, `ISLAND_SURVIVAL`), `DayCounter`, dan transisi *scene*.
-- **PlayerStats.cs (MonoBehaviour):** Mengatur `HP` (100), `Stamina` (100), `Hunger` (100 - turun via `Update()` atau Coroutine), `Infection` (0 - naik jika kena *hit* zombie).
-- **InventoryManager.cs:** List dinamis. Selalu simpan *item* inti: `Base_Kail` dan `Base_Pistol`.
-- **TimeManager.cs:** Mengatur *TimeOfDay* (0.0 - 24.0), menggerakkan rotasi `Directional Light` (Matahari/Bulan), dan memicu *event* pergantian hari.
+- **GameManager.cs:** Mengatur `currentPhase` (Enum `GamePhase`: `SinkingShip`, `IslandSurvival`), `currentDay`, dan transisi *scene*.
+- **SurvivalStats.cs (MonoBehaviour):** Mengatur `HP` (100), `Stamina` (100), `Hunger` (100 - turun via `Update()` atau Coroutine), `Thirst` (100 - turun via `Update()` atau Coroutine), `Infection` (0 - naik jika kena *hit* zombie).
+- **InventoryManager.cs:** List dinamis. Selalu simpan *item* inti: `Base_Kail`, `Base_Pistol`, dan `Base_Pisau`.
+- **DayNightDirector.cs:** Mengatur *TimeOfDay* (0.0 - 24.0), menggerakkan rotasi `Directional Light` (Matahari/Bulan), dan memicu *event* pergantian hari.
 
-**Catatan:** Blueprint memakai nama `SurvivalStats` dan `DayNightDirector`. Pisau juga belum diputuskan sebagai item inti. Keduanya dibahas di issue #85.
+**Catatan:** Nama resmi ada di `docs/blueprint/GLOSSARY.md`. Keputusan desain lain yang masih terbuka dicatat di issue #85.
 
 ---
 
@@ -89,19 +89,19 @@ Gunakan pendekatan `Singleton` untuk Manager dan `ScriptableObjects` untuk data 
 
 ### Pilar 1: The "60 Seconds!" Logic (Fase 1 - Kapal Tenggelam)
 - **Mekanik:** `UI Timer` statis dari 60 ke 0 menggunakan `Time.deltaTime`.
-- **Interaksi:** Gunakan `Physics.Raycast` dari tengah kamera (*First-Person*) dengan `LayerMask` khusus *Interactable*. Klik kiri untuk mengambil *loot* atau NPC.
-- **Transisi:** Saat *Timer* <= 0, simpan data ke `GameManager` (bisa lewat `DontDestroyOnLoad`), lakukan *Fade to Black*, dan panggil `SceneManager.LoadScene("IslandPhase")`.
+- **Interaksi:** Gunakan `Physics.Raycast` dari tengah kamera (*First-Person*) dengan `LayerMask` khusus *Interactable*. Tekan `E` untuk mengambil *loot* atau NPC.
+- **Transisi:** Saat *Timer* <= 0, simpan data ke `GameManager` (bisa lewat `DontDestroyOnLoad`), lakukan *Fade to Black*, dan muat scene `IslandPhase` lewat `RunLifecycle`.
 
-**Catatan:** Tombol interaksi dan nama *scene* dibahas di issue #85. Titik aman dibahas di issue #74.
+**Catatan:** Tombol interaksi dan nama *scene* sudah diputuskan di issue #85. Titik aman dibahas di issue #74.
 
 ### Pilar 2: The "Raft" Logic (Fase 2 - Survival & Base Building)
-- **Sistem Lapar & Infeksi:** Coroutine yang mengurangi `Hunger` setiap x detik.
+- **Sistem Lapar, Haus & Infeksi:** Coroutine yang mengurangi `Hunger` dan `Thirst` setiap x detik.
 - **Sistem Crafting & Building:** 
   - Gunakan *Grid Snapping* (pembulatan vektor posisi) saat mode *Build* aktif.
-  - **RESTRIKSI PANTAI:** Gunakan `Physics.Raycast` ke bawah. Jika menyentuh tanah dengan `LayerMask` "Sand/Beach", ubah material *hologram* bangunan menjadi merah dan batalkan instansiasi (*prevent building*).
+  - **RESTRIKSI PANTAI:** Periksa permukaan di bawah *hologram* lewat `SurfaceDetection`. Jika hasilnya `Pasir`, ubah material *hologram* bangunan menjadi merah dan batalkan instansiasi (*prevent building*).
 - **Fishing:** Animasi *cast* sederhana menggunakan *Kail*. Berikan jeda waktu acak (RNG) sebelum ikan tertangkap.
 
-**Catatan:** Deteksi pantai pada satu Terrain dibahas di issue #86.
+**Catatan:** Deteksi pantai pada satu Terrain diatur di issue #86.
 
 ### Pilar 3: The "L4D" Logic (Fase 2 - Combat & AI Director)
 - **AI Musuh (NavMesh):** SEMUA musuh wajib menggunakan `NavMeshAgent` komponen.
@@ -117,11 +117,11 @@ Gunakan pendekatan `Singleton` untuk Manager dan `ScriptableObjects` untuk data 
 ## 🗺️ TAHAP 4: ARSITEKTUR 4 REGION & EVENT DINAMIS
 Gunakan *BoxCollider* (IsTrigger) raksasa sebagai pengenal zona (`ZoneTrigger.cs`):
 1. **Region 1 (Gunung Berapi):** Zona awal. *Sudden Event:* Instansiasi prefab *Fireball* dari langit dengan koordinat acak di sekitar pemain.
-2. **Region 2 (Amazon Tropis):** Gelap (*Fog density* tinggi). Syarat akses: Cek kondisi inventori (`Kayu >= 500`). Jika ya, aktifkan *GameObject* Jembatan.
-3. **Region 3 (Es & Helipad):** Coroutine `FrostbiteTick()`. Kurangi HP per detik jika pemain tidak memiliki atribut *Warmth*.
+2. **Region 2 (Amazon Tropis):** Gelap (*Fog density* tinggi). Syarat akses: Setor kayu sebanyak `GameBalanceConfig.region.bridgeWoodCost` (nilai awal 500). Jika cukup, aktifkan *GameObject* Jembatan.
+3. **Region 3 (Es & Helipad):** Coroutine `FrostbiteTick()`. Kurangi Stamina per detik jika pemain tidak memiliki atribut *Warmth*, lalu kurangi HP setelah Stamina habis.
 4. **Region 4 (Desa Logistik):** Tempat mengambil *Heavy Items* (Prefab Suku Cadang). Saat digenggam, kecepatan pemain menjadi setengah, disable tombol *Sprint* dan *Jump*.
 
-**Catatan:** Blueprint memakai nama `ZoneManager`. Rincian tiap region dibahas di issue #68, #65, #69, #70, dan #92.
+**Catatan:** Nama resminya `ZoneManager`. Rincian tiap region dibahas di issue #68, #65, #69, #70, dan #92.
 
 ---
 
@@ -139,7 +139,7 @@ Gunakan *BoxCollider* (IsTrigger) raksasa sebagai pengenal zona (`ZoneTrigger.cs
 ## ⚠️ TAHAP 6: ATURAN KODE & OPTIMASI (UNITY STANDARD)
 1. **Object Pooling:** JANGAN gunakan `Instantiate()` dan `Destroy()` berulang kali untuk Zombie dan Peluru. Buat `ObjectPooler.cs` untuk mengelola objek mati/hidup guna mencegah *lag/garbage collection spikes*.
 2. **Permadeath:** Jika pemain mati, hapus/reset data `GameManager`, lalu muat ulang *Scene* Kapal Tenggelam (Fase 1).
-3. **Pemisahan Script:** Jangan menumpuk kode. Gunakan prinsip *Single Responsibility* (pisahkan `PlayerMovement`, `PlayerCombat`, `PlayerInventory`).
+3. **Pemisahan Script:** Jangan menumpuk kode. Gunakan prinsip *Single Responsibility* (pisahkan `PlayerMovement`, `PlayerCombat`, `InventoryManager`).
 4. **Ikuti Blueprint:** Kalau kode perlu berbeda dari blueprint, perbarui blueprint dan jelaskan alasannya.
 5. **Reset Pool:** Setiap objek dari pool harus mengembalikan HP, state, skala, dan komponen ke nilai awal.
 6. **Komunikasi:** Gunakan pola dari issue #107. Lepas setiap *event* yang didengar.
@@ -155,7 +155,7 @@ Sebagai AI, kirimkan *script* Unity C# secara modular berdasarkan perintah "Jala
 |---|---|---|---|
 | **1** | Struktur/kerangka `GameManager.cs`, `UIManager.cs`, dan pola *State Management* inti | `GameManager`, `UIManager`, `ObjectPooler`, `SaveSystem` | #85, #107, #87, #82, #83 |
 | **2** | Logika Fase 1 (Sistem Timer Kapal, Raycast Interactable Item) | `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | #74, #75, #102 |
-| **3** | `PlayerMovement.cs` (*First Person Controller* khusus), `PlayerStats.cs`, dan `InventoryManager.cs` | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | #59, #60, #66, #101, #102, #111 |
+| **3** | `PlayerMovement.cs` (*First Person Controller* khusus), `SurvivalStats.cs`, dan `InventoryManager.cs` | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | #59, #60, #66, #101, #102, #111 |
 | **4** | *Day/Night Cycle*, Sistem Lapar/Infeksi, dan *Building Placement* (Raft Logic) | `DayNightDirector`, `SurvivalStats`, `BuildManager`, `ResourceNode`, `CraftingManager` | #64, #73, #77, #78, #79, #86 |
 | **5** | `EnemyAI.cs` (*NavMeshAgent*), *Spawner System* siang/malam, dan Gunplay (L4D Logic) | `EnemyAI`, `MeleeCombatSystem`, `HitboxModifier` | #25, #58, #61, #62, #63, #93, #95, #108, #109 |
 | **6** | Sistem Region (*Zone Triggers*, *Frostbite*, Jembatan Kayu, Mekanik Barang Berat) | `ZoneManager`, `WeatherManager`, `IslandPlayerController` | #65, #68, #69, #88, #92 |
