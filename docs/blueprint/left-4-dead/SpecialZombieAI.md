@@ -260,7 +260,7 @@ Pemeriksaan tidak berjalan saat `AttackBuilding` atau di dalam kandang Lucky Mac
 **Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Runner, Tank, dan Spitter:** rekomendasi digabung sebagai pola pada varian GDD, tanpa `enemyId` baru, karena GDD tidak menyebut ketiganya.
-2. **Zombie Tribal:** rekomendasi jerat jarak 5 sampai 14 meter yang menarik dan menahan. Lepas lewat damage dari pemain, aksi #110, jarak, atau garis pandang terputus. Ambang damage diubah dari 25 menjadi 40 setelah audit, supaya satu tusukan Pisau (25) tidak langsung melepas. Nilai 40 masih menunggu konfirmasi developer (`docs/USULAN_TERBUKA.md`).
+2. **Zombie Tribal:** rekomendasi jerat jarak 5 sampai 14 meter yang menarik dan menahan. Lepas lewat damage dari pemain, aksi #110, jarak, atau garis pandang terputus. Ambang damage diubah dari 25 menjadi 40 setelah audit, supaya satu tusukan Pisau (25) tidak langsung melepas. Nilai 40 sudah diputuskan developer (`docs/USULAN_TERBUKA.md`).
 3. **Zombie Lumut:** rekomendasi `Dormant` dengan amarah bergaya Witch, dan tidak bisa kembali menyamar.
 4. **Zombie Beku:** rekomendasi menurunkan `Warmth`, bukan melambatkan, karena pemain yang membawa barang sudah berkecepatan setengah, dan `Warmth` terhubung ke frostbite di GDD.
 5. **Zombie Desa:** rekomendasi kecepatan 7,5 m/s dan terkaman tanpa pinned.
