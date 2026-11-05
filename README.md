@@ -51,7 +51,7 @@ Kalau dua dokumen berbeda, ikuti urutan ini:
 | 5 | `docs/CATATAN_MEKANIK.md`, `docs/REFERENSI_MUSUH_L4D.md` | Bahan referensi dan usulan, bukan aturan |
 | 6 | `LOGIC/` | Bahan analisis |
 
-Jangan memutuskan sendiri kalau aturannya bertentangan. Catat di [issue #85](https://github.com/Nabiludiin/Survival-Island/issues/85), lalu minta keputusan developer.
+Jangan memutuskan sendiri kalau aturannya bertentangan. Catat di bagian "Masih terbuka" pada `docs/USULAN_TERBUKA.md`, lalu minta keputusan developer. Keputusan yang sudah diambil dipindah ke bagian "Keputusan utama" di file yang sama.
 
 ## ⚙️ AI Developer Workflow (Alur Kerja Claude)
 

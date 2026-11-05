@@ -186,7 +186,7 @@ Darahnya 4000 di Normal, dengan pengali 0,75 di Easy dan 2 di Hard serta Expert.
 
 ## 4. Keputusan sebelum coding
 
-Bagian ini sudah ditutup. Keputusannya ada di `docs/blueprint/GLOSSARY.md` bagian 1, dan usulan yang masih terbuka dicatat di issue #85.
+Bagian ini sudah ditutup. Keputusannya ada di `docs/blueprint/GLOSSARY.md` bagian 1, dan usulan yang masih terbuka dicatat di bagian "Masih terbuka" pada `docs/USULAN_TERBUKA.md`.
 
 | Topik | Keputusan |
 |---|---|
