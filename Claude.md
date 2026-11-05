@@ -19,7 +19,7 @@ Baca juga sesuai tugas:
 
 ### Aturan yang selalu berlaku
 - **GDD adalah sumber utama aturan game.** Urutan prioritas lengkap ada di `README.md`.
-- **Jangan memutuskan desain sendiri.** Kalau aturan bertentangan atau belum jelas, tanyakan ke developer atau catat di issue #85.
+- **Jangan memutuskan desain sendiri.** Kalau aturan bertentangan atau belum jelas, tanyakan ke developer atau catat di bagian "Masih terbuka" pada `docs/USULAN_TERBUKA.md`.
 - **Bedakan aturan dan usulan.** Ide yang belum ada di GDD harus ditulis sebagai usulan.
 - **Kerjakan yang diminta saja.** Permintaan membuat issue tidak berarti mengerjakan blueprint-nya.
 - **Jangan commit, push, membuat Pull Request, atau menutup issue** tanpa perintah developer.
@@ -81,7 +81,7 @@ Gunakan pendekatan `Singleton` untuk Manager dan `ScriptableObjects` untuk data 
 - **InventoryManager.cs:** List dinamis. Selalu simpan *item* inti: `Base_Kail`, `Base_Pistol`, dan `Base_Pisau`.
 - **DayNightDirector.cs:** Mengatur *TimeOfDay* (0.0 - 24.0), menggerakkan rotasi `Directional Light` (Matahari/Bulan), dan memicu *event* pergantian hari.
 
-**Catatan:** Nama resmi ada di `docs/blueprint/GLOSSARY.md`. Keputusan desain lain yang masih terbuka dicatat di issue #85.
+**Catatan:** Nama resmi ada di `docs/blueprint/GLOSSARY.md`. Keputusan desain yang masih terbuka dicatat di bagian "Masih terbuka" pada `docs/USULAN_TERBUKA.md`.
 
 ---
 
