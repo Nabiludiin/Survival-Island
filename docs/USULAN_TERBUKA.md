@@ -9,7 +9,6 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Topik | Kondisi sekarang |
 |---|---|
 | Lucky Machine per region | Kuota Region 1, 2, dan 4 masih usulan (`LuckyMachine.md`). Keempat mesin memakai tabel hadiah yang sama, dengan batas hadiah unik dihitung bersama. Posisi mesin Region 1, 2, dan 4 ditentukan saat layout #88 |
-| Bantuan NPC saat diterkam | GDD bagian 3 menyebut pemain harus melepaskan diri sendiri. `PlayerPinnedState.md` masih membolehkan NPC menolong sebagai nilai awal |
 
 ## Keputusan utama
 
@@ -19,6 +18,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Infeksi mencapai 100 | HP turun bertahap, dan tidak mati seketika |
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
 | Lucky Machine | Satu mesin disetiap Region |
+| Diterkam | Pemain hanya bisa melepaskan diri sendiri. NPC tidak menolong |
 | Fitur tambahan yang dipakai | #96, #106, dan #112 |
 | Fitur yang tidak dipakai | #48, #105, dan #117 |
 | Angka inti | Hari 15 menit, 8 sampai 12 kayu per pohon, 5 suku cadang, dan frostbite 1 HP per detik |
@@ -856,7 +856,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Status sistem | Kini aturan GDD bagian 3 (Diterkam). Untuk Jaguar dan Zombie Tribal, dan pinned.enabled = true |
 | Cara lepas | Menekan Struggle berulang menjadi bawaan, menahan tombol menjadi pilihan aksesibilitas, dan Pisau menjadi cara cepat |
 | Pengaruh stamina, HP, dan infeksi pada kesulitan lepas | Pengali gabungan stamina 0,5, HP 0,75, infeksi 0,75, dengan batas bawah 0,35. Terburuk sekitar 6,3 detik lewat menekan berulang |
-| Peran NPC (menunggu konfirmasi, karena GDD menyebut pemain melepaskan diri sendiri) | NPC Follow atau Attack dalam 8 meter menyerang penyerang dan menambah kemajuan 0,25 per detik. NPC StayAtBase, Work, dan TakeCover tidak menolong |
+| Peran NPC | Diputuskan developer: tidak ada bantuan NPC. Usulan lama: NPC Follow atau Attack dalam 8 meter menyerang penyerang dan menambah kemajuan 0,25 per detik. NPC StayAtBase, Work, dan TakeCover tidak menolong |
 | Musuh lain saat pemain tertahan | Paling banyak 1 penyerang lain dengan damage 50 persen, dan batas tertahan 8 detik |
 | Durabilitas Pisau saat dipakai untuk lepas | Berkurang 5 tiap tusukan. Pisau Broken tidak bisa dipakai sampai diperbaiki |
 | Heavy Item saat diterkam | Barang langsung jatuh di dekat kaki pemain |

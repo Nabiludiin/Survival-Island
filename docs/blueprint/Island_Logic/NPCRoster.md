@@ -118,7 +118,7 @@ Nilai lain sudah ada: `infection.medicVaccineMultiplier` 1,25, dan `crafting.npc
 
 **Menghindari api (#97):** `Think` memanggil `FireSystem.Instance.IsNearFire(pos, margin)` untuk menghindari `FireArea`. NPC tidak memasang `Flammable`.
 
-**Menolong pemain yang diterkam (#110):** NPC `Follow` atau `Attack` dalam `pinned.npcHelpRadius` mendengar `PlayerPinnedEvent`, lalu menyerang `PlayerPinnedState.Attacker.DamageTarget`. Kemajuan `npcHelpProgressPerSec` dihitung `PlayerPinnedState`. NPC `StayAtBase`, `Work`, dan `TakeCover` tidak menolong.
+**Pemain yang diterkam (#110):** NPC tidak menolong, sesuai GDD bagian 3 (pemain melepaskan diri sendiri). Selama `PlayerPinnedState.IsPinned`, NPC tidak memilih `PlayerPinnedState.Attacker` sebagai target, supaya penyerang tidak mati atau lepas karena NPC. NPC tetap boleh melawan musuh lain.
 
 ### Perintah pemain
 
@@ -185,7 +185,7 @@ Sesuai `RegionStreaming.md`:
 
 **Event yang dikirim:** `NPCDiedEvent { npcId, reason }` dari `NPCCompanion` (sudah ada), dan dari `KillNpc` saat objek nonaktif, serta `NPCStateChangedEvent { npcId, state }` (baru).
 
-**Event yang didengar:** `NightfallEvent`, `DaybreakEvent`, `PlayerBaseStateChangedEvent`, `StructureDestroyedEvent`, `PlayerPinnedEvent` (#110), serta event `Unloading` `RegionStreaming`. `NPCRescuedEvent` tidak didengar, karena daftar dikirim lewat `SpawnRescued`.
+**Event yang didengar:** `NightfallEvent`, `DaybreakEvent`, `PlayerBaseStateChangedEvent`, `StructureDestroyedEvent`, serta event `Unloading` `RegionStreaming`. `NPCRescuedEvent` tidak didengar, karena daftar dikirim lewat `SpawnRescued`.
 
 | Sistem | Hubungan |
 |---|---|
@@ -199,7 +199,7 @@ Sesuai `RegionStreaming.md`:
 | `DamagePipeline` (#59) | `IDamageable`, serta aturan friendly fire |
 | `GunController` (#58) | `NPCGunUser` dan `NPC_Pistol` |
 | `BaseNavigation` (#78) | `npcLink`, `RequestNpcPass`, `IsInsideBase`, dan `TryGetBaseAnchor` |
-| `PlayerPinnedState` (#110) | NPC `Follow` atau `Attack` menolong. Kemajuan dihitung di sana |
+| `PlayerPinnedState` (#110) | Dibaca `IsPinned` dan `Attacker`, supaya NPC tidak menyerang penyerang. NPC tidak menolong |
 | `RemoteBaseSimulation` (#90) | `ApplyRemoteDamage`, `KillNpc`, dan membaca `members` |
 | `RescueEventManager` (#14) | `GetAliveNpcIds` |
 | `FireSystem` (#97) | `IsNearFire` |
@@ -260,7 +260,7 @@ Sesuai `RegionStreaming.md`:
 16. Mati, lalu mulai run baru. **Hasil:** tidak ada NPC di pulau sebelum kapal selesai.
 17. Biarkan NPC `Work` di region yang dilepas mati oleh `RemoteBaseSimulation`. **Hasil:** `KillNpc` menerbitkan `NPCDiedEvent` sekali walaupun objek nonaktif, dan skill hilang.
 18. Biarkan zombie menggigit NPC, lalu tekan `E` pada NPC itu. **Hasil:** HP turun, tidak ada nilai infeksi, dan urutan `E` tetap Ikuti, Tunggu, dan Base.
-19. Biarkan pemain diterkam dengan NPC `Follow` dalam 8 meter, lalu ulangi dengan NPC `Work`. **Hasil:** NPC pertama menyerang penyerang, dan NPC kedua tidak.
+19. Biarkan pemain diterkam dengan NPC `Follow` dalam 8 meter. **Hasil:** NPC tidak menyerang penyerang, dan pemain harus lepas sendiri. Setelah lepas, NPC boleh menyerang penyerang itu lagi.
 20. Lempar Molotov di jalur NPC. **Hasil:** NPC menghindari `FireArea`.
 21. Panggil `GetAliveNpcIds` dengan satu NPC mati. **Hasil:** ID NPC itu tidak ada di daftar.
 22. Aktifkan dan hentikan `Work` tukang. **Hasil:** `CraftingManager.SetNpcSpeedMultiplier` menerima 1,5, lalu 1.

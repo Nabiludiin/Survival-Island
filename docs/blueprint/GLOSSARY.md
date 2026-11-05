@@ -140,7 +140,7 @@ Developer sudah menyetujui keputusan berikut.
 | `DirectorPhase` | `Inactive`, `BuildUp`, `SustainPeak`, `PeakFade`, `Relax` | `AIDirector` (#27) |
 | `CrowdTier` | `Close`, `Mid`, `Far`, `Culled` | `HordeCrowdManager` (#93) |
 | `ReachResponse` | `None`, `Surround`, `Retreat`, `RockThrow`, `AttackStructure` | `AITraversal` (#94) |
-| `PinReleaseReason` | `Escaped`, `EscapedWithKnife`, `HelpedByNPC`, `AttackerDamaged`, `AttackerGone`, `TimedOut`, `PlayerDied` | `PlayerPinnedState` (#110) |
+| `PinReleaseReason` | `Escaped`, `EscapedWithKnife`, `AttackerDamaged`, `AttackerGone`, `TimedOut`, `PlayerDied` | `PlayerPinnedState` (#110) |
 | `TrapKind` | `Spike`, `BarbedWire`, `Campfire` | `BaseDefense` (#26) |
 | `ThrowEffect` | `Fire`, `Explosion`, `NoiseOnly`, `Lure` | `ThrowableSystem` (#96) |
 | `LairKind` | `Cave`, `MilitaryBunker`, `VillageWarehouse`, `RuinedHouse` | `ZombieLair` (#112) |

@@ -2,14 +2,14 @@
 **Lokasi:** `docs/blueprint/Island_Logic/PlayerPinnedState.md`
 **Deskripsi Utama:** Keadaan pemain tertahan musuh dan cara melepaskan diri sendirian. Sistem ini mengatur kondisi pemain, sedangkan penyerang dan damage-nya diatur #25 dan #61.
 **Issue:** #110
-**Rujukan GDD:** Bagian 3 (Diterkam: Jaguar dan Zombie Tribal bisa menahan pemain, dan pemain harus melepaskan diri sendiri, misalnya dengan Pisau) dan bagian 5 (Jaguar menyergap dari pohon). Angka, cara lepas, dan bantuan NPC adalah usulan. Polanya berasal dari `docs/REFERENSI_MUSUH_L4D.md` bagian 8.
+**Rujukan GDD:** Bagian 3 (Diterkam: Jaguar dan Zombie Tribal bisa menahan pemain, dan pemain harus melepaskan diri sendiri, misalnya dengan Pisau) dan bagian 5 (Jaguar menyergap dari pohon). Angka dan cara lepas adalah usulan. Tidak ada bantuan NPC, sesuai keputusan developer. Polanya berasal dari `docs/REFERENSI_MUSUH_L4D.md` bagian 8.
 
 ## 1. Arsitektur & Variabel Utama
 
 `PlayerPinnedState` adalah komponen di objek pemain pada scene `IslandPhase`, dengan satu instance. Fase 1 tidak memakainya.
 
 ```csharp
-public enum PinReleaseReason { Escaped, EscapedWithKnife, HelpedByNPC, AttackerDamaged, AttackerGone, TimedOut, PlayerDied }
+public enum PinReleaseReason { Escaped, EscapedWithKnife, AttackerDamaged, AttackerGone, TimedOut, PlayerDied }
 
 public interface IPinAttacker
 {
@@ -17,7 +17,7 @@ public interface IPinAttacker
     Transform LookTarget { get; }     // Titik kepala penyerang
     bool IsPinValid { get; }          // false kalau mati, terbakar, atau kembali ke pool
     void OnPinReleased(PinReleaseReason reason);   // Penyerang masuk Stagger atau jeda sendiri
-    IDamageable DamageTarget { get; } // Target tusukan Pisau dan NPC
+    IDamageable DamageTarget { get; } // Target tusukan Pisau
 }
 ```
 
@@ -48,8 +48,6 @@ public interface IPinAttacker
 | `GameBalanceConfig.pinned.knifeDamage` | 25 | Damage tusukan, sama dengan `MeleeCombatSystem` lama |
 | `GameBalanceConfig.pinned.knifeCooldownSeconds` | 1,5 | Jeda antar-tusukan |
 | `GameBalanceConfig.pinned.knifeDurabilityCost` | 5 | Durabilitas Pisau tiap tusukan |
-| `GameBalanceConfig.pinned.npcHelpRadius` | 8 | Jarak NPC yang bisa menolong |
-| `GameBalanceConfig.pinned.npcHelpProgressPerSec` | 0,25 | Tambahan kemajuan dari NPC |
 | `GameBalanceConfig.pinned.maxPinSeconds` | 8 | Penyerang melepas paksa setelah waktu ini |
 | `GameBalanceConfig.pinned.maxOtherAttackers` | 1 | Musuh lain yang boleh memukul saat pemain tertahan |
 | `GameBalanceConfig.pinned.otherAttackerDamageMultiplier` | 0,5 | Pengali damage musuh lain saat pemain tertahan |
@@ -80,7 +78,7 @@ Semua memakai `Time.deltaTime`, sehingga berhenti saat game dijeda.
 2. Tambah `pinTimer`. Kalau lewat `maxPinSeconds`, panggil `Release(TimedOut)`.
 3. Hitung `mult = EscapeMultiplier()`.
 4. Baca input cara lepas sesuai pilihan pengaturan.
-5. Tambah kemajuan dari NPC. Kalau `EscapeProgress >= 1`, panggil `Release(Escaped)`.
+5. Kalau `EscapeProgress >= 1`, panggil `Release(Escaped)`. Kemajuan hanya berasal dari pemain sendiri.
 
 ### Cara lepas
 
@@ -154,7 +152,7 @@ Dengan 6 tekanan per detik:
 | `InputManager` (#18) | `Struggle` dan `PrimaryPressed` |
 | `PlayerTraversal` (#101), `PlayerInteractor` (#17) | Mengunci gerakan dan interaksi |
 | `FirstPersonCamera` (#102), `CameraShake` (#24) | Arah pandang dan getaran |
-| `NPCCompanion`, `NPCRoster` (#76) | NPC menolong. Lihat bagian 5 |
+| `NPCCompanion`, `NPCRoster` (#76) | NPC tidak menolong, dan tidak menyerang `Attacker` selama pemain tertahan. Lihat bagian 5 |
 | `HeavyItemSystem` (#69) | Menjatuhkan barang saat `isPinned = true` |
 | `EnemyAttack` (#109) | `SetAttackerLimit` membatasi penyerang lain |
 | `WorldStateSave` (#80) | Menunda autosave saat tertahan |
@@ -180,7 +178,7 @@ Dengan 6 tekanan per detik:
 1. **Sifat sistem:** kini aturan GDD bagian 3, untuk Jaguar dan Zombie Tribal. `pinned.enabled = true`.
 2. **Cara lepas:** menekan berulang menjadi bawaan, menahan tombol menjadi pilihan aksesibilitas, dan Pisau menjadi cara cepat. Rekomendasi: pakai ketiganya.
 3. **Pengaruh status:** stamina paling kuat, HP dan infeksi lebih ringan, dengan batas bawah 0,35. Rekomendasi: pakai, supaya pemain yang lemah masih punya peluang.
-4. **Peran NPC (menunggu konfirmasi developer):** GDD bagian 3 menyebut pemain harus melepaskan diri sendiri, jadi bantuan NPC mungkin bertentangan. Sampai diputuskan, nilai awal tetap: NPC dengan state `Follow` atau `Attack` dalam `npcHelpRadius` menyerang `Attacker.DamageTarget` dan menambah kemajuan `npcHelpProgressPerSec`. NPC `StayAtBase`, `Work`, dan `TakeCover` tidak menolong. Rekomendasi: pakai.
+4. **Peran NPC:** diputuskan developer, NPC tidak menolong. Pemain hanya bisa melepaskan diri sendiri, sesuai GDD bagian 3. NPC juga tidak menyerang `Attacker` selama pemain tertahan (`NPCRoster.md`).
 5. **Musuh lain:** paling banyak 1 penyerang lain dengan damage 50 persen, serta batas tertahan 8 detik. Rekomendasi: pakai.
 6. **Durabilitas Pisau:** berkurang 5 tiap tusukan. Pisau rusak tidak bisa dipakai, sampai diperbaiki lewat `ToolRepairSystem`. Rekomendasi: pakai.
 7. **Heavy Item:** barang langsung jatuh. Rekomendasi: pakai, karena dua tangan terpakai dan pemain butuh tangan untuk melawan.
@@ -196,7 +194,7 @@ Dengan 6 tekanan per detik:
 6. Atur Pisau `Broken`, lalu tekan klik kiri. **Hasil:** tusukan ditolak, dan `Space` tetap berfungsi.
 7. Tertahan sambil membawa Heavy Item. **Hasil:** barang jatuh, `HeavyItemChangedEvent.isCarried = false`, dan barang bisa diambil lagi setelah lepas.
 8. Tertahan bersama 5 zombie di sekitar. **Hasil:** hanya 1 zombie lain yang memukul, dengan damage 50 persen.
-9. Tertahan dengan NPC `Follow` dalam 8 meter. **Hasil:** NPC menyerang penyerang, dan kemajuan naik tanpa tekanan tombol.
+9. Tertahan dengan NPC `Follow` di dekat pemain. **Hasil:** NPC tidak menyerang penyerang, dan kemajuan tidak naik tanpa tekanan tombol.
 10. Bunuh penyerang lewat `DevConsole` saat menahan. **Hasil:** pemain langsung lepas. Ulangi dengan mengirim penyerang kembali ke pool, dan pastikan hasilnya sama.
 11. Jeda game saat tertahan selama 10 detik. **Hasil:** `pinTimer` dan `EscapeProgress` tidak berubah.
 12. Mati saat tertahan. **Hasil:** `PlayerDiedEvent` satu kali, `Attacker` kosong, dan run berikutnya mulai tanpa kunci.

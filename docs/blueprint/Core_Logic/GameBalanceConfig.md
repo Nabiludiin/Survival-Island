@@ -244,7 +244,7 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 | `specialZombie` | #25 | Angka perilaku varian: jerat Tribal, amarah Lumut, lambat Militer, ledakan Beku, terkaman Desa, dan pengaman macet varian besar. Statistik HP dan kecepatan ada di aset `ZombieData` |
 | `aiDirector` | #27 | `threatCurve` per hari, pengali region, waktu tahap Director, intensitas, ukuran mob, batas kecepatan zombie, dan pengali setelah hari ke-60: postTargetCountPerDay 0,02, postTargetCountMax 1,5, postTargetHpPerDay 0,02, postTargetHpMax 2, postTargetDamagePerDay 0,01, postTargetDamageMax 1,5 (keputusan developer, juga dipakai Blood Moon dan penyergapan) |
 | `crowd` | #93 | Kapasitas agen, batas tick per frame, interval per tingkatan, ambang update tujuan, kelompok, avoidance, buffer overlap, dan stagger animasi |
-| `pinned` | #110 | enabled, kemajuan lepas, biaya stamina, pengali status, Pisau, bantuan NPC, batas tertahan, batas penyerang lain, dan waktu kebal |
+| `pinned` | #110 | enabled, kemajuan lepas, biaya stamina, pengali status, Pisau, batas tertahan, batas penyerang lain, dan waktu kebal |
 | `trap` | #26 | Damage, jeda, keausan, dan suara Spike Trap, kawat, dan api unggun, serta batas jebakan per region |
 | `throwable` | #96 | enabled true, gaya, sumbu, radius, damage, durasi, dan noise tiap barang, serta bidikan, jeda lempar, dan batas Suar |
 | `lair` | #112 | enabled true, radius aktif, pemicu Dormant, pintu keluar, HP sarang, pengurangan horde, dan porsi zombie yang keluar saat malam |
