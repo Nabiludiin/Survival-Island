@@ -12,11 +12,13 @@ Jika Anda adalah Claude, **baca dokumen ini dengan sangat teliti sebelum mengeks
 Survival-Island/
 ├── README.md                     # Alur kerja proyek (file ini)
 ├── GDD.md                        # Aturan game dan sumber utama desain
-├── Claude.md                     # Cara kerja dan standar teknis Claude
+├── Claude.md                     # Cara kerja dan standar teknis Claude untuk seluruh proyek
 ├── docs/
 │   ├── CATATAN_MEKANIK.md        # Catatan mekanik 60 Seconds!, Raft, dan L4D
 │   ├── REFERENSI_MUSUH_L4D.md    # Referensi perilaku dan angka musuh
+│   ├── USULAN_TERBUKA.md         # Keputusan developer dan keputusan yang masih terbuka
 │   └── blueprint/
+│       ├── GLOSSARY.md           # Nama resmi scene, manager, enum, tag, dan layer
 │       ├── 60-seconds/           # Fase 1: kapal tenggelam
 │       ├── raft/                 # Status, gathering, dan base building
 │       ├── left-4-dead/          # Siklus ancaman, AI musuh, spawn, dan gunplay
@@ -25,8 +27,12 @@ Survival-Island/
 ├── LOGIC/                        # Bahan referensi game asli, bukan kode proyek
 └── Survival Island/
     ├── README.md                 # Cerita, feel, dan gambaran game
-    └── LOGIC/                    # Lokasi output script C# nantinya
+    ├── Claude.md                 # Perintah khusus Claude saat menulis kode C# (Mode 3)
+    └── LOGIC/
+        └── README.md             # Lokasi kode gabungan C#, struktur folder, dan status tiap Langkah
 ```
+
+`LOGIC/` di root dan `Survival Island/LOGIC/` adalah dua folder berbeda. Yang pertama hanya bahan analisis dari game referensi. Yang kedua adalah tempat *script* C# proyek ini.
 
 ### Tempat menaruh blueprint
 
@@ -129,6 +135,8 @@ Mulai tahap ini setelah blueprint yang dibutuhkan selesai. Perintahnya mengikuti
 * **Lokasi Output / Penyatuan File:**
   Semua *script* hasil penggabungan logika **HARUS** disimpan ke dalam folder utama:
   👉 `Survival-Island\Survival Island\LOGIC`
+
+  Struktur sub-folder dan status tiap Langkah ada di `Survival Island/LOGIC/README.md`. Aturan khusus menulis kode ada di `Survival Island/Claude.md`.
 
 * **Standar Penulisan:**
 

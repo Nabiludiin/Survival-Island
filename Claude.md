@@ -15,7 +15,9 @@ Sebelum mulai bekerja, Anda **DIWAJIBKAN** membaca file berikut:
 Baca juga sesuai tugas:
 - Blueprint terkait di `docs/blueprint/`.
 - `docs/CATATAN_MEKANIK.md` dan `docs/REFERENSI_MUSUH_L4D.md` untuk referensi mekanik.
+- `docs/USULAN_TERBUKA.md` untuk keputusan developer dan keputusan yang masih terbuka.
 - Issue terkait di GitHub, termasuk yang disebut di bagian "Batasan".
+- `Survival Island/Claude.md` dan `Survival Island/LOGIC/README.md` saat menulis kode C# (Mode 3).
 
 ### Aturan yang selalu berlaku
 - **GDD adalah sumber utama aturan game.** Urutan prioritas lengkap ada di `README.md`.
@@ -61,7 +63,7 @@ Kalau diminta membuat Pull Request, pakai branch `fitur-<nama-sistem>` dari `mai
 
 1. Cek tabel prasyarat di Tahap 7.
 2. Kalau blueprint prasyarat belum selesai, laporkan dulu dan tanyakan apakah tetap lanjut.
-3. Tulis *script* modular di `Survival Island/LOGIC`, sesuai blueprint dan aturan Tahap 6.
+3. Tulis *script* modular di `Survival Island/LOGIC`, sesuai blueprint, aturan Tahap 6, dan aturan tambahan di `Survival Island/Claude.md`. Perbarui status Langkah di `Survival Island/LOGIC/README.md`.
 4. Beri komentar pada kode yang mengimplementasikan fitur GDD.
 5. Sebutkan yang sudah diuji dan yang belum. Jangan menyebut berhasil kalau belum dijalankan di Unity.
 
@@ -107,7 +109,9 @@ Gunakan pendekatan `Singleton` untuk Manager dan `ScriptableObjects` untuk data 
 - **AI Musuh (NavMesh):** SEMUA musuh wajib menggunakan `NavMeshAgent` komponen.
 - **Siklus Ancaman Dinamis:**
   - **Siang Hari:** *Spawn* **Hewan Buas** (Serigala, Jaguar). AI State: *Wander* dan *Chase* (teritorial). Pastikan semua Zombie memainkan animasi terbakar saat matahari terbit, lalu kembali ke `ObjectPooler`.
-  - **Malam Hari:** *Spawn* **Horde Zombie**. AI State: *Aggro* penuh mengejar transform pemain. Jika terhalang objek dengan *tag* "BaseWall", ubah *state* ke *AttackBuilding*.
+  - **Malam Hari:** *Spawn* **Horde Zombie**. Zombie mendeteksi pemain lewat pandangan dan suara, sehingga pemain bisa menghindar dengan mengendap (`AISensory`). Setelah mendeteksi, zombie mengejar transform pemain. Jika terhalang objek dengan *tag* "BaseWall", ubah *state* ke *AttackBuilding*.
+  - **Blood Moon:** Setiap 10 hari, horde besar menyerbu *base* dan zombie mengabaikan Stealth (*Aggro* penuh). Diatur `HordeManager`.
+- **Diterkam:** Jaguar dan Zombie Tribal bisa menahan pemain. Pemain hanya bisa lepas sendiri, tanpa bantuan NPC (`PlayerPinnedState`).
 - **Gunplay:** Gunakan *Raycast Shooting* untuk Pistol dengan partikel *Muzzle Flash*. Hitung *damage* berbasis *Collider* (headshot = 2x *damage*).
 
 **Catatan:** Pengecualian Zombie Desa dibahas di issue #63.
@@ -115,8 +119,8 @@ Gunakan pendekatan `Singleton` untuk Manager dan `ScriptableObjects` untuk data 
 ---
 
 ## 🗺️ TAHAP 4: ARSITEKTUR 4 REGION & EVENT DINAMIS
-Gunakan *BoxCollider* (IsTrigger) raksasa sebagai pengenal zona (`ZoneTrigger.cs`):
-1. **Region 1 (Gunung Berapi):** Zona awal. *Sudden Event:* Instansiasi prefab *Fireball* dari langit dengan koordinat acak di sekitar pemain.
+Gunakan *BoxCollider* (IsTrigger) raksasa di layer `ZoneTrigger` sebagai pengenal zona (`ZoneManager`):
+1. **Region 1 (Gunung Berapi):** Zona awal. *Sudden Event:* Ambil prefab *Fireball* dari `ObjectPooler` dan jatuhkan dari langit dengan koordinat acak di sekitar pemain.
 2. **Region 2 (Amazon Tropis):** Gelap (*Fog density* tinggi). Syarat akses: Setor kayu sebanyak `GameBalanceConfig.region.bridgeWoodCost` (nilai awal 500). Jika cukup, aktifkan *GameObject* Jembatan.
 3. **Region 3 (Es & Helipad):** Coroutine `FrostbiteTick()`. Kurangi Stamina per detik jika pemain tidak memiliki atribut *Warmth*, lalu kurangi HP setelah Stamina habis.
 4. **Region 4 (Desa Logistik):** Tempat mengambil *Heavy Items* (Prefab Suku Cadang). Saat digenggam, kecepatan pemain menjadi setengah, disable tombol *Sprint* dan *Jump*.
@@ -127,9 +131,9 @@ Gunakan *BoxCollider* (IsTrigger) raksasa sebagai pengenal zona (`ZoneTrigger.cs
 
 ## 🎰 TAHAP 5: SISTEM KHUSUS (DIARY & LUCKY MACHINE)
 - **Diary UI:** Saat berinteraksi dengan buku, aktifkan *Canvas/Panel* berisi teks, dan set `Time.timeScale = 0` (Pause).
-- **Lucky Machine:**
-  - *Trigger* 1: *Collider OnTriggerEnter* yang mengecek *Tag* Zombie Spesifik. Hitung hingga kuota penuh.
-  - *Trigger* 2: Terhubung dengan sistem cuaca (*Sudden Event*).
+- **Lucky Machine:** Satu mesin di setiap region.
+  - *Trigger* 1: *Collider OnTriggerEnter* di kandang yang mengecek musuh tertentu (zombie atau hewan buas) sesuai kuota region mesin itu. Hitung hingga kuota penuh.
+  - *Trigger* 2: Mode gratis 30 detik saat *Sudden Event* besar (`MajorDisasterStartedEvent` dari `DisasterManager`).
   - Berikan *reward* *weapon stats modifier* atau *spawn item* dari kumpulan *array rewards* (Gacha RNG).
 
 **Catatan:** Rincian dibahas di issue #72, #81, dan #83.
