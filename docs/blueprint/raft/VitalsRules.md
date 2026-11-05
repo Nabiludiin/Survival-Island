@@ -32,8 +32,8 @@
 | `bool CanUseStamina(StaminaUse use)` | Pengontrol, melee | Pemeriksaan tanpa mengurangi |
 | `SetDrowning(bool)` | `SwimmingController` (#13), `ShipHazardManager` (#75) | Kondisi tenggelam |
 | `SetPenalty(VitalPenaltySource, float maxStaminaMultiplier, float staminaRegenMultiplier)` | #64, #69, #20 | Penalti dari sistem lain |
-| `SetMaxBonus(float hpMultiplier, float staminaMultiplier)` | `StatusEffectManager` (#20), untuk buff `Permanent` Lucky Machine (#72) | Pengali naik untuk `MaxHP` dan `MaxStamina`. Nilai awal 1. Nama fungsi adalah usulan |
-| `SetRegenBlocked(bool)` | `StatusEffectManager` (#20) | Menahan regenerasi stamina |
+| `SetMaxBonus(float hpMultiplier)` | `StatusEffectManager` (#20), untuk buff `Permanent` Lucky Machine (#72) | Pengali naik untuk `MaxHP`. Nilai awal 1. Bonus `MaxStamina` lewat `SetPenalty(StatusEffect, ...)`. Nama fungsi adalah usulan |
+| `SetHPRegenBlocked(bool)` | `StatusEffectManager` (#20), dari `blocksHPRegen` penyakit (#45) | Menahan pemulihan HP alami (baris HP 6). Regenerasi stamina tidak terpengaruh |
 | `SetDrainMultiplier(float)` | `SleepSystem` (#67) | Pengali lapar dan haus. Nilai awal 1 |
 | `SetDrainEnabled(bool)` | `LifeboatExtraction.PreGameRoutine` (#74) | Mematikan lapar dan haus di Fase 1 |
 | `SetInvulnerable(bool)` | `DevConsole` (#56), #74 | Menahan HP di 1, dan infeksi di 99 |
@@ -131,6 +131,7 @@ void TickHP(float dt)
 - `Infection < regenMaxInfection`
 - `Time.time - lastDamageTime >= regenDelayAfterDamageSeconds`
 - Tidak ada baris 1 sampai 5 yang aktif
+- `SetHPRegenBlocked(true)` tidak aktif (penyakit dengan `blocksHPRegen`, #20 dan #45)
 
 Damage kondisi tidak mengubah `lastDamageTime`. Pemulihan sudah tertahan oleh syarat terakhir. #67 dapat mengalikan `regenPerSec` saat tidur.
 
@@ -141,11 +142,14 @@ Damage kondisi tidak mengubah `lastDamageTime`. Pemulihan sudah tertahan oleh sy
 ```csharp
 Hunger -= b.hungerDrainPerSec * drainMultiplier * difficulty.hungerMultiplier * dt;
 float thirstRate = b.thirstDrainPerSec * drainMultiplier * difficulty.thirstMultiplier;
-if (isSprinting) thirstRate *= b.sprintThirstMultiplier;
+float activity = 1f;
+if (isSprinting) activity = Mathf.Max(activity, b.sprintThirstMultiplier);
+if (isExerting) activity = Mathf.Max(activity, hydration.exertionThirstMultiplier);
+thirstRate *= activity;
 Thirst -= thirstRate * dt;
 ```
 
-Nilai dijaga pada rentang 0 sampai maksimum. `isSprinting` diisi otomatis saat `SpendStamina` dipanggil dengan `StaminaUse.Sprint` pada frame itu. Isi hidrasi lain, seperti hujan dan air kotor, ada di #43.
+Nilai dijaga pada rentang 0 sampai maksimum. `isSprinting` diisi otomatis saat `SpendStamina` dipanggil dengan `StaminaUse.Sprint` pada frame itu, dan `isExerting` saat dipanggil dengan `StaminaUse.Swim` atau `StaminaUse.Climb` (#43). Kalau keduanya aktif, pengali terbesar yang dipakai. Isi hidrasi lain, seperti hujan dan air kotor, ada di #43.
 
 **Pemulihan bertahap:** `QueueRestore` menambah sisa pemulihan. `TickRestore(dt)` menyalurkan sisa itu selama `seconds`. Rincian pemakaiannya ada di #66.
 
@@ -176,8 +180,8 @@ Melee saat lelah tetap berhasil, supaya pemain tidak kehilangan pilihan bertahan
 
 1. Kalau `isFreezing`, kurangi `frostbiteStaminaDrainPerSec * dt`, atur `lastStaminaUseTime`, lalu selesai.
 2. Hitung `regenMultiplier`, yaitu hasil kali semua penalti aktif.
-3. Kalau `SetRegenBlocked(true)` aktif, lewati pemulihan. Kalau `Time.time - lastStaminaUseTime >= staminaRegenDelaySeconds`, tambahkan `staminaRegenPerSec * regenMultiplier * dt`.
-4. Batasi `Stamina` sampai `MaxStamina * maxStaminaMultiplier * bonusStamina`.
+3. Kalau `Time.time - lastStaminaUseTime >= staminaRegenDelaySeconds`, tambahkan `staminaRegenPerSec * regenMultiplier * dt`.
+4. Batasi `Stamina` sampai `MaxStamina * maxStaminaMultiplier`. Nilai ini sudah memuat buff `StatusEffect` di atas 1, termasuk buff stamina Lucky Machine.
 5. Kalau `IsExhausted` dan `Stamina >= exhaustedRecoverThreshold`, `IsExhausted = false`.
 
 **Efek kelelahan:** lari dan lompat ditolak, suara napas berat (#23 dan #52) dimulai dari `VitalWarningFlags.Exhausted`, serta melee melemah. Pemain masih bisa berjalan.
@@ -186,7 +190,7 @@ Melee saat lelah tetap berhasil, supaya pemain tidak kehilangan pilihan bertahan
 
 `SurvivalStats` menyimpan satu pasang nilai per `VitalPenaltySource`, lalu menghitung `regenMultiplier` sebagai hasil kali. `VitalPenaltySource.StatusEffect` dikecualikan dari perhitungan nilai terkecil: `maxStaminaMultiplier = (terkecil dari sumber lain) x nilai StatusEffect`, supaya buff di atas 1 tidak hilang (#20).
 
-**Bonus maksimum (#72):** `SetPenalty` mengambil nilai terkecil, sehingga pengali 1,1 akan kalah. Karena itu, buff `Permanent` memakai `SetMaxBonus`, dan hasilnya dikalikan dengan penalti. Saat bonus naik, HP saat ini tidak ikut naik otomatis.
+**Bonus maksimum (#72):** satu jalur per status. Bonus `MaxStamina` masuk lewat `SetPenalty(StatusEffect, ...)`, yang dikecualikan dari nilai terkecil seperti di atas. Bonus `MaxHP` memakai `SetMaxBonus(hpMultiplier)`, karena `SetPenalty` tidak mengatur HP. Saat bonus naik, HP dan stamina saat ini tidak ikut naik otomatis.
 
 | Sumber | Syarat | Batas stamina | Regenerasi stamina | Penalti lain | Diisi oleh |
 |---|---|---|---|---|---|
@@ -306,3 +310,6 @@ ZoneManager --RegionChangedEvent--> WarmthSystem (#65) --WarmthChangedEvent { wa
 13. Simpan saat `Hunger` 40, keluar, lalu lanjutkan. **Hasil:** `Hunger` 40, dan ada jeda penuh sebelum HP pulih.
 14. Buka Pause selama 30 detik. **Hasil:** semua status tidak berubah.
 15. Cari `Stamina` di `ZoneManager` dan `IslandPlayerController`. **Hasil:** tidak ada penulisan langsung, dan tidak ada coroutine frostbite.
+16. Beri `Debuff_Bleeding` saat lapar 80, haus 80, infeksi 0, dan tanpa serangan selama 12 detik. **Hasil:** HP tidak pulih, sedangkan regenerasi stamina tetap normal.
+17. Berenang 100 detik dengan stamina dijaga lewat `setvital`. **Hasil:** `Thirst` turun sekitar 18,75 (pengali 1,25). Lari sambil memanjat tidak menumpuk: pengali tetap 1,5.
+18. Dapat `Buff_LuckyStamina` 1 kali saat lapar normal. **Hasil:** batas stamina 110. Dapat `Buff_LuckyHP` 1 kali. **Hasil:** `MaxHP` 110, dan HP saat ini tidak berubah.

@@ -69,6 +69,7 @@ Biaya mengikuti target base awal di `GameBalanceConfig.md`: 4 dinding, 1 pintu, 
 | `Build_BarbedWire` | Kawat berduri (#26), kategori `Defense` | `Cell` | 4 `Mat_Scrap` + 2 `Mat_Wood` | 80 | `FloorOrGround` | `None` | Tidak ada |
 | `Build_WallTorch` | Obor Dinding (#98), kategori `Furniture` | `WallMount` | 2 `Mat_Wood` + 1 `Mat_Cloth` | 50 | Dinding | `None` | Tidak ada |
 | `Build_Lamp` | Lampu (#98), kategori `Furniture` | `Cell` | 4 `Mat_Wood` + 2 `Mat_Scrap` | 80 | `FloorOrGround` | `Avoid` | Tidak ada |
+| `Build_RainCollector` | Penampung air hujan (#43), kategori `Furniture` | `Cell` | 6 `Mat_Wood` + 2 `Mat_Cloth` | 80 (usulan) | `FloorOrGround` | `Avoid` | Tidak ada |
 
 Data dinding batu ada di #47. Meja crafting (#77) menambah `BuildableData` sendiri lewat aturan yang sama.
 
@@ -249,13 +250,13 @@ Bahan diperiksa paling akhir, supaya alasan yang tampil adalah hal yang perlu pe
 5. `Instantiate(prefab, pos, rot, RegionStreaming.Instance.GetStructureRoot(RegionStreaming.Instance.GetRegionAt(pos)))`.
 6. `BaseHealth.Initialize(data, structureId, data.maxHP)`.
 7. `StructureRegistry.Register(node)`, yang mengisi grid dan menghitung `isGrounded`.
-8. Terbitkan `StructureBuiltEvent { structureId, buildableId }`.
+8. Terbitkan `StructureBuiltEvent { structureId, buildableId, position }`. `position` dipakai pendengar yang memeriksa jarak, seperti `HydrationSystem` (#43).
 
 Struktur memakai `Instantiate`, bukan `ObjectPooler`, karena jarang dibuat dan hidup lama (`DamagePipeline.md`). `BaseHealth` sudah ada di prefab.
 
 ### Penempatan dari item
 
-**`public void BeginPlacementFromItem(string instanceId, BuildableData data)`** (#44) dipanggil `ItemUseSystem`, misalnya untuk `Kit_Campfire`:
+**`public void BeginPlacementFromItem(int instanceId, BuildableData data)`** (#44). `instanceId` bertipe `int`, sama dengan `ItemInstance` dan `InventoryManager.RemoveInstance(int)`. Fungsi ini dipanggil `ItemUseSystem`, misalnya untuk `Kit_Campfire`:
 
 1. Palu tidak diperlukan. `Mode = Build`, `Selected = data`, dan `instanceId` dicatat.
 2. Validasi memakai `ValidatePlacement` yang sama, jadi larangan pantai tetap berlaku. Baris 12 memeriksa item itu, bukan `cost`.

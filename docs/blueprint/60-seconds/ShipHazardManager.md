@@ -101,6 +101,14 @@ UpdatePlayerEffects();
 
 `while` memastikan tidak ada entri terlewat saat frame panjang. `Fire` hanya dipanggil sekali per entri, karena `nextEntryIndex` maju.
 
+**`public void FlushScheduleAtTimeUp()`**, dipanggil `ShipTimerManager.ExecuteTimeUp()` sebelum `LifeboatExtraction.HandleTimeUp()`:
+
+1. Kalau `!IsRunning`, abaikan.
+2. Jalankan semua entri tersisa dengan `t = 0`, memakai `while` yang sama, termasuk `FinalShudder`.
+3. `UpdateWater(0)` sekali.
+
+Fungsi ini diperlukan karena kedua jalur hasil di #74 memanggil `StopAll()` pada frame yang sama dengan waktu habis. Setelah itu `Update` kelas ini tidak berjalan lagi, jadi entri `T=0` tidak akan pernah terbaca dari `Update`.
+
 **Isi jadwal awal:**
 
 | Waktu sisa | Kejadian | Tinggi air (`Y`) saat itu | Rute |
@@ -113,7 +121,7 @@ UpdatePlayerEffects();
 | `T=15` | Sway tahap 3, tangga runtuh, 2 zombie di dek tengah, dan garis area aman tampil | 1,1 | `Stair_LowerAft` tertutup |
 | Sekitar `T=13` | Kepala terendam di dek bawah, dan `lowerDeckBarrier` aktif | 1,6 | Dek bawah tidak bisa dimasuki. Yang masih di bawah keluar lewat `Stair_LowerFore` |
 | `T=5` | Air mencapai dek tengah | 4,0 | Dek tengah mulai melambat |
-| `T=0` | `FinalShudder` dengan `CameraShake.Play(CameraShakeKind.ShipFinalShudder)`, lalu #74 menentukan hasil | 4,6 | Input terkunci |
+| `T=0` | `FinalShudder` dengan `CameraShake.Play(CameraShakeKind.ShipFinalShudder)`, dijalankan lewat `FlushScheduleAtTimeUp`, lalu #74 menentukan hasil | 4,6 | Input terkunci |
 
 `docs/blueprint/60-seconds/README.md` menulis air mulai masuk pada `T=15`. Blueprint ini mengikuti itu untuk dek tengah dan lantai utama yang dilihat pemain, sementara dek bawah mulai basah sejak `T=30`, supaya ada tahapan.
 
@@ -265,7 +273,7 @@ NavMesh tidak bisa berputar saat bermain, jadi **geometri tidak boleh diputar sa
 
 | Sistem | Hubungan |
 |---|---|
-| `ShipTimerManager` | Menyediakan `SecondsLeft` |
+| `ShipTimerManager` | Menyediakan `SecondsLeft`, dan memanggil `FlushScheduleAtTimeUp` saat waktu habis |
 | `LifeboatExtraction` (#74) | Memanggil `Begin` dan `StopAll` |
 | `ShipPlayerController` | Menerima `SetShipMoveModifiers`, dan membaca aksi dorong |
 | `FirstPersonCamera` (#102) | Mendaftarkan `ShipSwaySource` |
@@ -317,7 +325,7 @@ NavMesh tidak bisa berputar saat bermain, jadi **geometri tidak boleh diputar sa
 
 ## 6. Skenario Tes
 
-1. Jalankan Fase 1 sampai selesai tanpa bergerak dari dek atas. **Hasil:** semua kejadian terjadi pada waktunya, dan sekali.
+1. Jalankan Fase 1 sampai selesai tanpa bergerak dari dek atas. **Hasil:** semua kejadian terjadi pada waktunya, dan sekali, termasuk `FinalShudder` pada `T=0` sebelum ringkasan tampil.
 2. Jalankan `eventlog 1`. **Hasil:** `ShipHazardStageChangedEvent` terkirim pada `T=45`, `T=30`, dan `T=15`.
 3. Berdiri di dek bawah. **Hasil:** pada `T=30` lantai basah, kecepatan turun bertahap, dan sekitar `T=13` kepala terendam.
 4. Tetap di dek bawah. **Hasil:** HP turun 10 per detik, lalu mati dengan alasan `Drowned`.

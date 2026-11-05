@@ -46,7 +46,7 @@ Pembagian ini mengikuti `CombatMusicDirector.md` (musik Fase 1 milik kelas ini),
 | Nama | Nilai awal | Fungsi |
 |---|---|---|
 | `GameBalanceConfig.ship.durationSeconds` | 60 | Sudah ada. Batas waktu paling lama (GDD bagian 3) |
-| `GameBalanceConfig.ship.panicStartSeconds` | 15 | Efek kepanikan mulai. Sama dengan tahap air dek tengah di #75 |
+| `GameBalanceConfig.ship.panicStartSeconds` | 15 | Efek kepanikan mulai. Sama dengan sway tahap 3 dan garis area aman di #75 (air baru mencapai dek tengah pada `T=5`) |
 | `GameBalanceConfig.ship.tickPitchMin` | 1 | Pitch detak saat tenang |
 | `GameBalanceConfig.ship.tickPitchMax` | 2 | Pitch detak pada `T=0` |
 | `GameBalanceConfig.ship.tickVolume` | 0,6 | Volume detak |
@@ -151,9 +151,10 @@ timerRect.anchoredPosition = timerBasePos + new Vector2(
 2. `WriteSeconds(0)`.
 3. `tickSource.Stop()`, lalu `AudioManager.Instance.PlaySFX(timeUpClip)`.
 4. `AudioManager.Instance.PlayMusicClip(null, musicFadeOutSeconds)`.
-5. `LifeboatExtraction.Instance.HandleTimeUp()`.
+5. `ShipHazardManager.Instance.FlushScheduleAtTimeUp()`. Sisa entri jadwal, termasuk `FinalShudder` pada `T=0`, dijalankan sekarang.
+6. `LifeboatExtraction.Instance.HandleTimeUp()`.
 
-`LifeboatExtraction` menentukan hasil: aman berarti ringkasan, tidak aman berarti `DeathReason.LeftOnShip` (#74). Getaran terakhir `FinalShudder` dijalankan `ShipHazardManager` dari jadwalnya sendiri pada `T=0`, bukan dari fungsi ini.
+`LifeboatExtraction` menentukan hasil: aman berarti ringkasan, tidak aman berarti `DeathReason.LeftOnShip` (#74). Langkah 5 wajib sebelum langkah 6, karena kedua jalur hasil memanggil `ShipHazardManager.StopAll()`. Tanpa urutan ini, `Update` milik `ShipHazardManager` tidak pernah melihat `SecondsLeft = 0`, dan `FinalShudder` tidak pernah terpicu. Isi getaran tetap milik `ShipHazardManager`.
 
 ### Berhenti saat run berakhir
 
@@ -176,7 +177,7 @@ void HandleRunEnded(RunEndedEvent e) { StopCountdown(); }
 | Sistem | Hubungan |
 |---|---|
 | `LifeboatExtraction` (#74) | Memanggil `StartCountdown` dan `StopCountdown`, membaca `SecondsLeft`, dan menerima `HandleTimeUp` |
-| `ShipHazardManager` (#75) | Membaca `SecondsLeft` untuk jadwal dan tinggi air |
+| `ShipHazardManager` (#75) | Membaca `SecondsLeft` untuk jadwal dan tinggi air. Menerima `FlushScheduleAtTimeUp` di `ExecuteTimeUp` |
 | `GameManager` | `IsRunEnding`, dan `RunEndedEvent` |
 | `AudioManager` | `PlayMusicClip` untuk musik Fase 1, dan `PlaySFX` untuk sirene akhir |
 | `CombatMusicDirector` (#114) | Tidak aktif di Fase 1. Musik Fase 1 milik kelas ini |
@@ -239,3 +240,4 @@ void HandleRunEnded(RunEndedEvent e) { StopCountdown(); }
 13. Paksa frame lambat 0,5 detik di akhir lewat `Debug.Break`. **Hasil:** `ExecuteTimeUp` tetap sekali, dan `SecondsLeft` tidak negatif.
 14. Ganti `ship.durationSeconds` ke 30 di config. **Hasil:** timer mulai dari 30 tanpa mengubah kode.
 15. Mati lalu ulangi dari kapal tiga kali. **Hasil:** tiap run dimulai dari 60, tanpa sisa vignette atau warna merah.
+16. Biarkan waktu habis di area aman, lalu ulangi di dek bawah. **Hasil:** pada kedua jalur, `FinalShudder` tampil sekali sebelum ringkasan atau sinematik mati.

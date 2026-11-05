@@ -11,8 +11,7 @@
 ```csharp
 public class EnemyData : ScriptableObject
 {
-    public string enemyId;              // zombie_militer
-    public string poolTag;              // Zombie_Militer
+    public string enemyId;              // zombie_militer, sekaligus tag pool (SpawnManager.md, ObjectPooler.md)
     public float maxHP;
     public float moveSpeed;
     public DamageResistance[] resistances;   // #59
@@ -118,7 +117,7 @@ public abstract class SpecialZombieAI : MonoBehaviour, IPoolable
 | `GameBalanceConfig.specialZombie.tribalCooldownSeconds` | 10 | Jeda lemparan |
 | `GameBalanceConfig.specialZombie.tribalPullSpeed` | 2 | Kecepatan menarik pemain |
 | `GameBalanceConfig.specialZombie.tribalDamagePerSec` | 5 | Damage selama menahan |
-| `GameBalanceConfig.specialZombie.tribalReleaseDamage` | 25 | Damage yang membuat jerat lepas |
+| `GameBalanceConfig.specialZombie.tribalReleaseDamage` | 40 | Damage yang membuat jerat lepas. Lebih besar dari `pinned.knifeDamage` 25, jadi butuh 2 tusukan Pisau, sejalan dengan `knifeProgress` 0,6. Menunggu konfirmasi developer (`docs/USULAN_TERBUKA.md`) |
 | `GameBalanceConfig.specialZombie.tribalBreakDistance` | 18 | Jerat putus di atas jarak ini |
 | `GameBalanceConfig.specialZombie.mossWakeDistance` | 4 | Bangun seketika |
 | `GameBalanceConfig.specialZombie.mossAlertDistance` | 8 | Amarah naik di dalam jarak ini |
@@ -192,7 +191,7 @@ Pemain jongkok (#101) yang tidak menyorotkan senter tidak menaikkan `rage`, kecu
 
 ### Zombie Militer: armor dan melambat
 
-`MilitaryBehavior` mendengar `EnemyHealth.Damaged`. Untuk `DamageType.Bullet`, hitung `t = InverseLerp(militarySlowEndDistance, militarySlowFullDistance, jarak ke pemain)`, lalu kecepatan menjadi `moveSpeed * Lerp(1, militarySlowMultiplier, t)` selama `militarySlowSeconds`. Menembak dari dekat lebih efektif, tetapi lebih berbahaya. `canBeKnockedBack = false` (#95).
+`MilitaryBehavior` mendengar `EnemyHealth.Damaged`. Untuk `DamageType.Bullet`, hitung `t = InverseLerp(militarySlowEndDistance, militarySlowFullDistance, jarak ke pemain)`, lalu panggil `EnemyAI.ApplySpeedModifier(SpeedSource.MilitarySlow, Lerp(1, militarySlowMultiplier, t), militarySlowSeconds)`. `agent.speed` tidak ditulis langsung, supaya pengali gelombang, kaki, dan jebakan tetap berlaku (`EnemyAI.md`). Menembak dari dekat lebih efektif, tetapi lebih berbahaya. `canBeKnockedBack = false` (#95).
 
 ### Pengaman macet varian besar
 
@@ -222,9 +221,9 @@ Pemeriksaan tidak berjalan saat `AttackBuilding` atau di dalam kandang Lucky Mac
 
 1. Kalau jarak ke pemain ada di antara `villagePounceMin` dan `villagePounceMax`, jeda selesai, dan `NavMesh.Raycast` ke pemain tidak terhalang, minta izin lewat `AttackCoordinator.TryAcquire` (#109).
 2. **Windup:** berhenti, memekik, dan menghadap pemain.
-3. **Terkaman:** `agent.speed = villagePounceSpeed` menuju titik pemain saat itu, paling lama 0,7 detik. Musuh tetap di NavMesh, tanpa fisika.
+3. **Terkaman:** `EnemyAI.ApplySpeedModifier(SpeedSource.Pounce, villagePounceSpeed / data.moveSpeed, 0.7f)` menuju titik pemain saat itu, paling lama 0,7 detik. Musuh tetap di NavMesh, tanpa fisika. Selama `Pounce` aktif, kecepatan agen tepat `villagePounceSpeed` (16): tidak dikali pengali gelombang, `LegHit`, atau sumber lain, dan dikecualikan dari `maxZombieSpeed` (rumus di `EnemyAI.md` bagian Kecepatan).
 4. **Kena:** `primaryAttack` sekali, tanpa menahan pemain. Karena zombie ini datang massal, pinned akan membuat pemain mati tanpa peluang.
-5. **Pemulihan:** diam selama `villagePounceRecoverySeconds`, lalu kecepatan kembali ke `moveSpeed`.
+5. **Pemulihan:** `EnemyAI.SetSpeedMultiplier(SpeedSource.Pounce, 1)`, lalu diam selama `villagePounceRecoverySeconds`.
 
 ## 3. Hubungan dengan Sistem Lain
 
@@ -245,7 +244,7 @@ Pemeriksaan tidak berjalan saat `AttackBuilding` atau di dalam kandang Lucky Mac
 
 ## 4. Kasus Khusus
 
-- **Dipakai ulang dari pool:** `OnSpawned` mengatur `agent.speed = moveSpeed`, mengosongkan timer, `rage = 0`, status jerat, dan efek lambat. Lumut kembali ke `Dormant`. `OnReturned` memanggil `ReleaseByAttacker(this, AttackerGone)` kalau masih menahan pemain, dan mengembalikan jerat yang masih terbang.
+- **Dipakai ulang dari pool:** `OnSpawned` mengosongkan timer, `rage = 0`, dan status jerat. Efek lambat dan terkaman (`SpeedSource.MilitarySlow`, `SpeedSource.Pounce`) dihapus `EnemyAI.OnSpawned`, yang mengembalikan semua `speedModifiers` ke 1. Lumut kembali ke `Dormant`. `OnReturned` memanggil `ReleaseByAttacker(this, AttackerGone)` kalau masih menahan pemain, dan mengembalikan jerat yang masih terbang.
 - **Game dijeda:** semua timer memakai `dt` dari `CrowdTick`, jadi berhenti saat `Time.timeScale = 0`. Pemain tidak bisa bergerak, dan jerat juga berhenti.
 - **Permadeath dan save:** tidak ada yang disimpan, sesuai `WorldStateSave.md`. Aset `ZombieData` tidak berubah. Reset memakai jalur pool biasa.
 - **Region dilepas (#88):** semua varian kembali ke pool. Jerat aktif dilepas lewat `OnReturned`.
@@ -261,7 +260,7 @@ Pemeriksaan tidak berjalan saat `AttackBuilding` atau di dalam kandang Lucky Mac
 **Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
 1. **Runner, Tank, dan Spitter:** rekomendasi digabung sebagai pola pada varian GDD, tanpa `enemyId` baru, karena GDD tidak menyebut ketiganya.
-2. **Zombie Tribal:** rekomendasi jerat jarak 5 sampai 14 meter yang menarik dan menahan. Lepas lewat 25 damage, aksi #110, jarak, atau garis pandang terputus.
+2. **Zombie Tribal:** rekomendasi jerat jarak 5 sampai 14 meter yang menarik dan menahan. Lepas lewat damage dari pemain, aksi #110, jarak, atau garis pandang terputus. Ambang damage diubah dari 25 menjadi 40 setelah audit, supaya satu tusukan Pisau (25) tidak langsung melepas. Nilai 40 masih menunggu konfirmasi developer (`docs/USULAN_TERBUKA.md`).
 3. **Zombie Lumut:** rekomendasi `Dormant` dengan amarah bergaya Witch, dan tidak bisa kembali menyamar.
 4. **Zombie Beku:** rekomendasi menurunkan `Warmth`, bukan melambatkan, karena pemain yang membawa barang sudah berkecepatan setengah, dan `Warmth` terhubung ke frostbite di GDD.
 5. **Zombie Desa:** rekomendasi kecepatan 7,5 m/s dan terkaman tanpa pinned.
@@ -273,7 +272,7 @@ Pemeriksaan tidak berjalan saat `AttackBuilding` atau di dalam kandang Lucky Mac
 1. `spawn zombie_militer 1`. Tembak badan, kaki, dan kepala dengan peluru 30 damage. **Hasil:** damage sekitar 10,5, 7,5, dan 60.
 2. Tembak Militer dari 3 meter, lalu dari 9 meter. **Hasil:** melambat 50 persen dari dekat, dan tanpa lambat dari jauh.
 3. `spawn zombie_tribal 1` dari 10 meter. Geser ke samping saat windup. **Hasil:** jerat meleset.
-4. Biarkan jerat kena, lalu tembak Tribal sampai 25 damage. **Hasil:** pemain lepas dan bisa bergerak.
+4. Biarkan jerat kena, lalu tembak Tribal sampai 40 damage. **Hasil:** pemain lepas dan bisa bergerak.
 5. Berdiri di belakang pohon saat ditarik. **Hasil:** jerat putus setelah sekitar 1 detik.
 6. Jongkok melewati Lumut pada jarak 6 meter tanpa senter. **Hasil:** tidak bangun.
 7. Sorot Lumut dari 10 meter. **Hasil:** bangun setelah sekitar 2,5 detik.
@@ -283,4 +282,7 @@ Pemeriksaan tidak berjalan saat `AttackBuilding` atau di dalam kandang Lucky Mac
 11. Kurung Militer di balik `Obstacle`, lalu menjauh tanpa melihatnya selama 15 detik. **Hasil:** ganti target, lalu kembali ke pool, tanpa `EnemyKilledEvent`.
 12. Pakai ulang Lumut yang sudah bangun dari pool. **Hasil:** kembali `Dormant`, `rage = 0`.
 13. Jeda game saat jerat terbang. **Hasil:** jerat berhenti, dan lanjut setelah jeda selesai.
-14. Saat terjerat Tribal, beri 30 damage ke Tribal lewat `DevConsole` dengan `byPlayer = false`. **Hasil:** jerat tidak lepas. Ulangi dengan 25 damage dari pemain. **Hasil:** jerat lepas dengan alasan `AttackerDamaged`.
+14. Saat terjerat Tribal, beri 30 damage ke Tribal lewat `DevConsole` dengan `byPlayer = false`. **Hasil:** jerat tidak lepas. Ulangi dengan 40 damage dari pemain. **Hasil:** jerat lepas dengan alasan `AttackerDamaged`.
+15. Saat terjerat Tribal, tusuk dengan Pisau satu kali. **Hasil:** jerat belum lepas (25 dari 40, kemajuan 0,6). Tusukan kedua melepas pemain, satu kali saja, dengan alasan `AttackerDamaged`, karena damage dikirim sebelum kemajuan ditambah (`PlayerPinnedState.md`, Tusukan Pisau langkah 2), sehingga `EscapedWithKnife` tidak terpanggil.
+16. `setday 60`, tembak Militer dari 3 meter, lalu tembak kakinya. **Hasil:** kecepatan = `moveSpeed` x pengali gelombang x pengali `MilitarySlow` x `legSlowMultiplier`, dan kembali ke pengali gelombang setelah efek habis.
+17. Spawn ulang `zombie_militer` dari pool. **Hasil:** `SpawnFromPool("zombie_militer", ...)` berhasil, tanpa field `poolTag` terpisah.

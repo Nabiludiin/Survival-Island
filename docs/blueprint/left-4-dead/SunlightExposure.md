@@ -113,7 +113,7 @@ Zombie yang terbakar tidak menjatuhkan loot, dan #95 melewati mayat serta ragdol
 
 **`SeekHiding`:** dimulai saat `HourChangedEvent` mencapai `seekHidingHour`. Pada `timeMultiplier` 96, satu jam game sama dengan 37,5 detik, jadi itulah waktu lari sebelum fajar. Zombie yang muncul setelah jam itu membaca `EventChannel<HourChangedEvent>.Last` dalam `OnEnable`.
 
-1. Lepas target, dan tinggalkan pemain. `agent.speed = ZombieData.moveSpeed`.
+1. Lepas target, dan tinggalkan pemain. Hapus boost lewat `EnemyAI.SetSpeedMultiplier(SpeedSource.EmergeBoost, 1)`. `agent.speed` tidak ditulis langsung, supaya pengali gelombang dan sumber lain tetap berlaku (`EnemyAI.md`).
 2. `spot = HidingSpot.FindAvailable(posisi, spotSearchRadius)`, yaitu titik terdekat dengan tempat kosong. Panggil `spot.Reserve(this)`.
 3. Kalau tidak ada titik, zombie tetap mengejar pemain seperti biasa, lalu kena aturan terlambat.
 4. Pergi ke `spot.entryPoint`. Kalau tiba, masuk `Submerged`.
@@ -134,9 +134,9 @@ Zombie yang terbakar tidak menjatuhkan loot, dan #95 melewati mayat serta ragdol
 3. Nyalakan `Renderer`, hitbox, dan kapsul. Set `AnimIds.Dormant = false`, panggil trigger `AnimIds.Emerge` (#12), lalu naik selama `emergeSeconds`, sambil memainkan efek dan suara.
 4. `spot.Release(this)`, `IsDormantCounted = false`, dan `IsProtected = false`.
 5. Panggil `AISensory.ForceAware(posisi pemain)` kalau pemain berada dalam jarak `huntHintRadius` x 2. Lainnya memakai perburuan biasa (#49).
-6. `agent.speed = ZombieData.moveSpeed * emergeBoostMultiplier` selama `emergeBoostSeconds`, lalu kembali normal. `AIState.Chase`.
+6. `EnemyAI.ApplySpeedModifier(SpeedSource.EmergeBoost, emergeBoostMultiplier, emergeBoostSeconds)`, lalu kembali normal saat waktunya habis. `AIState.Chase`.
 
-**"Sangat cepat"** berasal dari `moveSpeed` Zombie Desa, yaitu 7,5 m/s di #25. Dengan boost, zombie sempat melebihi `sprintSpeed` 8 selama 8 detik pertama, lalu pemain kembali bisa lolos. Terkaman setelah naik milik `VillageBehavior` (#25).
+**"Sangat cepat"** berasal dari `moveSpeed` Zombie Desa, yaitu 7,5 m/s di #25. Dengan boost (7,5 x 1,2 = 9 m/s), zombie sempat melebihi `sprintSpeed` 8 selama 8 detik pertama, lalu pemain kembali bisa lolos. `EmergeBoost` dikalikan sesudah batas `maxZombieSpeed` (7,8), jadi tidak terpotong (`EnemyAI.md` bagian Kecepatan). Terkaman setelah naik milik `VillageBehavior` (#25).
 
 **Laporan ke Director.** Saat `NightfallEvent`, `SpawnManager` memanggil `SunlightExposure.ReportEmergence()`, yang meneruskan `AIDirector.Instance.AddExternalSpawn(HidingSpot.TotalOccupants)`. Dengan begitu, mob pertama tidak menumpuk di atas zombie yang baru naik (#27).
 
@@ -152,7 +152,7 @@ Zombie yang terbakar tidak menjatuhkan loot, dan #95 melewati mayat serta ragdol
 
 **Mengisi titik saat siang.** `SpawnManager.PopulateHidingSpots()` memunculkan Zombie Desa langsung dalam keadaan `Submerged`, sampai jumlah penghuni semua titik mencapai `daySubmergedCount`. Fungsi ini dipanggil saat Region 4 dimuat pada siang hari, dan saat fajar. Ini membuat desa terasa berbahaya pada malam pertama pemain di sana.
 
-**Spawn malam.** Tick `SpawnManager` memanggil `VillageZombieHiding.SpawnEmerging(spot)`, sehingga tambahan musuh malam juga muncul dari air dan lumpur.
+**Spawn malam.** Slot gelombang malam `SpawnManager` (`RequestWave`, `RequestBurst`, `RequestAmbush`, bukan `TickSpawn` yang hanya mengisi hewan) memilih titik lewat `HidingSpot.FindEmergeSpot(playerPos)`, lalu memanggil `VillageZombieHiding.SpawnEmerging(spot)` pada zombie yang baru keluar dari pool (`SpawnManager.md`). Dengan begitu, tambahan musuh malam juga muncul dari air dan lumpur.
 
 ### Terlihat dan diserang
 
@@ -174,7 +174,7 @@ Saat `Submerged`, zombie tidak terlihat dan tidak bisa diserang, karena `Rendere
 - `animator.Rebind()`.
 - Kalau siang, mulai `ExposureLoop()`.
 
-**`VillageZombieHiding.OnReturned()`:** `spot?.Release(this)`, lalu kembalikan `Renderer`, kapsul, hitbox, dan `agent.speed` ke nilai awal. Layer hitbox mengikuti #87 dan #95.
+**`VillageZombieHiding.OnReturned()`:** `spot?.Release(this)`, lalu kembalikan `Renderer`, kapsul, dan hitbox ke nilai awal. Pengali `EmergeBoost` dihapus `EnemyAI.OnSpawned`, yang mengembalikan semua `speedModifiers` ke 1. Layer hitbox mengikuti #87 dan #95.
 
 ## 3. Hubungan dengan Sistem Lain
 
@@ -247,3 +247,4 @@ Saat `Submerged`, zombie tidak terlihat dan tidak bisa diserang, karena `Rendere
 14. Majukan jam ke 06:00 saat zombie sarang `Dormant` dan yang sudah bangun berada di dalam `InteriorZone`. **Hasil:** keduanya `IsProtected = true`, tidak terbakar, dan tetap ada setelah 60 detik.
 15. Dorong zombie sarang keluar dari zona saat siang. **Hasil:** `IsProtected = false`, dan terbakar saat pengecekan berikutnya.
 16. Taruh zombie horde di dalam `InteriorZone` saat fajar. **Hasil:** tidak terlindungi, dan terbakar paling lama setelah 60 detik.
+17. `setday 60` di Region 4, lalu majukan jam ke 18:00 dan tembak kaki Zombie Desa yang baru naik. **Hasil:** kecepatan = `Min(moveSpeed x pengali gelombang x legSlowMultiplier, maxZombieSpeed)` x `emergeBoostMultiplier`. Boost tidak ikut dipotong `maxZombieSpeed`. Setelah `emergeBoostSeconds`, hanya boost yang hilang.

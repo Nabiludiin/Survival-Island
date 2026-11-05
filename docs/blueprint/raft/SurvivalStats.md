@@ -30,11 +30,14 @@ Daftar lengkap ada di `VitalsRules.md`.
 | Fungsi | Kegunaan |
 |---|---|
 | `TakeDamage(in DamageInfo)` | Damage dari luar (#59) |
+| `ApplyVitalDamage(float amount, DamageType type)` | Damage kondisi, tanpa `PlayerDamagedEvent` |
 | `RestoreHP`, `RestoreHunger`, `RestoreThirst`, `RestoreStamina` | Pemulihan langsung. Menggantikan `Heal(float, string)` |
 | `QueueRestore(float hunger, float thirst, float seconds)` | Pemulihan bertahap |
 | `AddInfection`, `ReduceInfection` | Mengubah infeksi |
 | `SpendStamina`, `CanUseStamina` | Biaya stamina |
 | `SetDrowning`, `SetPenalty`, `SetDrainMultiplier`, `SetDrainEnabled`, `SetInvulnerable` | Kondisi dari sistem lain |
+| `SetMaxBonus(float hpMultiplier)` | Pengali `MaxHP` dari buff `Permanent` Lucky Machine, lewat `StatusEffectManager` (#20, #72) |
+| `SetHPRegenBlocked(bool)` | Menahan pemulihan HP alami, dari penyakit lewat `StatusEffectManager` (#20, #45) |
 
 ## 2. Detail Logika & Fungsi
 

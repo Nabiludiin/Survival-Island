@@ -143,7 +143,7 @@ PositionOffset = Vector3.ClampMagnitude((aimPos + visPos) * metersPerUnit, maxMe
 | `Fall` | Tidak ada. Dip kamera milik #101 |
 | `Fire`, `Frost`, `Starvation`, `Dehydration`, `Infection`, `Structural`, `Drown`, `Poison` | Tidak ada. Damage berkala akan membuat layar terus bergetar |
 
-Skala: `Mathf.Clamp(e.amount / hitReferenceDamage, hitScaleMin, hitScaleMax)`.
+Skala: `Mathf.Clamp(e.info.amount / hitReferenceDamage, hitScaleMin, hitScaleMax)`.
 
 Damage hewan, termasuk serudukan babi hutan, ikut jalur `PlayerHit` ini.
 

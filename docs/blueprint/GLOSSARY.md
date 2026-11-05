@@ -131,7 +131,9 @@ Developer sudah menyetujui keputusan berikut.
 | `SaveProblem` | `None`, `Corrupt`, `NewerVersion`, `OldVersionNoMigration` | `WorldStateSave` (#80) |
 | `WeaponFireMode` | `SemiAuto`, `Auto` | `GunController` (#58) |
 | `AttackPhase` | `None`, `Windup`, `Active`, `Recovery` | `EnemyAttack` (#109) |
-| `SpeedSource` | Sumber pengali kecepatan `EnemyAI`, termasuk `LegHit` (#95) dan `Trap` (#26) | `EnemyAI` |
+| `SpeedSource` | Sumber pengali kecepatan `EnemyAI` dan `WildlifeAI`: `LegHit` (#95), `Trap` (#26), `EmergeBoost` (#63), `MilitarySlow`, dan `Pounce` (#25). Komponen lain tidak menulis `agent.speed` langsung | `EnemyAI` |
+| `HitReactionKind` | `Stagger`, `Knockback`, `Dying` | `EnemyHitReaction` (#95) |
+| `IHitReactive` | Interface reaksi kena serangan (`RequestReaction`, `EndReaction`, `SetSpeedMultiplier`), dipakai `EnemyAI` dan `WildlifeAI` | `EnemyHitReaction` (#95) |
 | `TargetKind` | `Player`, `NPC`, `BaseAnchor`, `Lure` | `ThreatSystem` (#108) |
 | `AwarenessLevel` | `Unaware`, `Suspicious`, `Aware` | `AISensory` (#49) |
 | `NoiseSourceKind` | `Movement`, `Landing`, `Gunshot`, `Melee`, `Tool`, `Container`, `Decoy`, `Structure`, `Throwable` (#96) | `AISensory` (#49) |
@@ -304,6 +306,7 @@ Developer sudah menyetujui keputusan berikut.
 | `CraftingPanel` | `UIPanel` untuk `UIPanelId.Crafting` | #77 |
 | `Build_WoodBench` | `BuildableData` meja kayu | #77 |
 | `Build_MedicalBench` | `BuildableData` meja medis | #77 |
+| `Build_RainCollector` | `BuildableData` penampung air hujan (`RainwaterCollector`) | #43, #79 |
 | `Gear_WarmClothes` | Item pakaian hangat, nama sementara sampai #65 selesai | #77 |
 | `Mat_Hide` | Bahan kulit hewan | #77 |
 | `Mat_Rope` | Bahan tali | #77 |
@@ -447,7 +450,7 @@ Developer sudah menyetujui keputusan berikut.
 | `NPCRecord` | Baris data per NPC di `NPCRoster`, termasuk isi yang disimpan | #76 |
 | `ObjectiveData` | ScriptableObject satu tujuan cerita | #81 |
 | `DiaryReward` | Struct hadiah satu bab Diary | #81 |
-| `DiaryArchivePanel` | Panel baca ulang bab dan daftar tujuan selesai | #81 |
+| `DiaryArchivePanel` | `UIPanel` baca ulang bab dan daftar tujuan selesai, memakai `UIPanelId.DiaryArchive` (menjeda game) | #81 |
 | `LootEntry` | Struct satu baris `LootTable`, menggantikan kelas `LootTable` lama | #103 |
 | `LootPointDef` | Definisi satu titik di `LootSpawnerSystem`: `point`, `kind`, `guaranteedItems` | #103 |
 | `ItemStack` | Pasangan `ItemData` dan jumlah untuk `guaranteedItems` | #103 |

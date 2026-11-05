@@ -94,7 +94,7 @@ Stamina yang habis tidak menghentikan cara lepas. `SpendStamina` boleh mengembal
 **Tusukan Pisau:**
 
 1. Tolak kalau `knifeCooldownTimer > 0` atau `DurabilitySystem.GetState` Pisau adalah `Broken`.
-2. Mainkan animasi tusuk, lalu kirim `DamageInfo { amount = knifeDamage, type = Melee, sourceId = "Base_Pisau", byPlayer = true }` ke `Attacker.DamageTarget`.
+2. Mainkan animasi tusuk, lalu kirim `DamageInfo { amount = knifeDamage, type = Melee, sourceId = "Base_Pisau", hitPoint = posisi penyerang, hitDirection = arah kamera ke penyerang, byPlayer = true }` ke `Attacker.DamageTarget`. Kalau damage ini membuat penyerang melepas lewat `ReleaseByAttacker` (ambang `tribalReleaseDamage` 40 atau `pounceBreakDamage` 40, jadi paling cepat pada tusukan kedua), langkah 3 dan 5 dilewati karena `IsPinned` sudah `false`. Langkah 4 tetap berjalan.
 3. Tambah `EscapeProgress` sebesar `knifeProgress * mult`.
 4. Panggil `DurabilitySystem.ApplyWear(pisau, knifeDurabilityCost)`, sesuai aturan item inti di `ToolRepairSystem.md`.
 5. Isi `knifeCooldownTimer`. Kalau kemajuan mencapai 1, panggil `Release(EscapedWithKnife)`.

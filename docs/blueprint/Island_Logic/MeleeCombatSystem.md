@@ -54,7 +54,7 @@
 | Target | Langkah |
 |---|---|
 | `ResourceNode` | `result = node.ReceiveHit(item.toolClass, hit.point)`. Kurangi durabilitas lewat `ApplyWear` hanya kalau `result == Hit` |
-| `IDamageable` | `DamageRouter.ApplyHit(hit, new DamageInfo { amount = damage, type = DamageType.Melee, byPlayer = true, sourceId = item.itemId })`. Kurangi durabilitas lewat `ApplyWear` |
+| `IDamageable` | `DamageRouter.ApplyHit(hit, new DamageInfo { amount = damage, type = DamageType.Melee, source = gameObject pemain, sourceId = item.itemId, hitDirection = cameraTransform.forward, bodyPart = Torso, byPlayer = true })`. `hitDirection` wajib diisi, karena knockback dan ragdoll #95 memakainya. Kurangi durabilitas lewat `ApplyWear` |
 | Lainnya | Suara pukulan permukaan |
 
 **Fire Axe (#97):** kalau item adalah `Reward_FireAxe` dan target punya `Flammable`, panggil `Flammable.TryIgnite(fire.fireAxeIgniteChance, true)`.
@@ -107,3 +107,4 @@
 7. Ayun dekat zombie `Unaware`. **Hasil:** `NoiseEmitter` memakai radius 8 m.
 8. Pukul zombie dengan `Reward_FireAxe` berulang. **Hasil:** sekitar 25 persen pukulan menyalakan target.
 9. Cari `Physics.Raycast` dan `GetComponent<EnemyHealth>` di skrip. **Hasil:** tidak ada.
+10. Bunuh zombie dengan pukulan melee yang memicu knockback. **Hasil:** zombie terdorong atau ragdoll jatuh searah pandangan kamera, bukan diam di tempat.

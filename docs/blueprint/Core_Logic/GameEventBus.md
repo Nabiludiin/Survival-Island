@@ -86,13 +86,13 @@ Sistem baru menambahkan event ke tabel ini, bukan membuat jalur sendiri. Kolom S
 |---|---|---|---|---|
 | Waktu | `DaybreakEvent` | `day` | `DayNightDirector` | Ya |
 | Waktu | `NightfallEvent` | `day` | `DayNightDirector` | Ya |
-| Waktu | `DayChangedEvent` | `newDay` | `GameManager` | Ya |
+| Waktu | `DayChangedEvent` | `newDay`, `isReplay`. `isReplay` bernilai `true` saat dikirim ulang setelah load (`GameManager.PublishDayState`). Pendengar pekerjaan harian mengabaikannya | `GameManager` | Ya |
 | Waktu | `DayLimitPassedEvent` | `day` | `GameManager` | Ya |
 | Waktu | `HourChangedEvent` | `hour` | `DayNightDirector` | Ya |
 | Pemain | `VitalsChangedEvent` | `hp`, `stamina`, `hunger`, `thirst`, `infection` | `SurvivalStats`, 4 kali per detik | Ya |
 | Pemain | `WarmthChangedEvent` | `warmth`, `isFreezing` | `WarmthSystem` | Ya |
-| Pemain | `PlayerDamagedEvent` | `DamageInfo`, `remainingHP`. Hanya untuk damage dari luar. Damage kondisi (lapar, haus, frostbite, tenggelam, infeksi) tidak mengirimnya | `SurvivalStats` | Tidak |
-| Pemain | `PlayerDiedEvent` | `DeathReason` | `SurvivalStats` | Tidak |
+| Pemain | `PlayerDamagedEvent` | `info` (`DamageInfo`), `remainingHP`. Pendengar membaca `e.info.type`, `e.info.amount`, dan seterusnya. Hanya untuk damage dari luar. Damage kondisi (lapar, haus, frostbite, tenggelam, infeksi) tidak mengirimnya | `SurvivalStats` | Tidak |
+| Pemain | `PlayerDiedEvent` | `reason` (`DeathReason`) | `SurvivalStats` | Tidak |
 | Pemain | `InfectionStageChangedEvent` | `stage` | `InfectionSystem` | Ya |
 | Pemain | `PlayerPinnedEvent` | `attackerId`, `isPinned` | `PlayerPinnedState` | Ya |
 | Pemain | `NoiseEmittedEvent` | `position`, `radius`, `sourceKind` | `NoiseEmitter` | Tidak |
@@ -149,8 +149,8 @@ Sistem baru menambahkan event ke tabel ini, bukan membuat jalur sendiri. Kolom S
 | Suplai | `BeachSupplyArrivedEvent` | `day`, `crateCount` | `BeachSupplyManager` | Tidak |
 | Suplai | `SupplyDropLandedEvent` | `position` | `SupplyDropManager` | Tidak |
 | Suplai | `BeachCrateOpenedEvent` | `day` | `BeachSupplyManager` | Tidak |
-| Base | `StructureBuiltEvent` | `structureId`, `buildableId` | `BuildManager` | Tidak |
-| Base | `StructureDamagedEvent` | `structureId`, `hpRatio` | `BaseHealth` | Tidak |
+| Base | `StructureBuiltEvent` | `structureId`, `buildableId`, `position` | `BuildManager` | Tidak |
+| Base | `StructureDamagedEvent` | `structureId`, `hpRatio`, `position` | `BaseHealth` | Tidak |
 | Base | `StructureDestroyedEvent` | `structureId`, `position` | `BaseHealth` | Tidak |
 | Base | `BaseRaidResolvedEvent` | `damageTotal`, `npcInjured` | `RemoteBaseSimulation` | Tidak |
 | Base | `BuildModeChangedEvent` | `mode`, `buildableId` | `BuildManager` | Tidak |
@@ -177,9 +177,9 @@ Sistem baru menambahkan event ke tabel ini, bukan membuat jalur sendiri. Kolom S
 | Objektif | `LoreHintGrantedEvent` | `loreId`, `hintKind`, `region` | `LoreCollectibles` | Tidak |
 | Run | `RunStartedEvent` | `seed`, `isNewRun` | `RunLifecycle` | Ya |
 | Run | `PhaseChangedEvent` | `phase` | `GameManager` | Ya |
-| Run | `RunEndedEvent` | `RunResult`, `DeathReason`. `reason` bernilai `DeathReason.None` saat menang | `GameManager` | Tidak |
-| Run | `SaveRequestedEvent` | `reason` (`SaveReason`). Didengar `WorldStateSave` | `RunLifecycle`, `SleepSystem`, `DevConsole`, `RegionGateSystem`, `RescueEventManager`, `DisasterManager`, serta `WorldStateSave` untuk `DaybreakEvent` | Tidak |
-| Run | `SaveCompletedEvent` | `succeeded` | `WorldStateSave` | Tidak |
+| Run | `RunEndedEvent` | `result` (`RunResult`), `reason` (`DeathReason`). `reason` bernilai `DeathReason.None` saat menang | `GameManager` | Tidak |
+| Run | `SaveRequestedEvent` | `reason` (`SaveReason`). Didengar `WorldStateSave` | `RunLifecycle`, `SleepSystem`, `DevConsole`, `RegionGateSystem`, `RescueEventManager`, dan `DisasterManager`. Autosave fajar tidak lewat event ini, karena `WorldStateSave` mendengar `DaybreakEvent` langsung | Tidak |
+| Run | `SaveCompletedEvent` | `reason` (`SaveReason`), `succeeded`. Pendengar mencocokkan `reason` dengan permintaannya sendiri | `WorldStateSave` | Tidak |
 | Run | `NarrativeStateChangedEvent` | `sceneId`, `isPlaying` | `NarrativeSequencer` | Ya |
 | UI | `UIFocusChangedEvent` | `isGameplayBlocked`, `isPaused` | `UIFocusStack` | Ya |
 | UI | `InputBindingsChangedEvent` | Tanpa isi | `InputManager` | Tidak |

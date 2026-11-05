@@ -82,10 +82,12 @@ Semua bab berada dalam satu buku `DiaryBook` di shelter tua yang hancur, sesuai 
 | 2 | `obj_wood` | `Kumpulkan kayu n/<region.bridgeWoodCost>`, dengan angka dibaca dari `GameBalanceConfig` saat HUD diperbarui | Bab 2 | `ItemTotal`: kayu di inventori + setoran `BridgeSite` >= `region.bridgeWoodCost` |
 | 3 | `obj_bridge` | Bangun jembatan | Bab 2 | `BridgeBuilt`: `RegionUnlockedEvent` untuk `Amazon` |
 | 4 | `obj_vaccine` | Buat vaksin | Bab 2 | `ItemCrafted`: `rec_vaccine` |
-| 5 | `obj_region3` | Capai Region 3 | Bab 3 | `RegionEntered`: `Snow` |
-| 6 | `obj_region4` | Capai Region 4 | Bab 3 | `RegionEntered`: `Logistic` |
+| 5 | `obj_region4` | Capai Region 4 | Bab 3 | `RegionEntered`: `Logistic` |
+| 6 | `obj_region3` | Capai Region 3 | Bab 3 | `RegionEntered`: `Snow` |
 | 7 | `obj_parts` | Angkut suku cadang `n`/`total` | Bab 3 | `PartsInstalled`: `HelicopterPartInstalledEvent.installed` >= `total` |
 | 8 | `obj_takeoff` | Lepas landas | Bab 3 | `Escaped`: `RunEndedEvent` dengan `RunResult.Won` |
+
+Urutan 5 dan 6 mengikuti rantai akses Region 1, Region 2, Region 4, lalu Region 3 (`RegionStreaming.md`), sehingga HUD dan penanda tidak menunjuk ke Region 3 sebelum pemain bisa mencapainya lewat Region 4.
 
 Kalau tidak ada tujuan terlihat yang belum selesai, HUD menampilkan tujuan cadangan: `Cari buku Diary di shelter tua` kalau `!bookFound`, atau `Seberangi jembatan ke Region 2` kalau Bab 3 belum terbuka. Bab 2 tidak butuh tujuan cadangan, karena `obj_base` yang selesai langsung membukanya.
 
@@ -163,8 +165,8 @@ Kalau tidak ada tujuan terlihat yang belum selesai, HUD menampilkan tujuan cadan
 | Keadaan | Penanda |
 |---|---|
 | Tujuan cadangan aktif | `bookMarkerPosition` kalau `!bookFound`, atau `bridgeMarkerPosition` kalau Bab 3 belum terbuka |
-| `obj_parts`, tidak membawa barang | Suku cadang terdekat lewat `HeavyItemSystem.TryGetNearestPart(pos, out part)` (#69) |
-| `obj_parts`, membawa barang (`HeavyItemChangedEvent.isCarried`) | Helipad, dari `markerPosition` |
+| `obj_parts`, tidak membawa barang | Suku cadang terdekat yang sudah ditemukan, lewat `HeavyItemSystem.TryGetNearestPart(pos, out Vector3 partPosition)` (#69). Kalau belum ada yang ditemukan, `hasMarker = false`, supaya barang yang belum ditemukan tidak terbongkar |
+| `obj_parts`, membawa barang (`HeavyItemChangedEvent.isCarried`) | `hasMarker = false`. Helipad sudah ditandai `HeavyItemSystem` lewat `SetMarker("helipad")` selama `IsCarrying`, jadi tidak ada dua penanda di titik yang sama |
 | `obj_base`, `obj_wood` | Tanpa penanda, kecuali buku belum ditemukan, maka ke shelter tua |
 | Lainnya | `markerPosition` tujuan |
 
@@ -243,7 +245,7 @@ Tombol `OpenDiary` (`J`) membuka `DiaryArchivePanel` lewat `UIFocusStack.Push`. 
 6. Setor 200 kayu, dan pegang 300 kayu. **Hasil:** `obj_wood` selesai, dan `obj_bridge` aktif.
 7. Lewat `DevConsole`, pakai `unlockregion Logistic` dan `teleport` ke Region 4 sebelum masuk Region 2. **Hasil:** tidak ada notifikasi. Saat Bab 3 terbuka, `obj_region4` sudah terlewati.
 8. Hancurkan satu dinding base. **Hasil:** `obj_base` tetap selesai.
-9. Saat `obj_parts` aktif, angkat suku cadang. **Hasil:** penanda pindah ke helipad. Jatuhkan barang, dan penanda kembali ke barang terdekat.
+9. Saat `obj_parts` aktif, angkat suku cadang. **Hasil:** penanda tujuan hilang, dan kompas hanya menampilkan satu penanda `helipad` dari `HeavyItemSystem`. Jatuhkan barang, dan penanda tujuan kembali ke barang terdekat yang sudah ditemukan.
 10. Pasang semua suku cadang. **Hasil:** tujuan menjadi `Lepas landas`.
 11. Isi inventori sampai penuh, lalu temukan buku Diary. **Hasil:** `Kit_Campfire` muncul sebagai `WorldItem` di dekat pemain.
 12. Simpan setelah Bab 2, keluar, lalu lanjutkan. **Hasil:** bab, tujuan, dan penanda sama, tanpa notifikasi ulang.
@@ -255,3 +257,5 @@ Tombol `OpenDiary` (`J`) membuka `DiaryArchivePanel` lewat `UIFocusStack.Push`. 
 18. Bangun base dan tunggu hari ke-5 tanpa menemukan buku. **Hasil:** tidak ada bab, dan HUD menampilkan `Cari buku Diary di shelter tua`. Temukan buku. **Hasil:** Bab 1 dan 2 terbuka bersamaan, dan Blueprint didapat.
 19. `balance objective.chapter2TriggerDay 5`, temukan buku tanpa membangun, lalu tunggu hari ke-2. **Hasil:** Bab 2 belum terbuka. Tunggu hari ke-5. **Hasil:** Bab 2 terbuka.
 20. Selesaikan jembatan tanpa masuk Region 2. **Hasil:** HUD menampilkan `Seberangi jembatan ke Region 2`, kalau tujuan lain sudah selesai.
+21. Buka Bab 3 lewat masuk Region 2, dengan `obj_vaccine` sudah selesai. **Hasil:** tujuan aktif adalah `Capai Region 4`, bukan `Capai Region 3`.
+22. Saat `obj_parts` aktif, belum ada suku cadang yang ditemukan. **Hasil:** tidak ada penanda tujuan. Temukan satu barang. **Hasil:** penanda tujuan menunjuk barang itu.

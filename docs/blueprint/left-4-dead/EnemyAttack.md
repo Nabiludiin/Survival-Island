@@ -126,7 +126,9 @@ Damage terikat ke momen animasi, dengan cadangan timer:
 4. Untuk tiap hasil, lewati kalau berupa bangunan, sudah ada di `swingHits`, atau di luar `arcDegrees`.
 5. Lewati kalau `PhysicsQuery.Raycast` dari dada musuh ke target terhalang `PhysicsMasks.AIVision`, supaya pukulan tidak menembus dinding.
 6. Tambahkan ke `swingHits`, lalu `hitAny = true`.
-7. Panggil `TakeDamage(new DamageInfo { amount = damage, type = Melee, source = gameObject, sourceId = data.enemyId, hitPoint, hitDirection = arah musuh ke target, bodyPart = Torso, infection, byPlayer = false })`.
+7. Panggil `TakeDamage(new DamageInfo { amount = damage * wave.damage, type = Melee, source = gameObject, sourceId = data.enemyId, hitPoint, hitDirection = arah musuh ke target, bodyPart = Torso, infection, byPlayer = false })`.
+
+`wave` adalah `EnemyAI.waveModifiers` (`AIDirector.md`), dibaca saat ayunan dimulai. Hewan tidak punya pengali gelombang, jadi nilainya 1. Pengali kesulitan tidak dipakai di sini, karena sudah diterapkan `SurvivalStats` (#59). `structureDamage` tidak memakai pengali gelombang, sama seperti sebelumnya.
 
 `swingHits` menjamin satu ayunan hanya mengenai target yang sama satu kali. Ayunan yang lewat juga bisa mengenai NPC di samping target.
 
@@ -134,7 +136,7 @@ Damage terikat ke momen animasi, dengan cadangan timer:
 
 ### Tahap Recovery
 
-`phaseTimer = hitAny ? recoveryAfterHit : recoveryAfterMiss`. Musuh tetap diam. Setelah selesai:
+`phaseTimer = (hitAny ? recoveryAfterHit : recoveryAfterMiss) * wave.recovery`. Kolom "Jeda serang" di `AIDirector.md` mengisi `wave.recovery`. Musuh tetap diam. Setelah selesai:
 
 1. `AttackCoordinator.Release(enemyId)`.
 2. `nextAttackTime = Time.time`, lalu `Phase = None` dan `enabled = false`.
@@ -243,3 +245,4 @@ Saat batal: lepas izin, `nextAttackTime = Time.time + interruptCooldownSeconds`,
 13. Bunuh zombie yang memegang izin. **Hasil:** izin bebas, dan zombie lain segera mengisi tempatnya.
 14. Pakai ulang zombie yang mati di tengah ayunan. **Hasil:** tahap `None`, dan langsung bisa menyerang normal.
 15. Jeda game di tengah Windup. **Hasil:** tidak ada damage sampai jeda selesai.
+16. `setday 60`, lalu biarkan zombie standar dari mob memukul pemain. **Hasil:** damage 15 x 1,25 = 18,75, dan jeda setelah kena 1,2 x 0,75 = 0,9 detik.

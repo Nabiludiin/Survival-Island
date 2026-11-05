@@ -14,7 +14,7 @@
 public enum UIPanelId
 {
     MainMenu, Loading, Cinematic, Pause, Settings, ConfirmDialog, RunSummary,
-    Diary, LoreReader, Inventory, Crafting, Storage, Campfire, BuildMenu,
+    Diary, DiaryArchive, LoreReader, Inventory, Crafting, Storage, Campfire, BuildMenu,
     LuckyMachine, GameOver, WinScreen, DevConsole, Stats
 }
 
@@ -66,6 +66,7 @@ public abstract class UIPanel : MonoBehaviour
 | `ConfirmDialog` | Ya | Ya | Ya | Ya | Tidak | Tidak |
 | `RunSummary` (#74) | Ya | Ya | Ya | Tidak | Ya | Tidak |
 | `Diary` | Ya | Ya | Ya | Ya | Tidak | Tidak |
+| `DiaryArchive` (#81) | Ya | Ya | Ya | Ya | Tidak | Tidak |
 | `LoreReader` (#100) | Ya | Ya | Ya | Ya | Tidak | Tidak |
 | `Inventory` | Tidak | Ya | Ya | Ya | Tidak | Tidak |
 | `Crafting` (#77) | Tidak | Ya | Ya | Ya | Tidak | Tidak |
@@ -235,7 +236,7 @@ Panel hanya memanggil `Push` dan `Close`. Pemeriksaan teks `Time.timeScale`, `Cu
 | `InputManager` (#18) | Memanggil `HandleEscape()`, dan mengganti Action Map dari `UIFocusChangedEvent` |
 | `RunLifecycle` (#82) | Memakai `Push`, `Close`, `CloseAllUnlocked`, dan `ClearForNewRun` |
 | `UIManager` | Memiliki panel persisten `Pause`, `Loading`, `Cinematic`, `GameOver`, `WinScreen`, dan `ConfirmDialog`. Dialog dibuka lewat `UIManager.ShowConfirm(in ConfirmRequest)`, yang memanggil `Push` (`UIManager.md`). Tidak lagi mengatur waktu, kursor, atau Esc |
-| `DiaryManager` | `OpenDiary` memanggil `Push(diaryPanel)`, dan tombol Close memanggil `Close`. Variabel `isReading` dan pembacaan Esc dihapus |
+| `DiaryManager` | `OpenDiary` memanggil `Push(diaryPanel)`, dan `OpenArchive` memanggil `Push(archivePanel)` (`DiaryArchive`). Tombol Close memanggil `Close`. Variabel `isReading` dan pembacaan Esc dihapus |
 | `AudioManager` | Menyediakan `SetPausedMix` |
 | #44, #46, #72, #77, #79, #100 | Panelnya mewarisi `UIPanel` |
 | #53, #56 | Memakai `SetGameplayTimeScale` |
@@ -267,7 +268,7 @@ Panel hanya memanggil `Push` dan `Close`. Pemeriksaan teks `Time.timeScale`, `Cu
 
 **Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
-1. **Panel yang menjeda:** `Pause`, `Settings`, `ConfirmDialog`, `RunSummary`, `Diary`, `LoreReader`, `GameOver`, `WinScreen`, `Loading`, dan `DevConsole`. **Inventori, crafting, peti, api unggun, dan menu bangun tidak menjeda.**
+1. **Panel yang menjeda:** `Pause`, `Settings`, `ConfirmDialog`, `RunSummary`, `Diary`, `DiaryArchive` (panel baca, mengikuti Diary), `LoreReader`, `GameOver`, `WinScreen`, `Loading`, dan `DevConsole`. **Inventori, crafting, peti, api unggun, dan menu bangun tidak menjeda.**
 2. **Gerakan saat panel tanpa jeda terbuka:** pemain berhenti, karena seluruh `Gameplay` dimatikan. Pilihan lain adalah tetap bisa berjalan, tetapi itu membutuhkan pemisahan Action Map tambahan.
 3. **Audio saat dijeda:** SFX dunia berhenti, musik turun 12 dB, dan suara tombol tetap bunyi.
 4. **Jeda otomatis:** game membuka `Pause` saat jendela kehilangan fokus.
@@ -287,3 +288,4 @@ Panel hanya memanggil `Push` dan `Close`. Pemeriksaan teks `Time.timeScale`, `Cu
 10. Tutup panel Pause dengan klik. **Hasil:** pistol tidak menembak pada klik itu.
 11. Pindah ke jendela lain saat bermain, lalu kembali. **Hasil:** Pause terbuka, dan menutupnya mengunci kursor lagi.
 12. Cari `Time.timeScale` di semua script. **Hasil:** hanya ada penulisan di `UIFocusStack.ApplyState()`.
+13. Tekan `J`, lalu tekan Esc. **Hasil:** `DiaryArchive` menjeda game saat terbuka, lalu tertutup oleh Esc, dan waktu kembali berjalan.

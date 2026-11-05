@@ -63,11 +63,11 @@ Mengikuti GDD: Air Minum Bersih, Makanan Kaleng, Peluru, dan Resource langka. Ti
 
 ### Pemicu
 
-**`HandleDayChanged(DayChangedEvent e)`**: kalau `e.newDay % intervalDays == 0`, isi `pendingDay = e.newDay`.
+**`HandleDayChanged(DayChangedEvent e)`**: kalau `e.isReplay`, abaikan, karena event itu hanya kiriman ulang setelah load (`GameManager.PublishDayState`). Kalau `e.newDay % intervalDays == 0`, isi `pendingDay = e.newDay`.
 
 `DayChangedEvent` terjadi pukul 00:00, saat puncak pasang. Karena itu kargo baru muncul saat fajar.
 
-**`HandleDaybreak(DaybreakEvent e)`**: kalau `pendingDay == currentDay`, panggil `Deliver(pendingDay)`.
+**`HandleDaybreak(DaybreakEvent e)`**: kalau `GameManager.currentDay % intervalDays == 0` dan `state.day != GameManager.currentDay`, panggil `Deliver(GameManager.currentDay)`. Syarat dibaca dari `currentDay`, bukan dari `pendingDay`, karena `pendingDay` tidak disimpan dan kiriman ulang `DayChangedEvent` (`isReplay = true`) setelah load diabaikan. Jadi save antara 00:00 dan 06:00 pada hari kiriman tidak menghilangkan kiriman. `state.day` yang tersimpan mencegah kiriman ganda saat `DaybreakEvent` dikirim ulang setelah load. `pendingDay` hanya dipakai untuk tampilan dan `DevConsole`.
 
 Jadwalnya hari ke-7, 14, 21, dan seterusnya, tanpa hari terakhir. Sampai hari ke-60 ada 8 kiriman, dan kiriman berikutnya datang pada hari ke-63, 70, dan seterusnya.
 
@@ -218,3 +218,5 @@ Tier memberi air dan makanan lebih dulu pada pekan awal, karena pemain masih mem
 12. Cek titik di Editor. **Hasil:** semua `isReachable` bernilai `true` dan berada di atas level 0,85.
 13. `setday 63`, lalu tunggu fajar. **Hasil:** 4 kargo muncul dengan isi tier `Hari 42+`.
 14. `setday 70`, lalu berada di dekat kargo pada malam hari. **Hasil:** 12 zombie muncul, dengan HP 1,2 kali dan damage 1,1 kali. Ulangi pada siang hari. **Hasil:** jumlah hewan tidak berubah.
+15. Pada hari ke-14 pukul 03:00, simpan, keluar, lalu lanjutkan dan tunggu fajar. **Hasil:** kargo hari ke-14 tetap datang sekali.
+16. Simpan pada hari ke-7 pukul 10:00 setelah kargo datang, lalu lanjutkan. **Hasil:** tidak ada kiriman kedua, walaupun `DaybreakEvent` dikirim ulang.

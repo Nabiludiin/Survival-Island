@@ -6,7 +6,20 @@
 
 ## 1. Arsitektur & Variabel Utama
 
-`EnemyHitReaction : MonoBehaviour, IPoolable` berada di objek utama musuh. Komponen ini mendengar `EnemyHealth.Damaged` dan `Died`, yang berada pada objek yang sama, lalu meminta `EnemyAI` berpindah state.
+`EnemyHitReaction : MonoBehaviour, IPoolable` berada di objek utama musuh, termasuk hewan. Komponen ini mendengar `EnemyHealth.Damaged` dan `Died`, yang berada pada objek yang sama, lalu meminta reaksi lewat `IHitReactive`, bukan lewat `EnemyAI` langsung. Zombie memakai `EnemyAI`, sedangkan hewan memakai `WildlifeAI`, yang tidak punya `AIState` (#61).
+
+```csharp
+public enum HitReactionKind { Stagger, Knockback, Dying }
+
+public interface IHitReactive
+{
+    bool RequestReaction(HitReactionKind kind);   // false kalau ditolak prioritas
+    void EndReaction();                           // Reaksi selesai, AI lanjut
+    void SetSpeedMultiplier(SpeedSource source, float multiplier);
+}
+```
+
+`EnemyAI` meneruskan `RequestReaction` ke `RequestState` dengan `AIState` yang sama namanya (`EnemyAI.md`). `WildlifeAI` menghentikan tick FSM selama reaksi, lalu melanjutkan `AnimalState` sebelumnya saat `EndReaction`. Untuk `Dying`, FSM hewan berhenti tetap (`WildlifeAI.md`). Rujukan `IHitReactive` diambil sekali di `Awake`. Di bagian bawah, "`EnemyAI.RequestState(AIState.X)`" dan "`RequestState(AIState.X)`" berarti `reactive.RequestReaction(HitReactionKind.X)`, dan "`EnemyAI` kembali ke `Chase`" berarti `reactive.EndReaction()`.
 
 **Urutan prioritas state:** `BurnToAshes` lalu `Dying`, `Knockback`, `Stagger`, kemudian state lainnya. Permintaan yang lebih rendah ditolak. `Dying` adalah nilai baru pada `AIState`, karena `GLOSSARY.md` belum punya state sekarat.
 
@@ -88,7 +101,7 @@ Dibaca dari `info.bodyPart`, yang diisi `HitboxModifier.Apply`.
 |---|---|
 | `Head` | Lama stagger dikali `headStaggerMultiplier` |
 | `Torso` | Normal |
-| `Leg` | `EnemyAI.SetSpeedMultiplier(SpeedSource.LegHit, legSlowMultiplier)` selama `legSlowSeconds`. Diperpanjang kalau kena lagi, tanpa bertumpuk |
+| `Leg` | `reactive.SetSpeedMultiplier(SpeedSource.LegHit, legSlowMultiplier)` selama `legSlowSeconds`. Diperpanjang kalau kena lagi, tanpa bertumpuk |
 | Armor | Kalau `DamageResistanceTable.GetMultiplier(type, bodyPart) < armorNoFlinchBelow`, `poise` tidak bertambah, dan keluar percikan logam lewat `VFXManager.Instance.Play("VFX_MetalSpark", pos, rot)` (#15) |
 
 Zombie Militer yang ditembak di badan tidak terhuyung, tetapi ditembak di kepala (pengali 1) masih menambah `poise`. Celah kepala di `DamagePipeline.md` jadi terasa.
@@ -99,9 +112,9 @@ Zombie Militer yang ditembak di badan tidak terhuyung, tetapi ditembak di kepala
 
 1. Tolak kalau `!data.canBeStaggered` atau `Time.time < staggerImmuneUntil`.
 2. `EnemyAttack.Interrupt(false)`.
-3. `EnemyAI.RequestState(AIState.Stagger)`, `agent.isStopped = true`, dan `anim.Play(AnimIds.Stagger)` (#12).
+3. `reactive.RequestReaction(HitReactionKind.Stagger)`. Kalau ditolak, selesai. Lalu `agent.isStopped = true`, dan `anim.Play(AnimIds.Stagger)` (#12).
 4. `reactionEndTime = Time.time + seconds`, `staggerImmuneUntil = reactionEndTime + staggerImmunitySeconds`, dan `accumulatedPoise = 0`.
-5. Saat waktunya habis, `agent.isStopped = false`, lalu `EnemyAI` kembali ke `Chase`.
+5. Saat waktunya habis, `agent.isStopped = false`, lalu `reactive.EndReaction()`. Zombie kembali ke `Chase`, dan hewan melanjutkan `AnimalState` sebelumnya.
 
 ### Knockback: `NavMeshAgent` dan fisika
 
@@ -111,8 +124,8 @@ Zombie Militer yang ditembak di badan tidak terhuyung, tetapi ditembak di kepala
 
 1. Kalau `!data.canBeKnockedBack`, lanjut ke `ApplyStagger(staggerSeconds)`, lalu selesai.
 2. Kalau `!agent.enabled` atau `agent.isOnOffMeshLink`, lanjut ke `ApplyStagger`, lalu selesai. Link #94 tidak boleh terganggu.
-3. `EnemyAttack.Interrupt(false)`, `RequestState(AIState.Knockback)`, `agent.isStopped = true`, `agent.ResetPath()`, `agent.updateRotation = false`, dan `anim.Play(AnimIds.Knockback)` (#12).
-4. `knockbackVelocity = dir.flattened * distance * knockbackMultiplier / knockbackSeconds`.
+3. `EnemyAttack.Interrupt(false)`, `reactive.RequestReaction(HitReactionKind.Knockback)`, `agent.isStopped = true`, `agent.ResetPath()`, `agent.updateRotation = false`, dan `anim.Play(AnimIds.Knockback)` (#12).
+4. `knockbackVelocity = dir.flattened * distance * knockbackMultiplier / knockbackSeconds`. Kalau `dir` hampir nol (pengirim lama yang belum mengisi `hitDirection`), pakai arah dari pemain ke musuh, supaya dorongan tidak hilang.
 5. Selama `knockbackSeconds`, panggil `agent.Move(knockbackVelocity * Time.deltaTime)`, dengan kecepatan yang berkurang linier.
 6. Saat selesai, `agent.updateRotation = true`. Kalau `!agent.isOnNavMesh`, cari lewat `NavMesh.SamplePosition`, lalu `agent.Warp`. Kalau gagal, kembali ke pool.
 7. Lanjut ke `ApplyStagger(staggerSeconds)`. Pemeriksaan kebal stagger dilewati pada langkah ini.
@@ -142,7 +155,7 @@ Shove tidak memberi damage dan tidak membatalkan reload. Di kapal, `ShipShove` (
 
 **`private void HandleDied(DamageInfo info)`**:
 
-1. `EnemyAttack.CancelAttack()`, `RequestState(AIState.Dying)`, dan matikan `NavMeshAgent` serta kapsul `Enemy`.
+1. `EnemyAttack.CancelAttack()`, `reactive.RequestReaction(HitReactionKind.Dying)`, dan matikan `NavMeshAgent` serta kapsul `Enemy`. Untuk hewan, isi `EnemyInstance.IsCarcass = true`, supaya pengaman macet dan `SweepWrongPhase` tidak mengembalikan mayat atau bangkai yang agennya mati (`SpawnManager.md`).
 2. Panggil `SpawnDrop(info)`.
 3. Pilih bentuk mayat:
    - `Explosion` atau `Melee` dengan Knockback, dan `CorpseBudget.TryAcquireRagdoll()` berhasil: ragdoll.
@@ -150,13 +163,13 @@ Shove tidak memberi damage dan tidak membatalkan reload. Di kapal, `ShipShove` (
 4. Daftarkan ke `CorpseBudget`.
 5. Jalankan `corpseRoutine`.
 
-**Ragdoll:** `animator.enabled = false`, tulang pindah ke layer `Ragdoll`, `isKinematic = false`, lalu `AddForceAtPosition(info.hitDirection * ragdollForce, info.hitPoint)` pada tulang terdekat. Setelah `ragdollSettleSeconds`, semua tulang kembali kinematik dan izin ragdoll dilepas.
+**Ragdoll:** `animator.enabled = false`, tulang pindah ke layer `Ragdoll`, `isKinematic = false`, lalu `AddForceAtPosition(info.hitDirection * ragdollForce, info.hitPoint)` pada tulang terdekat. Ledakan mengisi `hitDirection` dari pusat ledakan ke target (`DamagePipeline.md`), dan melee dari kamera ke depan (`MeleeCombatSystem.md`). Setelah `ragdollSettleSeconds`, semua tulang kembali kinematik dan izin ragdoll dilepas.
 
 **`corpseRoutine`:**
 
 1. Tunggu `corpseHoldSeconds`. Kalau `data.leavesCarcass`, aktifkan `AnimalCarcass` pada prefab hewan, lalu berhenti di sini. Pudar dan pengembalian diatur `AnimalCarcass` (#61).
 2. Pudarkan renderer lewat `MaterialPropertyBlock` selama `corpseFadeSeconds`.
-3. `SpawnManager.Instance.Despawn(gameObject, DespawnReason.Killed)` (#62), supaya daftar musuh hidup tetap benar. Hanya di Fase 1 musuh langsung kembali lewat `ObjectPooler.Instance.ReturnToPool(poolTag, gameObject)`.
+3. `SpawnManager.Instance.Despawn(gameObject, DespawnReason.Killed)` (#62), supaya daftar musuh hidup tetap benar. `EnemyHitReaction` satu-satunya pemilik pengembalian musuh yang mati, kecuali bangkai hewan (`AnimalCarcass`, #61) dan zombie terbakar (`SunlightExposure`, #63). Hanya di Fase 1 musuh langsung kembali lewat `ObjectPooler.Instance.ReturnToPool(poolTag, gameObject)`.
 
 ### Batas mayat
 
@@ -194,7 +207,7 @@ Hasil paling banyak pada zombie standar: 0,08 × 2 = 0,16 peluru per mayat, kala
 
 | Sistem | Hubungan |
 |---|---|
-| `EnemyAI` | `RequestState`, `SetSpeedMultiplier`, dan state `Stagger`, `Knockback`, `Dying` |
+| `EnemyAI`, `WildlifeAI` (#61) | `IHitReactive`: `RequestReaction`, `EndReaction`, dan `SetSpeedMultiplier` |
 | `EnemyAttack` (#109) | `Interrupt` dan `CancelAttack` |
 | `DamagePipeline` (#59) | `info`, `DamageResistanceTable.GetMultiplier` |
 | `HitboxModifier` | Mengisi `bodyPart` |
@@ -256,3 +269,6 @@ Hasil paling banyak pada zombie standar: 0,08 × 2 = 0,16 peluru per mayat, kala
 13. Bunuh Zombie Militer 20 kali lewat `DevConsole`. **Hasil:** sekitar 8 drop peluru, dan batas per malam berlaku setelah 10 drop.
 14. Bunuh dengan seed yang sama, urutan sama. **Hasil:** urutan drop sama.
 15. Jeda saat mayat diam. **Hasil:** hitungan berhenti.
+16. Tembak kaki Serigala, lalu tembak badannya sampai `poise` tercapai. **Hasil:** Serigala melambat dan terhuyung lewat `WildlifeAI` sebagai `IHitReactive`, tanpa error `EnemyAI`, lalu melanjutkan `Chase`.
+17. Bunuh Beruang Kutub dan menjauh di luar pandangan. **Hasil:** `IsCarcass = true`, bangkai tidak dikembalikan sebagai `OffNavMesh`.
+18. Pukul zombie dengan Pisau sampai `poise` tercapai. **Hasil:** zombie terdorong menjauhi pemain, bukan diam di tempat.

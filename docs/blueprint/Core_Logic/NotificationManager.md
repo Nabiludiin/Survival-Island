@@ -99,22 +99,26 @@ Kalau `Danger` datang saat baris penuh dan semua tidak ditahan, baris `Info` ata
 
 **`void Update()`** memakai `Time.deltaTime`, jadi waktu tampil berhenti saat game dijeda:
 
-1. Kurangi `remaining` tiap baris. Mulai pudar saat `remaining <= fadeSeconds`.
-2. Saat `remaining <= 0`, kosongkan baris dan isi dari `queue`.
-3. Atur alpha `CanvasGroup` tiap baris, dan geser posisi dengan `Mathf.MoveTowards`.
+1. Panggil `RefreshHeld()`. Kalau `isHeld`, lewati langkah berikutnya, termasuk pengurangan waktu selama `Cinematic`.
+2. Kurangi `remaining` tiap baris. Mulai pudar saat `remaining <= fadeSeconds`.
+3. Saat `remaining <= 0`, kosongkan baris dan isi dari `queue`.
+4. Atur alpha `CanvasGroup` tiap baris, dan geser posisi dengan `Mathf.MoveTowards`.
 
 `rows` dipakai ulang dengan `Bind(in NotificationEntry)`. Tidak ada `Instantiate`, karena baris berada di canvas persisten dan jumlahnya tetap.
 
 ### Tampilan saat ada panel
 
-**`void HandleFocus(UIFocusChangedEvent e)`** menghitung `isHeld`:
+**`private void RefreshHeld()`** menghitung `isHeld`, dan dipanggil di awal setiap `Update()`:
 
 ```csharp
-var top = UIFocusStack.Instance.TopPanel;
+var stack = UIFocusStack.Instance;
+var top = stack.TopPanel;
 bool cinematic = top != null && top.id == UIPanelId.Cinematic;
-isHeld = e.isPaused || cinematic;
-canvasGroup.alpha = isHeld ? 0f : 1f;
+bool held = stack.IsPaused || cinematic;
+if (held != isHeld) { isHeld = held; canvasGroup.alpha = isHeld ? 0f : 1f; }
 ```
+
+Status tidak diambil dari `UIFocusChangedEvent`, karena event itu hanya terbit kalau status jeda atau blokir input berubah (`UIFocusStack.ApplyState`). Contohnya, `Cinematic` yang didorong saat `Inventory` terbuka tidak mengubah keduanya, jadi tidak ada event. Pemeriksaan ini hanya membaca dua nilai dan tidak membuat garbage.
 
 | Keadaan | Perilaku |
 |---|---|
@@ -151,7 +155,7 @@ Semua handler di tabel ini keluar lebih dulu kalau `TopPanel.id == Loading`. Pes
 
 **Event yang dikirim:** tidak ada.
 
-**Event yang didengar:** semua event di tabel di atas, `UIFocusChangedEvent`, dan `RunEndedEvent`.
+**Event yang didengar:** semua event di tabel di atas, dan `RunEndedEvent`. Status jeda dan adegan dibaca langsung dari `UIFocusStack` lewat `RefreshHeld()`.
 
 | Sistem | Hubungan |
 |---|---|
@@ -182,7 +186,7 @@ Semua handler di tabel ini keluar lebih dulu kalau `TopPanel.id == Loading`. Pes
 
 ## 5. Keputusan Desain
 
-**Sudah ditetapkan dokumen lain:** urutan bootstrap ke-8 dan canvas persisten (`RunLifecycle.md`). `Base terbakar` dari `StructureBurningEvent` (`FireSystem.md`).
+**Sudah ditetapkan dokumen lain:** urutan bootstrap ke-10 dan canvas persisten (`RunLifecycle.md`). `Base terbakar` dari `StructureBurningEvent` (`FireSystem.md`).
 
 **Keputusan teknis di blueprint ini:**
 
@@ -217,3 +221,4 @@ Belum diuji di Unity, karena proyek Unity belum dibuat.
 13. Simpan, keluar, lalu lanjutkan. **Hasil:** tidak ada banjir `+`, dan log kosong.
 14. Mati, lalu mulai run baru. **Hasil:** tidak ada pesan lama, dan log kosong.
 15. Buka Profiler selama 60 detik tanpa pesan baru. **Hasil:** tidak ada alokasi GC dari `Update`.
+16. Buka `Inventory`, picu adegan `helipad_found`, lalu kirim `notify info`. **Hasil:** pesan disembunyikan selama adegan, dan tampil dengan sisa waktu penuh setelah adegan selesai.

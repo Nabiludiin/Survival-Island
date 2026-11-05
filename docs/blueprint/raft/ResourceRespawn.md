@@ -109,13 +109,14 @@ Dari 120 pohon Region 1, minimal 80 berada dalam 200 meter dari titik mulai. Den
 
 ### Memanen
 
-**`public HitResult ReceiveHit(ToolClass tool, Vector3 hitPoint)`** menggantikan `ReceiveHit(int, string)`. Yang memanggil adalah `MeleeCombatSystem`, setelah `PhysicsMasks.Melee` mengenai node.
+**`public HitResult ReceiveHit(ToolClass tool, Vector3 hitPoint, bool byPlayer = true)`** menggantikan `ReceiveHit(int, string)`. Yang memanggil adalah `MeleeCombatSystem`, setelah `PhysicsMasks.Melee` mengenai node, dengan nilai bawaan `byPlayer = true`. Isi fungsi ini sama dengan `ResourceNode.md`.
 
 1. Kalau `Status == Depleted`, kembalikan `Rejected`. Mainkan suara tumpul.
 2. Cari damage alat di `toolRules`. Kalau 0, tampilkan notifikasi `Butuh alat lain` (#22), lalu kembalikan `Rejected`.
 3. `currentHits -= damage`, lalu mainkan partikel, suara, dan goyangan.
-4. Kalau `currentHits <= 0`, panggil `Deplete()`.
-5. Kembalikan `Hit`. `MeleeCombatSystem` mengurangi durabilitas hanya saat hasilnya `Hit`.
+4. Terbitkan `ResourceNodeHitEvent { nodeType, isDepleted, byPlayer }` (#16). Kalau `byPlayer`, panggil `NoiseEmitter.Emit(GameBalanceConfig.resource.harvestNoiseRadius, NoiseSourceKind.Tool)` (#49). `ResourceNode` adalah satu-satunya pengirim suara `Tool` saat memanen, sesuai keputusan developer (hewan menjaga resource, `WildlifeAI.md`).
+5. Kalau `currentHits <= 0`, panggil `Deplete()`.
+6. Kembalikan `Hit`. `MeleeCombatSystem` mengurangi durabilitas hanya saat hasilnya `Hit`.
 
 ### Status habis
 
@@ -195,7 +196,8 @@ Status memakai jam absolut. Saat region kembali, `RestoreState` mengisi `Status`
 | `InfectionSystem` (#64) | Varian node, sesuai tabel `InfectionSystem.md` |
 | `DisasterManager` (#70), `FireSystem` (#97) | `ForceDeplete`, dan `Flammable` pada pohon dan tanaman |
 | `ProgressionSafety` (#116) | `CountActiveStones` dan `ForceRegrowStones` |
-| `NoiseEmitter` (#49) | Dipakai `MeleeCombatSystem` saat memukul node |
+| `NoiseEmitter` (#49) | `ReceiveHit` mengirim `NoiseSourceKind.Tool` saat `byPlayer`. `MeleeCombatSystem` hanya mengirim suara ayunan `Melee` |
+| `AudioManager` (#16) | Mendengar `ResourceNodeHitEvent` |
 
 **Batas pekerjaan:** loot di titik tetap milik `LootSpawnerSystem`.
 
@@ -251,3 +253,4 @@ Status memakai jam absolut. Saat region kembali, `RestoreState` mengisi `Status`
 14. Tebang 30 pohon sambil membuka Profiler. **Hasil:** tidak ada `Instantiate` dari node, dan objek item berasal dari pool.
 15. Jalankan `ResourceAuditWindow`. **Hasil:** tiap region memenuhi jumlah minimum, atau peringatan muncul.
 16. Tebang 50 pohon di Region 1, sesuai lembar playtest. **Hasil:** sekitar 500 kayu dalam sekitar 3 siang penuh.
+17. Pukul pohon sekali dengan kapak sambil memantau `eventlog`. **Hasil:** satu `NoiseEmittedEvent` dengan `NoiseSourceKind.Tool` (radius `harvestNoiseRadius`) dari `ResourceNode`, satu suara `Melee` dari ayunan, dan satu `ResourceNodeHitEvent`. Panggil `ReceiveHit(..., byPlayer: false)`. **Hasil:** tidak ada suara `Tool`.

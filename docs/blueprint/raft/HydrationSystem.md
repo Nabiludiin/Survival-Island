@@ -113,7 +113,7 @@ Sumber ini tidak habis dan tidak perlu disimpan. `IsAvailable` selalu `true`, da
 
 ### `RainwaterCollector`
 
-Dibangun lewat menu bangun (#79), dengan `buildableId = Build_RainCollector`, biaya usulan 6 `Mat_Wood` dan 2 `Mat_Cloth`. Aturan pantai dari `BuildManager` tetap berlaku. Objek berada di layer `Structure` untuk tubuhnya, dan layer `Interactable` untuk collider interaksinya.
+Dibangun lewat menu bangun (#79), dengan `buildableId = Build_RainCollector`, biaya usulan 6 `Mat_Wood` dan 2 `Mat_Cloth`, serta HP 80. Datanya tercatat di daftar struktur `raft/BuildMenu.md`. Aturan pantai dari `BuildManager` tetap berlaku. Objek berada di layer `Structure` untuk tubuhnya, dan layer `Interactable` untuk collider interaksinya.
 
 **Pendaftaran:** saat objek dibuat atau dipulihkan, panggil `HydrationSystem.Instance.Register(this)`, dan saat dihancurkan panggil `Unregister(this)`. Pendaftaran ini tidak memakai `OnEnable`, karena `structureRoot` dimatikan saat region dilepas (#88), sedangkan air harus tetap bertambah. Fungsi pada objek nonaktif tetap bisa dipanggil.
 
@@ -135,7 +135,7 @@ UpdateVisual();
 - Tidur otomatis mengisi lebih cepat, karena jam game berjalan lebih cepat.
 - Satu tick per jam game cukup, karena air hujan tidak butuh ketepatan per detik.
 
-**Terlindung atap: `private void RefreshSkyExposure()`**: `PhysicsQuery.Raycast` ke atas sejauh `skyCheckDistance` dengan `PhysicsMasks.Sunlight`. `isExposedToSky` bernilai `true` kalau tidak mengenai apa pun. Dipanggil saat dibangun, dipulihkan, dan saat `StructureBuiltEvent` atau `StructureDestroyedEvent` terjadi dalam `structureRecheckRadius`. Hologram bangunan juga mengecek ini, dan tetap boleh dibangun dengan peringatan `Tertutup atap`.
+**Terlindung atap: `private void RefreshSkyExposure()`**: `PhysicsQuery.Raycast` ke atas sejauh `skyCheckDistance` dengan `PhysicsMasks.Sunlight`. `isExposedToSky` bernilai `true` kalau tidak mengenai apa pun. Dipanggil saat dibangun, dipulihkan, dan saat `StructureBuiltEvent` atau `StructureDestroyedEvent` terjadi dalam `structureRecheckRadius`. Jaraknya dibaca dari field `position` kedua event itu (`GameEventBus.md`). Hologram bangunan juga mengecek ini, dan tetap boleh dibangun dengan peringatan `Tertutup atap`.
 
 **Mengambil air, `protected override bool OnInteract(in InteractContext ctx)`**:
 

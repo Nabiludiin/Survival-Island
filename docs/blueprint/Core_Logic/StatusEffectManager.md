@@ -62,7 +62,7 @@ public struct ActiveEffect
 | `Buff_Supplement` | `Med_Supplement` | 60 detik | `Refresh` | Kecepatan lari dan jalan x1,2, sesuai contoh issue |
 | `Debuff_FoodPoisoning` | #45 | 3 jam game | `Refresh` | Isi di `DiseaseManager.md` |
 | `Debuff_Venom` | #45 | 2 jam game | `Refresh` | Isi di `DiseaseManager.md` |
-| `Debuff_Bleeding` | #45 | 6 jam game | `Refresh` | Isi di `DiseaseManager.md` |
+| `Debuff_Bleeding` | #45 | `Permanent`. `DiseaseManager` mengakhirinya setelah `bleedingGameHours` (6 jam game) dan mengubahnya menjadi infeksi luka | `Reject` | Isi di `DiseaseManager.md` |
 | `Debuff_WoundInfection` | #45 | Permanen sampai diobati | `Reject` | Isi di `DiseaseManager.md` |
 
 Buff permanen Lucky Machine (#72) memakai `Permanent`, dengan arti "selama satu run" kalau #72 memutuskan demikian.
@@ -145,8 +145,8 @@ Lalu, hanya kalau nilainya berubah:
 
 - `SurvivalStats.SetPenalty(VitalPenaltySource.StatusEffect, maxStamina, regen)`.
 - `IslandPlayerController.SetSpeedModifier(SpeedModifierId.StatusEffect, speed)`.
-- `SurvivalStats.SetRegenBlocked(blockRegen)`.
-- `SurvivalStats.SetMaxBonus(maxHp, 1f)` (#72). Bonus stamina tetap lewat `SetPenalty` di atas.
+- `SurvivalStats.SetHPRegenBlocked(blockRegen)`. Menahan pemulihan HP saja, sesuai `blocksHPRegen` (`VitalsRules.md`).
+- `SurvivalStats.SetMaxBonus(maxHp)` (#72). Bonus stamina hanya lewat `SetPenalty` di atas, sehingga tiap status punya satu jalur.
 
 Semua efek yang aktif dikalikan, sehingga urutan pemberian efek tidak mengubah hasil. `VitalsRules.md` perlu aturan khusus untuk sumber `StatusEffect`, karena buff di atas 1 tidak boleh hilang oleh perhitungan nilai terkecil.
 
@@ -167,7 +167,7 @@ Semua efek yang aktif dikalikan, sehingga urutan pemberian efek tidak mengubah h
 
 | Sistem | Hubungan |
 |---|---|
-| `SurvivalStats`, `VitalsRules` (#111) | Menerima `SetPenalty`, `SetRegenBlocked`, dan `ApplyVitalDamage` |
+| `SurvivalStats`, `VitalsRules` (#111) | Menerima `SetPenalty`, `SetHPRegenBlocked`, `SetMaxBonus`, dan `ApplyVitalDamage` |
 | `IslandPlayerController`, `PlayerTraversal` (#101) | Menerima `SetSpeedModifier(StatusEffect, ...)` |
 | `ItemUseSystem` (#66) | Memanggil `ApplyById` saat item selesai dipakai |
 | `DiseaseManager` (#45) | Memakai efek ini untuk semua penyakit |
@@ -223,3 +223,5 @@ Semua efek yang aktif dikalikan, sehingga urutan pemberian efek tidak mengubah h
 11. Simpan saat suplemen sisa 20 detik, keluar, lalu lanjutkan. **Hasil:** sisa 20 detik, dan kecepatan langsung aktif.
 12. Mati saat efek aktif, lalu mulai run baru. **Hasil:** tidak ada efek, dan semua pengali 1.
 13. Buka Profiler dengan 8 efek aktif. **Hasil:** `Update` tanpa alokasi GC.
+14. Beri efek dengan `blocksHPRegen`. **Hasil:** `SetHPRegenBlocked(true)`, HP tidak pulih, dan regenerasi stamina tetap berjalan.
+15. Beri `Debuff_Bleeding`, lalu tunggu lebih dari 6 jam game. **Hasil:** efek tidak habis sendiri. `DiseaseManager` menghapusnya pada `HourChangedEvent` berikutnya dan memasang `Debuff_WoundInfection`.

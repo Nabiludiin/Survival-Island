@@ -65,7 +65,7 @@ Kelas di bawah ini mewarisi `IslandInteractable`, atau memakai `IInteractable` l
 | Item jatuh | `WorldItem` | Masuk inventori | 0 | #66 |
 | Lucky Machine | `LuckyMachine` | Membuka panel | 0 | #72 |
 | Diary | `DiaryBook` | Membuka panel | 0 | #81 |
-| Kargo pantai | `CargoCrate` | Membuka kargo | 2 | #71 |
+| Kargo pantai | `BeachCrate` | Membuka kargo | `beachSupply.openHoldSeconds` (1,5) | #71 |
 | Peti penyimpanan | `StorageChest` | Membuka panel | 0 | #46 |
 | Meja crafting | `CraftingStation` | Membuka panel | 0 | #77 |
 | Api unggun | `CampfireManager` | Membuka panel | 0 | #44 |

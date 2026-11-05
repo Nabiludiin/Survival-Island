@@ -19,6 +19,13 @@
 | `hotbarView` | `HotbarView` | Tampilan hotbar (#60) |
 | `throwableIcon`, `throwableCount` | `Image`, `TextMeshProUGUI` | Barang lempar di dekat peluru (#96) |
 | `objectiveTitle`, `objectiveProgress`, `daysLeftText` | `TextMeshProUGUI` | Tujuan aktif dan sisa hari (#81) |
+| `partsText`, `engineText` | `TextMeshProUGUI` | Suku cadang terpasang dan hitung mundur mesin helikopter (#14) |
+| `luckyFreeText` | `TextMeshProUGUI` | Hitung mundur mode gratis Lucky Machine (#72) |
+| `luckyFreeRemaining` | `float` | Sisa detik yang dihitung HUD sendiri dengan `Time.deltaTime` (#72) |
+| `breathBar`, `warmthBar` | `Slider` | Napas di air (#13) dan suhu (#65) |
+| `craftQueueIcon` | `Image` | Antrean crafting yang berjalan saat panel tertutup (#77) |
+| `statusEffectBar` | `StatusEffectBar` | Ikon efek status (#20) |
+| `loadingAreaText` | `TextMeshProUGUI` | Pesan `Memuat area` saat `RegionStreaming.IsStalled` (#88) |
 | `shipHandWeight`, `lifeboatMarker`, `safeZoneLine` | Komponen UI | Hanya aktif di `ShipPhase` (#74) |
 
 ## 2. Detail Logika & Fungsi
@@ -32,9 +39,19 @@
 | `InputBindingsChangedEvent` | Minta ulang teks prompt yang sedang tampil |
 | `ThrowableChangedEvent` | Tampilkan ikon dan jumlah barang lempar |
 | `ActiveObjectiveChangedEvent` | Tampilkan judul dan progres, dengan sorotan selama `objective.hudFlashSeconds` |
-| `DayChangedEvent` | Sampai hari ke-60: `Sisa hari = GameManager.TargetDay - newDay + 1`. Setelah itu: `Target hari ke-60 terlewat` |
+| `DayChangedEvent` | Sampai hari ke-60: `Sisa hari = GameManager.TargetDay - newDay + 1`. Setelah itu: `Target hari ke-60 terlewat`. `GameManager.PublishDayState` menerbitkan event ini saat tiba di pulau (hari 1) dan setelah restore (`isReplay = true`), jadi teks langsung terisi. HUD adalah pendengar tampilan, jadi tidak mengabaikan `isReplay`. `OnEnable` juga membaca `HasLast` dan `Last` |
 | `DayLimitPassedEvent` | Tulis `Target hari ke-60 terlewat`. Saat `OnEnable` setelah load, baca `GameManager.IsPastTargetDay` |
 | `ShipHandChangedEvent` | Tampilkan berat tangan di `ShipPhase` |
+| `HelicopterPartInstalledEvent` | Tulis `Suku cadang installed / total` (#14, #69). Sticky, dibaca di `OnEnable` |
+| `HelicopterEngineChangedEvent` | Saat `WarmingUp`, tulis `Mesin memanas m:ss` dari `secondsLeft`. State lain menyembunyikan teks (#14) |
+| `LuckyMachineFreeWindowChangedEvent` | `isActive`: isi `luckyFreeRemaining = seconds`, lalu kurangi dengan `Time.deltaTime` dan tampilkan. Dua mesin aktif bersamaan tetap satu hitung mundur, karena dimulai dari bencana yang sama. Teks disembunyikan saat `luckyFreeRemaining <= 0` (#72) |
+| `SwimStateChangedEvent` | Tampilkan `breathBar` dari `breathRatio` selama `breathRatio < 1` (#13) |
+| `WarmthChangedEvent` | `warmthBar` tampil kalau `Warmth < 100` atau region aktif `Snow`. Biru muda di `<= 50`, biru tua berkedip saat `isFreezing` (#65) |
+| `CraftQueueChangedEvent` | Tampilkan `craftQueueIcon` selama `queueCount > 0` (#77) |
+| `StatusEffectChangedEvent` | Perbarui `statusEffectBar`, aturannya di `StatusEffectManager.md` (#20) |
+| `UIFocusChangedEvent` | Sembunyikan crosshair selama `isGameplayBlocked` (#83) |
+
+`loadingAreaText` membaca `RegionStreaming.Instance.IsStalled` 4 kali per detik, karena tidak ada event untuk status ini (#88). Cincin meronta milik `PinnedPromptUI` (#110), bukan sistem ini.
 
 **`public void UpdateAmmo(int inMagazine, int reserve)`**: tulis `inMagazine / reserve`. Saat keduanya 0, teks berkedip.
 
@@ -56,6 +73,10 @@
 | `InputManager` (#18) | Sumber `GetBindingDisplay` |
 | `CombatFeedbackUI` (#51) | `MarkerRoot` menjadi anak `crosshairRoot` |
 | `LifeboatExtraction` (#74) | Sumber status penanda Fase 1 |
+| `GameManager` | `PublishDayState` menerbitkan `DayChangedEvent` saat tiba di pulau dan setelah restore |
+| `RescueEventManager` (#14), `LuckyMachine` (#72) | Sumber event suku cadang, mesin, dan mode gratis |
+| `SwimmingController` (#13), `WarmthSystem` (#65), `StatusEffectManager` (#20), `CraftingManager` (#77) | Sumber bar napas, suhu, ikon efek, dan ikon antrean |
+| `RegionStreaming` (#88) | `IsStalled` untuk pesan `Memuat area` |
 
 ## 4. Kasus Khusus
 
@@ -83,3 +104,8 @@
 7. Sembunyikan crosshair. **Hasil:** penanda serangan ikut tersembunyi.
 8. Pada hari ke-10 dengan target 60. **Hasil:** Sisa hari tertulis 51.
 9. Pada hari ke-61 dan ke-100. **Hasil:** teks `Target hari ke-60 terlewat`, tanpa angka negatif.
+10. Tiba di pulau pada run baru. **Hasil:** `Sisa hari: 60` langsung tampil, tanpa menunggu tengah malam.
+11. Simpan pada hari ke-12, keluar, lalu lanjutkan. **Hasil:** `Sisa hari: 49` langsung tampil setelah load.
+12. Pasang satu suku cadang, lalu nyalakan mesin. **Hasil:** `Suku cadang 1 / 5`, lalu hitung mundur `Mesin memanas` saat pemanasan.
+13. Picu `MajorDisasterStartedEvent` di dekat Lucky Machine. **Hasil:** hitung mundur 30 detik tampil dan berhenti saat jeda.
+14. Menyelam, lalu masuk Region 3. **Hasil:** bar napas tampil saat `breathRatio < 1`, dan bar suhu tampil di Region 3.

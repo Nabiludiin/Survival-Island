@@ -12,7 +12,7 @@
 
 ```csharp
 public enum ShipFlowState { PreGame, Scavenge, Resolving, Summary, Finished }
-public enum ShipControlLevel { None, LookOnly, Full }
+// ShipControlLevel didefinisikan di ShipPlayerController.md (pemilik menurut GLOSSARY.md), tidak di sini
 
 [Serializable]
 public struct SavedItemData { public string itemId; public int amount; }
@@ -202,10 +202,10 @@ Fungsi `GameManager.SaveFase1Loot(List<Item>)` diganti `SaveShipOutcome`. `ShipT
 1. Kalau `GameManager.hasArrivedOnIsland` bernilai `true`, abaikan. Jalur `ContinueRun` tidak melewati fungsi ini.
 2. Tempatkan pemain di `landingPoint`, lalu arahkan kamera ke `lookTarget`.
 3. `SurvivalStats`: `HP = shipOutcome.hpOnExit`, `Infection = shipOutcome.infectionOnExit`, dan status lain penuh.
-4. `InventoryManager`: tambahkan `Base_Kail`, `Base_Pistol`, dan `Base_Pisau`, lalu `Med_Vaccine` sebanyak `GameBalanceConfig.infection.startingVaccineDoses` (2) (#64), sebelum `ApplyShipLoot`.
+4. `InventoryManager`: tambahkan `Base_Kail`, `Base_Pistol`, dan `Base_Pisau`, lalu `Med_Vaccine` sebanyak `GameBalanceConfig.infection.startingVaccineDoses` (2) (#64), sebelum `ApplyShipLoot`. **Langkah ini satu-satunya pemilik item inti dan vaksin awal.** `ApplyShipLoot` hanya memasukkan isi `savedShipLoot`.
 5. `CarryCapacity.ApplyShipLoot(savedShipLoot)` (#118). Yang tidak muat menjadi `WorldItem` di `overflowOrigin`, dan tidak hilang otomatis.
-6. `NPCRoster.SpawnRescued(rescuedNpcIds, npcOrigin)` (#76).
-7. `GameManager.hasArrivedOnIsland = true`.
+6. `NPCRoster.SpawnRescued(shipOutcome.rescuedNpcIds, npcOrigin)` (#76).
+7. `GameManager.savedShipLoot.Clear()`, lalu `GameManager.hasArrivedOnIsland = true`. Daftar dikosongkan di sini supaya barang kapal tidak bisa diterapkan dua kali.
 8. `SurvivalStats.SetInvulnerable(false)`, dan lapar serta haus aktif.
 
 **Posisi awal berada di pantai,** karena GDD menyebut pemain berasal dari kapal yang karam, dan #71 memakai pantai untuk kargo. Pemain tetap tidak boleh membangun di pasir (GDD bagian 4).
@@ -293,3 +293,4 @@ Fungsi `GameManager.SaveFase1Loot(List<Item>)` diganti `SaveShipOutcome`. `ShipT
 15. Keluar ke menu setelah tiba, lalu lanjutkan. **Hasil:** barang tidak berlipat, dan `Apply` tidak berjalan lagi.
 16. Mati di kapal, lalu mulai lagi lima kali. **Hasil:** `savedShipLoot` kosong tiap kali, dan barang di kapal muncul lagi lewat pool tanpa sisa status.
 17. Turunkan HP ke 0 pada `T=0,1`. **Hasil:** alur mati berjalan sekali, tanpa ringkasan.
+18. Setor satu `Med_Vaccine` dari kapal, lalu tiba di pulau. **Hasil:** item inti masing-masing tepat 1, `Med_Vaccine` berjumlah 3 (2 awal ditambah 1 dari kapal), dan `GameManager.savedShipLoot` kosong setelah `Apply`.

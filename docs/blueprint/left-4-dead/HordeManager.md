@@ -135,7 +135,7 @@ Zombie yang tersisa terbakar saat fajar lewat `SunlightExposure` (#63). `HordeMa
 
 ## 3. Hubungan dengan Sistem Lain
 
-**Event yang dikirim:** `BloodMoonStartedEvent { day }`, `BloodMoonEndedEvent { day }`.
+**Event yang dikirim:** `BloodMoonWarningEvent { day }` (#114), `BloodMoonStartedEvent { day }`, `BloodMoonEndedEvent { day }`.
 
 **Event yang didengar:** `NightfallEvent`, `DaybreakEvent`, `HourChangedEvent`, `SleepStateChangedEvent` (#67), `RunEndedEvent`.
 

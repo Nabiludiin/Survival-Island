@@ -8,6 +8,17 @@
 
 `AIState` milik zombie tidak dipakai. Hewan punya `AnimalState` (`GLOSSARY.md`) dan FSM sendiri, yang berjalan lewat coroutine dengan jeda `GameBalanceConfig.wildlife.tickSeconds` (0,25).
 
+**`IHitReactive` (#95):** `WildlifeAI` memakai interface yang sama dengan `EnemyAI`, supaya `EnemyHitReaction` tidak memanggil `EnemyAI` pada hewan.
+
+| Fungsi | Isi pada hewan |
+|---|---|
+| `RequestReaction(Stagger)` / `RequestReaction(Knockback)` | Tolak kalau sedang `Dying` atau terkaman aktif. Kalau diterima, simpan `AnimalState` saat ini dan hentikan tick FSM. `State` tidak diganti, karena `AnimalState` tidak punya state reaksi |
+| `RequestReaction(Dying)` | Selalu diterima. FSM berhenti tetap, sama dengan langkah `EnemyHealth.Died` di bawah |
+| `EndReaction()` | Lanjutkan tick FSM dengan `AnimalState` yang disimpan |
+| `SetSpeedMultiplier(source, m)` | Menyimpan pengali per `SpeedSource`, lalu memanggil ulang `ApplyStateSpeed(currentBaseSpeed)`. `agent.speed` hewan = kecepatan state (`wanderSpeed`, `chaseSpeed`, dan lainnya) x semua pengali sumber |
+
+**`ApplyStateSpeed(float baseSpeed)`:** satu-satunya tempat `agent.speed` hewan ditulis. Fungsi ini menyimpan `currentBaseSpeed = baseSpeed`, lalu mengatur `agent.speed = baseSpeed x hasil kali semua pengali SpeedSource`. Semua `EnterX` di bawah memanggil fungsi ini, bukan menulis `agent.speed` langsung, supaya `LegHit` dan `Trap` tetap berlaku setelah state berganti.
+
 ```csharp
 public enum AnimalAttackKind : byte { Bite, Pounce, VenomBite, Charge, FlockDive }
 
@@ -105,7 +116,7 @@ Target dipilih lewat `ThreatSystem.Evaluate` dengan profil `Threat_Animal` (#108
 
 ### Teritori
 
-**`EnterChase()`** menyimpan `chaseStartPoint = transform.position`, dan mengatur `agent.speed = chaseSpeed`.
+**`EnterChase()`** menyimpan `chaseStartPoint = transform.position`, dan memanggil `ApplyStateSpeed(chaseSpeed)`.
 
 **`TickChase()`:**
 
@@ -114,7 +125,7 @@ Target dipilih lewat `ThreatSystem.Evaluate` dengan profil `Threat_Animal` (#108
 3. Setiap `pathCheckSeconds`, jalankan `NavMesh.CalculatePath` dengan `NavMeshPath` milik objek. Kalau bukan `PathComplete` selama `unreachableConfirmSeconds`, masuk `TargetUnreachable`.
 4. Kalau masuk jarak `attack.range`, masuk `Attack`.
 
-**`EnterReturn()`:** `agent.speed = wanderSpeed * 1,5`, `reaggroUntil = Time.time + reaggroCooldownSeconds`. Selama state ini, HP naik `returnHealPerSec` per detik, supaya pemain tidak bisa memancing lalu mencicil HP dari batas teritori.
+**`EnterReturn()`:** `ApplyStateSpeed(wanderSpeed * 1,5)`, `reaggroUntil = Time.time + reaggroCooldownSeconds`. Selama state ini, HP naik `returnHealPerSec` per detik, supaya pemain tidak bisa memancing lalu mencicil HP dari batas teritori.
 
 ### Target tak terjangkau
 
@@ -123,14 +134,14 @@ Misalnya pemain di dalam base yang tertutup. Hewan tidak menyerang bangunan (`ca
 1. Bergerak ke ujung jalur parsial, lalu mondar-mandir sambil bersuara, supaya pemain tahu hewan masih ada.
 2. Terus jalankan `CalculatePath`. Kalau menjadi `PathComplete`, misalnya pintu terbuka, kembali ke `Chase`.
 3. Setelah `unreachableGiveUpSeconds`, masuk `ReturnToTerritory`.
-4. **Anti-eksploit:** kalau kena damage di state ini, langsung `ReturnToTerritory` dengan `chaseSpeed`, dan `reaggroCooldownSeconds` dimulai. Pemain tidak bisa menembak hewan yang tidak berdaya sampai mati dengan aman.
+4. **Anti-eksploit:** kalau kena damage di state ini, langsung `ReturnToTerritory` dengan `ApplyStateSpeed(chaseSpeed)`, dan `reaggroCooldownSeconds` dimulai. Pemain tidak bisa menembak hewan yang tidak berdaya sampai mati dengan aman.
 
 ### Malam hari
 
 **`HandleNightfall(NightfallEvent e)`** berlaku untuk semua hewan, kecuali yang sudah mati:
 
 1. Batalkan serangan khusus, panggil `PlayerPinnedState.ReleaseByAttacker` kalau sedang menahan, dan lepaskan `AmbushPerch`.
-2. `State = FleeToDen`, `agent.speed = chaseSpeed * fleeSpeedMultiplier`.
+2. `State = FleeToDen`, `ApplyStateSpeed(chaseSpeed * fleeSpeedMultiplier)`.
 3. Tujuan: `DenPoint.FindNearest(posisi)`, yaitu komponen di scene region. Kalau tidak ada, cari titik acak menjauhi pemain.
 4. Saat tiba dalam 2 m, panggil `SpawnManager.Instance.Despawn(gameObject, DespawnReason.ReturnedToDen)`.
 5. Setelah `fleeTimeoutSeconds`, panggil hal yang sama saat hewan di luar pandangan kamera.
@@ -157,7 +168,7 @@ Damage selalu lewat `IDamageable.TakeDamage(in DamageInfo)`, dengan `infection =
 **Serudukan Babi (`Charge`):**
 
 1. Dalam jarak 12 m, beri tanda menggaruk tanah selama `chargeTelegraphSeconds` (1).
-2. Kunci titik tujuan pada garis lurus sejauh `chargeDistance` (12 m), lalu `agent.speed = chargeSpeed` (10). Tujuan tidak berubah lagi, jadi pemain bisa menghindar ke samping.
+2. Kunci titik tujuan pada garis lurus sejauh `chargeDistance` (12 m), lalu `ApplyStateSpeed(chargeSpeed)` (10). Tujuan tidak berubah lagi, jadi pemain bisa menghindar ke samping.
 3. Setiap tick, `PhysicsQuery.OverlapSphere` dengan `PhysicsMasks.AIAttack` dan buffer tetap. Kena pemain: damage 18 berjenis `Melee`, satu kali per serudukan. Tidak ada pemanggilan getaran terpisah. Getaran datang otomatis dari `PlayerDamagedEvent`, sebagai `PlayerHit` (#24).
 4. Kena `Structure` atau `Obstacle` lewat ray pendek `AIVision`: pusing selama `chargeStunSeconds` (2). Dinding tidak menerima damage.
 
@@ -188,7 +199,7 @@ Damage selalu lewat `IDamageable.TakeDamage(in DamageInfo)`, dengan `infection =
 3. Panggil `NoiseEmitter.Emit(skinNoiseRadius, Tool)`, dengan nilai awal 6 m.
 4. Panggil `SpawnManager.Instance.Despawn(gameObject, DespawnReason.Harvested)`.
 
-Bangkai yang tidak dikuliti hilang setelah `carcassLifetimeSeconds`, tetap ada saat malam, dan tidak menghitung batas hewan hidup.
+Bangkai yang tidak dikuliti hilang setelah `carcassLifetimeSeconds`, tetap ada saat malam, dan tidak menghitung batas hewan hidup. `EnemyInstance.IsCarcass` bernilai `true` sejak hewan mati (`EnemyHitReaction.md`), sehingga pengaman macet dan `SweepWrongPhase` di `SpawnManager` melewatinya. Saat umurnya habis, `AnimalCarcass` memudarkan bangkai lalu memanggil `SpawnManager.Instance.Despawn(gameObject, DespawnReason.Killed)`. Bangkai tetap ikut dikembalikan saat region dilepas.
 
 ### Hewan dan zombie
 
@@ -223,7 +234,7 @@ Saat fajar dan senja keduanya bisa berpapasan. Mereka saling mengabaikan: tidak 
 
 ## 4. Kasus Khusus
 
-- **Objek pool:** `OnSpawned()` mengatur `State = Wander`, `CurrentHP` lewat `EnemyHealth`, `agent.enabled = true` lewat `Warp`, `agent.speed = wanderSpeed`, dan `agent.baseOffset` ke nilai prefab. `AnimalCarcass` dimatikan. Status jeda, `groupId`, perch, serta token Gagak dikosongkan di `OnReturned()`.
+- **Objek pool:** `OnSpawned()` mengatur `State = Wander`, `CurrentHP` lewat `EnemyHealth`, `agent.enabled = true` lewat `Warp`, semua pengali `SpeedSource` kembali ke 1, lalu `ApplyStateSpeed(wanderSpeed)`, tick FSM tidak dijeda reaksi, dan `agent.baseOffset` ke nilai prefab. `IsCarcass` dikosongkan oleh `EnemyInstance.OnSpawned`. `AnimalCarcass` dimatikan. Status jeda, `groupId`, perch, serta token Gagak dikosongkan di `OnReturned()`.
 - **Game dijeda:** coroutine FSM dan `Time.deltaTime` berhenti. Tahan `E` juga berhenti, karena `Gameplay` mati (#83).
 - **Tidur:** waktu dipercepat, jadi hewan yang tersisa ikut bergerak cepat, tetapi malam tidak punya hewan. `SpawnManager` tidak memunculkan hewan saat tidur.
 - **Permadeath dan save:** hewan dan bangkai tidak disimpan (#88). Daging dan kulit di inventori mengikuti #66 dan #80, dan dihapus saat permadeath.
@@ -268,3 +279,5 @@ Saat fajar dan senja keduanya bisa berpapasan. Mereka saling mengabaikan: tidak 
 14. Saat diterkam Jaguar, beri 50 damage ke Jaguar lewat `DevConsole` dengan `byPlayer = false`. **Hasil:** terkaman tidak batal. Ulangi dengan tembakan Pistol pemain sebesar 40. **Hasil:** terkaman batal.
 15. Tebang pohon di dalam `wanderRadius` serigala yang sedang `Wander`. **Hasil:** serigala langsung `Chase`. Ulangi di luar teritori. **Hasil:** hanya `Alert`.
 16. Pasang `AnimalTerritory` Jaguar di dekat jamur Region 2, lalu tunggu spawn siang berulang. **Hasil:** sekitar 70 persen Jaguar muncul dengan `homePoint` di titik itu.
+17. Tembak kaki Babi Hutan yang sedang `Chase`. **Hasil:** kecepatan `chaseSpeed` x `legSlowMultiplier`. Terhuyung menjeda FSM, lalu Babi kembali `Chase`. Picu serudukan sebelum efek kaki habis. **Hasil:** kecepatan serudukan `chargeSpeed` x `legSlowMultiplier`, karena `ApplyStateSpeed` tetap memakai pengali `LegHit`.
+18. Bunuh Serigala siang hari, lalu majukan jam ke 18:00 tanpa melihat bangkainya. **Hasil:** bangkai tetap ada sampai `carcassLifetimeSeconds`, lalu kembali ke pool dengan `Killed`.

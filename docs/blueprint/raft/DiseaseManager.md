@@ -97,7 +97,7 @@ Hasil acak dari aliran `Gameplay`, jadi keluar lalu masuk lagi tidak mengubah ha
 
 **`void HandleDamaged(PlayerDamagedEvent e)`**:
 
-1. Kalau `e.DamageInfo.type == DamageType.Poison`, panggil `Apply(DiseaseType.Venom, e.DamageInfo.sourceId)`.
+1. Kalau `e.info.type == DamageType.Poison`, panggil `Apply(DiseaseType.Venom, e.info.sourceId)`.
 2. Kalau `type == Melee`, `!byPlayer`, `amount >= bleedMinDamage`, dan `!Has(Bleeding)`, ambil acak dengan `bleedChance`. Kalau kena, panggil `Apply(DiseaseType.Bleeding, sourceId)`.
 
 ### Memberi penyakit
@@ -123,6 +123,8 @@ Efek yang sama memakai `EffectStackRule.Refresh`, jadi makan daging mentah lagi 
 
 1. `StatusEffectManager.Remove(Debuff_Bleeding)`.
 2. `Apply(DiseaseType.WoundInfection, "wound")`.
+
+**Pemilik akhir pendarahan:** aset `Debuff_Bleeding` memakai `EffectDurationUnit.Permanent` dan `Reject` (`StatusEffectManager.md`). Kalau durasinya diatur `StatusEffectManager`, efek itu sudah terhapus sebelum `HourChangedEvent` berikutnya, sehingga `Bleeding` tidak pernah berubah menjadi `WoundInfection`. Karena itu hanya `DiseaseManager` yang mengakhiri pendarahan, lewat `bleedingEndGameHour` di atas atau obat.
 
 ### Obat
 
@@ -183,7 +185,7 @@ overlay.alpha = isPoisoned ? Mathf.Lerp(0f, overlayMaxAlpha, t) : 0f;
 - **Mati karena keracunan:** `lastDamageType = Poison`, jadi `DeathReason.Poison`, lewat `DeathReasonMap`.
 - **Mati karena pendarahan:** `lastDamageType = Melee`, jadi `DeathReason.KilledByEnemy`.
 - **Beberapa penyakit sekaligus:** semuanya berjalan, dan pengali dikalikan di #20. HP bisa turun lebih cepat, karena penyakit di luar tabel kondisi HP di `VitalsRules.md`.
-- **Tabel kondisi HP:** efek penyakit berjalan bersama baris lapar dan haus. `blocksHPRegen` mencegah HP pulih selama penyakit aktif.
+- **Tabel kondisi HP:** efek penyakit berjalan bersama baris lapar dan haus. `blocksHPRegen` mencegah HP pulih selama penyakit aktif, lewat `SurvivalStats.SetHPRegenBlocked` (`VitalsRules.md`). Regenerasi stamina tidak ikut tertahan.
 - **Godmode (#56):** HP tertahan di 1, dan penyakit tetap aktif.
 - **Tidur saat sakit:** penyakit berjalan lebih cepat dalam waktu nyata, dan bisa membunuh saat tidur. Pembatasan tidur saat sakit ada di #67.
 - **Fase 1:** `DiseaseManager` tidak ada di `ShipPhase`, jadi makanan kapal tidak diuji di sana. Makanan tidak dimakan di Fase 1 (#75).
@@ -222,7 +224,7 @@ overlay.alpha = isPoisoned ? Mathf.Lerp(0f, overlayMaxAlpha, t) : 0f;
 7. Minum `Med_Norit` saat sehat. **Hasil:** ditolak, dan item tetap.
 8. Biarkan Ular menggigit. **Hasil:** `Venom` aktif, dan HP turun 0,5 per detik.
 9. `balance disease.bleedChance 1`, lalu biarkan zombie memukul dengan damage 15. **Hasil:** `Bleeding` aktif.
-10. Biarkan 6 jam game. **Hasil:** berubah menjadi `WoundInfection`, HP berhenti turun, dan HP tidak pulih.
+10. Biarkan 6 jam game, dengan pendarahan dimulai di tengah jam (misalnya 10:30). **Hasil:** `Debuff_Bleeding` tetap aktif sampai `HourChangedEvent` pertama setelah 16:30, lalu berubah menjadi `WoundInfection`, HP berhenti turun, dan HP tidak pulih. Selama pendarahan, HP juga tidak pulih.
 11. Pakai `Med_Bandage` saat `Bleeding`. **Hasil:** sembuh, HP naik 5, dan tidak berubah menjadi `WoundInfection`.
 12. Pakai `Med_Antibiotic` saat `WoundInfection`. **Hasil:** sembuh, dan HP mulai pulih.
 13. Pakai `Med_Antibiotic` dengan `Infection` 60 tanpa infeksi luka. **Hasil:** ditolak, dan `Infection` tetap 60.

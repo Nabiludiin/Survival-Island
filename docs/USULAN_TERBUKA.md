@@ -9,6 +9,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Topik | Kondisi sekarang |
 |---|---|
 | Posisi Lucky Machine Region 1, 2, dan 4 | Bukan keputusan desain. Ditentukan saat layout peta #88, dengan syarat di `LuckyMachine.md` |
+| Ambang lepas jerat Tribal | Nilai awal 40 (2 tusukan Pisau), menunggu konfirmasi developer. Bertentangan dengan nilai lama 25 yang disetujui di tabel #25 bawah, karena 25 membuat satu tusukan Pisau langsung melepas |
 
 ## Keputusan utama
 
@@ -159,7 +160,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Topik | Usulan |
 |---|---|
 | Runner, Tank, dan Spitter: digabung atau jenis terpisah | Digabung sebagai pola pada varian GDD: Runner ke Zombie Desa, Tank ke Zombie Militer, jarak jauh ke Zombie Tribal. Tidak ada enemyId baru. |
-| Zombie Tribal: jenis serangan, jarak, dan cara lepas | Jerat proyektil jarak 5-14 m yang bisa dihindari, menarik dan menahan lewat PlayerPinnedState. Lepas lewat 25 damage ke Tribal, aksi #110, jarak di atas 18 m, atau garis pandang terputus. |
+| Zombie Tribal: jenis serangan, jarak, dan cara lepas | Jerat proyektil jarak 5-14 m yang bisa dihindari, menarik dan menahan lewat PlayerPinnedState. Lepas lewat damage dari pemain ke Tribal (nilai awal kini 40, yaitu 2 tusukan Pisau, lihat "Masih terbuka"), aksi #110, jarak di atas 18 m, atau garis pandang terputus. |
 | Zombie Lumut: state menyamar dan pemicu bangun | AIState.Dormant dengan rage bergaya Witch: bangun seketika dalam 4 m, saat kena damage, atau kena suara. Rage naik saat pemain berdiri dalam 8 m atau disorot senter dalam 12 m. Tidak bisa kembali menyamar. |
 | Zombie Beku: melambatkan atau menurunkan Warmth | Menurunkan Warmth 25 lewat ledakan saat mati, tanpa melambatkan. Mati karena api tidak meledak. |
 | Zombie Desa: kecepatan dan serangan | Kecepatan 7,5 m/s dan terkaman 3-10 m tanpa menahan pemain, dengan pemulihan 1,5 detik sebagai celah membalas. |

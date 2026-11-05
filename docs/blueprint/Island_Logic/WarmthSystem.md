@@ -173,7 +173,7 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 
 - **Objek pool:** tidak ada. Partikel api memakai `VFXManager` (#15), dan dikembalikan saat `OnUnequip` atau `OnDisable`.
 - **Game dijeda:** `Time.deltaTime` berhenti, jadi `Warmth` dan durasi obor ikut berhenti.
-- **Tidur:** `SleepSystem` menolak tidur saat `IsFreezing`. `Warmth` tetap memakai waktu nyata saat tidur. Pemain yang beratap dan berapi tidak turun.
+- **Tidur:** `SleepSystem` menolak tidur saat `IsFreezing`. `Warmth` tetap memakai waktu nyata saat tidur. Pemain yang beratap dan berapi tidak turun. Kalau `IsFreezing` menjadi `true` saat tidur, misalnya api unggun padam lebih cepat karena bahan bakarnya memakai jam game, `SleepSystem` membangunkan pemain dengan `SleepWakeReason.Freezing` lewat `WarmthChangedEvent`.
 - **Save:** `player_warmth` menyimpan `Warmth`, dan `wornClothingInstanceId` beserta `ItemInstance` pakaiannya. `IsFreezing` tidak disimpan. Setelah dimuat, `Tick` langsung berjalan dan mengirim `WarmthChangedEvent`. Sisa bakar obor mengikuti `ItemInstance` (#66), dan status menyala mengikuti `EquipmentSaveData.offHandActive`.
 - **Permadeath:** `Warmth`, pakaian, dan obor terhapus bersama save run. Run baru mulai dari 100, tanpa pakaian.
 - **Melepas pakaian di Region 3:** `Warmth` mulai turun pada tick berikutnya, paling lama 0,5 detik.

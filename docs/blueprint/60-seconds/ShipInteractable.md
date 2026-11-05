@@ -269,7 +269,7 @@ Objek pool berada di bawah `PersistentRoot`, jadi kelas ini **tidak** menyimpan 
 3. Ambil 4 barang berat 1, lalu bidik barang kelima. **Hasil:** highlight `Blocked`, prompt `Tangan penuh. Setor ke Sekoci`, dan barang tetap ada setelah `E` ditekan.
 4. Sambil membidik barang kelima, setor ke sekoci lewat `DevConsole` atau dari dekat. **Hasil:** warna berubah menjadi `Available` tanpa menggeser bidikan.
 5. Ambil `npc_medic`. **Hasil:** tangan penuh, NPC hilang dari dunia, dan HUD menampilkan ikon NPC. `NPCRescuedEvent` belum terkirim.
-6. Ambil `npc_cook` lalu satu makanan. **Hasil:** keduanya muat, karena berat Koki 3.
+6. Ambil `npc_cook`, lalu bidik satu makanan. **Hasil:** makanan `Blocked` dan tidak terambil, karena berat Koki 4 sudah memenuhi tangan (`NPCRoster.md`).
 7. Biarkan air menenggelamkan NPC di dek bawah. **Hasil:** prompt tidak muncul, dan NPC tercatat di bagian Korban.
 8. Bidik barang dengan collider yang diubah menjadi trigger. **Hasil:** tidak terbidik. `LayerAuditWindow` (#87) melaporkannya.
 9. Bidik barang di balik dinding. **Hasil:** tidak ada prompt.

@@ -157,7 +157,7 @@ Memancing di tebing karang tetap bisa kapan saja. Diary Bab 1 mengajarkan cara i
 - **Game dijeda:** `Time.deltaTime` dan jam berhenti, jadi air diam.
 - **Tidur:** jam dipercepat, sehingga air naik lebih cepat dengan rumus yang sama.
 - **Permadeath dan save:** tidak ada data tersimpan. Setelah load, `Update` pertama menghitung nilai dari jam, `surge` langsung mengikuti cuaca, dan `TideChangedEvent` dikirim ulang.
-- **`LowTideSpot`:** `harvestedToday` disimpan lewat `SaveIdTag` di `RegionStateStore`, dan diulang saat `DayChangedEvent`.
+- **`LowTideSpot`:** `harvestedToday` disimpan lewat `SaveIdTag` di `RegionStateStore`, dan diulang saat `DayChangedEvent` dengan `isReplay = false`. Kiriman ulang setelah load (`isReplay = true`) diabaikan, supaya keluar lalu lanjutkan tidak membuka panen lagi.
 - **Region dilepas:** laut berada di `IslandPhase` dan tetap aktif. `LowTideSpot` ikut scene region.
 - **Pemain tenggelam karena tidur:** `SleepSystem` membangunkan pemain lebih dulu. Stamina hilang 30, sesuai `sleep.beachTideStaminaLoss`.
 

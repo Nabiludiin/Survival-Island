@@ -146,19 +146,22 @@ Manager hanya mengisi `Instance` di `Awake`. Pekerjaan yang bergantung pada mana
 6. `WorldStateSave.RestoreBaseScene()`. Ini mengisi data di scene dasar, termasuk `RegionStateStore` dan posisi pemain.
 7. `yield return RegionStreaming.Instance.LoadInitialRegions(posisiPemain)` (#88). Objek region mengambil statusnya dari `RegionStateStore` saat region masuk.
 8. `WorldStateSave.FinishRestore()`, yang mengirim ulang event sticky lewat `ISaveable`.
-9. Tutup panel `Loading`, lalu `State = OnIsland`.
+9. `GameManager.PublishDayState(isReplay: true)`. `GameManager` bukan `ISaveable`, jadi `DayChangedEvent` dikirim ulang di sini.
+10. Tutup panel `Loading`, lalu `State = OnIsland`.
 
 ### Pindah dari kapal ke pulau
 
 **`public void EnterIslandPhase()`** dipanggil pemilik akhir Fase 1, yaitu `LifeboatExtraction` (#74). Hanya berlaku saat state `InShip`:
 
-1. Jalankan `AsyncSceneLoader.LoadSingle("IslandPhase", holdActivation: true)` sebagai coroutine (#99).
-2. `GameManager.SetPhase(GamePhase.IslandSurvival)`.
-3. `yield return NarrativeSequencer.Instance.PlayDuringLoad("lifeboat_to_beach")`, lalu `yield return` coroutine muatnya.
-4. `yield return RegionStreaming.Instance.LoadInitialRegions(IslandArrival.Instance.LandingPosition)`.
-5. `IslandArrival.Instance.Apply()` (#74).
-6. `State = OnIsland`, lalu terbitkan `SaveRequestedEvent` dengan alasan `ArrivedOnIsland`. Ini save pertama dalam satu run.
-7. Tutup panel `Loading`.
+1. `ObjectPooler.Instance.ReturnAllActive()`, selagi `ShipPhase` masih ada. Zombie kapal (`zombie_standar`), `ShipLoot_Generic`, dan `ShipNpc_Generic` hidup di bawah `PersistentRoot`, jadi tanpa langkah ini mereka tetap aktif di pulau dan memakai kuota pool (`ObjectPooler.md`).
+2. Jalankan `AsyncSceneLoader.LoadSingle("IslandPhase", holdActivation: true)` sebagai coroutine (#99).
+3. `GameManager.SetPhase(GamePhase.IslandSurvival)`.
+4. `yield return NarrativeSequencer.Instance.PlayDuringLoad("lifeboat_to_beach")`, lalu `yield return` coroutine muatnya.
+5. `yield return RegionStreaming.Instance.LoadInitialRegions(IslandArrival.Instance.LandingPosition)`.
+6. `IslandArrival.Instance.Apply()` (#74).
+7. `GameManager.PublishDayState(isReplay: false)`. `DayChangedEvent { newDay = 1 }` terkirim pertama kali, supaya pembaca hari punya nilai sejak tiba.
+8. `State = OnIsland`, lalu terbitkan `SaveRequestedEvent` dengan alasan `ArrivedOnIsland`. Ini save pertama dalam satu run.
+9. Tutup panel `Loading`.
 
 ### Alur akhir run tunggal
 
@@ -179,7 +182,7 @@ RescueEventManager  ------------->  GameManager.TriggerWinSequence()      ─┘
 | Langkah | Tindakan | `Died` | `Won` |
 |---|---|---|---|
 | 1 | `State = Ending`, matikan autosave | Sama | Sama |
-| 2 | `WorldStateSave.MarkRunEnded(result, reason)` | Sama | Sama |
+| 2 | `yield return WorldStateSave.WaitForPendingWrite(saveWaitTimeoutSeconds)`, lalu `WorldStateSave.MarkRunEnded(result, reason)`. Penantian tidak membekukan frame, dan penulisan yang tersisa dibatalkan (#80) | Sama | Sama |
 | 3 | `UIFocusStack.CloseAllUnlocked(RunEnded)`, lalu dorong panel `Cinematic` | Sama | Sama |
 | 4 | Putar penutup, dengan batas `endSequenceTimeoutSeconds`. Untuk `Won`, batasnya `endingTimeoutSeconds` | `yield return DeathCinematic.Instance.Play(reason)` (#53), dilewati kalau `Instance` bernilai `null` | `NarrativeSequencer.PlayEnding()` tanpa parameter (#99). `RescueEventManager` sudah mengisi `PrepareEnding` |
 | 5 | `WorldStateSave.DeleteRunSave()` | Sama | Sama |
@@ -201,7 +204,7 @@ Langkah 4 memakai waktu tak terskala untuk batas tunggunya. Kalau `DeathCinemati
 
 **`public void SaveAndQuitToMenu()`**, dipanggil dari panel `Pause`:
 
-1. **Di Fase 2:** terbitkan `SaveRequestedEvent` dengan alasan `QuitToMenu`, lalu tunggu `SaveCompletedEvent` selama `saveWaitTimeoutSeconds`. Kalau gagal, tampilkan `ConfirmDialog` bahwa progres terakhir bisa hilang.
+1. **Di Fase 2:** terbitkan `SaveRequestedEvent` dengan alasan `QuitToMenu`, lalu tunggu `SaveCompletedEvent` dengan `reason == QuitToMenu` selama `saveWaitTimeoutSeconds`. Event dengan alasan lain, misalnya autosave yang selesai lebih dulu, diabaikan. Kalau gagal atau batas waktu habis, tampilkan `ConfirmDialog` bahwa progres terakhir bisa hilang.
 2. **Di Fase 1:** tampilkan `ConfirmDialog` bahwa run ini hilang, karena Fase 1 tidak punya save.
 3. Jalankan `ReturnToMainMenu()`.
 
@@ -351,3 +354,5 @@ Panel `Loading` mengubah bar dengan `Mathf.MoveTowards` dan `Time.unscaledDeltaT
 12. Matikan proses game saat sinematik kematian, lalu buka lagi. **Hasil:** Lanjutkan tidak tampil, save sudah hilang, dan statistik mencatat run tersebut.
 13. Mati lalu mulai run baru sebanyak lima kali sambil memantau log. **Hasil:** tidak ada peringatan kebocoran pendengar, event tidak ganda, dan jumlah objek pool tetap.
 14. Tekan Play langsung dari `IslandPhase` di Editor. **Hasil:** `EditorQuickStart` menyiapkan manager dan game berjalan.
+15. Biarkan 4 zombie kapal aktif dan beberapa barang tidak terambil, lalu berangkat dengan sekoci. **Hasil:** di `IslandPhase`, `CountActive` untuk `zombie_standar`, `ShipLoot_Generic`, dan `ShipNpc_Generic` bernilai 0.
+16. Tiba di pulau, lalu lihat `eventlog 1`. **Hasil:** `DayChangedEvent { newDay = 1, isReplay = false }` terkirim sekali. Keluar, lalu lanjutkan. **Hasil:** `DayChangedEvent` dengan `isReplay = true` terkirim sekali setelah `FinishRestore`.

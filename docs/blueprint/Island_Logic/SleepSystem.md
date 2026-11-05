@@ -22,7 +22,7 @@ public enum SleepBlockReason
     None, NotNight, EnemyNearby, DisasterActive, BloodMoon, Freezing, VitalsTooLow, RecentlyWoken
 }
 
-public enum SleepWakeReason { None, Daybreak, Manual, Attacked, EnemyNear, Interrupted, Disaster, TideRising, VitalEmpty, BedDestroyed, RunEnded }
+public enum SleepWakeReason { None, Daybreak, Manual, Attacked, EnemyNear, Interrupted, Disaster, TideRising, VitalEmpty, BedDestroyed, RunEnded, Freezing }
 ```
 
 ### Kasur sebagai struktur
@@ -204,6 +204,7 @@ Karena tiap langkah paling besar 0,25 jam, frame panjang tidak bisa melompati ja
 | Air pasang | `TideChangedEvent.isHigh`, kalau `onBeach` | `TideRising` |
 | Lapar atau haus nol | `Update` | `VitalEmpty` |
 | Kasur hancur | `StructureDestroyedEvent` | `BedDestroyed` |
+| Mulai membeku | `WarmthChangedEvent.isFreezing` berubah menjadi `true` (#65), misalnya api unggun padam karena bahan bakarnya ikut jam game yang dipercepat | `Freezing`, dengan notifikasi `Kedinginan, kamu terbangun` |
 | Panel ditutup sistem lain | `SleepPanel.OnClosed(Forced)` atau `OnClosed(RunEnded)` | `RunEnded` |
 
 **`private void EndSleep(SleepWakeReason reason)`**, satu-satunya jalur bangun:
@@ -227,7 +228,7 @@ Karena tiap langkah paling besar 0,25 jam, frame panjang tidak bisa melompati ja
 | Hal | Syarat | Hasil |
 |---|---|---|
 | HP | `Hunger > 0`, `Thirst > 0`, dan `Infection < regenMaxInfection` | `RestoreHP(hours * (inBase ? hpPerGameHourInBase : hpPerGameHourOutside))` |
-| Stamina | `hours >= minHoursForStamina`, `reason` bukan `Attacked`, `Interrupted`, atau `TideRising` | `RestoreStamina(MaxStamina)` |
+| Stamina | `hours >= minHoursForStamina`, `reason` bukan `Attacked`, `Interrupted`, `TideRising`, atau `Freezing` | `RestoreStamina(MaxStamina)` |
 | Di pantai | `onBeach` | Tidak ada HP dan stamina |
 
 Infeksi tidak berkurang karena tidur. Obatnya tetap Vaksin, sesuai GDD bagian 3.
@@ -283,7 +284,7 @@ interruptAtGameHour = startGameHour + HoursUntilDaybreak() * progress;
 
 **Event yang dikirim:** `SleepStateChangedEvent` (`isSleeping`, `reason`, sticky, baru), `SaveRequestedEvent` (alasan `WakeUp`).
 
-**Event yang didengar:** `DaybreakEvent`, `PlayerDamagedEvent`, `StructureDamagedEvent`, `StructureDestroyedEvent`, `DisasterStartedEvent`, dan `TideChangedEvent`.
+**Event yang didengar:** `DaybreakEvent`, `PlayerDamagedEvent`, `StructureDamagedEvent`, `StructureDestroyedEvent`, `DisasterStartedEvent`, `TideChangedEvent`, dan `WarmthChangedEvent`. Jarak `StructureDamagedEvent` dibaca dari field `position` di event itu.
 
 | Sistem | Hubungan |
 |---|---|
@@ -366,3 +367,4 @@ interruptAtGameHour = startGameHour + HoursUntilDaybreak() * progress;
 20. Mati saat tidur. **Hasil:** alur akhir run berjalan, `SleepPanel` tertutup, dan `timeMultiplier` run baru kembali ke nilai dasar.
 21. Tutup jendela saat tidur, lalu lanjutkan. **Hasil:** jam mengikuti waktu penyimpanan, dan pemain dalam keadaan terjaga.
 22. `setday 70`, lalu paksa gangguan tidur. **Hasil:** jumlah penyergap 13, yaitu (4 + 7) x 1,2 dibulatkan, dengan HP 1,2 kali dan damage 1,1 kali.
+23. Di Region 3, tidur di luar ruangan dekat api unggun berisi 60 detik bahan bakar, tanpa pakaian hangat. **Hasil:** api padam karena jam dipercepat, `Warmth` turun, dan saat `isFreezing` menjadi `true` pemain langsung bangun dengan alasan `Freezing`. Waktu kembali normal, dan stamina tidak dipulihkan.

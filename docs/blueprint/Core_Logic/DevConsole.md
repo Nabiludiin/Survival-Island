@@ -240,7 +240,7 @@ Sistem gameplay tidak boleh bergantung pada `DevConsole`. Fungsi bernama `Debug*
 
 ## 5. Keputusan Desain
 
-**Sudah ditetapkan dokumen lain:** tombol `~` dan Action Map `Debug` (#18). Panel menjeda waktu dan boleh masuk di atas panel terkunci (#83). Urutan bootstrap ke-14 (#82). Perintah `seed`, `layout`, `balance`, `eventlog`, `streamstat`, dan `streamdelay` (#84, #88, #89, #107).
+**Sudah ditetapkan dokumen lain:** tombol `~` dan Action Map `Debug` (#18). Panel menjeda waktu dan boleh masuk di atas panel terkunci (#83). Urutan bootstrap ke-18 (#82). Perintah `seed`, `layout`, `balance`, `eventlog`, `streamstat`, dan `streamdelay` (#84, #88, #89, #107).
 
 **Keputusan teknis di blueprint ini:**
 

@@ -78,14 +78,14 @@ IslandArrival (#74)          ->  CarryCapacity.ApplyShipLoot(savedShipLoot)
 
 Berat barang mengikuti `ShipInteractable.md`: makanan 1, senjata 2, dan NPC 4. Daftar barang kapal final ada di #103.
 
-**`public void ApplyShipLoot(List<SavedItemData> loot)`**, dipanggil `IslandArrival` setelah item inti masuk:
+**`public void ApplyShipLoot(List<SavedItemData> loot)`**, dipanggil `IslandArrival` setelah item inti dan vaksin awal masuk:
 
-1. Urutkan: item inti lebih dulu, lalu vaksin awal (#64), lalu sisa `loot` sesuai urutan disetor.
-2. Tiap item masuk lewat `InventoryManager.AddItem(ItemData, amount)`. Item baru mendapat `ItemInstance` dengan `createdGameHour` saat ini.
+1. Proses isi `loot` sesuai urutan disetor. Fungsi ini **tidak** menambahkan item inti atau vaksin awal. Pemiliknya `IslandArrival.Apply` langkah 4 (`LifeboatExtraction.md`), jadi keduanya tidak masuk dua kali.
+2. Tiap item masuk lewat `InventoryManager.AddItem(ItemData, entry.amount)`. `entry.amount` sudah berisi `shipPickupAmount` dari saat diambil, jadi **tidak** dikali lagi. Item baru mendapat `ItemInstance` dengan `createdGameHour` saat ini.
 3. Sisa yang tidak muat masuk daftar `overflow`.
 4. `IslandArrival` memunculkan `overflow` di pantai sebagai `WorldItem` dengan `despawns: false`, berjarak `overflowSpacing`.
 
-Item inti (`Base_Kail`, `Base_Pistol`, dan `Base_Pisau`) tidak pernah menjadi sisa, karena masuk paling awal, dan selalu ditambahkan terlepas dari isi `loot`, sesuai GDD bagian 3.
+Item inti (`Base_Kail`, `Base_Pistol`, dan `Base_Pisau`) tidak pernah menjadi sisa, karena `IslandArrival.Apply` memasukkannya sebelum fungsi ini, dan selalu ditambahkan terlepas dari isi `loot`, sesuai GDD bagian 3.
 
 ### Kapasitas
 

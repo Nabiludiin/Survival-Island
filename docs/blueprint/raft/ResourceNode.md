@@ -43,7 +43,9 @@ public enum NodeStatus { Standing, Depleted }
 
 ## 2. Detail Logika & Fungsi
 
-**`public HitResult ReceiveHit(ToolClass tool, Vector3 hitPoint)`** menggantikan `ReceiveHit(int, string)`:
+**`public HitResult ReceiveHit(ToolClass tool, Vector3 hitPoint, bool byPlayer = true)`** menggantikan `ReceiveHit(int, string)`. `MeleeCombatSystem` pemain memanggil dengan nilai bawaan `true`. Pemanggil lain, misalnya NPC pekerja (#76), mengisi `false`. Isi fungsi ini sama dengan `ResourceRespawn.md`.
+
+**Pemilik suara panen:** `ResourceNode.ReceiveHit` adalah satu-satunya pengirim `NoiseSourceKind.Tool` untuk panen node, sesuai keputusan developer (hewan menjaga resource). Menguliti bangkai juga mengirim `Tool` lewat `AnimalCarcass` (`WildlifeAI.md`). `MeleeCombatSystem` tetap mengirim suara ayunan `NoiseSourceKind.Melee` miliknya sendiri, dan tidak mengirim `Tool`.
 
 1. Kalau `Status == Depleted`, kembalikan `Rejected`.
 2. Cari damage alat di `toolRules`. Kalau 0, tampilkan `Butuh alat lain`, lalu kembalikan `Rejected`.

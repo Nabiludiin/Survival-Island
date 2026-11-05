@@ -142,7 +142,9 @@ Panel `Cinematic` (#83) memblokir input gameplay, tidak menjeda waktu, tidak bis
 
 ### Subtitle
 
-`subtitleKey` dan `textKey` ditampilkan lewat `LocalizationManager.Get(key)` (#104). Tampilan subtitle mengikuti setting dari #104. Selama #104 belum ada, kunci mentah dianggap sebagai teks, sehingga adegan tetap berjalan.
+- **`textKey`** (teks layar beat) diambil lewat `LocalizationManager.Get(key)` (#104) dan ditampilkan di `CinematicPanel`.
+- **`subtitleKey`** tidak ditampilkan sendiri. Saat beat dimulai dan `subtitleKey` tidak kosong, terbitkan `SubtitleRequestedEvent { textKey = subtitleKey, speakerKey = "", priority = 3, sourceKind = Scene }` (`GameEventBus.md`). `SubtitlePresenter` di `LocalizationManager.md` yang memilih baris, menghitung lama tampil, dan mengikuti setting subtitle.
+- Selama #104 belum ada, kunci mentah dianggap sebagai teks, sehingga adegan tetap berjalan.
 
 ### Audio
 
@@ -159,7 +161,7 @@ Trigger layer `ZoneTrigger` di `Region3_Snow`, sekaligus `ISaveable` lewat `Regi
 
 ## 3. Hubungan dengan Sistem Lain
 
-**Event yang dikirim:** `NarrativeStateChangedEvent` dan `CinematicStateChangedEvent`.
+**Event yang dikirim:** `NarrativeStateChangedEvent`, `CinematicStateChangedEvent`, dan `SubtitleRequestedEvent` (sumber `Scene`, prioritas 3, #104).
 
 **Event yang didengar:** tidak ada. Adegan dipicu lewat pemanggilan langsung dari pemilik alur.
 
@@ -170,7 +172,7 @@ Trigger layer `ZoneTrigger` di `Region3_Snow`, sekaligus `ISaveable` lewat `Regi
 | `UIFocusStack` (#83) | Panel `Cinematic`, `SetGameplayTimeScale` |
 | `UIManager` | Fungsi `CinematicPanel`: `FadeToBlack`, `FadeFromBlack`, `SetBlack`, dan `ClearCaption` (`UIManager.md`) |
 | `InputManager` (#18) | `SkipPressed` |
-| `LocalizationManager` (#104) | Teks dan subtitle |
+| `LocalizationManager` (#104) | `Get` untuk teks layar. Subtitle lewat `SubtitleRequestedEvent` ke `SubtitlePresenter` |
 | `AudioManager`, `CombatMusicDirector` (#114) | Audio |
 | `RescueEventManager` (#14) | `PrepareEnding` |
 | `LifeboatExtraction` (#74) | `lostNpcIds` untuk `lifeboat_to_beach`. `PreGameRoutine` menunggu panel `Cinematic` tertutup |

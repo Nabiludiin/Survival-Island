@@ -55,6 +55,8 @@ Runner, Tank, dan Spitter tidak menjadi `enemyId` baru. Sesuai `SpecialZombieAI.
 | `IsEngaged` | Diisi `EnemyAI` dan `WildlifeAI` saat mengejar atau menyerang |
 | `IsDormantCounted` | `true` saat `Submerged`, sehingga tidak dihitung sebagai musuh aktif |
 | `IsSacrificing` | `public bool`. Diisi `LuckyMachine` (#72) saat vakum, dan dikosongkan di `OnSpawned` |
+| `IsCarcass` | `public bool`. Diisi `EnemyHitReaction.HandleDied` (#95) untuk hewan yang mati, sampai bangkai dikuliti atau umurnya habis. Dikosongkan di `OnSpawned`. Pengaman macet dan `SweepWrongPhase` melewatinya, dan `CountAwake()` tidak menghitungnya |
+| `UsesNightBudget` | `public bool`. Diisi `true` oleh `SpawnManager` hanya untuk zombie yang muncul dari slot `RequestWave` (anggaran malam #27). Zombie dari `RequestBurst`, `RequestAmbush`, dan `DebugSpawn` tetap `false`. Dikosongkan di `OnSpawned`. `Despawn` membacanya sebelum `RefundBudget` |
 | `lastPosition`, `stuckTimer` | Pengaman macet |
 | `IsCulled`, `culledAgentWasEnabled`, `culledAnimatorWasEnabled` | Status culling milik `OptimizationManager`, beserta status `NavMeshAgent.enabled` dan `Animator.enabled` sebelum culling (usulan, `OptimizationManager.md`) |
 
@@ -106,7 +108,7 @@ Runner, Tank, dan Spitter tidak menjadi `enemyId` baru. Sesuai `SpecialZombieAI.
 | `LairClearedEvent` (#112) | Tambah `regionBudgetReduction[region]` sebesar `lair.clearedBudgetReduction`, paling besar `lair.maxBudgetReduction` (`ZombieLair.md`). Nilai ini mengurangi `count` di `RequestWave` sebagai rasio |
 | `RunEndedEvent` | Hentikan coroutine |
 
-**`SweepWrongPhase()`** mengembalikan musuh yang salah waktu dan berada di luar pandangan, misalnya hewan yang tersesat saat malam, kecuali `IsDormantCounted`, zombie sarang di dalam `InteriorZone` (`EnemyAI.lair != null`, #112), dan musuh hasil override aktif.
+**`SweepWrongPhase()`** mengembalikan musuh yang salah waktu dan berada di luar pandangan, misalnya hewan yang tersesat saat malam, kecuali `IsDormantCounted`, `IsCarcass` (bangkai tetap ada saat malam, `WildlifeAI.md`), zombie sarang di dalam `InteriorZone` (`EnemyAI.lair != null`, #112), dan musuh hasil override aktif.
 
 ### Tick spawn
 
@@ -130,7 +132,7 @@ Tick ini hanya mengisi hewan pada siang hari.
 3. Masukkan `count` slot ke antrean, bersama `r.modifiers`, `r.maxLarge`, `r.specialShare`, `r.forcedEnemyId`, dan `r.origin`. Kembalikan `count`, yang dipakai Director sebagai jumlah yang muncul.
 4. `Update` mengerjakan paling banyak `maxSpawnsPerFrame` slot, memakai `PickEntry()` dan `FindSpawnPoint()`. Kalau `forcedEnemyId` terisi, jenisnya tidak diacak.
 5. `PickEntry()` memberi bobot 0 pada entri `isSpecial` kalau porsinya sudah `specialShare`, dan pada `ZombieData.isLarge` kalau jumlahnya sudah `maxLarge`.
-6. Setelah keluar dari pool: `EnemyHealth.SetHPMultiplier(r.modifiers.hp)`, lalu `EnemyAI.ApplyWaveModifiers(in r.modifiers)`.
+6. Setelah keluar dari pool: `EnemyInstance.UsesNightBudget = true`, `EnemyHealth.SetHPMultiplier(r.modifiers.hp)`, lalu `EnemyAI.ApplyWaveModifiers(in r.modifiers)`.
 7. Slot yang tetap gagal setelah 3 percobaan tick dibuang, lalu panggil `AIDirector.RefundBudget(1)`.
 
 **`PickEntry()`:** isi `float[] weightBuffer` milik manager, dengan bobot 0 untuk entri yang belum `minDay` atau sudah `maxAlive`. Panggil `rng.PickWeighted(weightBuffer)`.
@@ -144,7 +146,7 @@ Tick ini hanya mengisi hewan pada siang hari.
 5. `WildlifeAI` menerima `homePoint` dan `groupId`. Untuk hewan siang, titik spawn lebih dulu dicari di `AnimalTerritory` yang cocok dengan peluang `wildlife.territorySpawnChance` (disetujui developer, `WildlifeAI.md`).
 6. Tambah ke `activeEnemies`, lalu kirim `EnemySpawnedEvent { enemyId, position }`.
 
-**Zombie Desa:** entri dengan `ZombieData.hidesFromSun` tidak memakai `FindSpawnPoint`. Gelombang malam memanggil `HidingSpot.FindEmergeSpot(playerPos)` (#63), sehingga musuh selalu naik dari air atau lumpur.
+**Zombie Desa:** entri dengan `ZombieData.hidesFromSun` tidak memakai `FindSpawnPoint`. Slot gelombang malam (`RequestWave`, `RequestBurst`, dan `RequestAmbush`, bukan `TickSpawn` yang hanya mengisi hewan) memanggil `HidingSpot.FindEmergeSpot(playerPos)` (#63). Setelah keluar dari pool, `SpawnManager` memanggil `VillageZombieHiding.SpawnEmerging(spot)` (`SunlightExposure.md`), sehingga musuh selalu naik dari air atau lumpur. Kalau tidak ada titik, slot diperlakukan gagal seperti `FindSpawnPoint` yang gagal.
 
 **Zombie Lumut:** entri `useBushPoints` memilih komponen `BushSpawnPoint` di `Region2_Amazon` yang memenuhi syarat jarak dan pandangan, lalu `SpecialZombieAI` memulainya dari `Dormant` (#25).
 
@@ -179,7 +181,7 @@ Kalau semua gagal, kembalikan `false` dan coba lagi pada tick berikutnya. Syarat
 
 **`IEnumerator WatchdogLoop()`**, setiap `stuckCheckSeconds`:
 
-1. Lewati `IsDormantCounted`, state `AttackPlayer`, `AttackBuilding`, `Attack`, `BurnToAshes`, `Dying`, `SeekHiding`, `Emerging`, `Dormant`, dan hewan yang menunggu di perch.
+1. Lewati `IsDormantCounted`, `IsCarcass`, state `AttackPlayer`, `AttackBuilding`, `Attack`, `BurnToAshes`, `Dying`, `SeekHiding`, `Emerging`, `Dormant`, dan hewan yang menunggu di perch.
 2. Kalau `!agent.isOnNavMesh`, panggil `Despawn(OffNavMesh)` saat di luar pandangan. Kalau tetap terlihat, setelah `stuckForceSeconds`.
 3. Kalau bergerak kurang dari `stuckMoveEpsilon`, tambah `stuckTimer`. Kalau tidak, nolkan.
 4. Kalau `stuckTimer >= stuckSeconds` dan di luar pandangan, atau `>= stuckForceSeconds`, panggil `Despawn(Stuck)`.
@@ -187,7 +189,9 @@ Kalau semua gagal, kembalikan `false` dan coba lagi pada tick berikutnya. Syarat
 
 Musuh `IsCulled` (`OptimizationManager.md`) melewati langkah 2 sampai 4, karena agennya sengaja dimatikan sehingga `isOnNavMesh` bernilai `false` dan posisinya diam. Langkah 5 tetap berlaku.
 
-Musuh yang dikembalikan tidak mengirim `EnemyKilledEvent`, jadi tidak menghitung statistik dan Lucky Machine. Kalau zombie, `AIDirector.RefundBudget(1)` mengembalikan anggaran malam itu.
+Musuh yang dikembalikan tidak mengirim `EnemyKilledEvent`, jadi tidak menghitung statistik dan Lucky Machine. Anggaran malam dikembalikan di dalam `Despawn`, bukan di sini (lihat "Pengembalian anggaran").
+
+**Pengembalian anggaran.** `AIDirector.RefundBudget(1)` hanya dipanggil di satu tempat, yaitu `Despawn`, untuk zombie dengan `EnemyInstance.UsesNightBudget == true` dan alasan `Stuck`, `OffNavMesh`, `TooFar`, atau `RegionUnloaded`. Zombie dari `RequestBurst`, `RequestAmbush`, dan `DebugSpawn` tidak memakai anggaran, jadi tidak pernah mengembalikannya. Alasan `Killed`, `Burned`, `Sacrificed`, `ReturnedToDen`, `Harvested`, dan `Debug` tidak mengembalikan anggaran. Satu-satunya jalur lain adalah slot `RequestWave` yang gagal (langkah 7), karena slot itu tidak pernah menjadi musuh.
 
 ### Pindah region
 
@@ -202,9 +206,9 @@ Rekomendasi (lihat bagian 5):
 
 | Fungsi | Pemanggil | Isi |
 |---|---|---|
-| `void Despawn(GameObject go, DespawnReason r)` | `EnemyAI`, `WildlifeAI`, #95, #72 | Hapus dari daftar lalu `ReturnToPool`. Satu-satunya jalur kembali di Fase 2. Alasan `Sacrificed` tidak memanggil `RefundBudget` |
+| `void Despawn(GameObject go, DespawnReason r)` | `EnemyAI`, `WildlifeAI`, #95, #72 | Hapus dari daftar lalu `ReturnToPool`. Satu-satunya jalur kembali di Fase 2. Musuh yang mati dikembalikan `EnemyHitReaction` (#95) dengan `Killed`, kecuali bangkai hewan yang dikembalikan `AnimalCarcass` (`Harvested` atau `Killed` saat umurnya habis, `WildlifeAI.md`) dan zombie terbakar yang dikembalikan `SunlightExposure` dengan `Burned` (`EnemyHitReaction.md`). Untuk zombie, panggil `RefundBudget(1)` hanya kalau `UsesNightBudget` dan alasannya `Stuck`, `OffNavMesh`, `TooFar`, atau `RegionUnloaded` |
 | `int RequestWave(in WaveRequest r)` | #27 | Lihat "Gelombang dari Director" |
-| `void ReturnStuck(EnemyInstance e)` | #25, #94 | `Despawn(Stuck)` lalu `RefundBudget(1)` |
+| `void ReturnStuck(EnemyInstance e)` | #25, #94 | `Despawn(e.gameObject, DespawnReason.Stuck)`. Anggaran dikembalikan di dalam `Despawn`, jadi tidak ada `RefundBudget` kedua |
 | `int ReturnRaidersNear(Vector3 center, float radius)` | #90 | `Despawn(go, DespawnReason.TooFar)` untuk zombie di sekitar base. Mengembalikan jumlahnya |
 | `int AliveZombies { get; }`, `int AliveLarge { get; }` | #27 | Zombie hidup, tanpa `IsDormantCounted` |
 | `void RequestAmbush(Vector3 center, int count, float radius)` | #67, #80 | Memakai tabel malam, cincin `radius`, dan `AISensory.ForceAware`. Berlaku saat tidur. HP dan damage memakai `AIDirector.GetPostTargetModifiers(currentDay)`. `count` tidak dikali di sini, supaya pemulihan #80 tetap memunculkan jumlah yang sama |
@@ -254,7 +258,7 @@ Beberapa override boleh aktif. Yang terakhir didorong menang untuk `table`, nila
 
 ## 4. Kasus Khusus
 
-- **Objek pool:** `EnemyInstance.OnSpawned()` mengosongkan `stuckTimer`, `IsEngaged`, `IsDormantCounted`, `IsSacrificing`, `IsCulled`, `culledAgentWasEnabled`, dan `culledAnimatorWasEnabled`, lalu menyalakan `Animator` (`OptimizationManager.md`). Reset HP mengikuti #59, dan reset agen serta state mengikuti pemilik masing-masing. `SetHPMultiplier` dipanggil setelah objek keluar dari pool.
+- **Objek pool:** `EnemyInstance.OnSpawned()` mengosongkan `stuckTimer`, `IsEngaged`, `IsDormantCounted`, `IsSacrificing`, `UsesNightBudget`, `IsCulled`, `culledAgentWasEnabled`, dan `culledAnimatorWasEnabled`, lalu menyalakan `Animator` (`OptimizationManager.md`). Reset HP mengikuti #59, dan reset agen serta state mengikuti pemilik masing-masing. `SetHPMultiplier` dipanggil setelah objek keluar dari pool.
 - **Pool kosong:** `SpawnFromPool` mengembalikan `null`, dan tick berikutnya mencoba lagi.
 - **Game dijeda:** semua loop memakai `WaitForSeconds`, jadi berhenti saat `timeScale = 0`. Event transisi tetap diterima, tetapi tidak ada spawn.
 - **Tidur:** tick berhenti. Pengaman macet tetap jalan, karena waktu dipercepat.
@@ -299,3 +303,7 @@ Beberapa override boleh aktif. Yang terakhir didorong menang untuk `table`, nila
 13. Jalankan dua run dengan seed sama tanpa aksi. **Hasil:** urutan jenis musuh sama.
 14. Mati lalu mulai run baru. **Hasil:** `activeEnemies` kosong, dan tidak ada event ganda.
 15. Tunggu fajar di dekat gua berisi zombie sarang, lalu tunggu `cleanupSeconds`, di luar pandangan. **Hasil:** `SweepWrongPhase` tidak mengembalikan zombie sarang di dalam `InteriorZone`, dan zombie horde di luar ruangan sudah habis.
+16. Bunuh Serigala, menjauh sampai bangkainya di luar pandangan, lalu majukan jam ke 18:00 dan tunggu `cleanupSeconds`. **Hasil:** bangkai tetap ada dan bisa dikuliti, tanpa `Despawn(OffNavMesh)` atau sapu bersih.
+17. Saat malam, bunuh 3 zombie, lalu kembalikan 1 zombie lewat `ReturnStuck`. **Hasil:** `spawnedTonight` hanya berkurang 1.
+18. Malam di Region 4, panggil `RequestWave` dengan `count = 4`. **Hasil:** semua Zombie Desa naik dari titik `HidingSpot` lewat `SpawnEmerging`, dan `TickSpawn` tidak memunculkan zombie.
+19. Saat malam, panggil `RequestAmbush` dengan 5 zombie, lalu menjauh sampai semuanya `Despawn(TooFar)`. **Hasil:** `spawnedTonight` tidak berkurang, karena `UsesNightBudget` bernilai `false`. Ulangi dengan zombie dari `RequestWave`. **Hasil:** anggaran dikembalikan satu per zombie.

@@ -193,7 +193,7 @@ Overload `public void ReturnToPool(GameObject obj)` memakai `PoolTag` dari `Pool
 
 ### `public void ReturnAllActive()`
 
-Dipanggil `RunLifecycle.ResetRunState()` langkah 4, sebelum scene diganti. Juga dipakai `DevConsole` lewat jalur `SpawnManager`.
+Dipanggil `RunLifecycle.ResetRunState()` langkah 4, sebelum scene diganti. `RunLifecycle.EnterIslandPhase()` langkah 1 juga memanggilnya selagi `ShipPhase` masih ada, supaya zombie, loot, dan NPC kapal tidak terbawa ke pulau. Juga dipakai `DevConsole` lewat jalur `SpawnManager`.
 
 1. Salin semua objek aktif dari semua tag ke `returnBuffer`. Salinan dipakai karena `OnReturned` satu objek bisa mengembalikan objek lain.
 2. Untuk tiap objek di `returnBuffer`:

@@ -158,7 +158,7 @@ Dengan begitu, GDD tetap terpenuhi karena badan tahan peluru, dan pemain punya c
 6. Panggil `Damaged?.Invoke(info)`.
 7. Kalau `isKill`, panggil `Died?.Invoke(info)`, lalu terbitkan `EnemyKilledEvent { enemyId = data.enemyId, position, damageType = info.type, byPlayer }`.
 
-`EnemyHealth` tidak mengembalikan dirinya ke pool. Mayat dan ragdoll diatur #95, dan pengembalian dilakukan pemilik state di `EnemyAI`.
+`EnemyHealth` tidak mengembalikan dirinya ke pool. Mayat, ragdoll, dan pengembalian musuh yang mati dipegang satu pemilik, yaitu `EnemyHitReaction` (#95), lewat `SpawnManager.Despawn(Killed)`. Pengecualiannya bangkai hewan (`AnimalCarcass`, #61) dan zombie terbakar (`SunlightExposure`, #63). `EnemyAI` tidak memanggil `Despawn` untuk kematian.
 
 **`public void SetInvulnerable(bool value)`**: saat aktif, `TakeDamage` diabaikan (#72).
 
@@ -189,7 +189,7 @@ Dengan begitu, GDD tetap terpenuhi karena badan tahan peluru, dan pemain punya c
 | `Explosion`, `Structural` | 1 | Serangan zombie, bencana, dan ledakan |
 | `Fire` | Dari `BuildableData.resistances`: 1 untuk kayu, 0 untuk batu | Mengikuti material (#47) |
 
-**`TakeDamage`**: kalikan damage dengan pengali bawaan dan pengali dari `SetDamageMultiplier`, kurangi HP, terbitkan `StructureDamagedEvent { structureId, hpRatio }`. Saat HP habis, terbitkan `StructureDestroyedEvent { structureId, position }`, lalu nonaktifkan dan hapus objek. Bangunan jarang dibuat dan dihancurkan, jadi tidak memakai `ObjectPooler`. Runtuhan beruntun diatur #79, dan **perbaikan diatur #47**, lewat `public void Repair(float amount)`.
+**`TakeDamage`**: kalikan damage dengan pengali bawaan dan pengali dari `SetDamageMultiplier`, kurangi HP, terbitkan `StructureDamagedEvent { structureId, hpRatio, position }`, dengan `position` dari `transform.position` struktur, dipakai `SleepSystem` (#67) untuk jarak alarm. Saat HP habis, terbitkan `StructureDestroyedEvent { structureId, position }`, lalu nonaktifkan dan hapus objek. Bangunan jarang dibuat dan dihancurkan, jadi tidak memakai `ObjectPooler`. Runtuhan beruntun diatur #79, dan **perbaikan diatur #47**, lewat `public void Repair(float amount)`.
 
 **`public void SetDamageMultiplier(DamageType type, float multiplier)`** menyimpan pengali tambahan per jenis damage, dengan nilai awal 1. Dipakai `BaseDoor` saat `Locked` (#78).
 
@@ -247,7 +247,9 @@ public static class ExplosionDamage
     {
         int count = PhysicsQuery.OverlapSphere(center, radius, PhysicsMasks.Explosion, buffer);
         PhysicsQuery.CollectUniqueDamageables(buffer, count, unique);
-        // Untuk tiap target: hitung falloff dari jarak ke titik collider terdekat, lalu TakeDamage
+        // Untuk tiap target: hitung falloff dari jarak ke titik collider terdekat,
+        // isi info.hitPoint = titik terdekat dan info.hitDirection = (titik terdekat - center).normalized
+        // (Vector3.up kalau jaraknya nol), lalu TakeDamage. #95 memakai arah ini untuk knockback dan ragdoll
         EnvironmentalHazard.NotifyExplosion(center, radius, info.byPlayer);   // Tong di radius ikut meledak
     }
 }
@@ -348,3 +350,5 @@ Target memeriksa aturan ini di `TakeDamage`, jadi senjata tidak perlu tahu jenis
 12. Spawn zombie yang sudah pernah mati dari pool. **Hasil:** HP penuh, `IsAlive` bernilai `true`, dan bisa dibunuh lagi.
 13. Simpan setelah dinding rusak, keluar, lalu lanjutkan. **Hasil:** HP dinding sama. Setelah mati, run baru tidak memuat dinding itu.
 14. Buka Profiler dan tembak 100 kali. **Hasil:** jalur `DamageRouter` tanpa alokasi GC selain `GetComponentInParent` yang tidak mengalokasi di build.
+15. Ledakkan tong di tengah 4 zombie. **Hasil:** tiap zombie terdorong atau jatuh menjauhi pusat ledakan, dengan `hitDirection` berbeda per target.
+16. Pakai profil kesulitan uji dengan `enemyDamageMultiplier` 2 pada hari 1. **Hasil:** pukulan zombie standar 30, karena pengali hanya diterapkan di langkah 4 `SurvivalStats`.

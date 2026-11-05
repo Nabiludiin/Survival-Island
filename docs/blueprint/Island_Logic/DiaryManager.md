@@ -12,7 +12,7 @@
 |---|---|---|
 | `DiaryManager` | Manager di `IslandPhase` | Pintu masuk `OpenDiary`, dan membaca tombol arsip |
 | `DiaryPanel` | Turunan `UIPanel`, `UIPanelId.Diary` | Panel teks satu bab |
-| `DiaryArchivePanel` | Turunan `UIPanel` | Daftar bab terbuka dan tujuan selesai. Isi dan tab `Arsip` ada di `ObjectiveManager.md` |
+| `DiaryArchivePanel` | Turunan `UIPanel`, `UIPanelId.DiaryArchive` | Daftar bab terbuka dan tujuan selesai. Menjeda game seperti `Diary` (`UIFocusStack.md`). Isi dan tab `Arsip` ada di `ObjectiveManager.md` |
 
 | Variabel | Tipe | Nilai awal | Fungsi |
 |---|---|---|---|
@@ -77,3 +77,4 @@
 7. Ganti bahasa, lalu buka bab. **Hasil:** teks mengikuti bahasa baru.
 8. Mati, lalu mulai run baru dan tekan `J`. **Hasil:** arsip kosong.
 9. Tekan `E` lagi pada buku yang sudah ditemukan. **Hasil:** arsip terbuka, bukan panel Bab 1.
+10. Tekan `J` di tengah malam. **Hasil:** `DiaryArchive` terbuka, `Time.timeScale` 0, dan Esc menutupnya.

@@ -162,7 +162,7 @@ Keluar lebih awal kalau `CurrentPhase == Inactive`, `isHeld`, `isOverridden`, at
 6. Panggil `int SpawnManager.Instance.RequestWave(in WaveRequest r)`, dengan alasan `Mob`. Nilai kembalinya adalah jumlah yang diterima (#62). Slot yang gagal dibuang `SpawnManager`, lalu memanggil `RefundBudget(1)`.
 7. `spawnedTonight += jumlah yang diterima`, `heldSeconds = 0`, dan `mobTimer` diisi nilai acak dari jeda mob lewat `RunSeedManager.Instance.GetStream(RandomStreamId.Enemy)`.
 
-**`BuildModifiers()`** mengisi `WaveModifiers` dari `Threat`, lalu `damage` dikali `difficulty.enemyDamageMultiplier`. `SpawnManager` mengisi `EnemyHealth.hpMultiplier`, lalu `EnemyAI.ApplyWaveModifiers(in modifiers)`. Kecepatan akhir dibatasi `maxZombieSpeed`.
+**`BuildModifiers()`** mengisi `WaveModifiers` dari `Threat`. `damage` **tidak** dikali `difficulty.enemyDamageMultiplier`, karena pengali kesulitan hanya diterapkan sekali di `SurvivalStats.TakeDamage` (`DamagePipeline.md`, langkah 4). `EnemyAttack` membaca `damage` dan `recovery` dari `EnemyAI.waveModifiers` (#109). `SpawnManager` mengisi `EnemyHealth.hpMultiplier`, lalu `EnemyAI.ApplyWaveModifiers(in modifiers)`. Kecepatan akhir dibatasi `maxZombieSpeed`, kecuali terkaman Zombie Desa (`SpeedSource.Pounce`) dan `SpeedSource.EmergeBoost` yang sementara (`EnemyAI.md` bagian Kecepatan).
 
 ### Intensitas
 
@@ -178,7 +178,7 @@ Keluar lebih awal kalau `CurrentPhase == Inactive`, `isHeld`, `isOverridden`, at
 |---|---|---|
 | `RequestPanicWave(int size, string reason)` | #14, #70 | Melewati tahap dan `heldSeconds`, tetapi tetap mematuhi `maxAlive`. Menambah `spawnedTonight` |
 | `RequestCampCounter(string enemyId, int count)` | #94 | Gelombang dengan `forcedEnemyId`. Boleh saat Relax, dan tidak memakai `nightBudget` |
-| `RefundBudget(int count)` | `SpawnManager.ReturnStuck` | Mengurangi `spawnedTonight`, supaya zombie macet tidak memotong malam itu |
+| `RefundBudget(int count)` | `SpawnManager.Despawn` (alasan `Stuck`, `OffNavMesh`, `TooFar`, `RegionUnloaded`) dan slot `RequestWave` yang gagal | Mengurangi `spawnedTonight`, paling kecil 0, supaya zombie yang hilang tanpa dibunuh tidak memotong malam itu. Zombie yang dibunuh, terbakar, atau ditumbalkan tidak dikembalikan |
 | `GetPostTargetModifiers(int day)` | #50, #62, #71 | Mengembalikan `WaveModifiers` berisi `pengaliHP` dan `pengaliDamage`, sedangkan kecepatan dan jeda serang bernilai 1. Sampai hari ke-60, semua nilainya 1 |
 | `GetPostTargetCountMultiplier(int day)` | #50, #67, #71 | Mengembalikan `pengaliJumlah`. Sampai hari ke-60, nilainya 1. Pemanggil membulatkan hasilnya, dan batas zombie aktif tetap berlaku |
 | `AddExternalSpawn(int count)` | `SunlightExposure.ReportEmergence()` saat `NightfallEvent` (#63, #62) | Menambah `spawnedTonight` untuk zombie yang bangkit dari tempat sembunyi. Kalau `count >= mobSize`, mob pertama dilewati |
@@ -242,3 +242,5 @@ Keluar lebih awal kalau `CurrentPhase == Inactive`, `isHeld`, `isOverridden`, at
 11. `setday 70`, tunggu malam, lalu `director`. **Hasil:** `nightBudget` 216, HP 1,8 kali, damage sekitar 1,38 kali, dan `maxAlive` tetap 30.
 12. `setday 200`, tunggu malam. **Hasil:** `nightBudget` 270, HP 3 kali, damage sekitar 1,88 kali, zombie aktif tidak lebih dari 30, dan FPS dicatat ke lembar playtest.
 13. Panggil `GetPostTargetModifiers` dan `GetPostTargetCountMultiplier` pada hari 60, 70, dan 200. **Hasil:** hari 60 semua 1, hari 70 jumlah 1,2, HP 1,2, dan damage 1,1, serta hari 200 berhenti pada 1,5, 2, dan 1,5.
+14. Pakai profil kesulitan uji dengan `enemyDamageMultiplier` 2, lalu biarkan zombie standar hari 1 memukul pemain. **Hasil:** damage 30, bukan 60, karena pengali kesulitan hanya dipakai `SurvivalStats`.
+15. Bunuh 5 zombie, lalu `director`. **Hasil:** `spawnedTonight` tidak berkurang. Kembalikan 1 zombie lewat pengaman macet. **Hasil:** `spawnedTonight` berkurang 1, sekali saja.

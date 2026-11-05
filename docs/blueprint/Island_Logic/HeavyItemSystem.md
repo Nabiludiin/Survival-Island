@@ -174,7 +174,7 @@ Barang yang tergeletak di dalam trigger juga terpasang, sehingga pemain tidak di
 
 ### Suku cadang terdekat
 
-**`public bool TryGetNearestPart(Vector3 position, out HeavyItemData part)`**, dipakai penanda tujuan #81, mencari barang terdekat yang belum dipasang. Fungsi membaca `records`, sehingga tetap bekerja saat region tidak dimuat. Mengembalikan `false` kalau semua sudah dipasang.
+**`public bool TryGetNearestPart(Vector3 position, out Vector3 partPosition)`**, dipakai penanda tujuan #81, mencari barang terdekat yang `isDiscovered`, berstatus `Lying`, dan belum dipasang, lalu mengisi `records[i].position`. Aturan ini sama dengan penanda kompas `part_<partId>` di atas, jadi barang yang belum ditemukan tidak terbongkar. Fungsi membaca `records`, sehingga tetap bekerja saat region tidak dimuat. Mengembalikan `false` kalau tidak ada barang yang memenuhi syarat.
 
 ## 3. Hubungan dengan Sistem Lain
 
@@ -239,7 +239,7 @@ Barang yang tergeletak di dalam trigger juga terpasang, sehingga pemain tidak di
 11. Bawa barang ke helipad. **Hasil:** `MarkInstalled` berjalan, kecepatan normal, dan HUD menulis `1 / 5`.
 12. Simpan saat membawa, lalu muat. **Hasil:** barang tetap di tangan, dan efeknya aktif.
 13. Mati lalu mulai run baru. **Hasil:** barang kembali ke titik baru, dan jumlah terpasang 0.
-14. Panggil `TryGetNearestPart` saat `Region4_Village` tidak dimuat. **Hasil:** barang terdekat tetap ditemukan dari `records`.
+14. Panggil `TryGetNearestPart` saat `Region4_Village` tidak dimuat. **Hasil:** posisi barang terdekat yang sudah ditemukan tetap didapat dari `records`. Sebelum ada barang yang ditemukan, fungsi mengembalikan `false`.
 15. Temukan lore `PartLocation`. **Hasil:** barang indeks terkecil yang belum ditemukan mendapat penanda. Saat semua sudah ditemukan, tidak ada perubahan.
 16. Pakai `Keluar dari Tersangkut` saat membawa barang. **Hasil:** barang jatuh dengan `Unstuck`, tanpa suara jatuh keras.
 17. Jalankan pemeriksaan Editor pada `PartSpawnPointTable`. **Hasil:** tiap titik punya `isReachable` yang benar.

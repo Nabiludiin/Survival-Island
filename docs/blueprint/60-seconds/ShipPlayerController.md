@@ -107,7 +107,7 @@ Langkah:
 
 Gravitasi tetap berjalan di semua level, supaya pemain tidak melayang. Geser `drift` hanya berlaku pada `Full`.
 
-**Catatan kontrak:** `FirstPersonCamera` belum punya `SetLookEnabled(bool)`. Fungsi ini perlu ditambahkan di `FirstPersonCamera.md`: saat mati, `LookDelta` diabaikan, tetapi `LateUpdate` tetap menerapkan ship sway dan getaran. Mematikan komponen kamera tidak boleh dipakai, karena getaran `FinalShudder` pada `T=0` ikut hilang.
+**Catatan kontrak:** `FirstPersonCamera.SetLookEnabled(bool)` sudah ada di `FirstPersonCamera.md` (`lookEnabled`). Saat mati, `LookDelta` diabaikan, tetapi `LateUpdate` tetap menerapkan ship sway dan getaran. Mematikan komponen kamera tidak boleh dipakai, karena getaran `FinalShudder` pada `T=0` ikut hilang.
 
 ### Pengali dari bahaya kapal
 
@@ -174,7 +174,7 @@ Zombie kapal berjalan 3,5 m/s dikali pengali air yang sama (#75). Di lantai keri
 | Sistem | Hubungan |
 |---|---|
 | `InputManager` (#18) | Sumber `MoveInput` dan `PrimaryPressed` |
-| `FirstPersonCamera` (#102) | Membaca `LookDelta`, memutar yaw pemain, dan menerima `SetLookEnabled` (perlu ditambahkan) |
+| `FirstPersonCamera` (#102) | Membaca `LookDelta`, memutar yaw pemain, dan menerima `SetLookEnabled` |
 | `PlayerInteractor` (#17) | Membaca `InteractPressed`. Menerima `SetEnabled` |
 | `ShipShove` (#75) | Menerima `TryShove()` |
 | `LifeboatExtraction` (#74) | Memanggil `SetControlLevel` |
@@ -221,7 +221,7 @@ Zombie kapal berjalan 3,5 m/s dikali pengali air yang sama (#75). Di lantai keri
 2. Pengaturan `CharacterController` di tabel bagian 1.
 3. Tanpa lari, lompat, dan jongkok di kapal. Rute #75 sudah dihitung dengan jalan 5 m/s, jadi lari akan membuat jadwal air terlalu mudah.
 
-**Perlu perubahan di blueprint lain:** `FirstPersonCamera.SetLookEnabled(bool)`, dan nama `ShipShove.TryShove()` di `ShipHazardManager.md`.
+**Perlu perubahan di blueprint lain:** tidak ada. `FirstPersonCamera.SetLookEnabled(bool)` dan `ShipShove.TryShove()` sudah tertulis di `FirstPersonCamera.md` dan `ShipHazardManager.md`. Enum `ShipControlLevel` hanya didefinisikan di sini.
 
 **Menunggu developer:** tidak ada yang menghalangi.
 

@@ -86,6 +86,8 @@ Semua berada di `Application.persistentDataPath`.
 | `autosaveEnabled` | `bool` | `true` | Dimatikan saat `RunLifecycle.State = Ending` |
 | `pendingReason` | `SaveReason?` | `null` | Permintaan yang tertunda |
 | `isWriting` | `bool` | `false` | Sedang menulis |
+| `writeTask` | `Task<bool>` | `null` | Penulisan autosave yang berjalan di thread lain. Dibaca langsung oleh `WaitForPendingWrite` dan `TrySaveNow`, tanpa menunggu `Update` |
+| `abortWrites` | `volatile bool` | `false` | Diisi `true` oleh `MarkRunEnded`. Penulisan yang masih berjalan dibatalkan sebelum `File.Replace` |
 | `loadedPayload` | `RunSavePayload` | `null` | Hasil `ReadRunFile` selama proses load |
 
 ### Angka penyetelan
@@ -150,7 +152,7 @@ Semua berada di `Application.persistentDataPath`.
 | Hotbar | `player_equipment` | `EquipmentManager` (#60) | `EquipmentSaveData` |
 | Barang lempar | `world_throwables` | `ThrowableSystem` (#96) | `selectedIndex` |
 | Status tubuh | `player_vitals` | `SurvivalStats` (#111) | `HP`, `Stamina`, `Hunger`, `Thirst`, `Infection`, `IsExhausted`, dan sisa pemulihan |
-| Infeksi, penyakit, dan efek | `player_infection`, `player_disease`, `player_effects` | #64, #45, #20 | Tahap dan sisa waktu |
+| Penyakit dan efek | `player_disease`, `player_effects` | #45, #20 | Penyakit aktif dan sisa waktu efek. Infeksi zombie tidak punya entri sendiri: nilai `Infection` ada di `player_vitals`, dan tahap dihitung ulang `InfectionSystem` (#64) saat dimuat |
 | Kehangatan | `player_warmth` | `WarmthSystem` (#65) | Nilai kehangatan dan pakaian |
 | Posisi pemain | `player_transform` | `IslandPlayerController` | `GetSafeSavePosition()` (#101), `yaw`, dan `pitch` (#102) |
 | Bangunan | `world_structures` | `StructureRegistry` (#79) | `StructureRecord[]`, HP, status pintu (#78), dan isi peti (#46) |
@@ -183,14 +185,18 @@ Semua berada di `Application.persistentDataPath`.
 
 **`private bool TrySaveNow(SaveReason reason)`**:
 
-1. Kalau `!autosaveEnabled`, atau `RunLifecycle.State != OnIsland`, kembalikan `false`.
+1. Kalau `!autosaveEnabled`, atau `RunLifecycle.State != OnIsland`, terbitkan `SaveCompletedEvent { reason, succeeded = false }`, lalu kembalikan `false`. Dengan begitu `RunLifecycle` yang menunggu `QuitToMenu` tidak menunggu sampai batas waktu.
 2. Kalau alasan termasuk autosave dan `!IsSafeToAutosave()`, simpan `pendingReason`, lalu mulai `DeferLoop()`, dan kembalikan `false`.
-3. Kalau `isWriting`, simpan `pendingReason`, lalu selesai. Permintaan setelah penulisan selesai hanya berjalan sekali.
+3. Kalau `isWriting`:
+   - **Autosave:** simpan `pendingReason`, lalu selesai. Permintaan setelah penulisan selesai hanya berjalan sekali.
+   - **`QuitToMenu`:** jalankan coroutine `QuitAfterPendingWrite()`, yang memanggil `yield return WaitForPendingWrite(run.saveWaitTimeoutSeconds)`, lalu melanjutkan langkah 4 sampai 8 dengan alasan `QuitToMenu`. Thread utama tidak diblokir, dan `RunLifecycle` tetap menghitung batas waktunya sendiri. Kembalikan `false` untuk pemanggilan ini, karena hasilnya dikirim lewat `SaveCompletedEvent`.
+   - **`AppQuit`:** pengecualian dari janji "thread utama tidak diblokir" di bagian Permadeath. `writeTask.Wait(run.saveWaitTimeoutSeconds)` dijalankan di tempat, paling lama 5 detik, lalu lanjut ke langkah 4. Coroutine tidak dipakai, karena proses bisa berakhir atau dijeda (`OnApplicationPause`) sebelum frame berikutnya.
+   - Permintaan keluar tidak pernah ditunda ke `pendingReason`, karena scene akan segera dibuang.
 4. `RegionStreaming.Instance.CaptureLoadedRegions()`.
 5. Bangun `RunSavePayload`. Panggil `CaptureState()` pada tiap `registered`, urut `LoadOrder`. Exception dari satu sistem menggagalkan save itu, bukan menulis file setengah jadi.
 6. Ubah ke JSON, hitung `payloadCrc32`, lalu bangun `RunSaveEnvelope`.
-7. Tulis lewat `WriteAtomic(json)`.
-8. Terbitkan `SaveCompletedEvent { succeeded }`.
+7. Tulis lewat `WriteAtomic(mainPath, json, abortable: true)`.
+8. Terbitkan `SaveCompletedEvent { reason, succeeded }`. `reason` adalah alasan yang benar-benar ditulis, sehingga selesainya autosave tidak terbaca sebagai selesainya save keluar.
 
 **Kapan tiap alasan dipakai:**
 
@@ -208,16 +214,16 @@ Semua berada di `Application.persistentDataPath`.
 
 ### Menulis tanpa merusak file lama
 
-**`private bool WriteAtomic(string json)`**:
+**`private bool WriteAtomic(string path, string json, bool abortable)`**:
 
-1. Tulis ke `survival_save.json.tmp` lewat `FileStream`.
+1. Tulis ke `path + ".tmp"` lewat `FileStream`.
 2. `stream.Flush(true)`, supaya data benar-benar sampai ke disk.
-3. Kalau `survival_save.json` ada, panggil `File.Replace(tmp, main, bak)`. Kalau tidak ada, `File.Move(tmp, main)`.
+3. Kalau `abortable` dan `abortWrites` bernilai `true`, hapus `tmp` dan kembalikan `false`. Pemeriksaan ini hanya berlaku untuk save run (`survival_save.json`, `abortable: true`). `run_end.marker` ditulis dengan `abortable: false`, jadi tidak ikut dibatalkan. Selain itu, kalau file `path` ada, panggil `File.Replace(tmp, path, bak)` (`.bak` hanya untuk save run; marker memakai `null`). Kalau tidak ada, `File.Move(tmp, path)`.
 4. Kalau `IOException`, hapus `tmp` kalau perlu, catat kesalahan, dan kembalikan `false`. File lama tetap utuh.
 
 Kalau game mati sebelum langkah 3, file utama masih versi lama. Kalau mati sesudahnya, file baru sudah lengkap.
 
-**Thread:** langkah 4 sampai 6 di `TrySaveNow` berjalan di thread utama, supaya datanya konsisten. `WriteAtomic` untuk autosave berjalan di `Task.Run`, dengan `isWriting = true`. Hasilnya dibaca di `Update`, dan `SaveCompletedEvent` terkirim dari thread utama. Untuk `QuitToMenu` dan `AppQuit`, `WriteAtomic` berjalan langsung, karena proses mungkin segera berakhir.
+**Thread:** langkah 4 sampai 6 di `TrySaveNow` berjalan di thread utama, supaya datanya konsisten. `WriteAtomic` untuk autosave berjalan di `Task.Run`, disimpan di `writeTask`, dengan `isWriting = true`. Hasilnya dibaca di `Update` lewat `writeTask.IsCompleted`, dan `SaveCompletedEvent` terkirim dari thread utama. Untuk `QuitToMenu` dan `AppQuit`, `WriteAtomic` berjalan langsung, karena proses mungkin segera berakhir.
 
 Waktu tangkap pada base 400 struktur harus diukur. Target: di bawah 50 ms. Waktu ini dilakukan pada pagi hari, saat ancaman sudah hilang.
 
@@ -296,7 +302,7 @@ Urutan ini mengikuti `RunLifecycle.ContinueRun()`.
 | 4 | 40 | `player_carry` | Slot tas harus benar sebelum isi inventori (#118) |
 | 5 | 50 | `player_inventory` | Sumber `ItemInstance` |
 | 6 | 60 | `player_equipment`, `world_throwables` | Merujuk `instanceId` (#60), dan barang lempar di inventori (#96) |
-| 7 | 70 | `player_vitals`, `player_infection`, `player_disease`, `player_effects`, `player_warmth` | Mengisi status |
+| 7 | 70 | `player_vitals`, `player_disease`, `player_effects`, `player_warmth` | Mengisi status |
 | 8 | 80 | `player_transform` | Menentukan region awal |
 | 9 | 90 | `world_structures` | Memakai `GetStructureRoot`, dan item untuk peti |
 | 10 | 100 | `world_fire`, `LightFixture` per `StructureId`, `world_parts`, `world_helicopter` | Data pulau. `world_fire` dan `LightFixture` merujuk struktur, jadi setelah `world_structures` |
@@ -339,7 +345,9 @@ Alur saat `Corrupt`:
 
 ### Permadeath
 
-**`public void MarkRunEnded(RunResult result, DeathReason reason)`** menulis `run_end.marker` lewat cara `WriteAtomic`.
+**`public IEnumerator WaitForPendingWrite(float timeoutSeconds)`**, dijalankan `RunLifecycle` sebelum `MarkRunEnded`: tunggu sampai `writeTask == null || writeTask.IsCompleted`, dengan `yield return null` dan waktu tak terskala, paling lama `timeoutSeconds`. Fungsi ini membaca `writeTask` langsung, bukan `isWriting`, karena `isWriting` baru dikosongkan di `Update`. Thread utama tidak diblokir, kecuali jalur `AppQuit` di `TrySaveNow` langkah 3.
+
+**`public void MarkRunEnded(RunResult result, DeathReason reason)`**: isi `abortWrites = true`, lalu tulis `run_end.marker` lewat `WriteAtomic(markerPath, json, abortable: false)`. Marker tidak terkena `abortWrites`, jadi selalu tertulis. Kalau penulisan autosave masih berjalan setelah batas waktu, penulisan itu berhenti di langkah 3 `WriteAtomic` dan tidak bisa memunculkan save lagi setelah `DeleteRunSave`.
 
 **`public void DeleteRunSave()`** menghapus `survival_save.json`, `.tmp`, `.bak`, dan `.corrupt.json`. Fungsi ini juga mengosongkan cache `HasContinuableSave`. File `stats.json` dan `PlayerPrefs` tidak disentuh. `PlayerPrefs.DeleteAll()` dilarang (#82).
 
@@ -349,17 +357,17 @@ Alur saat `Corrupt`:
 
 **`public bool TryReadRunEndMarker(out RunEndMarker m)`** dipakai `RecoverInterruptedEnd()` (#82).
 
-**`public void ResetForNewRun()`**: `pendingReason = null`, `autosaveEnabled = true`, `loadedPayload = null`, dan `registered` dikosongkan.
+**`public void ResetForNewRun()`**: `pendingReason = null`, `autosaveEnabled = true`, `abortWrites = false`, `writeTask = null`, `loadedPayload = null`, dan `registered` dikosongkan.
 
 ## 3. Hubungan dengan Sistem Lain
 
-**Event yang dikirim:** `SaveCompletedEvent` (`succeeded`).
+**Event yang dikirim:** `SaveCompletedEvent` (`reason`, `succeeded`).
 
 **Event yang didengar:** `SaveRequestedEvent`, `DaybreakEvent`, `PlayerDamagedEvent`, `VitalsChangedEvent`, `VitalWarningChangedEvent`, `PlayerPinnedEvent`, `DisasterStartedEvent`, `DisasterEndedEvent`, dan `RunEndedEvent` (mematikan autosave).
 
 | Sistem | Hubungan |
 |---|---|
-| `RunLifecycle` (#82) | Memanggil `HasContinuableSave`, `ReadRunFile`, `RestoreBaseScene`, `FinishRestore`, `SetAutosaveEnabled`, `MarkRunEnded`, `DeleteRunSave`, `ClearRunEndMarker`, dan `TryReadRunEndMarker` |
+| `RunLifecycle` (#82) | Memanggil `HasContinuableSave`, `ReadRunFile`, `RestoreBaseScene`, `FinishRestore`, `SetAutosaveEnabled`, `WaitForPendingWrite`, `MarkRunEnded`, `DeleteRunSave`, `ClearRunEndMarker`, dan `TryReadRunEndMarker` |
 | `RegionStreaming` (#88) | `CaptureLoadedRegions`, `RegionStateStore`, dan pemulihan objek region |
 | `RunSeedManager` (#89), `GameManager` | `CaptureSave`, `RestoreFromSave`, dan `RestoreRunData` |
 | `StructureRegistry` (#79) | `world_structures`, termasuk #46 dan #78 |
@@ -380,7 +388,8 @@ Alur saat `Corrupt`:
 - **Save dan load di Fase 1:** tidak ada (#82). `TrySaveNow` menolak saat `State` bukan `OnIsland`.
 - **Disk penuh:** `WriteAtomic` mengembalikan `false`, dan file lama tetap utuh. Notifikasi `Gagal menyimpan` tampil. `RunLifecycle` menampilkan `ConfirmDialog` saat keluar.
 - **Dua permintaan sekaligus:** digabung lewat `pendingReason`.
-- **Menang atau kalah saat menulis:** `MarkRunEnded` menunggu `isWriting` selesai, paling lama `saveWaitTimeoutSeconds` (#82), lalu lanjut. `DeleteRunSave` tetap dijalankan sesudahnya.
+- **Menang atau kalah saat menulis:** `RunLifecycle` menjalankan `WaitForPendingWrite(saveWaitTimeoutSeconds)` (#82) sebagai coroutine, lalu `MarkRunEnded`. Kalau batas waktu habis, `abortWrites` membatalkan penulisan yang tersisa sebelum `File.Replace`. `DeleteRunSave` tetap dijalankan sesudahnya, dan save tidak bisa muncul kembali.
+- **Keluar saat autosave sedang menulis:** `QuitToMenu` menunggu `writeTask` lalu menulis sendiri, dan `SaveCompletedEvent` membawa `reason = QuitToMenu`. `RunLifecycle` tidak salah membaca selesainya autosave sebagai selesainya save keluar.
 - **Save saat region sedang dimuat:** `CaptureLoadedRegions` hanya membaca region `Loaded`. Region yang `Loading` memakai data di `Store`.
 - **Save saat runtuhan berjalan:** dibahas di #79.
 - **`RestoreState` di objek nonaktif:** struktur region yang tidak dimuat dibuat di bawah akar nonaktif, sehingga `Awake` belum berjalan. Sistem seperti itu tidak boleh mengandalkan `Awake` (#79).
@@ -435,3 +444,7 @@ Alur saat `Corrupt`:
 21. Isi disk uji sampai penuh, lalu simpan. **Hasil:** notifikasi gagal, dan file lama tetap bisa dimuat.
 22. Lanjutkan lalu ambil loot, keluar, dan ulangi lima kali. **Hasil:** barang tidak berlipat, dan ukuran file stabil.
 23. Dapatkan `lucky_laser` dan satu `lucky_hp`, simpan, keluar, lalu lanjutkan. **Hasil:** `grantCounts` sama, `lucky_laser` tidak keluar lagi, dan buff tetap aktif.
+24. Jalankan `savedelay 3`, picu autosave pagi, lalu segera pilih Simpan dan Keluar ke Menu. **Hasil:** `SaveCompletedEvent` dengan `reason = Daybreak` tidak menutup penantian, lalu save `QuitToMenu` ditulis dan `SaveCompletedEvent { reason = QuitToMenu }` terkirim. Saat dilanjutkan, progres terakhir ada.
+25. Jalankan `savedelay 10`, picu autosave, lalu turunkan HP ke 0. **Hasil:** alur mati menunggu paling lama 5 detik tanpa membekukan frame, penulisan autosave dibatalkan, dan setelah alur selesai tidak ada `survival_save.json`.
+26. Ulangi tes 25, lalu matikan proses tepat setelah `MarkRunEnded`. **Hasil:** `run_end.marker` tetap tertulis walaupun `abortWrites = true`, dan boot berikutnya menyelesaikan permadeath.
+27. Jalankan `savedelay 3`, picu autosave, lalu segera pilih Simpan dan Keluar ke Menu. **Hasil:** frame tidak membeku selama menunggu `writeTask`, lalu save `QuitToMenu` tertulis.

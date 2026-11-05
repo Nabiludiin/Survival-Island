@@ -46,7 +46,7 @@ Fungsi ini menggantikan `ResetGameAndReturnToShip()`.
 
 **`public void SetPhase(GamePhase phase)`**: isi `currentPhase`, lalu terbitkan `PhaseChangedEvent { phase }`.
 
-**`public void RestoreRunData(GameRunSaveData data)`** dipanggil `RunLifecycle.ContinueRun()`. Mengisi `currentDay`, `hasEscaped`, `hasArrivedOnIsland`, `shipOutcome` (termasuk `lostNpcIds`), dan `wasTainted`, tanpa mengirim event. `dayLimitPassedSent` diisi dari `IsPastTargetDay`, jadi event tidak terkirim dua kali setelah load. Sistem yang perlu status ini setelah load membaca `IsPastTargetDay`. Pasangannya, `CaptureRunData()`, dipanggil `WorldStateSave` (#80).
+**`public void RestoreRunData(GameRunSaveData data)`** dipanggil `RunLifecycle.ContinueRun()`. Mengisi `currentDay`, `hasEscaped`, `hasArrivedOnIsland`, `shipOutcome` (termasuk `lostNpcIds`), dan `wasTainted`, tanpa mengirim event. `dayLimitPassedSent` diisi dari `IsPastTargetDay`, jadi event tidak terkirim dua kali setelah load. Sistem yang perlu status ini setelah load membaca `IsPastTargetDay`. `DayChangedEvent` dikirim ulang lewat `PublishDayState(isReplay: true)` setelah `FinishRestore`, karena kelas ini bukan `ISaveable`. Pasangannya, `CaptureRunData()`, dipanggil `WorldStateSave` (#80).
 
 ### Data dari Fase 1
 
@@ -56,10 +56,14 @@ Fungsi ini menggantikan `ResetGameAndReturnToShip()`.
 
 ### Hari
 
+**`public void PublishDayState(bool isReplay)`**, dipanggil `RunLifecycle`: pada `EnterIslandPhase` setelah `IslandArrival.Apply` (`isReplay = false`), dan pada `ContinueRun` setelah `WorldStateSave.FinishRestore` (`isReplay = true`). Fungsi ini hanya menerbitkan `DayChangedEvent { newDay = currentDay, isReplay }`, tanpa mengubah `currentDay` dan tanpa memanggil `CheckDay60Milestone`. Tujuannya supaya event sticky ini punya nilai sejak hari pertama dan setelah load, karena `GameEventRegistry.ClearAll()` menghapusnya saat reset.
+
+Pendengar yang melakukan pekerjaan harian, seperti reset panen atau jadwal kargo, **mengabaikan** event dengan `isReplay = true`. Pendengar tampilan tetap memakainya. `AdvanceDay` dan `DebugSetDay` selalu mengirim `isReplay = false`.
+
 **`public void AdvanceDay()`** dipanggil `DayNightDirector` saat jam melewati 24:00:
 
 1. Keluar kalau `IsRunEnding`.
-2. Naikkan `currentDay`, lalu terbitkan `DayChangedEvent { newDay }`.
+2. Naikkan `currentDay`, lalu terbitkan `DayChangedEvent { newDay, isReplay = false }`.
 3. Panggil `CheckDay60Milestone()`.
 
 **`public void CheckDay60Milestone()`**: kalau `IsPastTargetDay` dan `dayLimitPassedSent == false`, isi `dayLimitPassedSent = true`, lalu terbitkan `DayLimitPassedEvent { day = currentDay }`. Pada alur normal, ini terjadi saat `currentDay` pertama kali menjadi `TargetDay + 1`. Fungsi ini tidak mengakhiri run, sesuai GDD bagian 3. Kekuatan zombie setelah hari ke-60 dihitung `AIDirector` (#27).
@@ -95,7 +99,7 @@ Fungsi ini menggantikan `ResetGameAndReturnToShip()`.
 
 | Sistem | Hubungan |
 |---|---|
-| `RunLifecycle` (#82) | Memanggil `Initialize`, `ResetForNewRun`, `SetPhase`, dan `RestoreRunData`. Mendengar `RunEndedEvent` |
+| `RunLifecycle` (#82) | Memanggil `Initialize`, `ResetForNewRun`, `SetPhase`, `RestoreRunData`, dan `PublishDayState`. Mendengar `RunEndedEvent` |
 | `DayNightDirector` | Memanggil `AdvanceDay` |
 | `LifeboatExtraction`, `IslandArrival` (#74) | Mengisi dan membaca data Fase 1 |
 | `RescueEventManager` (#14) | Memanggil `TriggerWinSequence` |
@@ -129,3 +133,5 @@ Fungsi ini menggantikan `ResetGameAndReturnToShip()`.
 6. Jalankan `setday 61` pada run baru. **Hasil:** diterima, dan `DayChangedEvent` serta `DayLimitPassedEvent` masing-masing terkirim sekali. Jalankan `setday 0`. **Hasil:** ditolak.
 7. Tunggu sampai hari ke-62, simpan, lalu lanjutkan. **Hasil:** `IsPastTargetDay` tetap `true`, dan `DayLimitPassedEvent` tidak terkirim lagi.
 8. Pada hari ke-75, panggil `TriggerWinSequence`. **Hasil:** `RunEndedEvent` bernilai `Won`.
+9. Tiba di pulau. **Hasil:** `DayChangedEvent { newDay = 1, isReplay = false }` terkirim sekali, dan penghitung hari langsung terisi.
+10. Pada hari ke-10, keluar lalu lanjutkan. **Hasil:** `DayChangedEvent { newDay = 10, isReplay = true }` terkirim sekali setelah `FinishRestore`, `currentDay` tidak berubah, `DayLimitPassedEvent` tidak terkirim, dan panen harian atau jadwal kargo tidak ter-reset.

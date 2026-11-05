@@ -107,7 +107,7 @@ Total 20 temuan, dan Region 4 paling banyak sesuai GDD bagian 5.
 3. Temuan yang belum pernah ditemukan tidak tampil.
 4. Memilih satu baris membuka `LoreReader`, tanpa memberi petunjuk lagi.
 
-`MainMenuController` juga bisa membuka tab ini lewat `LoreArchiveFile.Load()`.
+`MainMenuController` juga bisa menampilkan isi `archive` lewat `LoreArchiveFile.Load()`, sebagai tampilan di dalam panel `MainMenu`. Menu utama tidak memakai `DiaryArchivePanel` (`UIPanelId.DiaryArchive`), karena panel itu hanya ada di scene `IslandPhase`.
 
 **`LorePoint` setelah dibaca:** objeknya tetap ada dan bisa dibaca lagi dari dunia. Prompt berubah menjadi `prompt.read_again`.
 

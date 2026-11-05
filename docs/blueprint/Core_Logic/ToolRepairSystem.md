@@ -30,9 +30,7 @@ Durabilitas tetap berada di `ItemInstance.durability`. `DurabilitySystem` menjad
 
 ### Status durabilitas
 
-```csharp
-public enum DurabilityState { NoDurability, Normal, Low, Broken, Destroyed }
-```
+`enum DurabilityState` didefinisikan di `DurabilitySystem.md`, pemiliknya. Blueprint ini hanya menetapkan aturan tiap status:
 
 | Status | Syarat | Akibat |
 |---|---|---|
@@ -101,17 +99,9 @@ Tiap jenis hanya bisa dipasang sekali per item, dan maksimum `upgrade.maxPerItem
 
 ### Pengurangan durabilitas
 
-**`public static DurabilityState ApplyWear(ItemInstance inst, float amount)`**, pengganti `UseItem`:
+Pengurangan dilakukan lewat `DurabilitySystem.ApplyWear(inst, amount)`, pengganti `UseItem`. Definisi dan langkah lengkapnya, termasuk penolakan `amount <= 0`, event `DurabilityStateChangedEvent`, dan `RemoveInstance` untuk `Destroyed`, hanya ada di `DurabilitySystem.md`. Blueprint ini tidak mendefinisikannya ulang.
 
-1. Kalau `inst.durability < 0`, kembalikan `NoDurability`.
-2. Simpan status lama, lalu `inst.durability = Max(0, durability - amount)`.
-3. Hitung status baru lewat `GetState`.
-4. Kalau status berubah, terbitkan `DurabilityStateChangedEvent { instanceId, itemId, state }`.
-5. Kalau `Destroyed`, panggil `InventoryManager.RemoveInstance(instanceId)`. `EquipmentManager` lalu menjalankan alur item hancur.
-
-Event dikirim sebelum `RemoveInstance`, supaya HUD dan notifikasi masih bisa membaca nama item. Langkah lengkapnya, termasuk penolakan `amount <= 0`, ada di `DurabilitySystem.md`.
-
-**`public static float GetEffectiveMax(ItemInstance inst, ItemData data)`**:
+**`DurabilitySystem.GetEffectiveMax(ItemInstance inst, ItemData data)`** (fungsi milik `DurabilitySystem`, rumusnya ditetapkan di sini):
 
 ```csharp
 float lossRatio = data.isCoreItem ? 0f : inst.repairCount * maxLossPerRepair;
@@ -176,7 +166,7 @@ Hasilnya dihitung saat item dipasang atau berubah, lalu disimpan oleh pengendali
 
 | Sistem | Hubungan |
 |---|---|
-| `DurabilitySystem` | Ditulis ulang menjadi `ApplyWear`, `GetState`, dan `GetEffectiveMax` |
+| `DurabilitySystem` | Pemilik `DurabilityState`, `ApplyWear`, `GetState`, dan `GetEffectiveMax`. Blueprint ini hanya menetapkan aturan status dan rumus batas maksimum |
 | `ItemUseSystem` (#66), `InventoryManager` | `ItemInstance`, `RemoveInstance`, dan `RemoveItem` |
 | `EquipmentManager` (#60) | Menolak aksi item `Broken`, dan menjalankan alur item hancur |
 | `CraftingManager`, `CraftingPanel` (#77) | `availableMask`, `RecipeIngredient`, dan tab Perbaiki |
@@ -197,7 +187,7 @@ Hasilnya dihitung saat item dipasang atau berubah, lalu disimpan oleh pengendali
 - **Modifier tidak ditemukan:** `luckyModifierId` yang tidak dikenal diabaikan, dengan peringatan.
 - **Item dipindah saat diperbaiki:** `StartRepair` menyimpan `instanceId`. Kalau `FindInstance` mengembalikan `null` saat selesai, pekerjaan batal.
 - **Bahan hilang saat pekerjaan berjalan:** pemeriksaan ulang di langkah 4 membatalkan pekerjaan tanpa mengubah item.
-- **Fire Axe:** `maxDurability = -1`, sehingga `ApplyWear` berhenti di langkah 1. Tab Perbaiki dan `Upg_Durability` tidak menampilkannya. Upgrade lain tetap boleh.
+- **Fire Axe:** `maxDurability = -1`, sehingga `DurabilitySystem.ApplyWear` berhenti di langkah 2 (`NoDurability`). Tab Perbaiki dan `Upg_Durability` tidak menampilkannya. Upgrade lain tetap boleh.
 - **Laser Pistol:** statusnya mengikuti #58 dan #72. Kalau memakai durabilitas, biayanya ditulis di datanya.
 - **Modifier `indestructible` dari #72:** `LuckyMachine` mengatur `inst.durability = -1`, dan status `Broken` langsung berakhir.
 - **Item inti rusak saat tidak ada bahan:** Pisau dan Kail hanya butuh bahan Region 1. Pistol butuh `Mat_Cloth`, dengan sumber dari kapal dan Region 1, sesuai `CarryCapacity.md`. Sampai diperbaiki, pemain tetap punya pisau atau tangan.

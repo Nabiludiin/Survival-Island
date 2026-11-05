@@ -158,7 +158,7 @@ Nilai mengikuti target makan dan minum di `GameBalanceConfig.md`.
 **`public bool TryUse(int slotIndex)`**:
 
 1. Tolak kalau `IsUsing`, slot kosong, atau item bukan `isConsumable`.
-2. Tolak kalau semua status yang dipulihkan sudah penuh, dengan notifikasi. Kalau `item.infectionDelta < 0`, panggil `InfectionSystem.CanUseMedicine(item)` (#64). Kalau `item.curesDiseases != None`, atau item obat dengan `healAmount > 0`, panggil `DiseaseManager.CanUseMedicine(item)` (#45).
+2. Pemeriksaan "sudah penuh" hanya berlaku untuk item yang punya nilai pemulihan lapar atau haus (`hungerDelta > 0` atau `thirstDelta > 0`): tolak dengan notifikasi kalau semua status itu sudah penuh. Item tanpa nilai lapar dan haus, seperti vaksin, Norit, Antibiotik, Perban, Medkit, dan suplemen, tidak ditolak oleh aturan ini, dan langsung masuk ke pemeriksaan berikutnya. Kalau `item.infectionDelta < 0`, panggil `InfectionSystem.CanUseMedicine(item)` (#64). Kalau `item.curesDiseases != None`, atau item obat dengan `healAmount > 0`, panggil `DiseaseManager.CanUseMedicine(item)` (#45).
 3. Catat `useSlotIndex`, atur `useTimer = useSeconds`, dan `IsUsing = true`.
 4. Pasang `IslandPlayerController.SetSpeedModifier(ItemUse, useMoveSpeedMultiplier)`.
 5. Kalau `useSeconds == 0`, langsung panggil `CompleteUse()`.
@@ -358,3 +358,4 @@ Isi keracunan, efek, dan obatnya milik #45. Blueprint ini mengirim `OnConsumed(i
 16. Jatuhkan 70 item. **Hasil:** tertua hilang, jumlah tetap 64, dan loot tidak ikut hilang.
 17. Pakai item dari pool berkali-kali lalu ambil. **Hasil:** tidak ada mesh atau data dari item sebelumnya.
 18. Mati saat inventori terbuka sambil menyeret. **Hasil:** barang kembali ke slot, dan run baru mulai dengan isi awal.
+19. Dengan lapar, haus, dan HP penuh, suntik `Med_Vaccine` saat `Infection` 80. **Hasil:** tidak ditolak oleh aturan "sudah penuh", dan vaksin berjalan. Minum `Drink_CleanWater` saat haus penuh. **Hasil:** ditolak.

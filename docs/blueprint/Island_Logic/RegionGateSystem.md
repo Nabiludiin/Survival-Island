@@ -95,7 +95,7 @@ Kayu boleh dikumpulkan sebelum Blueprint didapat. Hanya penyetorannya yang terku
 
 1. `bridgeComplete = true`.
 2. Panggil `BridgeSite.SetComplete()` kalau `Region1_Volcano` dimuat. Scene ini pasti dimuat, karena pemain sedang berdiri di sana.
-3. `Unlock(Amazon)`, terbitkan `RegionUnlockedEvent { Amazon }`, dan kirim notifikasi (#22).
+3. `Unlock(Amazon)`. `RegionUnlockedEvent { Amazon }` diterbitkan sekali oleh `Unlock`, dan notifikasi `Akses baru terbuka` berasal dari event itu (`NotificationManager.md`, aturan sumber tunggal). Langkah ini tidak menerbitkan event atau notifikasi sendiri.
 4. Terbitkan `SaveRequestedEvent` dengan `reason = BridgeComplete`.
 
 ### Visual jembatan mengikuti progres
@@ -135,7 +135,7 @@ Jembatan berada di layer `Structure` supaya bisa dipijak, tetapi tidak punya `Ba
 |---|---|---|
 | 1. Jarak | Lebar jurang minimal `ravineMinWidth` 30 meter. Lompatan lari terjauh sekitar 7,5 meter (`jumpHeight` 1,1, `sprintSpeed` 8) | Melompat |
 | 2. Dinding | `GateBarrier` setinggi 30 meter di sisi seberang jurang, dan mati hanya saat seam terbuka | Lompat dari tempat tinggi |
-| 3. Air | `GateBarrier` memanjang dari tebing sampai ke laut, melewati batas renang stamina (42 meter, #13) | Berenang memutar |
+| 3. Air | `GateBarrier` memanjang dari tebing ke laut minimal 60 meter. Pemain masih bisa bergerak saat tenggelam, total sekitar 110 meter dari stamina penuh (#13), jadi memutari ujung dinding (2 x panjang) harus lebih jauh dari itu | Berenang memutar |
 | 4. Bangunan | `NoBuildVolume` di sekitar `BridgeSite` dan tepi jurang (`BuildMenu.md`) | Tangga atau lantai buatan |
 | 5. Pengembalian | `RavineRecoveryVolume` | Pemain yang jatuh |
 | 6. Pemeriksaan | `VerifyPlayerRegion()` | Bug fisika |
@@ -202,3 +202,5 @@ Jembatan berada di layer `Structure` supaya bisa dipijak, tetapi tidak punya `Ba
 9. Pakai `teleport` ke Region 2 sebelum terbuka. **Hasil:** dalam 2 detik pemain kembali ke `LastSafePosition`.
 10. Simpan pada `312 / 500`, keluar, lalu muat. **Hasil:** papan dan ruas sama. Mati, lalu mulai run baru. **Hasil:** progres kembali `0 / 500`, dan Blueprint hilang.
 11. Masuk Region 2, sehingga Bab 3 terbuka. **Hasil:** `GateBlocker` hilang, `S2` dan `S3` terbuka di data, dan Region 4 dimuat saat pemain mendekat.
+12. Selesaikan jembatan dengan `eventlog 1` aktif. **Hasil:** `RegionUnlockedEvent(Amazon)` tercatat sekali, dan notifikasi `Akses baru terbuka` tampil sekali.
+13. Dari stamina penuh, berenang memutari ujung `GateBarrier` di sisi laut tanpa berhenti. **Hasil:** pemain tenggelam sebelum mencapai pantai Region 2.

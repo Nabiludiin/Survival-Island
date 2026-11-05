@@ -93,7 +93,7 @@ Tabel urutan `LoadOrder` 10 sampai 130 ada di `WorldStateSave.md` bagian "Membac
 
 ## 3. Hubungan dengan Sistem Lain
 
-**Event yang dikirim:** `SaveCompletedEvent { succeeded }`, oleh `WorldStateSave`.
+**Event yang dikirim:** `SaveCompletedEvent { reason, succeeded }`, oleh `WorldStateSave`.
 
 **Event yang didengar:** `SaveRequestedEvent`, `DaybreakEvent`, `PlayerDamagedEvent`, `VitalsChangedEvent`, `VitalWarningChangedEvent`, `PlayerPinnedEvent`, `DisasterStartedEvent`, `DisasterEndedEvent`, dan `RunEndedEvent`, semuanya oleh `WorldStateSave`.
 
