@@ -422,6 +422,7 @@ Developer sudah menyetujui keputusan berikut.
 | `LowTideSpot` | `IslandInteractable` berupa titik karang kecil yang hanya bisa dipakai saat surut | #91 |
 | `TideZoneAuditWindow` | Alat Editor yang memeriksa tanah terendam yang belum dicat pasir atau di luar Area `Tidal` | #91 |
 | `Tidal` | Area NavMesh pantai yang biayanya naik saat pasang lewat `NavMesh.SetAreaCost` | #91 |
+| `AnimalTerritory` | Komponen scene penanda teritori hewan di dekat kumpulan resource, dipakai `SpawnManager` sebagai `homePoint` | #61 |
 | `ZoneTracker` | Kelas statis penghitung zona yang menentukan region aktif saat zona bertumpuk | #92 |
 | `WeatherEnvironmentLayer` | Data lapisan fog dan cahaya per `WeatherType` | #92 |
 | `EnvironmentEventLayer` | Data lapisan suasana event bencana atau Blood Moon, dengan prioritas | #92 |

@@ -164,6 +164,8 @@ Biaya mengikuti kerusakan: `Ceil(cost * (1 - durability / effectiveMax))`, minim
 | 3 | Lucky Machine (#72), `WeaponModifierData` | `damage * damageMultiplier`, `speed * speedMultiplier`, dan `magazine + magazineBonus` |
 | 4 | Batas | Damage maksimum `base * maxDamageMultiplier`, dan magazine minimum 1 |
 
+Alat (`ItemType.Tool`) memakai rumus yang sama untuk *enchant* Lucky Machine (#72): `damage` untuk pukulan ke musuh dan `speed` untuk kecepatan ayun. `magazine` tidak dipakai alat.
+
 Hasilnya dihitung saat item dipasang atau berubah, lalu disimpan oleh pengendali senjata. Jadi tembakan tidak mengulang perhitungan dan tidak membuat garbage. Hasil ini menjadi `DamageInfo.amount`, sesuai langkah 1 di `DamagePipeline.md`. Armor dan pengali headshot 2x dihitung sesudahnya.
 
 ## 3. Hubungan dengan Sistem Lain

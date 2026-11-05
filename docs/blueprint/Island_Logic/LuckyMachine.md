@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/Island_Logic/LuckyMachine.md`
 **Deskripsi Utama:** Mesin gacha peninggalan peneliti. Aktif lewat tumbal musuh tertentu di kandang vakum, atau gratis selama 30 detik saat bencana besar. Hadiahnya berasal dari data.
 **Issue:** #72 (melengkapi #1)
-**Rujukan GDD:** Bagian 7 (satu mesin di setiap region, dua cara aktivasi, jenis hadiah, serta contoh 5 Zombie Militer atau 3 Beruang Kutub). Kuota mesin Region 1, 2, dan 4 serta hadiah bersama disetujui developer sebagai nilai awal. Posisi mesin, tabel peluang, batas putaran, dan arti "permanen" adalah usulan.
+**Rujukan GDD:** Bagian 7 (satu mesin di setiap region, dua cara aktivasi, jenis hadiah termasuk *enchant* pada alat atau senjata, serta contoh 5 Zombie Militer atau 3 Beruang Kutub). Kuota mesin Region 1, 2, dan 4 serta hadiah bersama disetujui developer sebagai nilai awal. Posisi mesin, tabel peluang, batas putaran, dan arti "permanen" adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -13,7 +13,7 @@
 | `LuckyMachineData` | ScriptableObject | Region, kuota, dan tabel hadiah. Satu aset per mesin |
 | `LuckyRewardLedger` | Kelas biasa, `ISaveable` global lewat `WorldStateSave` | Catatan hadiah bersama untuk keempat mesin |
 | `LuckyRewardData` | ScriptableObject | Satu hadiah |
-| `WeaponModifierData` | ScriptableObject | Pengali senjata, dibaca `ToolRepairSystem` (#113) |
+| `WeaponModifierData` | ScriptableObject | Pengali senjata atau alat (*enchant*), dibaca `ToolRepairSystem` (#113) |
 
 Blueprint ini menggantikan isi lama: `AddEnergy`, `energyCost`, dan array `GameObject` per tier tidak dipakai lagi.
 
@@ -212,7 +212,7 @@ Setiap mesin yang regionnya dimuat menerima event ini dan membuka jendelanya sen
 | Jenis | Langkah |
 |---|---|
 | `SpawnItem` | `WorldItemManager.Spawn(inst, amount, rewardPoint, despawns: false)`. Tidak hilang, dan tidak bergantung pada inventori penuh. Kalau `modifier` terisi, pasang ke `inst` lebih dulu |
-| `WeaponModifier` | Target: item yang dipegang kalau senjata, lalu `Base_Pistol` di inventori. Isi `inst.luckyModifierId`. Kalau `modifier.indestructible`, `inst.durability = -1`. Panggil `EquipmentManager.RefreshEquipped()` |
+| `WeaponModifier` | Target: item yang dipegang kalau senjata atau alat (`ItemType.Weapon` atau `ItemType.Tool`), lalu `Base_Pistol` di inventori. Isi `inst.luckyModifierId`. Kalau `modifier.indestructible`, `inst.durability = -1`. Panggil `EquipmentManager.RefreshEquipped()` |
 | `Skin` | Cari `skinTargetItemId` di inventori. Isi `inst.skinId`. `EquipmentManager` mengganti material. Kalau item tidak ada, simpan lewat `LuckyRewardLedger.AddPendingSkin`, lalu pasang saat item didapat |
 | `PermanentBuff` | `StatusEffectManager.Instance.Apply(r.buff, "lucky_machine")`. Aset memakai `Permanent`, `Intensify`, dan `maxStacks = 3` |
 
@@ -288,6 +288,7 @@ Setiap mesin yang regionnya dimuat menerima event ini dan membuka jendelanya sen
 10. **Blood Moon tidak memicu mode gratis:** GDD hanya menyebut *Sudden Event*.
 11. **Hadiah bersama (disetujui developer):** keempat mesin memakai tabel hadiah yang sama, dan batas hadiah dihitung bersama lewat `LuckyRewardLedger`.
 12. **Putaran tidak bisa dipindah:** putaran tersimpan dari satu mesin hanya bisa dipakai di mesin itu.
+13. **Enchant pada alat (disetujui developer, GDD bagian 7):** modifier boleh dipasang ke alat seperti kapak dan beliung. `damageMultiplier` menambah damage saat alat dipakai memukul musuh, dan `speedMultiplier` mempercepat ayunan, termasuk saat menebang dan menambang. Jumlah pukulan pada `ResourceNode` tetap mengikuti `toolRules`, supaya hasil kayu dan batu tidak berubah. `magazineBonus` tidak berlaku untuk alat.
 
 **Perubahan kontrak yang diperlukan:** lihat daftar laporan, untuk `SpawnManager`, `DamagePipeline`, `StatusEffectManager`, `VitalsRules`, `ItemUseSystem`, `EquipmentManager`, dan `DurabilitySystem`.
 
@@ -315,3 +316,5 @@ Setiap mesin yang regionnya dimuat menerima event ini dan membuka jendelanya sen
 20. Masukkan `zombie_militer` ke kandang mesin Region 4 lewat `DevConsole`. **Hasil:** musuh melewati kandang tanpa tersedot.
 21. Dapatkan `lucky_laser` dari mesin Region 1, lalu paksa hadiah yang sama di mesin Region 3. **Hasil:** diganti hadiah lain, karena ledger bersama.
 22. Kumpulkan 1 putaran di mesin Region 3, lalu buka panel mesin Region 1. **Hasil:** `storedSpins` mesin Region 1 tetap 0.
+23. Pegang kapak, lalu paksa hadiah `lucky_mod_damage`. **Hasil:** `luckyModifierId` terpasang di kapak, bukan di `Base_Pistol`, dan damage kapak ke zombie naik 1,25 kali.
+24. Pegang kapak dengan `lucky_mod_speed`, lalu tebang pohon. **Hasil:** ayunan lebih cepat, tetapi jumlah pukulan sampai pohon tumbang tetap sama.

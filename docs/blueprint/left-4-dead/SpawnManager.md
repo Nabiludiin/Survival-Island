@@ -141,7 +141,7 @@ Tick ini hanya mengisi hewan pada siang hari.
 2. Untuk tiap anggota: `go = ObjectPooler.Instance.SpawnFromPool(entry.enemy.enemyId, posisi, rotasi)`. Anggota lain digeser dalam 2 m lewat `SamplePosition`.
 3. Kalau `go == null`, hentikan kelompok ini. Pool memang punya batas.
 4. Isi `EnemyInstance`. Pengali gelombang hanya berlaku untuk zombie, lewat `RequestWave`, `RequestBurst`, dan `RequestAmbush`.
-5. `WildlifeAI` menerima `homePoint` dan `groupId`.
+5. `WildlifeAI` menerima `homePoint` dan `groupId`. Untuk hewan siang, titik spawn lebih dulu dicari di `AnimalTerritory` yang cocok dengan peluang `wildlife.territorySpawnChance` (disetujui developer, `WildlifeAI.md`).
 6. Tambah ke `activeEnemies`, lalu kirim `EnemySpawnedEvent { enemyId, position }`.
 
 **Zombie Desa:** entri dengan `ZombieData.hidesFromSun` tidak memakai `FindSpawnPoint`. Gelombang malam memanggil `HidingSpot.FindEmergeSpot(playerPos)` (#63), sehingga musuh selalu naik dari air atau lumpur.

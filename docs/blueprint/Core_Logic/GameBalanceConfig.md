@@ -140,6 +140,7 @@ Sebelumnya `timeMultiplier = 50` menghasilkan 28,8 menit per hari dan 28,8 jam t
 | `vitals` | `frostbiteDamagePerSec` | 5 | 1 | Setelah stamina habis, HP penuh habis dalam 100 detik |
 | `resource` | `treeDropMin` / `treeDropMax` | 2 / 4 | 8 / 12 | Rata-rata 10 kayu per pohon |
 | `resource` | `axeDecayPerUse` | 5 | 1 | 100 ayunan per kapak, sekitar 50 pohon |
+| `resource` | `harvestNoiseRadius` | - | 10 | Disetujui developer. Suara menebang, menambang, dan memetik, dipakai hewan menjaga resource (#61) |
 | `region` | `bridgeWoodCost` | 500 | 500 | GDD bagian 5 (nilai awal 500, bisa disetel) |
 | `region` | `heavyItemSpeedMultiplier` | 0,5 | 0,5 | Sesuai `Claude.md` |
 | `region` | `helicopterPartCount` | Tidak ada | 5 | Disetel bersama #69 |
@@ -241,7 +242,7 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 | `hitReaction` | #95 | Stagger, efek kaki, ambang armor, knockback, Shove, mayat, ragdoll, dan batas drop per malam |
 | `threat` | #108 | Jeda penilaian, waktu minimum target, selisih skor, aggro, pengurang kerumunan, Blood Moon, kehilangan jejak, target tak terjangkau, dan batas per frame |
 | `stealth` | #49 | Saklar enabled true (aturan GDD, saklar hanya untuk tes), jarak dan sudut pandang, laju deteksi, pengali jongkok dan lari, radius suara, jadwal tick, dan titik perburuan |
-| `wildlife` | #61 | Jeda FSM, aggro dan suara, teritori, target tak terjangkau, kabur ke sarang, serangan khusus, dan menguliti. Angka per spesies ada di `AnimalData` |
+| `wildlife` | #61 | Jeda FSM, aggro dan suara, teritori, territorySpawnChance 0,7 (disetujui, teritori dekat resource), target tak terjangkau, kabur ke sarang, serangan khusus, dan menguliti. Angka per spesies ada di `AnimalData` |
 | `spawn` | #62 | Jeda dan batas spawn, batas zombie dan hewan, jarak, arah belakang, pengaman macet, sapu bersih, target hewan, dan batas pengurangan anggaran dari sarang |
 | `sunlight` | #63 | Jeda cek sinar, sudut matahari, durasi terbakar, batas berlindung, jam sembunyi, waktu turun dan naik, boost, dan jumlah Zombie Desa siang |
 | `specialZombie` | #25 | Angka perilaku varian: jerat Tribal, amarah Lumut, lambat Militer, ledakan Beku, terkaman Desa, dan pengaman macet varian besar. Statistik HP dan kecepatan ada di aset `ZombieData` |

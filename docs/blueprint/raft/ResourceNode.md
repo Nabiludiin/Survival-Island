@@ -49,7 +49,7 @@ public enum NodeStatus { Standing, Depleted }
 2. Cari damage alat di `toolRules`. Kalau 0, tampilkan `Butuh alat lain`, lalu kembalikan `Rejected`.
 3. `currentHits -= damage`.
 4. `VFXManager.Instance.Play(tag, hitPoint, rot)`, suara pukulan, dan goyangan singkat.
-5. Terbitkan `ResourceNodeHitEvent { nodeType, isDepleted, byPlayer }` (#16).
+5. Terbitkan `ResourceNodeHitEvent { nodeType, isDepleted, byPlayer }` (#16). Kalau `byPlayer`, panggil juga `NoiseEmitter.Emit(GameBalanceConfig.resource.harvestNoiseRadius, NoiseSourceKind.Tool)` (#49). Suara ini dipakai hewan buas untuk menjaga resource di teritorinya (`WildlifeAI.md`, disetujui developer).
 6. Kalau `currentHits <= 0`, panggil `Deplete()`.
 7. Kembalikan `Hit`.
 
@@ -117,5 +117,7 @@ public enum NodeStatus { Standing, Depleted }
 7. Pukul pohon 3 kali, simpan, lalu lanjutkan. **Hasil:** sisa pukulan sama.
 8. Habiskan node, jauhi region sampai dilepas, lalu kembali. **Hasil:** status tetap, dan node tumbuh kalau waktunya sudah lewat.
 9. Pukul node apa pun. **Hasil:** efek muncul sesuai `NodeType`, dan `ResourceNodeHitEvent` terkirim.
+
+10. Tebang pohon di dalam teritori serigala. **Hasil:** `NoiseEmittedEvent` dengan `NoiseSourceKind.Tool` terkirim, dan serigala langsung mengejar.
 
 Belum diuji di Unity, karena blueprint ini baru rancangan.

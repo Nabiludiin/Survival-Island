@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/left-4-dead/WildlifeAI.md`
 **Deskripsi Utama:** AI hewan buas siang hari: teritorial, punya serangan khusus per spesies, kembali ke sarang saat malam, dan bangkainya bisa dikuliti.
 **Issue:** #61
-**Rujukan GDD:** Bagian 3 (ancaman siang, hewan kembali ke sarang, dan berburu) dan bagian 5 (hewan per region). Angka dan bentuk serangan adalah usulan.
+**Rujukan GDD:** Bagian 3 (ancaman siang, hewan menjaga teritori dan *resource*, hewan kembali ke sarang, dan berburu) dan bagian 5 (hewan per region). Angka dan bentuk serangan adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -94,6 +94,10 @@ Daging adalah `Food_RawMeat` (#66), dan kulit adalah `Mat_Hide` (#77). Beruang m
 4. Garis pandang: `PhysicsQuery.Raycast` dengan `PhysicsMasks.AIVision`. Kalau tidak terhalang, masuk `Alert`.
 
 **`HandleNoise(NoiseEmittedEvent e)`:** kalau `State == Wander` dan jarak ke sumber kurang dari `e.radius * noiseAggroMultiplier`, masuk `Alert` sambil menghadap sumber. Hewan tidak mengisi ikon mata #49.
+
+**Menjaga resource (GDD bagian 3, disetujui developer):** kalau `e.sourceKind == NoiseSourceKind.Tool` (menebang, menambang, memetik, atau menguliti) dan sumbernya berada dalam `wanderRadius` dari `homePoint`, hewan langsung masuk `Chase`, bukan `Alert`. Pemain yang mengambil resource di dalam teritori dianggap mengganggu. Batas `leashDistance` tetap berlaku, jadi hewan tidak mengejar keluar teritori.
+
+**Teritori di dekat resource (disetujui developer):** komponen scene `AnimalTerritory` diletakkan di Editor dekat kumpulan `ResourceNode`, misalnya jamur dan pohon getah Region 2 untuk Jaguar, atau area tambang Region 3 untuk Beruang Kutub. Isinya `enemyIds` (spesies yang boleh menempati) dan `radius`. `SpawnManager` memakai titik ini sebagai `homePoint` untuk hewan siang dengan peluang `wildlife.territorySpawnChance` (0,7). Kalau tidak ada `AnimalTerritory` yang cocok dalam jarak spawn, `FindSpawnPoint` biasa dipakai.
 
 **`EnemyHealth.Damaged`:** kalau `info.byPlayer` dan bukan `FleeToDen`, langsung `Chase` kalau masih di dalam teritori. Hewan yang dilukai dari luar batas masuk `Alert`, lalu kembali ke teritorinya, sesuai #108.
 
@@ -244,6 +248,7 @@ Saat fajar dan senja keduanya bisa berpapasan. Mereka saling mengabaikan: tidak 
 2. **Hubungan hewan dan zombie saat fajar dan senja.** Rekomendasi: saling mengabaikan, supaya GDD tetap sederhana dan performa aman.
 3. **Syarat menguliti.** Rekomendasi: `Base_Pisau` harus sedang dipegang, dan durabilitasnya tidak berkurang, karena Pisau adalah item inti.
 4. **Semua angka spesies di bagian 1.** Rekomendasi: pakai nilai awal, lalu setel lewat playtest bersama `GameBalanceConfig`.
+5. **Menjaga resource:** suara alat di dalam teritori langsung memicu `Chase`, dan teritori hewan diletakkan dekat resource lewat `AnimalTerritory` dengan peluang 0,7. Disetujui developer untuk memenuhi GDD bagian 3.
 
 ## 6. Skenario Tes
 
@@ -261,3 +266,5 @@ Saat fajar dan senja keduanya bisa berpapasan. Mereka saling mengabaikan: tidak 
 12. Tahan `E` pada bangkai sambil memegang Pistol. **Hasil:** ditolak dengan `MissingTool`. Ulangi dengan Pisau. **Hasil:** daging dan kulit masuk inventori, dan sisanya jatuh.
 13. Pakai ulang hewan dari pool sebanyak 20 kali. **Hasil:** HP, `baseOffset`, dan state kembali ke nilai awal.
 14. Saat diterkam Jaguar, beri 50 damage ke Jaguar lewat `DevConsole` dengan `byPlayer = false`. **Hasil:** terkaman tidak batal. Ulangi dengan tembakan Pistol pemain sebesar 40. **Hasil:** terkaman batal.
+15. Tebang pohon di dalam `wanderRadius` serigala yang sedang `Wander`. **Hasil:** serigala langsung `Chase`. Ulangi di luar teritori. **Hasil:** hanya `Alert`.
+16. Pasang `AnimalTerritory` Jaguar di dekat jamur Region 2, lalu tunggu spawn siang berulang. **Hasil:** sekitar 70 persen Jaguar muncul dengan `homePoint` di titik itu.
