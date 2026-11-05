@@ -19,6 +19,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
 | Enchant Lucky Machine | Modifier boleh dipasang ke senjata atau alat. Pada alat, damage pukulan dan kecepatan ayun naik, tetapi jumlah pukulan pada resource tetap |
 | Hewan menjaga resource | Suara alat di dalam teritori langsung memicu kejaran. Teritori hewan diletakkan dekat resource lewat `AnimalTerritory`, dengan peluang spawn 0,7 |
+| Berat NPC di kapal | Semua NPC berberat 4, jadi membawa satu NPC memenuhi tangan |
 | Lucky Machine | Satu mesin disetiap Region. Kuota: Region 1 8 zombie standar atau 3 serigala, Region 2 5 Zombie Tribal atau 2 Jaguar, Region 3 5 Zombie Militer atau 3 Beruang Kutub, Region 4 5 Zombie Desa atau 4 anjing liar. Tabel hadiah sama, hadiah unik sekali per run, dan putaran tidak bisa dipindah antar-mesin |
 | Obor saat badai | Obor tetap menyala saat Storm dan Blizzard, sesuai GDD bagian 5 |
 | Vaksin di kapal | Tetap ada sebagai loot langka, dan dihitung sebagai stok awal. Setelah Fase 1, vaksin baru hanya dari material Region 2 |
@@ -525,7 +526,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Barang di tangan saat waktu habis | Ikut kalau pemain berada di area aman. |
 | Berangkat lebih awal | Diputuskan developer: boleh, dengan menahan E 1,5 detik saat tangan kosong. 60 detik di GDD bagian 3 adalah batas paling lama. |
 | Jeda pra-game | 3 detik di luar 60 detik. Pemain hanya bisa menengok, sirene di detik ke-1,5, lalu kontrol dibuka. |
-| Kapasitas tangan dan NPC | Kapasitas 4 berat. NPC berberat 4, disembunyikan saat dibawa dan tampil sebagai ikon. NPC tertinggal menjadi korban. |
+| Kapasitas tangan dan NPC | Kapasitas 4 berat. Diputuskan developer: semua NPC berberat 4, termasuk Koki, disembunyikan saat dibawa dan tampil sebagai ikon. NPC tertinggal menjadi korban. |
 | Kedatangan di pantai | Pemain di pantai selatan Region 1 pada jam 06:00. Barang langsung di inventori, sisanya di samping bangkai sekoci, dan NPC di dekat pemain. |
 
 ### #75

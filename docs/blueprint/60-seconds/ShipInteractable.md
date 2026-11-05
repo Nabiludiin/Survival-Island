@@ -64,7 +64,7 @@ Sumber angka: `ItemData.shipWeight` dan `ItemData.shipPickupAmount` (#118). Daft
 | Baterai | `Item_Battery` | 1 | 1 | |
 | Bahan, seperti kain dan tali | `Mat_*` | 1 | 4 | Kalau ditambahkan ke `Loot_Ship` nanti |
 | Senjata atau alat besar | Sesuai item | 2 | 1 | Belum ada di `Loot_Ship`. Aturan berat tetap disiapkan |
-| NPC | `npc_*` | Dari `NPCData.weight` | 1 | `npc_medic` 4, `npc_crafter` 4, dan `npc_cook` 3 (`NPCRoster.md`) |
+| NPC | `npc_*` | Dari `NPCData.weight` | 1 | Semua NPC 4, jadi membawa satu NPC memenuhi tangan (`NPCRoster.md`) |
 
 Item inti (`Base_Kail`, `Base_Pistol`, `Base_Pisau`) **tidak pernah** muncul sebagai `ShipInteractable`. Ketiganya selalu ditambahkan saat tiba di pulau (`IslandArrival.Apply`, #74), sesuai GDD bagian 3.
 
@@ -259,7 +259,7 @@ Objek pool berada di bawah `PersistentRoot`, jadi kelas ini **tidak** menyimpan 
 
 **Ketidaksesuaian yang perlu diputuskan developer (tidak menghalangi kode):**
 
-- **Berat NPC:** `LifeboatExtraction.md` menulis berat semua NPC 4, tetapi `NPCRoster.md` memberi `npc_cook` berat 3. Kode membaca `NPCData.weight`, jadi cukup mengubah datanya.
+- **Berat NPC (keputusan developer):** semua NPC berberat 4, sama dengan `ship.handCapacity`. Menyelamatkan satu NPC selalu memenuhi tangan, jadi pemain harus memilih antara barang dan orang. Kode tetap membaca `NPCData.weight`.
 - **Jumlah barang kapal:** `RegionLootTable.md` memberi `Ammo_9mm` 3 sampai 6 di `Loot_Ship`, sedangkan `CarryCapacity.md` memakai `shipPickupAmount` 12. Blueprint ini mengikuti `CarryCapacity.md`, karena kontrak `AddShipHandItem` memakai `shipPickupAmount`, dan jumlah hasil acak `Loot_Ship` diabaikan. Rekomendasi: jumlah di `Loot_Ship` ditulis 1.
 
 ## 6. Skenario Tes

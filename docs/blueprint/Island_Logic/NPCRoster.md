@@ -37,7 +37,7 @@ public class NPCData : ScriptableObject
 |---|---|---|---|---|---|---|
 | `npc_medic` | Medis | 4 | 80 | `Medic` | `NPC_Pistol` | Tidak perlu |
 | `npc_crafter` | Tukang | 4 | 120 | `Crafter` | `NPC_Pistol` | `CraftingStation` terdekat |
-| `npc_cook` | Koki | 3 | 100 | `Cook` | `NPC_Pistol` | `CampfireManager` terdekat |
+| `npc_cook` | Koki | 4 | 100 | `Cook` | `NPC_Pistol` | `CampfireManager` terdekat |
 
 `RunSeedManager.CurrentLayout.shipNpcIds` memilih NPC yang muncul di kapal dari daftar ini (#89). Jumlah per run ditentukan #74 dan #89.
 
