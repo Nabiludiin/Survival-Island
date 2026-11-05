@@ -66,7 +66,7 @@ Persen dihitung dari entri yang lolos saringan. Jadi total bobot tidak harus 100
 
 | Tabel | Item, jumlah, bobot, titik |
 |---|---|
-| `Loot_Ship` | `Food_Can` 1, 30. `Ammo_9mm` 3-6, 25. `Drink_CleanWater` 1, 20. `Med_Bandage` 1, 12. `Med_Medkit` 1, 5*. `Med_Vaccine` 1, 4*. `Item_Battery` 1, 5. Semua `Any` |
+| `Loot_Ship` | `Food_Can` 1, 30. `Ammo_9mm` 1, 25. `Drink_CleanWater` 1, 20. `Med_Bandage` 1, 12. `Med_Medkit` 1, 5*. `Med_Vaccine` 1, 4*. `Item_Battery` 1, 5. Semua `Any`. Di kapal, tabel ini hanya memilih jenis barang. Jumlah per objek dibaca dari `ItemData.shipPickupAmount`, misalnya peluru 12 butir per kotak (keputusan developer, `ShipInteractable.md`) |
 | `Loot_Region1` | `Mat_Cloth` 1-3, 25, H. `Food_Can` 1-2, 20, HC. `Drink_CleanWater` 1, 20, HC. `Mat_Rope` 1-2, 15, HC. `Med_Bandage` 1, 10, HC. `Ammo_9mm` 3-6, 8, C. `Item_Battery` 1, 5, HC |
 | `Loot_Region2` | `Food_Can` 1-2, 15, HC. `Drink_CleanWater` 1, 15, HC. `Mat_TreeSap` 1-2, 14, HC. `Mat_Mushroom` 1-2, 14, HC. `Med_Norit` 1, 12, HC. `Mat_Rope` 1-2, 10, H. `Ammo_9mm` 3-6, 10, C. `Med_Antibiotic` 1, 8, C*. `Item_Battery` 1, 5, HC |
 | `Loot_Region3` | `Ammo_9mm` 6-12, 25, BW. `Mat_Scrap` 2-4, 15, W. `Ammo_556` 5-15, 15, BWC*, `minDay` 10. `Food_Can` 1-2, 12, CW. `Drink_CleanWater` 1, 10, CW. `Med_Medkit` 1, 8, BC*. `Gear_WarmClothes` 1, 6, CW. `Tool_Flashlight` 1, 4, W. `Med_Supplement` 1, 3, C*. `Item_Battery` 1, 5, CW |

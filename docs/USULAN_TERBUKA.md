@@ -19,6 +19,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
 | Enchant Lucky Machine | Modifier boleh dipasang ke senjata atau alat. Pada alat, damage pukulan dan kecepatan ayun naik, tetapi jumlah pukulan pada resource tetap |
 | Hewan menjaga resource | Suara alat di dalam teritori langsung memicu kejaran. Teritori hewan diletakkan dekat resource lewat `AnimalTerritory`, dengan peluang spawn 0,7 |
+| Peluru di kapal | Satu kotak peluru di kapal berisi 12 butir (satu magazine penuh). `Loot_Ship` hanya memilih jenis barang |
 | Berat NPC di kapal | Semua NPC berberat 4, jadi membawa satu NPC memenuhi tangan |
 | Lucky Machine | Satu mesin disetiap Region. Kuota: Region 1 8 zombie standar atau 3 serigala, Region 2 5 Zombie Tribal atau 2 Jaguar, Region 3 5 Zombie Militer atau 3 Beruang Kutub, Region 4 5 Zombie Desa atau 4 anjing liar. Tabel hadiah sama, hadiah unik sekali per run, dan putaran tidak bisa dipindah antar-mesin |
 | Obor saat badai | Obor tetap menyala saat Storm dan Blizzard, sesuai GDD bagian 5 |

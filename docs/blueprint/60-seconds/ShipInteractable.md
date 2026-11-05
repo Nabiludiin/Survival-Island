@@ -260,7 +260,7 @@ Objek pool berada di bawah `PersistentRoot`, jadi kelas ini **tidak** menyimpan 
 **Ketidaksesuaian yang perlu diputuskan developer (tidak menghalangi kode):**
 
 - **Berat NPC (keputusan developer):** semua NPC berberat 4, sama dengan `ship.handCapacity`. Menyelamatkan satu NPC selalu memenuhi tangan, jadi pemain harus memilih antara barang dan orang. Kode tetap membaca `NPCData.weight`.
-- **Jumlah barang kapal:** `RegionLootTable.md` memberi `Ammo_9mm` 3 sampai 6 di `Loot_Ship`, sedangkan `CarryCapacity.md` memakai `shipPickupAmount` 12. Blueprint ini mengikuti `CarryCapacity.md`, karena kontrak `AddShipHandItem` memakai `shipPickupAmount`, dan jumlah hasil acak `Loot_Ship` diabaikan. Rekomendasi: jumlah di `Loot_Ship` ditulis 1.
+- **Jumlah barang kapal (keputusan developer):** satu kotak peluru di kapal berisi 12 butir, satu magazine penuh `Base_Pistol`. `Loot_Ship` hanya memilih jenis barang, dan jumlahnya dibaca dari `shipPickupAmount`. Karena itu jumlah di `Loot_Ship` ditulis 1.
 
 ## 6. Skenario Tes
 
