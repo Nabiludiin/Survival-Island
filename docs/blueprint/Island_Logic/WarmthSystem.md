@@ -123,7 +123,7 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 
 **`TorchController.OnEquip()`:**
 
-1. Kalau `CanLight()` gagal, tampilkan notifikasi `Terlalu berangin` (#22), dan tetap padam.
+1. Kalau `CanLight()` gagal, tampilkan notifikasi `Terlalu basah` (#22), dan tetap padam.
 2. Nyalakan `Light` dan partikel, pasang `LightSource` dengan `isHeld = true` (#98), lalu `IsLit = true`. Sumber ini tidak dihitung dalam tarikan cahaya.
 3. `WarmthSystem.SetTorchHeld(true)`.
 
@@ -135,10 +135,10 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 **`Update()`**, kalau `IsLit`:
 
 1. `burnRemaining -= Time.deltaTime`. Kalau habis, `InventoryManager.RemoveInstance(instanceId)` dan kirim notifikasi.
-2. Kalau `Storm` atau `Blizzard` dan terkena langit, panggil `Extinguish()`.
+2. `Storm` dan `Blizzard` tidak memadamkan obor. GDD bagian 5 menyebut membawa obor cukup untuk mencegah frostbite, dan developer memutuskan mengikutinya.
 3. Kalau `Rain` dan terkena langit, tambah `rainTimer`. Kalau mencapai `torchRainExtinguishSeconds`, panggil `Extinguish()`. Di bawah atap, `rainTimer = 0`.
 
-**`CanLight()`:** ditolak kalau `isInWater`, atau kalau `Storm`, `Blizzard`, atau `Rain` dan terkena langit. Menyalakan ulang gratis selama durasi masih ada.
+**`CanLight()`:** ditolak kalau `isInWater`, atau kalau `Rain` dan terkena langit. `Storm` dan `Blizzard` tidak menghalangi. Menyalakan ulang gratis selama durasi masih ada.
 
 **Saat Heavy Item:** nilai `equipment.offHandAllowedWhileCarrying` tetap `false`. Obor disimpan otomatis saat barang diangkat, karena barang dipegang dua tangan (#69).
 
@@ -194,7 +194,7 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 
 1. **Bentuk `Warmth`:** rekomendasi nilai 0 sampai 100, dengan pemilik `WarmthSystem`. Ini mendukung `ApplyColdBurst` dan indikator HUD.
 2. **Hujan dan air di luar Region 3:** rekomendasi hanya menurunkan `Warmth` sampai batas aman, jadi frostbite tetap khusus Region 3. Efek nyatanya adalah cadangan panas berkurang.
-3. **Durasi obor dan padam:** rekomendasi 300 detik, `Rain` memadamkan setelah 20 detik, sedangkan `Storm` dan `Blizzard` memadamkan langsung. `CampfireManager` memakai aturan yang berbeda untuk hujan, karena api unggun lebih besar. **Menyimpang dari GDD:** obor padam dan tidak bisa dinyalakan ulang di tempat terbuka saat `Blizzard`, jadi pemain yang hanya membawa obor tetap membeku, padahal GDD bagian 5 menyebut "membawa obor". Keputusannya di #85.
+3. **Durasi obor dan padam:** bakar 300 detik, dan `Rain` memadamkan setelah 20 detik. **Keputusan developer:** `Storm` dan `Blizzard` tidak memadamkan obor, sesuai GDD bagian 5 ("membawa obor"). Region 3 tidak punya `Rain` (`RegionalWeather.md`), jadi obor selalu bisa melindungi pemain di sana selama durasinya masih ada. `CampfireManager` memakai aturan yang berbeda untuk hujan, karena api unggun lebih besar.
 4. **Slot pakaian:** rekomendasi satu slot di luar inventori, tanpa durabilitas pada versi awal. Bahan kulit hewan sudah menjadi biayanya.
 5. **Obor saat membawa Heavy Item:** rekomendasi tidak boleh. GDD menyebut barang berat, dan pemain jadi perlu pakaian hangat untuk perjalanan bolak-balik.
 6. **Ambang `Warmth`:** rekomendasi membeku pada 20, sehingga stamina habis pada sekitar detik ke-24. Ini sedikit lebih lambat dari perhitungan `GameBalanceConfig.md`, yaitu 20 detik.
@@ -211,7 +211,7 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 6. Masuk bangunan dengan atap dan empat dinding. **Hasil:** `isIndoors` aktif dalam 2 detik. Hancurkan atap. **Hasil:** tidak aktif.
 7. Berdiri di hujan di Region 1 selama 60 detik. **Hasil:** `Warmth` berhenti di 40, tanpa frostbite.
 8. Masuk air di Region 1, lalu di Region 3. **Hasil:** Region 1 berhenti di 30. Region 3 terus turun sampai membeku.
-9. Paksa `Rain` saat obor menyala. **Hasil:** padam setelah 20 detik. Paksa `Storm`. **Hasil:** padam langsung.
+9. Paksa `Rain` saat obor menyala. **Hasil:** padam setelah 20 detik. Paksa `Storm`, lalu `Blizzard` di Region 3. **Hasil:** obor tetap menyala, dan tidak ada frostbite.
 10. Biarkan obor menyala 300 detik. **Hasil:** item hilang, dan notifikasi muncul.
 11. Angkat suku cadang saat memegang obor. **Hasil:** obor disimpan, panas obor hilang, dan durasi tetap berkurang.
 12. Terkena ledakan Zombie Beku tanpa perlindungan. **Hasil:** `Warmth` turun 25 sekali. Ulangi dengan pakaian dan `Warmth` 40. **Hasil:** `Warmth` berhenti di 30, dan pemain tidak membeku.

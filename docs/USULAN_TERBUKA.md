@@ -18,6 +18,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Infeksi mencapai 100 | HP turun bertahap, dan tidak mati seketika |
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
 | Lucky Machine | Satu mesin disetiap Region |
+| Obor saat badai | Obor tetap menyala saat Storm dan Blizzard, sesuai GDD bagian 5 |
 | Diterkam | Pemain hanya bisa melepaskan diri sendiri. NPC tidak menolong, dan hanya damage dari pemain yang bisa membatalkan terkaman Jaguar atau jerat Tribal |
 | Fitur tambahan yang dipakai | #96, #106, dan #112 |
 | Fitur yang tidak dipakai | #48, #105, dan #117 |
@@ -410,7 +411,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 |---|---|
 | Bentuk dan pemilik Warmth | Nilai 0 sampai 100 dengan pemilik WarmthSystem. SurvivalStats hanya membaca isFreezing. |
 | Hujan dan air di luar Region 3 | Hanya menurunkan Warmth sampai batas aman (hujan 40, badai 30, air 30), sehingga frostbite tetap khusus Region 3. |
-| Durasi dan padamnya obor | Bakar 300 detik. Rain memadamkan setelah 20 detik, sedangkan Storm dan Blizzard memadamkan langsung. |
+| Durasi dan padamnya obor | Bakar 300 detik. Rain memadamkan setelah 20 detik. Diputuskan developer: Storm dan Blizzard tidak memadamkan obor, sesuai GDD bagian 5. |
 | Slot pakaian hangat dan resep | Satu slot di luar inventori tanpa durabilitas pada versi awal. Resep 4 Mat_Hide dan 2 Mat_Rope di WoodBench. |
 | Obor saat membawa Heavy Item | Tidak boleh (equipment.offHandAllowedWhileCarrying = false), karena barang dipegang dua tangan. Obor disimpan otomatis dan durasinya tetap berjalan. |
 | Ambang Warmth untuk membeku | Masuk membeku pada 20 dan keluar pada 30, sehingga stamina habis sekitar detik ke-24. Ini sedikit lebih lambat dari perhitungan 20 detik di GameBalanceConfig.md. |
