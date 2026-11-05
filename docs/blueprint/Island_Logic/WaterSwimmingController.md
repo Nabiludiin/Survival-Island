@@ -199,7 +199,7 @@ Air dangkal tidak menyelamatkan pemain dari damage jatuh.
 7. Pegang Pistol lalu masuk air dalam. **Hasil:** Pistol disimpan, dan kembali setelah keluar.
 8. Bawa suku cadang ke air setinggi paha, lalu ke air dalam. **Hasil:** tetap dibawa di air dangkal, dan barang kembali ke darat saat berenang.
 9. Jatuh dari tebing 15 meter ke air dalam. **Hasil:** tanpa damage. Ulangi ke air 0,5 meter. **Hasil:** damage jatuh normal.
-10. Masuk air di Region 3 tanpa pelindung. **Hasil:** `Warmth` turun cepat, dan pemain membeku (#65).
+10. Masuk air di Region 3 tanpa pakaian hangat. **Hasil:** `Warmth` turun cepat, dan pemain membeku (#65). Ulangi dengan pakaian hangat. **Hasil:** `Warmth` berhenti di 30, dan pemain tidak membeku.
 11. Lepas `Region4_Village` saat pemain di sungai lewat `DevConsole`. **Hasil:** mode kembali `None`, tanpa error.
 12. Simpan di darat, lalu muat di dalam air lewat `teleport`. **Hasil:** mode `Swimming` dalam 0,1 detik.
 13. Jeda saat tenggelam. **Hasil:** HP dan napas berhenti, lalu berlanjut setelah jeda.

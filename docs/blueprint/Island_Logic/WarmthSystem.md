@@ -85,7 +85,7 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 8. Kalau `IsProtected()`: `Warmth = Max(Warmth, protectedFloor)`.
 9. Jalankan `UpdateFreezing()`.
 
-**`private bool IsProtected()`:** `!isInWater`, dan `wornClothingInstanceId != -1` atau `isTorchHeld`.
+**`private bool IsProtected()`:** `wornClothingInstanceId != -1`, atau `isTorchHeld && !isInWater`. Pakaian hangat tetap melindungi di air, termasuk air es Region 3 (GDD bagian 5, keputusan developer). Obor tidak melindungi di air, karena obor padam saat masuk air (`WaterSwimmingController.md`).
 
 **`UpdateFreezing()`:** `true` kalau `Warmth <= freezeEnterThreshold`, `false` kalau `Warmth >= freezeExitThreshold`, dan tetap di antaranya. Terbitkan `WarmthChangedEvent { warmth, isFreezing }` kalau `IsFreezing` berubah, atau nilai bulat `Warmth` berubah.
 
@@ -199,7 +199,7 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 5. **Obor saat membawa Heavy Item:** rekomendasi tidak boleh. GDD menyebut barang berat, dan pemain jadi perlu pakaian hangat untuk perjalanan bolak-balik.
 6. **Ambang `Warmth`:** rekomendasi membeku pada 20, sehingga stamina habis pada sekitar detik ke-24. Ini sedikit lebih lambat dari perhitungan `GameBalanceConfig.md`, yaitu 20 detik.
 7. **Sumber angka dingin cuaca (#115, menunggu persetujuan):** saat ini `blizzardCold` (2) dan `GameBalanceConfig.weather.effects.warmthLossPerSec` memegang nilai yang sama. Usulan: hapus `blizzardCold`, lalu baca `RegionalWeather.Instance.GetEffects(currentRegion).warmthLossPerSec`. Akibatnya `Snow` ikut menambah dingin 0,5 per detik. Belum diterapkan, karena batasan #115 menyebut efek suhu milik #65.
-8. **Batas bawah saat terlindung:** rekomendasi `protectedFloor` 30 untuk pakaian hangat atau obor menyala, sehingga `Blizzard` dan Zombie Beku tidak membekukan pemain yang terlindung. Pengecualian: air es Region 3 tetap bisa membekukan pemakai pakaian. Ini aturan tambahan yang menyimpang dari GDD bagian 5, dan perlu keputusan di #85.
+8. **Batas bawah saat terlindung:** rekomendasi `protectedFloor` 30 untuk pakaian hangat atau obor menyala, sehingga `Blizzard` dan Zombie Beku tidak membekukan pemain yang terlindung. **Keputusan developer:** pakaian hangat juga melindungi di air es Region 3, sesuai GDD bagian 5. `Warmth` tetap turun cepat di air es, tetapi berhenti di `protectedFloor`. Pemain tanpa pakaian tetap membeku di air es.
 
 ## 6. Skenario Tes
 
@@ -210,7 +210,7 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 5. Berdiri dalam 5 meter dari api unggun di Region 3. **Hasil:** `Warmth` naik 20 per detik. Berjalan keluar radius. **Hasil:** turun lagi.
 6. Masuk bangunan dengan atap dan empat dinding. **Hasil:** `isIndoors` aktif dalam 2 detik. Hancurkan atap. **Hasil:** tidak aktif.
 7. Berdiri di hujan di Region 1 selama 60 detik. **Hasil:** `Warmth` berhenti di 40, tanpa frostbite.
-8. Masuk air di Region 1, lalu di Region 3. **Hasil:** Region 1 berhenti di 30. Region 3 terus turun sampai membeku.
+8. Masuk air di Region 1, lalu di Region 3, tanpa pakaian hangat. **Hasil:** Region 1 berhenti di 30. Region 3 terus turun sampai membeku. Ulangi di air Region 3 dengan pakaian hangat. **Hasil:** `Warmth` berhenti di 30, dan tidak ada frostbite.
 9. Paksa `Rain` saat obor menyala. **Hasil:** padam setelah 20 detik. Paksa `Storm`, lalu `Blizzard` di Region 3. **Hasil:** obor tetap menyala, dan tidak ada frostbite.
 10. Biarkan obor menyala 300 detik. **Hasil:** item hilang, dan notifikasi muncul.
 11. Angkat suku cadang saat memegang obor. **Hasil:** obor disimpan, panas obor hilang, dan durasi tetap berkurang.

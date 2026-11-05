@@ -19,6 +19,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
 | Lucky Machine | Satu mesin disetiap Region |
 | Obor saat badai | Obor tetap menyala saat Storm dan Blizzard, sesuai GDD bagian 5 |
+| Air es Region 3 | Pakaian hangat tetap melindungi di air es, sesuai GDD bagian 5. Obor padam di air, jadi tidak melindungi |
 | Diterkam | Pemain hanya bisa melepaskan diri sendiri. NPC tidak menolong, dan hanya damage dari pemain yang bisa membatalkan terkaman Jaguar atau jerat Tribal |
 | Fitur tambahan yang dipakai | #96, #106, dan #112 |
 | Fitur yang tidak dipakai | #48, #105, dan #117 |
