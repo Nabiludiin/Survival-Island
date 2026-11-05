@@ -49,7 +49,7 @@ Jumlah keausan per aksi milik pemanggil:
 | `GunController` (#58) | Satu tembakan | `WeaponData.wearPerShot` (Pistol 0,25) |
 | `PlayerPinnedState` (#110) | Satu tusukan pisau saat diterkam | `pinned.knifeDurabilityCost` (5) |
 
-Tabel ini hanya daftar baca. Kalau angka berubah, ubah di blueprint pemiliknya. `FishingSystem.md` saat ini tidak mengurangi durabilitas Kail, walaupun `ToolRepairSystem.md` menyebutnya sebagai pemanggil.
+Tabel ini hanya daftar baca. Kalau angka berubah, ubah di blueprint pemiliknya. Kail tidak aus saat memancing (`FishingSystem.md`, `ToolRepairSystem.md`).
 
 ## 2. Detail Logika & Fungsi
 

@@ -43,6 +43,7 @@ Dengan `Clear Depth`, tangan selalu tergambar di atas dunia, sehingga senjata ti
 | `eyeHeightCurrent` | `float` | `camera.eyeHeightStand` | Tinggi mata saat ini |
 | `viewmodelMode` | `ViewmodelMode` | `Visible` | `Visible`, `Lowered`, atau `Hidden` |
 | `skipLookFrames` | `int` | 0 | Mengabaikan lonjakan mouse |
+| `lookEnabled` | `bool` | `true` | Diatur `SetLookEnabled`. Saat `false`, `LookDelta` diabaikan |
 
 ```csharp
 public interface ICameraOffsetSource
@@ -107,6 +108,7 @@ Nilai sensitivitas lama `2` mengikuti `Input.GetAxis`. Nilainya berubah karena `
 **`void Update()`**, membaca input lebih dulu:
 
 ```csharp
+if (!lookEnabled) return;
 if (skipLookFrames > 0) { skipLookFrames--; return; }
 Vector2 look = InputManager.Instance.LookDelta * settings.mouseSensitivity * lookScale;
 yaw += look.x;
@@ -212,6 +214,8 @@ Saat berganti item, `EquipmentManager` memanggil `SetMainPose(ViewmodelPose)`. T
 | **Adegan** | Panel `Cinematic` | `Gameplay` mati. #99 boleh memakai kamera lain | `Hidden` |
 | **Fase 1** | Rig sama, tanpa item | Ship sway aktif, dan tangan kosong tampil | `Visible` |
 
+**`public void SetLookEnabled(bool enabled)`** (usulan dari `ShipPlayerController.md`) mengisi `lookEnabled`. Saat `false`, `Update` mengabaikan `LookDelta`, tetapi `LateUpdate` tetap menerapkan ship sway dan getaran. Dipakai Fase 1 saat `ShipControlLevel.None`, karena mematikan komponen kamera ikut menghilangkan getaran `FinalShudder` pada `T=0`. Saat diaktifkan kembali, `skipLookFrames = 1` supaya kamera tidak melompat.
+
 **`public void DetachForDeath()`** memanggil `CameraRig.SetParent(null, true)`, sehingga kamera tidak ikut terjatuh bersama `CharacterController` yang dimatikan.
 
 ## 3. Hubungan dengan Sistem Lain
@@ -231,6 +235,7 @@ Saat berganti item, `EquipmentManager` memanggil `SetMainPose(ViewmodelPose)`. T
 | `PlayerInteractor` (#17), `BuildManager` | Memakai `WorldCamera` |
 | `PlayerTraversal` (#101) | `SetEyeHeight`, `EnterClimbView`, `ExitClimbView`, dan `PlayLandingDip` |
 | `ShipHazardManager` (#75) | Sumber ship sway |
+| `ShipPlayerController` (#74) | `SetLookEnabled` sesuai `ShipControlLevel` |
 | `DeathCinematic` (#53) | `DetachForDeath` |
 | `PlayerPinnedState` (#110) | `SetForcedLook` |
 | `AnimationController` (#12) | Animator tangan di dalam viewmodel |

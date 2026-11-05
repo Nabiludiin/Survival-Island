@@ -49,7 +49,7 @@ public enum DurabilityState { NoDurability, Normal, Low, Broken, Destroyed }
 | `Tool_Hammer` | 1 `Mat_Wood`, 1 `Mat_Stone` | `Hand` | Ya |
 | Senjata api non-inti (#58) | 2 `Mat_Cloth`, 2 `Mat_Stone` | `WoodBench` | Ya |
 | `Base_Pistol` | 1 `Mat_Cloth` | `Hand` | Tidak, item inti |
-| `Base_Kail` | 2 `Mat_Wood` | `Hand` | Tidak, item inti |
+| `Base_Kail` | 2 `Mat_Wood` | `Hand` | Tidak, item inti. Saat ini `FishingSystem.md` tidak mengurangi durabilitas Kail, jadi baris ini belum terpakai |
 | `Base_Pisau` | 1 `Mat_Stone` | `Hand` | Tidak, item inti |
 | `Tool_Torch`, `Tool_Flashlight` | Tidak bisa | Tidak ada | Mengikuti #65 dan `FlashlightController` |
 | `Reward_FireAxe` | Tidak bisa, dan tidak perlu | Tidak ada | Tidak punya durabilitas |
@@ -106,8 +106,10 @@ Tiap jenis hanya bisa dipasang sekali per item, dan maksimum `upgrade.maxPerItem
 1. Kalau `inst.durability < 0`, kembalikan `NoDurability`.
 2. Simpan status lama, lalu `inst.durability = Max(0, durability - amount)`.
 3. Hitung status baru lewat `GetState`.
-4. Kalau `Destroyed`, panggil `InventoryManager.RemoveInstance(instanceId)`. `EquipmentManager` lalu menjalankan alur item hancur.
-5. Kalau status berubah, terbitkan `DurabilityStateChangedEvent { instanceId, itemId, state }`.
+4. Kalau status berubah, terbitkan `DurabilityStateChangedEvent { instanceId, itemId, state }`.
+5. Kalau `Destroyed`, panggil `InventoryManager.RemoveInstance(instanceId)`. `EquipmentManager` lalu menjalankan alur item hancur.
+
+Event dikirim sebelum `RemoveInstance`, supaya HUD dan notifikasi masih bisa membaca nama item. Langkah lengkapnya, termasuk penolakan `amount <= 0`, ada di `DurabilitySystem.md`.
 
 **`public static float GetEffectiveMax(ItemInstance inst, ItemData data)`**:
 
@@ -178,7 +180,7 @@ Hasilnya dihitung saat item dipasang atau berubah, lalu disimpan oleh pengendali
 | `CraftingManager`, `CraftingPanel` (#77) | `availableMask`, `RecipeIngredient`, dan tab Perbaiki |
 | `GunController` (#58), `MeleeCombatSystem` | Membaca `WeaponStatCalculator`, dan memanggil `ApplyWear` |
 | `LuckyMachine` (#72) | Mengisi `luckyModifierId`, dan menyediakan `WeaponModifierData` |
-| `ResourceRespawn` (#73), `FishingSystem` (#55), `BuildingIntegrity` (#47) | Memanggil `ApplyWear` |
+| `ResourceRespawn` (#73), `BuildingIntegrity` (#47) | Memanggil `ApplyWear` |
 | `HUDManager`, `NotificationManager` (#22) | Bar durabilitas dan peringatan |
 
 **Batas pekerjaan:** perbaikan bangunan di #47, isi modifier gacha di #72, dan meja di #77.

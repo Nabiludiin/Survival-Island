@@ -224,7 +224,7 @@ Setiap mesin yang regionnya dimuat menerima event ini dan membuka jendelanya sen
 
 ### Tak bisa rusak
 
-- **Fire Axe:** `Reward_FireAxe` memakai `ItemData.maxDurability = -1`. `DurabilitySystem.UseItem` selesai lebih awal kalau nilainya `-1`. Saat pukulan `MeleeCombatSystem` mengenai target, panggil `Flammable.TryIgnite(fire.fireAxeIgniteChance, true)` (#97).
+- **Fire Axe:** `Reward_FireAxe` memakai `ItemData.maxDurability = -1`. `DurabilitySystem.ApplyWear` mengembalikan `NoDurability` tanpa mengubah apa pun kalau `durability` bernilai `-1` (`DurabilitySystem.md`). Saat pukulan `MeleeCombatSystem` mengenai target, panggil `Flammable.TryIgnite(fire.fireAxeIgniteChance, true)` (#97).
 - **Laser Pistol:** `GunController` memakai `WeaponData` khusus dan `mod_indestructible`. `inst.durability = -1` (#58, #113).
 
 ## 3. Hubungan dengan Sistem Lain

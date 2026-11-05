@@ -61,6 +61,8 @@ public struct VFXEntry
 | `VFX_WoodDust`, `VFX_StoneDust`, `VFX_LeafBurst` | 8 per tag | 0,8 | 8 | 40 | 0,05 |
 | `VFX_GachaSpark` | 4 | 2 | 4 | 0 | 0 |
 | `VFX_Splash` | 8 | 1 | 8 | 40 | 0,1 |
+| `VFX_Explosion` (tong, usulan `EnvironmentalHazard.md`) | 4 | 2 | 4 | 0 | 0 |
+| `VFX_ShipPickup` (ambil barang kapal, usulan `ShipInteractable.md`) | 4 | 0,5 | 4 | 0 | 0 |
 
 Setiap efek berbasis `ParticleSystem`, dengan `Stop Action = None`, tanpa collider, dan `Simulation Space = World`. Isi pool didaftarkan di daftar `pools` milik `ObjectPooler`, dan tidak boleh lebih kecil dari `maxActive`. Dengan begitu, antrean tidak pernah membuat objek baru.
 

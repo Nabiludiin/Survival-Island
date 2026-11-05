@@ -48,6 +48,8 @@
 
 Setiap perubahan isi tangan menerbitkan `ShipHandChangedEvent { weight, capacity }`.
 
+**Mengisi `isNpc` (usulan):** `ShipInteractable.Interact` memanggil `AddShipHandItem(ItemID, weightCost, pickupAmount)` tanpa penanda jenis, dengan `ItemID` berisi `NPCData.npcId` untuk NPC (`ShipInteractable.md`). Karena semua ID NPC memakai awalan `npc_`, `AddShipHandItem` mengisi `isNpc = id.StartsWith("npc_", StringComparison.Ordinal)`. Entri NPC tidak digabung dengan entri lain, dan `amount`-nya selalu 1. `LifeboatExtraction.DepositHand` membaca `isNpc` untuk memisahkan barang dari NPC.
+
 ## 3. Hubungan dengan Sistem Lain
 
 **Event yang dikirim:** `InventoryChangedEvent`, `ShipHandChangedEvent`.

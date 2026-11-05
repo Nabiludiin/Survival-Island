@@ -141,7 +141,7 @@ Nilai mengikuti target makan dan minum di `GameBalanceConfig.md`.
 | **Pakai** | `isConsumable` | `ItemUseSystem.TryUse(slot)` | Mulai memakai, lalu panel tetap terbuka |
 | **Pakai** | `isWarmClothing` | `WarmthSystem.WearClothing(instanceId)` (#65), bukan `TryUse` | Pakaian terpasang |
 | **Pakai** | `Kit_Campfire` | `BuildManager.BeginPlacementFromItem(instanceId, Build_Campfire)` (#44) | Mulai penempatan |
-| **Pakai** | `Item_Battery` | Cari `Tool_Flashlight` yang dipegang, lalu yang isinya terendah di inventori. Panggil `Recharge(flashlight.batteryRecharge)`, lalu kurangi 1 item (#98) | Ditolak kalau senter tidak ada atau sudah penuh |
+| **Pakai** | `Item_Battery` | Cari `Tool_Flashlight` yang dipegang, lalu yang isinya terendah di inventori. Panggil `FlashlightController.Recharge(senter, flashlight.batteryRecharge)` dengan `ItemInstance` senter yang dipilih, lalu kurangi 1 item hanya kalau hasilnya `true` (#98, `FlashlightController.md`) | Ditolak kalau senter tidak ada atau sudah penuh |
 | **Buang** | `isDroppable` | `ItemUseSystem.DropFromSlot(slot, amount)` | Item jatuh sebagai `WorldItem` |
 | **Pisahkan** | `amount > 1` dan ada slot kosong | `InventoryManager.SplitStack(slot, amount / 2)` | Tumpukan terbagi dua |
 | **Ke Hotbar** | Punya `equipPrefab` atau `isConsumable` | `EquipmentManager.AssignToHotbar(index, instanceId)` | Rujukan masuk ke hotbar (#60) |
@@ -265,7 +265,7 @@ Isi keracunan, efek, dan obatnya milik #45. Blueprint ini mengirim `OnConsumed(i
 
 1. `int sisa = ctx.Inventory.AddItem(Instance, Amount)`.
 2. Kalau `sisa == Amount`, inventori penuh. **Item tetap di tanah,** dan tampil notifikasi `Inventori penuh` (#22). Kembalikan `false`.
-3. Kalau `sisa > 0`, `Amount = sisa`, dan item tetap di tanah dengan notifikasi `Sebagian terambil`.
+3. Kalau `sisa > 0`, `Amount = sisa`, panggil `sourceSpawner?.UpdateRemaining(sourcePointIndex, sisa)` (`LootSpawnerSystem.md`), dan item tetap di tanah dengan notifikasi `Sebagian terambil`. Tanpa panggilan ini, load memulihkan jumlah awal dan barang berlipat.
 4. Kalau `sisa == 0`, panggil `sourceSpawner?.MarkTaken(sourcePointIndex)`, lalu `Despawn`.
 
 **Aturan penghapusan:**

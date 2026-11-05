@@ -180,7 +180,7 @@ stats.SetDrowning(depth >= headDepth);
 | Hal | Aturan |
 |---|---|
 | Jumlah | 4 tertidur di awal, tambah 2, 2, dan 2 sesuai jadwal. Paling banyak `zombieMaxAlive` 8 sekaligus |
-| Jenis | Zombie standar, `ZombieData` dengan `enemyId = zombie_standar` (#25), memakai pool yang sama dengan pulau, dengan tag `Zombie_Standard`. Target memakai `EnemyAI.SetTarget` langsung, karena `ThreatSystem` tidak ada di `ShipPhase` (#109) |
+| Jenis | Zombie standar, `ZombieData` dengan `enemyId = zombie_standar` (#25), memakai pool yang sama dengan pulau, dengan tag `zombie_standar` (tag pool musuh sama dengan `enemyId`, `ObjectPooler.md`). Target memakai `EnemyAI.SetTarget` langsung, karena `ThreatSystem` tidak ada di `ShipPhase` (#109) |
 | Posisi | Titik `ShipZombiePoint` per grup, minimal `zombieMinSpawnDistance` dari pemain dan sekoci |
 | Tidur | `AIState.Dormant`. Bangun kalau pemain masuk `zombieAggroRadius` dan terlihat, atau saat suara `T=45` untuk grup yang dijadwalkan |
 | Kecepatan | `zombieMoveSpeed`, dikali pengali air. Pemain selalu bisa berlari menjauh di lantai kering |
@@ -188,7 +188,7 @@ stats.SetDrowning(depth >= headDepth);
 | Terendam | Zombie dengan kedalaman `>= waterHeadDepth` kembali ke pool. Dek bawah tidak penuh mayat |
 | Macet | Lewat 5 detik tanpa jalur lengkap, zombie kembali ke `Dormant` |
 
-**`private void SpawnZombies(string groupId, int count)`**: untuk tiap titik di grup, lewati kalau `activeZombies.Count >= zombieMaxAlive`, atau jaraknya kurang. Panggil `ObjectPooler.Instance.SpawnFromPool("Zombie_Standard", pos, rot)`, lalu tambahkan ke `activeZombies`. Saat `EnemyHealth.Died` atau objek kembali ke pool, hapus dari daftar.
+**`private void SpawnZombies(string groupId, int count)`**: untuk tiap titik di grup, lewati kalau `activeZombies.Count >= zombieMaxAlive`, atau jaraknya kurang. Panggil `ObjectPooler.Instance.SpawnFromPool("zombie_standar", pos, rot)`, lalu tambahkan ke `activeZombies`. Saat `EnemyHealth.Died` atau objek kembali ke pool, hapus dari daftar.
 
 `zombieTickSeconds` memperbarui `agent.speed` dan memeriksa kedalaman, jadi pekerjaan ini tidak berjalan per frame. Zombie kapal tidak terbakar, karena `DayNightDirector` tidak ada di `ShipPhase`, dan nilai `DaybreakEvent` sudah dihapus `GameEventRegistry.ClearAll()` (#82).
 
@@ -198,7 +198,7 @@ stats.SetDrowning(depth >= headDepth);
 
 **Pemain punya tiga pilihan:** menghindar, memakai rute lain, atau mendorong.
 
-**`ShipShove`**, komponen di pemain Fase 1. `ShipPlayerController` membaca `InputManager.PrimaryPressed`, yang menjadi aksi dorong di kapal:
+**`ShipShove`**, komponen di pemain Fase 1. `ShipPlayerController` membaca `InputManager.PrimaryPressed`, yang menjadi aksi dorong di kapal, lalu memanggil **`public void TryShove()`** (`ShipPlayerController.md`):
 
 1. Tolak kalau masih dalam `shoveCooldownSeconds`.
 2. Mainkan animasi dorong tangan.
@@ -228,7 +228,7 @@ Saat `RunEndedEvent` terkirim, `ShipHazardManager` memanggil `StopAll()`: `IsRun
 | Lapisan | Nilai | Cara |
 |---|---|---|
 | Kemiringan tetap | `staticTiltDegrees` 4 | Geometri scene dibuat miring dan dibake begitu saja |
-| Pengaruh ke kecepatan | `tiltSpeedInfluence` 0,12 | `speed *= 1 + influence * Dot(moveDir, downhill)`. Menanjak 12 persen lebih lambat, menurun 12 persen lebih cepat |
+| Pengaruh ke kecepatan | `tiltSpeedInfluence` 0,12 | `speed *= 1 + influence * Dot(moveDir, downhill)`, dengan `moveDir = ShipPlayerController.MoveDirectionWorld` dari frame sebelumnya, di dalam `ComputeTiltMul()`. Menanjak 12 persen lebih lambat, menurun 12 persen lebih cepat |
 | Geser ke sisi rendah | `driftSpeedMax` 0,4 m/s pada tahap 3 | `SetShipMoveModifiers(..., drift)`, tahap sebelumnya 0 |
 | Ship sway | `swayDegreesByStage` | Roll kamera lewat `ICameraOffsetSource` |
 
@@ -272,7 +272,7 @@ NavMesh tidak bisa berputar saat bermain, jadi **geometri tidak boleh diputar sa
 | `SurvivalStats` (#111) | `SetDrowning`, dan membawa HP serta infeksi |
 | `DamagePipeline` (#59) | Damage dari serangan |
 | `EnemyAI`, `EnemyAttack` (#109), `EnemyHitReaction` (#95) | Perilaku zombie, gigitan, dan dorongan |
-| `ObjectPooler` | Pool `Zombie_Standard` dan efek air |
+| `ObjectPooler` | Pool `zombie_standar` dan efek air |
 | `CameraShake` (#24), `PostProcessController` (#23) | Isi efek. Di luar issue ini |
 | `RunLifecycle` (#82) | Alur mati |
 | `RunSeedManager` (#89) | Validasi titik NPC |

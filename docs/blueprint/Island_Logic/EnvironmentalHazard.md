@@ -81,7 +81,7 @@
 5. `ExplosionDamage.Apply(transform.position, barrelRadius, info)`. Fungsi ini memilih target unik lewat `PhysicsMasks.Explosion`, menerapkan falloff, dan menjalankan aturan friendly fire, sehingga satu musuh hanya kena satu kali.
 6. `NoiseEmitter.Emit(noiseRadius, NoiseSourceKind.Throwable)` (#49). Belum ada `NoiseSourceKind` khusus ledakan, jadi tong memakai jenis yang sama dengan Bom Rakitan.
 7. Matikan `visualRoot` dan `Flammable`. Objek akar tetap ada tetapi nonaktif, karena `RegionStreaming.CaptureRegion` memakai daftar `ISaveable` yang dikumpulkan saat region dimuat. Objek yang di-`Destroy` tidak bisa melaporkan statusnya.
-8. Panggil `NotifyExplosion(transform.position, barrelRadius, armedByPlayer)` untuk ledakan berantai.
+8. Ledakan berantai tidak dipanggil di sini, karena `ExplosionDamage.Apply` di langkah 5 sudah memanggil `NotifyExplosion` (`DamagePipeline.md`).
 
 ### Ledakan berantai
 

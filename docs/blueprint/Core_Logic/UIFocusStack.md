@@ -234,7 +234,7 @@ Panel hanya memanggil `Push` dan `Close`. Pemeriksaan teks `Time.timeScale`, `Cu
 |---|---|
 | `InputManager` (#18) | Memanggil `HandleEscape()`, dan mengganti Action Map dari `UIFocusChangedEvent` |
 | `RunLifecycle` (#82) | Memakai `Push`, `Close`, `CloseAllUnlocked`, dan `ClearForNewRun` |
-| `UIManager` | Memiliki panel persisten `Pause`, `Loading`, `Cinematic`, `GameOver`, dan `WinScreen`. Tidak lagi mengatur waktu, kursor, atau Esc |
+| `UIManager` | Memiliki panel persisten `Pause`, `Loading`, `Cinematic`, `GameOver`, `WinScreen`, dan `ConfirmDialog`. Dialog dibuka lewat `UIManager.ShowConfirm(in ConfirmRequest)`, yang memanggil `Push` (`UIManager.md`). Tidak lagi mengatur waktu, kursor, atau Esc |
 | `DiaryManager` | `OpenDiary` memanggil `Push(diaryPanel)`, dan tombol Close memanggil `Close`. Variabel `isReading` dan pembacaan Esc dihapus |
 | `AudioManager` | Menyediakan `SetPausedMix` |
 | #44, #46, #72, #77, #79, #100 | Panelnya mewarisi `UIPanel` |

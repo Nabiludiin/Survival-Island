@@ -26,6 +26,7 @@
 | `Flame_Vegetation` | 0,2 | 20 | 0 | 0,08 | 4 | `ResourceNode.ForceDeplete(false)` |
 | `Flame_Zombie` | 0 | 8 | 10 | 0,10 | 2 | Padam |
 | `Flame_Animal` | 0,3 | 6 | 8 | 0 | 0 | Padam |
+| `Flame_Barrel` (usulan, `EnvironmentalHazard.md`) | 0 | 3 | 5 | 0 | 0 | Tong meledak. Damage `Fire` pertama memulai sumbu `hazard.fireFuseSeconds` (2), lalu `EnvironmentalHazard` mematikan `Flammable` saat meledak |
 
 - `fireResistance = 1` berarti kebal. `Wall_Stone` dan `Door_Stone` memakai `Flame_Stone`, selaras dengan pengali `Fire` 0 di `BuildingIntegrity.md`. Upgrade dinding (#47) otomatis mengganti profil karena prefabnya berganti.
 - Dinding kayu terbakar penuh kehilangan 180 dari 300 HP, jadi satu kali api merusak berat, tetapi belum meruntuhkan.

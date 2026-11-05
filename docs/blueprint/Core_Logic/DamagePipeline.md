@@ -248,6 +248,7 @@ public static class ExplosionDamage
         int count = PhysicsQuery.OverlapSphere(center, radius, PhysicsMasks.Explosion, buffer);
         PhysicsQuery.CollectUniqueDamageables(buffer, count, unique);
         // Untuk tiap target: hitung falloff dari jarak ke titik collider terdekat, lalu TakeDamage
+        EnvironmentalHazard.NotifyExplosion(center, radius, info.byPlayer);   // Tong di radius ikut meledak
     }
 }
 ```
@@ -257,6 +258,7 @@ public static class ExplosionDamage
 - **Bagian tubuh:** selalu `Torso`, tanpa pengali headshot.
 - **Garis pandang:** ledakan tidak mengecek dinding. Dinding juga menerima damage.
 - `EnvironmentalHazard`, Fireball (#70), dan #96 memakai fungsi ini.
+- **Tong meledak berantai (usulan, `EnvironmentalHazard.md`):** setelah damage dibagikan, `Apply` memanggil `EnvironmentalHazard.NotifyExplosion`, supaya Bom Rakitan dan Fireball ikut memicu tong. Tong berada di layer `Obstacle` yang tidak ada di `PhysicsMasks.Explosion`, jadi tidak terkena dua kali. Tong yang sudah meledak atau bersumbu diabaikan `NotifyExplosion`.
 
 ### Friendly fire
 

@@ -47,7 +47,7 @@ Komponen di pemain Fase 2, bersama `CharacterController` dan `PlayerTraversal`. 
 
 **`public void ClearSpeedModifier(SpeedModifierId id)`** mengembalikan nilai ke 1.
 
-**`public void Teleport(Vector3 position)`:** matikan `CharacterController`, pindahkan posisi, nyalakan lagi, nolkan `velocity`. Pemanggil seperti `ProgressionSafety` (#116) lalu memanggil `PlayerTraversal.ResetFallTracking()`.
+**`public void Teleport(Vector3 position)`:** matikan `CharacterController`, pindahkan posisi, nyalakan lagi, nolkan `velocity`, lalu panggil `ZoneManager.ResyncAll(position)`, karena `OnTriggerExit` tidak dijamin terkirim saat collider dimatikan (`ZoneManager.md`). Pemanggil seperti `ProgressionSafety` (#116) lalu memanggil `PlayerTraversal.ResetFallTracking()`.
 
 **Membawa Heavy Item:** `HeavyItemSystem` memanggil `SetSpeedModifier(SpeedModifierId.HeavyItem, ...)`. Sprint dan Jump membaca `HeavyItemSystem.IsCarrying`.
 
@@ -67,6 +67,7 @@ Komponen di pemain Fase 2, bersama `CharacterController` dan `PlayerTraversal`. 
 | `SwimmingController` (#13) | Pengali `Water` |
 | `ItemUseSystem` (#66), `StatusEffectManager` (#20) | Pengali `ItemUse` dan `StatusEffect` |
 | `ProgressionSafety` (#116), `DevConsole` (#56) | `Teleport` |
+| `ZoneManager` | `Teleport` memanggil `ResyncAll` |
 
 ## 4. Kasus Khusus
 

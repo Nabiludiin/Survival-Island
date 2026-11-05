@@ -101,6 +101,9 @@ public class GameBalanceConfig : ScriptableObject
     public LoreBalance lore;
     public BarksBalance barks;
     public LocalizationBalance localization;
+    public OptimizationBalance optimization;
+    public CompassBalance compass;
+    public HazardBalance hazard;
 }
 ```
 
@@ -286,6 +289,14 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 | `lore` | #100 | maxPartHintsPerRun 2 |
 | `barks` | #100 | checkSeconds 2, globalCooldownSeconds 6, npcCooldownSeconds 20, categoryCooldownSeconds 90, hearRadius 25, greetRadius 6, greetAwaySeconds 120, hurtHpRatio 0,4, zombieAlertRadius 15 |
 | `localization` | #104 | textScaleMin 0,85, textScaleMax 1,5, subtitleMinSeconds 1,5, subtitleSecondsPerChar 0,06, subtitleMaxRows 3, maxFlashesPerSecond 3 |
+| `ship` (tambahan) | #74, #75 | **Usulan.** Timer (`ShipTimerManager.md`): panicStartSeconds 15, tickPitchMin 1, tickPitchMax 2, tickVolume 0,6, vignetteMaxAlpha 0,55, timerShakePixels 6, timerShakeFrequency 25, musicFadeInSeconds 1, musicFadeOutSeconds 0,5. Gerak (`ShipPlayerController.md`): moveSpeed 5, gravity -9,81, groundedStickVelocity -2. Barang (`ShipInteractable.md`): pickupColliderPadding 0,05 |
+| `ui` (tambahan) | #83 | **Usulan.** loadingBarSpeed 1,5, confirmInputDelaySeconds 0,25 (`UIManager.md`) |
+| `optimization` | #62, #93 | **Usulan.** cullingDistance 50, cullCheckSeconds 1 (`OptimizationManager.md`) |
+| `compass` | #30 | **Usulan.** visibleArcDegrees 180, edgeFadeDegrees 15, showDistance true, clampObjectiveToEdge true (`CompassSystem.md`) |
+| `hazard` | #59 | **Usulan.** barrelRadius 5, barrelDamage 100, chainDelaySeconds 0,15, fireFuseSeconds 2, noiseRadius 40 (`EnvironmentalHazard.md`) |
+| `weather` (tambahan) | #115 | **Usulan.** audioVolume 0,8, insideVolumeMultiplier 0,3, insideBlendSeconds 1,5 (`WeatherManager.md`) |
+| `flashlight` (tambahan) | #98 | **Usulan.** range 25, spotAngle 50, flickerHz 6 (`FlashlightController.md`) |
+| `npc` (tambahan) | #76 | **Usulan.** corpseSeconds 60, followThreatWeight 0,6, coverThreatWeight 0,3 (`NPCCompanion.md`) |
 
 ## 3. Hubungan dengan Sistem Lain
 

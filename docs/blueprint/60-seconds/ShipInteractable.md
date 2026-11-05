@@ -82,7 +82,7 @@ Item inti (`Base_Kail`, `Base_Pistol`, `Base_Pisau`) **tidak pernah** muncul seb
 
 `ObjectPooler.SpawnFromPool` memanggil `OnSpawned()` **sebelum** pemanggil tahu barang apa yang dimunculkan. Jadi data diisi lewat `Setup`, yang dipanggil tepat setelah `SpawnFromPool`.
 
-**`public void Setup(ItemData item)`**, dipanggil `LootSpawnerSystem.RollAndRecord()` langkah 5:
+**`public void Setup(ItemData item)`**, dipanggil `LootSpawnerSystem` tepat setelah `SpawnFromPool` (tabel wujud barang per scene di `LootSpawnerSystem.md`):
 
 1. Kalau `item == null`, catat peringatan, lalu `ReturnToPool(poolTag, gameObject)` dan selesai.
 2. `kind = Item`, `itemData = item`, `ItemID = item.itemID`.

@@ -111,6 +111,7 @@ Ukuran pool adalah data, dan berada di prefab `PersistentRoot`, bukan di logika.
 | `UI_DamageIndicator` | 6 | `Fixed` | `GameBalanceConfig.combatFeedback.maxIndicators` (#51) |
 | `ShipLoot_Generic` | Jumlah semua titik `LootSpawnerSystem` di `ShipPhase` | `Fixed` | `LootSpawnerSystem.md`. Satu titik paling banyak satu objek |
 | `ShipNpc_Generic` | 3 | `Fixed` | `ShipInteractable.md` (usulan di sana) |
+| `Fx_Snow`, `Fx_Blizzard` | 2 per tag | `Fixed` | **Usulan** (`WeatherManager.md`, #115). Satu untuk cuaca aktif dan satu untuk crossfade |
 | `WorldItem_Generic` | 128, `maxSize` 512 | `Grow` | **Usulan.** Item tanah jumlahnya sulit ditebak, dan dibatasi `maxLooseWorldItems` (#66) |
 | `Audio_OneShot3D` | 16 | `Fixed` | **Usulan** (#52) |
 | `Debris_Generic` | 8 | `Fixed` | **Usulan** (#106) |

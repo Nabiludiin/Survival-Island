@@ -113,7 +113,7 @@ Barang di sekoci aman, dan tidak bisa hilang karena bahaya.
 
 NPC diperlakukan sebagai barang dengan berat besar, seperti `docs/CATATAN_MEKANIK.md`.
 
-- **Penempatan:** NPC muncul di titik dari `RunSeedManager.CurrentLayout.shipNpcIds` dan `shipNpcPointByNpc` (#89). `SpawnShipNpcs()` membuatnya saat scene mulai.
+- **Penempatan:** NPC muncul di titik dari `RunSeedManager.CurrentLayout.shipNpcIds` dan `shipNpcPointByNpc` (#89). `SpawnShipNpcs()` membuatnya saat scene mulai: untuk tiap NPC, `ObjectPooler.Instance.SpawnFromPool<ShipInteractable>("ShipNpc_Generic", titik.position, titik.rotation)`, lalu langsung `Setup(npcData)` (`ShipInteractable.md`). Data tidak diisi di `OnSpawned`.
 - **Berat:** 4, sama dengan `ship.handCapacity`, sehingga satu NPC memenuhi tangan.
 - **Saat dibawa:** model NPC disembunyikan, dan HUD menampilkan ikon NPC bersama pemain. Tidak ada agen tambahan yang bisa tersangkut atau diserang di kapal.
 - **Setelah disetor:** masuk `rescuedNpcIds`, dan `NPCRescuedEvent` terkirim.

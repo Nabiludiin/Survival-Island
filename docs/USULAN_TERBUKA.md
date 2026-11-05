@@ -450,7 +450,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Syarat akses Region 4 (seam S2) | Diary Bab 3 ditemukan, karena bab itu mengungkap lokasi suku cadang. ObjectiveManager sudah menaruh Bab 3 di Region 2. |
 | Syarat akses Region 3 (seam S3) | Terbuka bersama S2 tanpa syarat item. Dingin sudah menjadi rintangan alami, dan pemain tidak terkunci karena gagal menemukan satu benda. |
 | Kerusakan jembatan | Tidak bisa dirusak zombie, hewan, atau bencana, karena kerugiannya terlalu besar dalam game permadeath. Alternatifnya, jembatan punya HP dan bisa diperbaiki lewat #47 dan #116. |
-| Bentuk Blueprint Jembatan | Node node_bridge_blueprint di TechTreeManager, bukan item inventori, sama dengan usulan ObjectiveManager.md. RegionGateSystem hanya membacanya. |
+| Bentuk Blueprint Jembatan | Penanda hasBridgeBlueprint di RegionGateSystem, diisi saat Diary Bab 2 terbuka dan tersimpan di world_gates, bukan item inventori dan bukan node TechTreeManager. Sama dengan RegionGateSystem.md dan ObjectiveManager.md. Pembaca lain memakai properti HasBridgeBlueprint. |
 | Pencegahan berenang melewati jurang | Dinding tak terlihat GateBarrier di air. Arus laut lebih alami, tetapi lebih sulit dijamin. |
 
 ### #69

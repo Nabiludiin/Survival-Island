@@ -99,7 +99,7 @@ Atap dibaca lewat `PhysicsQuery.Raycast` ke atas dengan `PhysicsMasks.Sunlight`,
 
 1. Cari `Tool_Flashlight` yang sedang dipegang. Kalau tidak ada, cari di inventori dengan isi terendah. Kalau tidak ada, tolak dengan `Tidak ada senter`.
 2. Tolak kalau isinya sudah penuh, supaya baterai tidak terbuang.
-3. `FlashlightController.Recharge(batteryRecharge)`, lalu kurangi 1 item.
+3. `FlashlightController.Recharge(senter, batteryRecharge)`, dengan `ItemInstance` senter dari langkah 1. Kurangi 1 item hanya kalau hasilnya `true` (`FlashlightController.md`).
 
 Isi baterai disimpan di `ItemInstance.durability`, jadi tiap senter punya isi sendiri, dan ikut tersimpan bersama inventori. Senter tidak bisa diperbaiki lewat #113.
 

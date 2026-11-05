@@ -99,6 +99,17 @@ Kunci berbentuk `<kelompok>.<nama>`: `ui.`, `prompt.`, `item.`, `diary.`, `lore.
 | `DiaryEntry.title`, `body` | Teks di aset | `diary.ch<chapter>.title`, `diary.ch<chapter>.body` |
 | `FishingSystem`, `NotificationManager` | Pesan langsung | `bark.`, `prompt.`, dan `notif.` |
 
+**Kunci baru dari blueprint lain (usulan, perlu masuk tabel kedua bahasa):**
+
+| Kunci | Contoh isi | Sumber |
+|---|---|---|
+| `prompt.rescue` | `Selamatkan {name}` | `ShipInteractable.md` |
+| `prompt.handsFull` | `Tangan penuh. Setor ke Sekoci` | `ShipInteractable.md` |
+| `ui.yes`, `ui.no` | `Ya`, `Tidak` | `UIManager.md` (`ConfirmRequest`) |
+| `ui.pause.save_quit`, `ui.pause.quit` | Tombol keluar di Fase 2 dan Fase 1 | `UIManager.md` |
+| `ui.unstuck.confirm`, `ui.unstuck.<UnstuckResult>` | Dialog dan hasil Keluar dari Tersangkut | `UIManager.md`, #116 |
+| `ui.compass.n`, `ui.compass.e`, `ui.compass.s`, `ui.compass.w` | `U`, `T`, `S`, `B` | `CompassSystem.md` |
+
 **`LocalizationAuditWindow`** (Editor) melaporkan kunci yang hilang di salah satu bahasa, kunci yang tidak terpakai, dan kata `Press [` di aset atau kode. Pemeriksaan ini wajib lulus sebelum build.
 
 ### Angka, hari, dan jamak

@@ -100,7 +100,7 @@ GameManager --RunEndedEvent--> RunLifecycle.RunEndSequence
 5. Jalankan gaya sesuai tabel. `Ragdoll`, `Collapse`, dan `Sink` memanggil `EnableRagdoll(profile.style)`.
 6. Kecuali `Zombify` dan `Blackout`: `FirstPersonCamera.Instance.DetachForDeath()`, lalu jalankan `CameraOrbit()` sebagai coroutine.
 7. Tunggu `holdSeconds`, atau `collapseHoldSeconds`, memakai `WaitForSecondsRealtime`. Selama `skipAfterSeconds` sudah lewat, `InputManager.SkipPressed` memotong sisa tunggu.
-8. Fade hitam `fadeSeconds`, tampilkan `messageKey` selama `messageSeconds`, lalu selesai. Layar tetap hitam sampai panel `GameOver` tampil.
+8. Fade hitam `fadeSeconds` lewat `yield return UIManager.Instance.cinematicPanel.FadeToBlack(fadeSeconds)`, tampilkan `messageKey` lewat `ShowCaption(messageKey)` selama `messageSeconds`, lalu selesai (`UIManager.md`). Layar tetap hitam sampai panel `GameOver` tampil.
 9. Di blok `finally`, walaupun terjadi kesalahan: `SetGameplayTimeScale(1)`, lalu terbitkan `CinematicStateChangedEvent { isPlaying = false, keepMusic = false }`.
 
 ### Melepas pengendali dan mengaktifkan ragdoll
@@ -149,7 +149,7 @@ Kamera memakai `unscaledDeltaTime`, jadi gerakannya tetap halus saat gerak lamba
 | `FirstPersonCamera` (#102) | `DetachForDeath` |
 | `PlayerTraversal` (#101) | `SetLocked` |
 | `UIFocusStack` (#83) | Panel `Cinematic` dan `SetGameplayTimeScale` |
-| `UIManager` | Fade hitam dan teks pada panel `Cinematic` |
+| `UIManager` | Fade hitam dan teks pada panel `Cinematic`, lewat `CinematicPanel.FadeToBlack`, `ShowCaption`, dan `ClearCaption` (`UIManager.md`) |
 | `InputManager` (#18) | `SkipPressed` |
 | `VFXManager` (#15), `AudioManager` | Efek dan suara |
 | `LocalizationManager` (#104) | `messageKey` |

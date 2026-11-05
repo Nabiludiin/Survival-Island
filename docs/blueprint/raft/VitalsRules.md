@@ -35,7 +35,7 @@
 | `SetMaxBonus(float hpMultiplier, float staminaMultiplier)` | `StatusEffectManager` (#20), untuk buff `Permanent` Lucky Machine (#72) | Pengali naik untuk `MaxHP` dan `MaxStamina`. Nilai awal 1. Nama fungsi adalah usulan |
 | `SetRegenBlocked(bool)` | `StatusEffectManager` (#20) | Menahan regenerasi stamina |
 | `SetDrainMultiplier(float)` | `SleepSystem` (#67) | Pengali lapar dan haus. Nilai awal 1 |
-| `SetDrainEnabled(bool)` | `ShipPlayerController` (#75) | Mematikan lapar dan haus di Fase 1 |
+| `SetDrainEnabled(bool)` | `LifeboatExtraction.PreGameRoutine` (#74) | Mematikan lapar dan haus di Fase 1 |
 | `SetInvulnerable(bool)` | `DevConsole` (#56), #74 | Menahan HP di 1, dan infeksi di 99 |
 | `DebugSetVital(string name, float value)` | `DevConsole` (#56) | Dibungkus `#if UNITY_EDITOR \|\| DEVELOPMENT_BUILD`. Mengisi satu status lewat perintah `setvital` |
 | `DebugKill(DeathReason reason)` | `DevConsole` (#56) | Dibungkus `#if UNITY_EDITOR \|\| DEVELOPMENT_BUILD`. Meneruskan ke `TriggerDeath` |

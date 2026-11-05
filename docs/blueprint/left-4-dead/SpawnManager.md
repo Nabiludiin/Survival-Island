@@ -56,6 +56,7 @@ Runner, Tank, dan Spitter tidak menjadi `enemyId` baru. Sesuai `SpecialZombieAI.
 | `IsDormantCounted` | `true` saat `Submerged`, sehingga tidak dihitung sebagai musuh aktif |
 | `IsSacrificing` | `public bool`. Diisi `LuckyMachine` (#72) saat vakum, dan dikosongkan di `OnSpawned` |
 | `lastPosition`, `stuckTimer` | Pengaman macet |
+| `IsCulled`, `culledAgentWasEnabled`, `culledAnimatorWasEnabled` | Status culling milik `OptimizationManager`, beserta status `NavMeshAgent.enabled` dan `Animator.enabled` sebelum culling (usulan, `OptimizationManager.md`) |
 
 ### Variabel `SpawnManager`
 
@@ -184,6 +185,8 @@ Kalau semua gagal, kembalikan `false` dan coba lagi pada tick berikutnya. Syarat
 4. Kalau `stuckTimer >= stuckSeconds` dan di luar pandangan, atau `>= stuckForceSeconds`, panggil `Despawn(Stuck)`.
 5. Kalau musuh tidak `IsEngaged` dan lebih jauh dari `despawnDistance`, panggil `Despawn(TooFar)`.
 
+Musuh `IsCulled` (`OptimizationManager.md`) melewati langkah 2 sampai 4, karena agennya sengaja dimatikan sehingga `isOnNavMesh` bernilai `false` dan posisinya diam. Langkah 5 tetap berlaku.
+
 Musuh yang dikembalikan tidak mengirim `EnemyKilledEvent`, jadi tidak menghitung statistik dan Lucky Machine. Kalau zombie, `AIDirector.RefundBudget(1)` mengembalikan anggaran malam itu.
 
 ### Pindah region
@@ -251,7 +254,7 @@ Beberapa override boleh aktif. Yang terakhir didorong menang untuk `table`, nila
 
 ## 4. Kasus Khusus
 
-- **Objek pool:** `EnemyInstance.OnSpawned()` mengosongkan `stuckTimer`, `IsEngaged`, `IsDormantCounted`, dan `IsSacrificing`. Reset HP mengikuti #59, dan reset agen serta state mengikuti pemilik masing-masing. `SetHPMultiplier` dipanggil setelah objek keluar dari pool.
+- **Objek pool:** `EnemyInstance.OnSpawned()` mengosongkan `stuckTimer`, `IsEngaged`, `IsDormantCounted`, `IsSacrificing`, `IsCulled`, `culledAgentWasEnabled`, dan `culledAnimatorWasEnabled`, lalu menyalakan `Animator` (`OptimizationManager.md`). Reset HP mengikuti #59, dan reset agen serta state mengikuti pemilik masing-masing. `SetHPMultiplier` dipanggil setelah objek keluar dari pool.
 - **Pool kosong:** `SpawnFromPool` mengembalikan `null`, dan tick berikutnya mencoba lagi.
 - **Game dijeda:** semua loop memakai `WaitForSeconds`, jadi berhenti saat `timeScale = 0`. Event transisi tetap diterima, tetapi tidak ada spawn.
 - **Tidur:** tick berhenti. Pengaman macet tetap jalan, karena waktu dipercepat.

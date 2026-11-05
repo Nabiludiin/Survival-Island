@@ -220,7 +220,7 @@ Saat `StructureDestroyedEvent` untuk `StructureId` milik api ini: panggil `Extin
 
 ## 4. Kasus Khusus
 
-- **Objek pool:** api unggun tidak memakai pool, karena jarang dibuat. Item yang keluar saat hancur memakai pool `WorldItem`. Efek asap dan api mengikuti `VFXManager` (#15).
+- **Objek pool:** api unggun tidak memakai pool, karena jarang dibuat. Item yang keluar saat hancur memakai pool `WorldItem_Generic` (`ObjectPooler.md`). Efek asap dan api mengikuti `VFXManager` (#15).
 - **Game dijeda:** `TotalGameHours` berhenti, jadi `sim` bernilai 0. Panel `Campfire` tidak menjeda, jadi membuka panel tetap membakar bahan bakar.
 - **Permadeath:** semua api unggun dan isinya terhapus bersama save run (#82).
 - **Save dan load:** disimpan `fuelSeconds`, `IsLit`, `lastTickGameHour`, dan tiap `CookRow` dengan `ItemInstance`, `recipeId`, `progressSeconds`, `overcookSeconds`, serta `state`. `SaveId = StructureId`. Setelah dimuat, `Simulate()` tidak mengejar waktu, karena jam game disimpan bersama.

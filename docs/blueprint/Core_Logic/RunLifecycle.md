@@ -77,7 +77,7 @@ Manager hanya mengisi `Instance` di `Awake`. Pekerjaan yang bergantung pada mana
 | **Persisten (`DontDestroyOnLoad`)** | Semua layanan pada tabel urutan bootstrap, termasuk `VFXManager` (#15) dan `TutorialManager` (#16), lalu `RunLifecycle`, `NarrativeSequencer` (#99), dan `EventSystem` | Dipakai lintas scene, atau menyimpan data yang harus bertahan saat scene berganti |
 | **Scene `MainMenu`** | `MainMenuController` | Hanya dipakai di menu |
 | **Scene `ShipPhase`** | `ShipTimerManager`, `ShipHazardManager`, `LifeboatExtraction`, `LootSpawnerSystem`, `InventoryManager`, `HUDManager`, `HordeCrowdManager` (#93), dan pemain Fase 1 dengan komponen `DeathCinematic` (#53) | Fase 1 dibuang utuh setelah selesai |
-| **Scene `IslandPhase`** | `RegionStreaming`, `DayNightDirector`, `ZoneManager`, `RegionalWeather`, `EnvironmentDirector`, `DisasterManager`, `SpawnManager`, `AIDirector`, `HordeManager`, `BuildManager`, `CraftingManager`, `InventoryManager`, `EquipmentManager`, `HeavyItemSystem`, `RescueEventManager`, `ObjectiveManager`, `DiaryManager`, `NPCRoster`, `HUDManager`, `ItemUseSystem` dan `WorldItemManager` (#66), `IslandArrival` (#74), `HordeCrowdManager` dan `AITraversal` (#93, #94), `RemoteBaseSimulation` (#90), `ProgressionSafety` (#116), dan pemain Fase 2 dengan komponen `DeathCinematic` (#53) | Terikat pada dunia pulau, dan hilang bersama scene saat reset |
+| **Scene `IslandPhase`** | `RegionStreaming`, `DayNightDirector`, `ZoneManager`, `RegionalWeather`, `EnvironmentDirector`, `DisasterManager`, `SpawnManager`, `AIDirector`, `HordeManager`, `BuildManager`, `CraftingManager`, `InventoryManager`, `EquipmentManager`, `HeavyItemSystem`, `RescueEventManager`, `ObjectiveManager`, `DiaryManager`, `NPCRoster`, `HUDManager`, `ItemUseSystem` dan `WorldItemManager` (#66), `IslandArrival` (#74), `HordeCrowdManager` dan `AITraversal` (#93, #94), `RemoteBaseSimulation` (#90), `ProgressionSafety` (#116), `TechTreeManager`, `OptimizationManager`, `CompassSystem` (anak `HUDManager`), dan pemain Fase 2 dengan komponen `DeathCinematic` (#53) | Terikat pada dunia pulau, dan hilang bersama scene saat reset |
 | **Region scene** | Tidak boleh memuat manager. Hanya objek dunia (#88) | Region bisa dilepas kapan saja |
 
 `InventoryManager` memakai satu kelas untuk dua fase, dengan instance di tiap scene. Barang berpindah fase lewat `GameManager.savedShipLoot`, sesuai `GLOSSARY.md`.
@@ -256,6 +256,7 @@ Menutup jendela memakai alur yang sama lewat `Application.wantsToQuit`. Saat sta
 | `AsyncOperation UnloadAdditive(string sceneName)` | `RegionStreaming` (#88) |
 | `void AllowActivation()` | `NarrativeSequencer` (#99), setelah adegan selesai |
 | `float Progress`, `bool IsBusy` | Panel `Loading` |
+| `bool LastLoadSucceeded` | `RunLifecycle`, setelah setiap `yield return LoadSingle(...)` (usulan, `AsyncSceneLoader.md`) |
 
 **Logika `LoadSingle`:**
 
@@ -308,7 +309,7 @@ Panel `Loading` mengubah bar dengan `Mathf.MoveTowards` dan `Time.unscaledDeltaT
 - **Game ditutup paksa saat akhir run:** penanda `run_end.marker` berisi `result`, `reason`, `currentDay`, dan `seed`. Saat boot berikutnya, `RecoverInterruptedEnd()` menghapus save, mencatat statistik, lalu menghapus penandanya. Pemain tidak bisa lolos dari permadeath dengan mematikan game saat sinematik.
 - **Statistik tercatat dua kali:** kalau game mati di antara langkah 6 dan 7, `LocalStatsManager` mengabaikan seed yang sama dengan catatan terakhirnya.
 - **Save gagal saat keluar:** pemain mendapat pilihan lewat `ConfirmDialog`, dan tidak keluar diam-diam.
-- **Scene gagal dimuat:** kalau `LoadSceneAsync` mengembalikan `null`, kembali ke `MainMenu` dan tampilkan notifikasi. Kalau gagalnya pada `MainMenu`, catat kesalahan dan tetap di layar loading.
+- **Scene gagal dimuat:** kalau `LoadSceneAsync` mengembalikan `null`, kembali ke `MainMenu` dan tampilkan notifikasi. Kegagalan dibaca dari `AsyncSceneLoader.LastLoadSucceeded` setelah setiap `yield return LoadSingle(...)`, karena coroutine tidak bisa mengembalikan nilai (usulan, `AsyncSceneLoader.md`). Kalau `false`, langkah berikutnya di alur itu tidak dijalankan. Kalau gagalnya pada `MainMenu`, catat kesalahan dan tetap di layar loading.
 - **`Time.timeScale` saat scene baru:** scene baru tidak boleh mengatur nilai ini. Satu-satunya penulisnya adalah `UIFocusStack`.
 
 ## 5. Keputusan Desain

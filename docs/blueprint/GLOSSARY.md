@@ -56,7 +56,7 @@ Developer sudah menyetujui keputusan berikut.
 |---|---|---|
 | `Bootstrap` | Memuat manager persisten | `RunLifecycle` (#82) |
 | `MainMenu` | Menu utama | `RunLifecycle` (#82) |
-| `ShipPhase` | Fase 1 | `ShipTimerManager` |
+| `ShipPhase` | Fase 1 | `LifeboatExtraction` (#74). Timer milik `ShipTimerManager` |
 | `IslandPhase` | Scene dasar Fase 2 | `RegionStreaming` (#88) |
 | `Region1_Volcano`, `Region2_Amazon`, `Region3_Snow`, `Region4_Village` | Scene additive tiap region. Usulan, menunggu #88 | `RegionStreaming` (#88) |
 
@@ -181,6 +181,8 @@ Developer sudah menyetujui keputusan berikut.
 | `LoreSource` | `Researcher`, `Military`, `Experiment` | `LoreCollectibles` (#100) |
 | `LoreHintKind` | `None`, `PartLocation` | `LoreCollectibles` (#100) |
 | `BarkCategory` | Kategori ucapan NPC | `NPCBarks` (#100) |
+| `TechUnlockTrigger` | `Manual`, `ItemCrafted`, `StructureBuilt` | `TechTreeManager` (#34, #77) |
+| `PoolOverflow` | `Fixed`, `Grow` | `ObjectPooler` (#82) |
 
 ---
 
@@ -524,6 +526,14 @@ Developer sudah menyetujui keputusan berikut.
 | `LocalizationAuditWindow` | Alat Editor pemeriksa kunci teks | #104 |
 | `MapMarker` | Struct data penanda kompas | #30 |
 | `MapMarkerRegistry` | Kelas penyimpan penanda, dimiliki `CompassSystem` | #30 |
+| `CompassIcon` | Komponen satu slot ikon di bilah kompas (`CompassSystem.md`) | #30 |
+| `TechTreeManager` | Manager node teknologi dan resep yang terbuka (`TechTreeManager.md`) | #34, #77 |
+| `TechNodeData` | ScriptableObject satu node teknologi | #34, #77 |
+| `OptimizationManager` | Manager culling musuh jauh per scene `IslandPhase` (`OptimizationManager.md`) | #62, #93 |
+| `Pool` | Kelas serializable satu daftar pool: tag, prefab, ukuran, dan `PoolOverflow` (`ObjectPooler.md`) | #82 |
+| `PooledObject` | Komponen pembantu yang ditambahkan otomatis oleh `ObjectPooler` ke setiap objek pool | #82 |
+| `PausePanel`, `LoadingPanel`, `CinematicPanel`, `EndScreenPanel`, `ConfirmDialogPanel` | Kelas panel bersama milik `UIManager` (`UIManager.md`) | #83 |
+| `ConfirmRequest` | Struct isi dialog konfirmasi untuk `UIManager.ShowConfirm` | #83 |
 
 **Pemilik status pemain:** `SurvivalStats` memegang `HP`, `Stamina`, `Hunger`, `Thirst`, dan `Infection`. Sistem lain membaca atau mengubah nilainya lewat fungsi publik `SurvivalStats`.
 

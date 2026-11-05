@@ -168,6 +168,7 @@ Trigger layer `ZoneTrigger` di `Region3_Snow`, sekaligus `ISaveable` lewat `Regi
 | `RunLifecycle` (#82) | Memanggil `PlayDuringLoad` dan `PlayEnding` |
 | `AsyncSceneLoader` | `Progress`, dan `AllowActivation` |
 | `UIFocusStack` (#83) | Panel `Cinematic`, `SetGameplayTimeScale` |
+| `UIManager` | Fungsi `CinematicPanel`: `FadeToBlack`, `FadeFromBlack`, `SetBlack`, dan `ClearCaption` (`UIManager.md`) |
 | `InputManager` (#18) | `SkipPressed` |
 | `LocalizationManager` (#104) | Teks dan subtitle |
 | `AudioManager`, `CombatMusicDirector` (#114) | Audio |

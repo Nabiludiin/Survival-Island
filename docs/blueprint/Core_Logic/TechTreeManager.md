@@ -55,7 +55,7 @@ Semua resep inti di `CraftingStation.md` memakai `startsUnlocked = true`, jadi p
 
 Sampai tabel ini disetujui, `unlockNodeId` pada `BuildableData` tetap kosong, sesuai keputusan #85 di `BuildingIntegrity.md`. Dengan `unlockNodeId` kosong, bangunan terbuka sejak awal.
 
-**Bukan isi sistem ini:** Blueprint Jembatan. Statusnya hanya ada di `RegionGateSystem.hasBridgeBlueprint`, tersimpan di `world_gates`, dan diisi saat `DiaryChapterUnlockedEvent` Bab 2 (#68). Bentuk ini ditulis di `RegionGateSystem.md` dan `ObjectiveManager.md`. Catatan: tabel #68 di `docs/USULAN_TERBUKA.md` masih menulis node `node_bridge_blueprint` di sistem ini. Kepala file itu menyatakan blueprint yang diikuti kalau berbeda, jadi blueprint ini mengikuti `RegionGateSystem.md`. Karena itu `TechUnlockTrigger` tidak punya pilihan Diary.
+**Bukan isi sistem ini:** Blueprint Jembatan. Statusnya hanya ada di `RegionGateSystem.hasBridgeBlueprint`, tersimpan di `world_gates`, dan diisi saat `DiaryChapterUnlockedEvent` Bab 2 (#68). Bentuk ini ditulis di `RegionGateSystem.md` dan `ObjectiveManager.md`. Karena itu `TechUnlockTrigger` tidak punya pilihan Diary.
 
 ## 2. Detail Logika & Fungsi
 
