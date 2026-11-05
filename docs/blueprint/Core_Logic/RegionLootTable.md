@@ -62,6 +62,8 @@ public class LootTable : ScriptableObject
 
 Persen dihitung dari entri yang lolos saringan. Jadi total bobot tidak harus 100. H = `House`, C = `Chest`, B = `SoldierBody`, W = `Warehouse`. Tanda * berarti `isRare`.
 
+**Vaksin di `Loot_Ship` (keputusan developer):** vaksin yang ditemukan di kapal dihitung sebagai bagian stok awal yang "sangat sedikit" di GDD bagian 3, bukan vaksin baru. Setelah Fase 1, vaksin baru hanya dari resep dengan material Region 2, jadi tabel loot pulau, `supply_drop`, dan kargo pantai tetap tanpa `Med_Vaccine`.
+
 | Tabel | Item, jumlah, bobot, titik |
 |---|---|
 | `Loot_Ship` | `Food_Can` 1, 30. `Ammo_9mm` 3-6, 25. `Drink_CleanWater` 1, 20. `Med_Bandage` 1, 12. `Med_Medkit` 1, 5*. `Med_Vaccine` 1, 4*. `Item_Battery` 1, 5. Semua `Any` |

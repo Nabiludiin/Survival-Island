@@ -19,6 +19,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
 | Lucky Machine | Satu mesin disetiap Region |
 | Obor saat badai | Obor tetap menyala saat Storm dan Blizzard, sesuai GDD bagian 5 |
+| Vaksin di kapal | Tetap ada sebagai loot langka, dan dihitung sebagai stok awal. Setelah Fase 1, vaksin baru hanya dari material Region 2 |
 | Fase 1 | 60 detik adalah batas paling lama. Pemain boleh berangkat dengan sekoci sebelum waktu habis |
 | Air es Region 3 | Pakaian hangat tetap melindungi di air es, sesuai GDD bagian 5. Obor padam di air, jadi tidak melindungi |
 | Diterkam | Pemain hanya bisa melepaskan diri sendiri. NPC tidak menolong, dan hanya damage dari pemain yang bisa membatalkan terkaman Jaguar atau jerat Tribal |
@@ -400,7 +401,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Kenaikan infeksi: naik sendiri atau hanya saat diserang | Hanya saat diserang. selfProgressPerGameHour bernilai 0 dan bisa dinaikkan tanpa mengubah kode. |
 | Tahap infeksi dan penaltinya | Empat tahap (0-25, 25-50, 50-75, 75-100). Batas stamina x1; 0,9; 0,75; 0,5. Regenerasi stamina x1; 1; 0,75; 0,5. Intensitas penglihatan 0; 0,15; 0,4; 0,8. |
 | Kenaikan infeksi per jenis musuh | Standar 5, Tribal 6, Lumut 8, Militer 10, Beku 5, Desa 6, hewan 0. Runner, Tank, dan Spitter mengikuti #25. |
-| Stok vaksin awal dan vaksin dari kapal | 2 dosis, dan vaksin dari kapal menambah stok itu. |
+| Stok vaksin awal dan vaksin dari kapal | 2 dosis, dan vaksin dari kapal menambah stok itu. Dikonfirmasi developer: vaksin tetap ada di loot kapal. |
 | Efek dan pemakaian vaksin | Menurunkan infeksi 50, suntik 4 detik, dan batal saat diserang tanpa kehilangan vaksin. |
 | Resep vaksin | rec_vaccine terbuka sejak awal, di MedicalBench, 10 detik, dengan 2 Mat_TreeSap dan 2 Mat_Mushroom. |
 | Node MedicalHerb | Jamur dipanen dengan tangan dan getah dengan Base_Pisau, hanya di Region 2. Jamur tumbuh kembali 1 hari game, getah 2 hari game. |
