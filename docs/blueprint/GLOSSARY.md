@@ -25,7 +25,7 @@ Developer sudah menyetujui keputusan berikut.
 | Zombie setelah hari ke-60 | Per hari: jumlah +2 persen, HP +2 persen, dan damage +1 persen. Batasnya 1,5x, 2x, dan 1,5x |
 | Infeksi mencapai 100 | HP turun bertahap, tidak mati seketika |
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
-| Lucky Machine | Satu mesin. Lokasi masih menunggu developer |
+| Lucky Machine | Satu mesin di setiap region. Kuota per region dan hadiah bersama menunggu konfirmasi developer |
 | Fitur tambahan yang dipakai | #96, #106, dan #112 |
 | Fitur yang tidak dipakai | #48, #105, dan #117. Blueprint-nya disimpan sebagai arsip |
 | Angka inti dan usulan kecil | Disetujui sebagai nilai awal, dan boleh berubah saat playtest |
@@ -435,7 +435,8 @@ Developer sudah menyetujui keputusan berikut.
 | `SupplyPlane` | Prefab pool visual dan suara pesawat | #54 |
 | `SupplyCrate` | Prefab pool peti, turunan `IslandInteractable` | #54 |
 | `LuckyMachineCage` | Komponen trigger kandang, gerbang, dan vakum | #72 |
-| `LuckyMachineData` | ScriptableObject kuota dan tabel hadiah | #72 |
+| `LuckyMachineData` | ScriptableObject region, kuota, dan tabel hadiah. Satu aset per mesin | #72 |
+| `LuckyRewardLedger` | Catatan hadiah bersama untuk keempat Lucky Machine, disimpan di `world_lucky` | #72 |
 | `LuckyRewardData` | ScriptableObject satu hadiah | #72 |
 | `SacrificeQuota` | Data kuota per `enemyId` | #72 |
 | `NPCRecord` | Baris data per NPC di `NPCRoster`, termasuk isi yang disimpan | #76 |

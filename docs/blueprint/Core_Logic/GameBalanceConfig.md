@@ -258,7 +258,7 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 | `disaster` | #70 | scheduleBlockDays 60, fireballIntervalSeconds, fireballRingMin/Max, fireballMarkerSeconds 2,5, fireballRadius, fireballDamageCenter/Edge, fireballStructureDamage, fireballTreeChance 0,25, eruptionOffscreenHits, quakeDamageRatio, quakePulses, maxStructuresPerFrame, stormPulseSeconds, stormStructureDamage, treeFallSeconds 45, treeFallRingMin/Max 12/30 m, treeFallRadius, treeFallDamage, treeFallStructureDamage, quakeRemoteDamagePerHit 75, quakeRemoteHits 4 |
 | `beachSupply` | #71 | intervalDays 7, crateCountBase, crateCountPerTwoWeeks, crateCountMax, rollsPerCrate, crateLifetimeGameHours, crateMinLevel, openHoldSeconds, openNoiseRadius, ambushTriggerDistance, ambushAnimalsBase, ambushZombiesBase |
 | `supplyDrop` | #54 | Saklar enabled false, dailyChance 0,10, minDay 3, cooldownDays 3, jam jatuh 8 sampai 14, jarak titik jatuh 120 sampai 260, serta angka pesawat, parasut, suar, dan kedaluwarsa peti |
-| `bloodMoon` | #50 | Saklar enabled false, intervalDays 10, warningHour 12, waveCount 4, baseWaveSize 12, waveSizePerEvent 4, maxAlive 50, sustainAlive 20, burstRadius 45, baseEngageDistance 120, dan jeda gelombang |
+| `bloodMoon` | #50 | Saklar enabled true (aturan GDD), intervalDays 10, warningHour 12, waveCount 4, baseWaveSize 12, waveSizePerEvent 4, maxAlive 50, sustainAlive 20, burstRadius 45, baseEngageDistance 120, dan jeda gelombang |
 | `luckyMachine` | #72 | freeWindowSeconds 30, maxFreeSpinsPerWindow 3, maxStoredSpins 1, spinSeconds 4, vacuumSeconds 1,2, bobot tier 5/25/70, gateReopenSeconds 2, dan cageRewardOffset 2 |
 | `npc` | #76 | thinkSeconds 0,25, jarak ikut 5 dan 2,5, teleportDistance 40, detectRadius 15, attackLeashDistance 12, baseRegenPerSec 0,5, workSearchRadius 30, cookSpeedMultiplier 1,25, builderRepairMultiplier 1,25, dan avoidancePriority 70 |
 | `objective` | #81 | baseWallCount 4, hudFlashSeconds 3, chapter2TriggerDay 2, chapter3TriggerRegion `Amazon` (keputusan developer) |
@@ -304,7 +304,7 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 
 ## 5. Keputusan Desain
 
-**Keputusan developer:** `bridgeWoodCost` bernilai awal 500. Pengali `aiDirector.postTarget*` setelah hari ke-60 (`AIDirector.md`). Laju `vitals.infectionDamagePerSec` 0,3 saat `Infection` 100 (`VitalsRules.md`). Pemicu `objective.chapter2TriggerDay` dan `objective.chapter3TriggerRegion` (`ObjectiveManager.md`). Mesin `luckyMachine` hanya satu (`LuckyMachine.md`).
+**Keputusan developer:** `bridgeWoodCost` bernilai awal 500. Pengali `aiDirector.postTarget*` setelah hari ke-60 (`AIDirector.md`). Laju `vitals.infectionDamagePerSec` 0,3 saat `Infection` 100 (`VitalsRules.md`). Pemicu `objective.chapter2TriggerDay` dan `objective.chapter3TriggerRegion` (`ObjectiveManager.md`). Satu Lucky Machine di setiap region, dengan angka `luckyMachine` yang sama untuk keempat mesin (`LuckyMachine.md`).
 
 **Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 

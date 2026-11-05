@@ -161,7 +161,7 @@ Sistem baru menambahkan event ke tabel ini, bukan membuat jalur sendiri. Kolom S
 | Base | `BaseRaidStartedEvent` | `clusterId`, `region` | `RemoteBaseSimulation` | Tidak |
 | Base | `StructureBurningEvent` | `structureId`, `isBurning` | `Flammable` | Tidak |
 | Base | `LightSourceToggledEvent` | `structureId`, `isLit` | `LightFixture` | Tidak |
-| Lucky Machine | `LuckyMachineFreeWindowChangedEvent` | `isActive`, `seconds` | `LuckyMachine` | Ya |
+| Lucky Machine | `LuckyMachineFreeWindowChangedEvent` | `region`, `isActive`, `seconds` | `LuckyMachine` | Ya |
 | Lucky Machine | `LuckyMachineSpinResolvedEvent` | `rewardId` | `LuckyMachine` | Tidak |
 | NPC | `NPCRescuedEvent` | `npcId` | `LifeboatExtraction` | Tidak |
 | NPC | `NPCDiedEvent` | `npcId`, `reason` | `NPCCompanion`, `NPCRoster` | Tidak |

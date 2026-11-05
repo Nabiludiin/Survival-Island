@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/Island_Logic/PlayerPinnedState.md`
 **Deskripsi Utama:** Keadaan pemain tertahan musuh dan cara melepaskan diri sendirian. Sistem ini mengatur kondisi pemain, sedangkan penyerang dan damage-nya diatur #25 dan #61.
 **Issue:** #110
-**Rujukan GDD:** Usulan, belum ada di GDD. Sistem ini nonaktif sampai developer menyetujui. Rekomendasi: sebaiknya dipakai. Sistem ini mendukung bagian 5 (Jaguar menyergap, Zombie Tribal), dan polanya berasal dari usulan `docs/REFERENSI_MUSUH_L4D.md` bagian 8.
+**Rujukan GDD:** Bagian 3 (Diterkam: Jaguar dan Zombie Tribal bisa menahan pemain, dan pemain harus melepaskan diri sendiri, misalnya dengan Pisau) dan bagian 5 (Jaguar menyergap dari pohon). Angka, cara lepas, dan bantuan NPC adalah usulan. Polanya berasal dari `docs/REFERENSI_MUSUH_L4D.md` bagian 8.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -33,7 +33,7 @@ public interface IPinAttacker
 
 | Angka | Nilai awal | Fungsi |
 |---|---|---|
-| `GameBalanceConfig.pinned.enabled` | `false` | Sistem nonaktif sampai disetujui. Saat `false`, `TryPin` selalu menolak |
+| `GameBalanceConfig.pinned.enabled` | `true` | Aturan GDD bagian 3. Saklar hanya untuk tes. Saat `false`, `TryPin` selalu menolak |
 | `GameBalanceConfig.pinned.mashProgressPerPress` | 0,1 | Kemajuan tiap tekanan `Struggle` |
 | `GameBalanceConfig.pinned.mashDecayPerSec` | 0,05 | Kemajuan turun saat berhenti menekan |
 | `GameBalanceConfig.pinned.mashMinPressInterval` | 0,08 | Jeda minimum antar-tekanan, untuk membatasi makro |
@@ -177,10 +177,10 @@ Dengan 6 tekanan per detik:
 
 **Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 
-1. **Sifat sistem:** GDD tidak menyebut serangan menahan. Rekomendasi: pakai, hanya untuk Jaguar dan Zombie Tribal. Nilai awal tetap `pinned.enabled = false` sampai disetujui.
+1. **Sifat sistem:** kini aturan GDD bagian 3, untuk Jaguar dan Zombie Tribal. `pinned.enabled = true`.
 2. **Cara lepas:** menekan berulang menjadi bawaan, menahan tombol menjadi pilihan aksesibilitas, dan Pisau menjadi cara cepat. Rekomendasi: pakai ketiganya.
 3. **Pengaruh status:** stamina paling kuat, HP dan infeksi lebih ringan, dengan batas bawah 0,35. Rekomendasi: pakai, supaya pemain yang lemah masih punya peluang.
-4. **Peran NPC:** NPC dengan state `Follow` atau `Attack` dalam `npcHelpRadius` menyerang `Attacker.DamageTarget` dan menambah kemajuan `npcHelpProgressPerSec`. NPC `StayAtBase`, `Work`, dan `TakeCover` tidak menolong. Rekomendasi: pakai.
+4. **Peran NPC (menunggu konfirmasi developer):** GDD bagian 3 menyebut pemain harus melepaskan diri sendiri, jadi bantuan NPC mungkin bertentangan. Sampai diputuskan, nilai awal tetap: NPC dengan state `Follow` atau `Attack` dalam `npcHelpRadius` menyerang `Attacker.DamageTarget` dan menambah kemajuan `npcHelpProgressPerSec`. NPC `StayAtBase`, `Work`, dan `TakeCover` tidak menolong. Rekomendasi: pakai.
 5. **Musuh lain:** paling banyak 1 penyerang lain dengan damage 50 persen, serta batas tertahan 8 detik. Rekomendasi: pakai.
 6. **Durabilitas Pisau:** berkurang 5 tiap tusukan. Pisau rusak tidak bisa dipakai, sampai diperbaiki lewat `ToolRepairSystem`. Rekomendasi: pakai.
 7. **Heavy Item:** barang langsung jatuh. Rekomendasi: pakai, karena dua tangan terpakai dan pemain butuh tangan untuk melawan.
@@ -188,7 +188,7 @@ Dengan 6 tekanan per detik:
 
 ## 6. Skenario Tes
 
-1. Dengan `pinned.enabled = false`, panggil `TryPin`. **Hasil:** ditolak, dan penyerang menjalankan jedanya. Lalu atur `pinned.enabled = true` lewat `DevConsole`, dan ulangi dengan zombie uji. **Hasil:** gerakan dan senjata terkunci, kamera menghadap penyerang, dan penunjuk tombol muncul.
+1. Atur `pinned.enabled = false` lewat `DevConsole`, lalu panggil `TryPin`. **Hasil:** ditolak, dan penyerang menjalankan jedanya. Lalu kembalikan `pinned.enabled = true`, dan ulangi dengan zombie uji. **Hasil:** gerakan dan senjata terkunci, kamera menghadap penyerang, dan penunjuk tombol muncul.
 2. Tekan `Space` 6 kali per detik dengan status penuh. **Hasil:** lepas dalam sekitar 2 detik, penyerang terdorong, dan kontrol kembali.
 3. Atur stamina 0, HP 10, dan infeksi 100. **Hasil:** lepas dalam sekitar 6,3 detik, dan tidak lewat 8 detik.
 4. Berhenti menekan selama 8 detik. **Hasil:** `Release(TimedOut)` berjalan, dan pemain kebal penahanan selama 4 detik.

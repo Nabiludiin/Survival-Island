@@ -2,10 +2,10 @@
 **Lokasi:** `docs/blueprint/left-4-dead/AISensory.md`
 **Deskripsi Utama:** Cara zombie melihat dan mendengar pemain, supaya pemain bisa mengendap-endap: kerucut pandang, Noise Sphere, dan ikon mata Detection Meter.
 **Issue:** #49
-**Rujukan GDD:** Usulan, belum ada di GDD. Bagian 3 hanya menyebut horde memburu MC pada malam hari.
-**Status:** Usulan, belum ada di GDD. Sistem ini nonaktif sampai developer menyetujui. Rekomendasi: dipakai, karena `HordeManager` (#50) dan `ZombieLair` (#112) sudah mengandalkannya, dan `NoiseEmitter` sudah dipanggil #17, #47, #73, serta #101.
+**Rujukan GDD:** Bagian 3 (Mengendap: zombie mendeteksi pemain lewat pandangan dan suara, sehingga pemain bisa menghindar dengan mengendap, kecuali saat Blood Moon). Jarak, sudut pandang, laju deteksi, dan radius suara adalah usulan.
+**Status:** Aturan GDD bagian 3. Sistem aktif. `HordeManager` (#50) dan `ZombieLair` (#112) mengandalkannya, dan `NoiseEmitter` sudah dipanggil #17, #47, #73, serta #101.
 
-Saat `GameBalanceConfig.stealth.enabled = false`, setiap zombie langsung berstatus `Aware`, sesuai "Aggro penuh" di `Claude.md`. `NoiseEmitter` tetap mengirim event tanpa akibat.
+Saklar `GameBalanceConfig.stealth.enabled` hanya untuk tes. Saat `false`, setiap zombie langsung berstatus `Aware`, sesuai "Aggro penuh" di `Claude.md`. `NoiseEmitter` tetap mengirim event tanpa akibat.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -198,7 +198,7 @@ Saat `stealth.enabled = false`, objek ini mematikan dirinya.
 
 **Usulan yang disetujui developer sebagai nilai awal:**
 
-1. **Sistem stealth dipakai atau tidak.** GDD tidak menyebutnya. Rekomendasi: dipakai.
+1. **Sistem stealth:** kini aturan GDD bagian 3, jadi dipakai dan tidak lagi menjadi usulan.
 2. **Aturan "Aggro penuh" di `Claude.md` terhadap stealth.** Rekomendasi: zombie malam selalu bergerak ke `HuntHint`, tetapi baru mengejar langsung setelah `Aware`.
 3. **Semua angka di bagian 1**, yaitu 22 m, 120 derajat, dan radius suara. Rekomendasi: pakai nilai awal, lalu setel lewat playtest.
 

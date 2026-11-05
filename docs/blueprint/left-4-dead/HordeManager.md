@@ -2,8 +2,8 @@
 **Lokasi:** `docs/blueprint/left-4-dead/HordeManager.md`
 **Deskripsi Utama:** Event Blood Moon terjadwal. Setiap kelipatan 10 hari, langit menjadi merah, zombie mengabaikan Stealth, lalu horde besar menyerbu markas pemain sampai fajar.
 **Issue:** #50
-**Rujukan GDD:** Bagian 3 (Horde Zombie keluar malam hari untuk memburu MC dan menyerang base). Blood Moon terjadwal adalah usulan, belum ada di GDD.
-**Status:** Usulan, belum ada di GDD. Sistem ini nonaktif sampai developer menyetujui (`GameBalanceConfig.bloodMoon.enabled = false`). Rekomendasi: sebaiknya dipakai, karena #27, #49, #67, dan #108 sudah menyiapkan kaitannya, dan event ini memberi ujian base yang bisa diantisipasi.
+**Rujukan GDD:** Bagian 3 (Horde Zombie keluar malam hari untuk memburu MC dan menyerang base). Blood Moon setiap 10 hari: malam merah, serbuan besar ke base, dan zombie mengabaikan Stealth. Isi gelombang, jumlah zombie, dan peringatan adalah usulan.
+**Status:** Aturan GDD bagian 3. Sistem aktif (`GameBalanceConfig.bloodMoon.enabled = true`), dan saklarnya hanya untuk tes. #27, #49, #67, dan #108 sudah menyiapkan kaitannya, dan event ini memberi ujian base yang bisa diantisipasi.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -26,8 +26,8 @@
 
 | Nama | Nilai awal | Fungsi |
 |---|---|---|
-| `enabled` | `false` | Saklar sampai usulan disetujui |
-| `intervalDays` | 10 | Hari ke-10, 20, 30, sesuai issue |
+| `enabled` | `true` | Aturan GDD bagian 3. Saklar hanya untuk tes |
+| `intervalDays` | 10 | Hari ke-10, 20, 30, sesuai GDD bagian 3 |
 | `warningHour` | 12 | Jam peringatan pada hari itu |
 | `waveCount` | 4 | Jumlah gelombang utama |
 | `firstWaveDelaySeconds` | 20 | Jeda setelah matahari terbenam |
@@ -176,7 +176,7 @@ Zombie yang tersisa terbakar saat fajar lewat `SunlightExposure` (#63). `HordeMa
 
 **Usulan yang disetujui developer sebagai nilai awal:**
 
-1. **Pemakaian sistem:** pakai. GDD hanya menyebut horde malam biasa.
+1. **Pemakaian sistem:** kini aturan GDD bagian 3, jadi tidak lagi menjadi usulan.
 2. **Satu malam penuh:** dari `NightfallEvent` sampai `DaybreakEvent`, dan zombie tetap terbakar saat fajar, sesuai GDD bagian 3.
 3. **Hanya visual pada cuaca:** cuaca tetap berjalan, dan hanya warna langit serta kabut yang ditimpa.
 4. **Empat gelombang, lalu jaga 20 zombie:** ukuran 12 pada hari ke-10, 32 pada hari ke-60, lalu naik bersama pengali jumlah sampai batas 50.
@@ -188,7 +188,7 @@ Zombie yang tersisa terbakar saat fajar lewat `SunlightExposure` (#63). `HordeMa
 
 ## 6. Skenario Tes
 
-Sebelum tes, atur `balance bloodMoon.enabled 1`.
+`bloodMoon.enabled` sudah `true` sebagai nilai awal.
 
 1. `setday 9`, lalu lewati ke hari berikutnya. **Hasil:** `IsBloodMoonDay(10)` benar, dan notifikasi muncul jam 12:00.
 2. `setday 11` sampai malam. **Hasil:** tidak ada Blood Moon, dan `AIDirector` berjalan normal.
@@ -204,4 +204,4 @@ Sebelum tes, atur `balance bloodMoon.enabled 1`.
 12. Simpan saat gelombang kedua, lalu muat. **Hasil:** suasana merah kembali, dan gelombang berlanjut dari `wavesSpawned` tersimpan.
 13. Jeda game. **Hasil:** gelombang tidak muncul selama jeda.
 14. Mati saat Blood Moon, lalu mulai run baru. **Hasil:** langit normal, dan event tidak aktif.
-15. Biarkan `enabled = false`, lalu `setday 10`. **Hasil:** malam berjalan biasa.
+15. Atur `balance bloodMoon.enabled 0`, lalu `setday 10`. **Hasil:** malam berjalan biasa. Saklar ini hanya untuk tes.

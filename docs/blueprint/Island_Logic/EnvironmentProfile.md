@@ -88,7 +88,7 @@ Rotasi matahari ditulis dari `DayNightDirector.Instance.SunRotation`. `RenderSet
 | `BloodMoon` | 30 | `#6B0F12` | 0,01 | 0,8, warna merah | `#801010` | 20 / 10 detik | `HordeManager` (#50) |
 | `Eruption` | 20 | `#A5391F` | 0,008 | 0,6, warna jingga | Tidak ada | `eventBlendSeconds` | `DisasterManager` (#70) |
 
-Warna langit dan transisi `BloodMoon` adalah usulan dari #50. `PushEventLayer` dan `PopEventLayer` tetap sama.
+Langit merah saat `BloodMoon` adalah aturan GDD bagian 3. Warna persis dan transisinya adalah usulan dari #50. `PushEventLayer` dan `PopEventLayer` tetap sama.
 
 **`public void PushEventLayer(EnvEventId id, float weight)`** dan **`public void PopEventLayer(EnvEventId id)`** dipanggil langsung, karena pengirimnya memang bergantung pada director ini. Saat erupsi, `DisasterManager` memberi bobot 1 kalau region aktif `Volcano`, dan `eruptionRemoteWeight` di region lain.
 

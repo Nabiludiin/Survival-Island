@@ -25,9 +25,12 @@ Game dibagi menjadi dua fase utama yang saling berkesinambungan.
     *   **Infeksi:** Terkena serangan zombie akan meningkatkan meteran infeksi. MC memulai dengan formula vaksin dan stok vaksin yang sangat sedikit. Vaksin baru hanya bisa dirakit menggunakan material dari Region 2.
     *   **Kail:** Selain memancing, Kail bisa menarik barang hanyut dari laut, seperti di game Raft.
     *   **Barang Lempar:** Molotov, Bom Rakitan, Batu, dan Suar bisa dipakai untuk mengendalikan atau memancing kerumunan zombie.
+    *   **Diterkam:** Beberapa musuh, seperti Jaguar dan Zombie Tribal, bisa menahan pemain. Pemain harus melepaskan diri sendiri, misalnya dengan Pisau.
 -   **Siklus Siang & Malam (Ancaman Ganda):**
     *   **Siang Hari:** **Zombie akan terbakar dan mati jika terkena sinar matahari.** Oleh karena itu, tidak ada zombie yang berkeliaran di luar ruangan pada siang hari. Sebagian zombie bersembunyi diam di ruang gelap seperti gua, bunker, dan gudang, lalu bangun kalau terganggu. Ancaman utama di luar ruangan pada siang hari berasal dari **Hewan Buas** yang agresif menjaga teritori dan *resource*.
     *   **Malam Hari:** Matahari terbenam dan hewan buas kembali ke sarang. Gelapnya malam memicu **Horde Zombie** keluar dari persembunyiannya untuk memburu MC dan menyerang *base*.
+    *   **Blood Moon:** Setiap 10 hari, malam berubah merah dan gerombolan zombie menyerbu *base* pemain secara besar-besaran.
+    *   **Mengendap (Stealth):** Zombie mendeteksi pemain lewat pandangan dan suara, sehingga pemain bisa menghindar dengan mengendap, kecuali saat Blood Moon.
 -   **Syarat Menang & Game Over (Permadeath):** 
     *   **Menang:** Menyelesaikan rakitan Helikopter di Region 3 dan lepas landas.
     *   **Kalah / Game Over:** Jika MC **mati** (HP habis karena diserang, lapar, haus, atau infeksi), **maka game akan mengulang dari awal (Reset).** Pemain akan kembali ke Fase 1 (berada di dalam kapal pesiar yang tenggelam) dan harus mengambil barang-barang (looting) dari nol lagi.
@@ -80,7 +83,7 @@ Pulau terbagi menjadi 4 Region. Pemain harus membuka aksesnya secara bertahap.
 -   **Bencana Acak:** Badai Tropis, Gempa Bumi (dapat merusak *base* yang tidak di-upgrade dindingnya), dan Erupsi Gunung. Bencana ini memaksa pemain selalu menyiapkan cadangan material untuk perbaikan.
 
 ## 7. Unique Mechanic: "The Lucky Machine"
-Sebuah mesin eksperimen aneh (gacha/RNG) peninggalan peneliti terdahulu yang bisa memberikan *skin* senjata, *buff* HP/Stamina permanen, atau senjata ajaib ber-damage tinggi (seperti *Laser Pistol* atau *Fire Axe* tak bisa rusak).
+Mesin eksperimen aneh (gacha/RNG) peninggalan peneliti terdahulu yang terdapat di masing-masing region (satu mesin per region). Mesin bisa memberikan *skin* senjata, *enchant* pada alat atau senjata (misalnya tambahan *damage*), *buff* HP/Stamina permanen, atau senjata ajaib ber-damage tinggi (seperti *Laser Pistol* atau *Fire Axe* tak bisa rusak).
 -   **Cara Mengaktifkan:**
     1.  **Tumbal Zombie:** Mesin ini memiliki area vakum/kandang. MC harus memancing dan menjebak musuh tertentu (misal: 5 Zombie Militer dari Region 3, atau 3 Beruang Kutub) ke dalam mesin.
     2.  **Energi Alam (Gratis):** Mesin akan otomatis menyala dan gratis diputar selama 30 detik saat terjadi *Sudden Event* skala besar, seperti saat Gunung Berapi di Region 1 meletus dan menyalurkan listrik statis. MC harus berani keluar *base* di tengah bencana untuk memutar mesin ini.

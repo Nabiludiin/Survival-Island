@@ -8,7 +8,8 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 
 | Topik | Kondisi sekarang |
 |---|---|
-| Lokasi Lucky Machine | Nilai awal Region 3. Tumbal mudah dilakukan, tetapi jendela gratis 30 detik sulit dipakai kalau base pemain jauh |
+| Lucky Machine per region | Kuota Region 1, 2, dan 4 masih usulan (`LuckyMachine.md`). Keempat mesin memakai tabel hadiah yang sama, dengan batas hadiah unik dihitung bersama. Posisi mesin Region 1, 2, dan 4 ditentukan saat layout #88 |
+| Bantuan NPC saat diterkam | GDD bagian 3 menyebut pemain harus melepaskan diri sendiri. `PlayerPinnedState.md` masih membolehkan NPC menolong sebagai nilai awal |
 
 ## Keputusan utama
 
@@ -17,7 +18,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Zombie setelah hari ke-60 | Per hari: jumlah +2 persen, HP +2 persen, dan damage +1 persen. Batasnya 1,5x, 2x, dan 1,5x |
 | Infeksi mencapai 100 | HP turun bertahap, dan tidak mati seketika |
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
-| Lucky Machine | Satu mesin |
+| Lucky Machine | Satu mesin disetiap Region |
 | Fitur tambahan yang dipakai | #96, #106, dan #112 |
 | Fitur yang tidak dipakai | #48, #105, dan #117 |
 | Angka inti | Hari 15 menit, 8 sampai 12 kayu per pohon, 5 suku cadang, dan frostbite 1 HP per detik |
@@ -243,7 +244,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 
 | Topik | Usulan |
 |---|---|
-| Sistem stealth belum ada di GDD: dipakai atau tidak | Dipakai, karena #50 dan #112 sudah mengandalkannya. Sampai disetujui, stealth.enabled = false membuat zombie langsung Aware. |
+| Sistem stealth | Kini aturan GDD bagian 3 (Mengendap). Dipakai, dan stealth.enabled = true. Saklar hanya untuk tes. |
 | Aturan Aggro penuh di Claude.md bertentangan dengan stealth | Zombie malam selalu bergerak ke HuntHint di sekitar pemain, tetapi baru mengejar langsung setelah Aware. |
 | Angka pandang dan suara | Pakai sightRange 22 m, kerucut 120 derajat, suara jalan 8 m, lari 20 m, tembakan 40 m, lalu setel lewat playtest. |
 
@@ -251,7 +252,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 
 | Topik | Usulan |
 |---|---|
-| Pemakaian Blood Moon (GDD hanya menyebut horde malam biasa) | Pakai. Saklar bloodMoon.enabled tetap false sampai disetujui. |
+| Pemakaian Blood Moon | Kini aturan GDD bagian 3 (setiap 10 hari). Dipakai, dan bloodMoon.enabled = true. Saklar hanya untuk tes. |
 | Durasi Blood Moon | Satu malam penuh, dari NightfallEvent sampai DaybreakEvent. Zombie tetap terbakar saat fajar sesuai GDD bagian 3. |
 | Override cuaca | Hanya visual. Cuaca tetap berjalan, dan hanya warna langit serta kabut yang ditimpa. |
 | Ukuran serangan | Empat gelombang, lalu menjaga 20 zombie. Ukuran 12 pada hari ke-10 sampai 32 pada hari ke-60, dengan batas 50. |
@@ -488,10 +489,11 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 |---|---|
 | Nasib AddEnergy | Dihapus, karena GDD meminta musuh tertentu dijebak. |
 | Arti permanen | Selama satu run. Buff dan skin hilang saat permadeath, sesuai GDD bagian 3. |
-| Lokasi mesin | Satu mesin di Region 3, koordinat (350, 2050). Akibatnya pemain yang jauh saat erupsi kehilangan mode gratis. Alternatifnya mesin kedua di Region 1 khusus mode gratis. |
+| Lokasi mesin | Diganti GDD bagian 7: satu mesin di setiap region. Mesin Region 3 tetap di (350, 2050). Posisi tiga mesin lainnya ditentukan saat layout #88. |
 | Batas putaran gratis | 3 putaran per jendela 30 detik. |
 | Tabungan putaran | Maksimum 1, dan gerbang menutup setelah kuota penuh. |
-| Kuota per musuh | 5 Zombie Militer dan 3 Beruang Kutub dihitung terpisah, dan masing-masing memberi 1 putaran. |
+| Kuota per musuh | Tiap mesin memakai musuh regionnya. Region 1: 8 zombie_standar atau 3 serigala. Region 2: 5 zombie_tribal atau 2 jaguar. Region 3: 5 Zombie Militer atau 3 Beruang Kutub (GDD). Region 4: 5 zombie_desa atau 4 anjing liar. Tiap baris memberi 1 putaran. |
+| Hadiah antar-mesin | Keempat mesin memakai tabel hadiah yang sama. Batas hadiah unik dihitung bersama lewat LuckyRewardLedger, dan putaran tersimpan tidak bisa dipindah antar-mesin. |
 | Peluang tier | S 5 persen, A 25 persen, B 70 persen, dari blueprint lama. |
 | Aturan hadiah ganda | Item unik tidak berulang, buff bertumpuk sampai 3 kali, dan satu modifier per senjata. |
 | Hadiah tier B berupa barang biasa | Tetap ada SpawnItem peluru dan kayu, karena issue meminta jenis ini walau GDD tidak menyebutnya. |
@@ -851,10 +853,10 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 
 | Topik | Usulan |
 |---|---|
-| Status sistem: GDD tidak menyebut serangan menahan | Pakai hanya untuk Jaguar dan Zombie Tribal. pinned.enabled tetap false sampai disetujui |
+| Status sistem | Kini aturan GDD bagian 3 (Diterkam). Untuk Jaguar dan Zombie Tribal, dan pinned.enabled = true |
 | Cara lepas | Menekan Struggle berulang menjadi bawaan, menahan tombol menjadi pilihan aksesibilitas, dan Pisau menjadi cara cepat |
 | Pengaruh stamina, HP, dan infeksi pada kesulitan lepas | Pengali gabungan stamina 0,5, HP 0,75, infeksi 0,75, dengan batas bawah 0,35. Terburuk sekitar 6,3 detik lewat menekan berulang |
-| Peran NPC | NPC Follow atau Attack dalam 8 meter menyerang penyerang dan menambah kemajuan 0,25 per detik. NPC StayAtBase, Work, dan TakeCover tidak menolong |
+| Peran NPC (menunggu konfirmasi, karena GDD menyebut pemain melepaskan diri sendiri) | NPC Follow atau Attack dalam 8 meter menyerang penyerang dan menambah kemajuan 0,25 per detik. NPC StayAtBase, Work, dan TakeCover tidak menolong |
 | Musuh lain saat pemain tertahan | Paling banyak 1 penyerang lain dengan damage 50 persen, dan batas tertahan 8 detik |
 | Durabilitas Pisau saat dipakai untuk lepas | Berkurang 5 tiap tusukan. Pisau Broken tidak bisa dipakai sampai diperbaiki |
 | Heavy Item saat diterkam | Barang langsung jatuh di dekat kaki pemain |

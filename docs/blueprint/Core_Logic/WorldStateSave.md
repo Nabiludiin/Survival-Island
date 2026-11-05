@@ -168,7 +168,8 @@ Semua berada di `Application.persistentDataPath`.
 | Kargo pantai | `world_supply_beach` | `BeachSupplyManager` (#71) | Kargo yang belum diambil |
 | Suplai udara | `world_supply` | `SupplyDropManager` (#54) | Jadwal dan status suplai |
 | Hasil simulasi base | `world_remotebase` | `RemoteBaseSimulation` (#90) | Hasil yang belum diterapkan |
-| Lucky Machine | Lewat `RegionStateStore`, dengan `saveId` dari `SaveIdTag` | `LuckyMachine` (#72) | `quotaProgress`, `storedSpins`, `freeWindowEndGameHour`, `freeSpinsUsed`, `gateState`, `grantCounts`, dan `pendingSkins`. `grantCounts` diubah ke array di `CaptureState`. Buff tersimpan di `player_effects`, sedangkan modifier dan skin di `ItemInstance` |
+| Catatan hadiah Lucky Machine | `world_lucky` | `LuckyRewardLedger` (#72) | `grantCounts` sebagai array, dan `pendingSkins`, bersama untuk keempat mesin |
+| Lucky Machine | Lewat `RegionStateStore`, dengan `saveId` dari `SaveIdTag` | `LuckyMachine` (#72) | `quotaProgress`, `storedSpins`, `freeWindowEndGameHour`, `freeSpinsUsed`, dan `gateState`, per mesin. `grantCounts` dan `pendingSkins` ada di `world_lucky`. Buff tersimpan di `player_effects`, sedangkan modifier dan skin di `ItemInstance` |
 
 **`LightFixture` (#98):** `ISaveable` dengan `SaveId = StructureId`, berisi `fuelSeconds`, `IsLit`, dan `lastTickGameHour`. Dipulihkan setelah `world_structures`.
 
