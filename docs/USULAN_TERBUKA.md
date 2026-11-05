@@ -19,6 +19,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
 | Lucky Machine | Satu mesin disetiap Region |
 | Obor saat badai | Obor tetap menyala saat Storm dan Blizzard, sesuai GDD bagian 5 |
+| Fase 1 | 60 detik adalah batas paling lama. Pemain boleh berangkat dengan sekoci sebelum waktu habis |
 | Air es Region 3 | Pakaian hangat tetap melindungi di air es, sesuai GDD bagian 5. Obor padam di air, jadi tidak melindungi |
 | Diterkam | Pemain hanya bisa melepaskan diri sendiri. NPC tidak menolong, dan hanya damage dari pemain yang bisa membatalkan terkaman Jaguar atau jerat Tribal |
 | Fitur tambahan yang dipakai | #96, #106, dan #112 |
@@ -519,7 +520,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Sekoci | Sekoci di dek atas menjadi titik aman dan titik setor. Menyetor mengosongkan seluruh tangan. |
 | Gagal mencapai sekoci | Permadeath langsung dengan DeathReason.LeftOnShip. Pilihan lain adalah tiba di pulau tanpa barang tambahan. |
 | Barang di tangan saat waktu habis | Ikut kalau pemain berada di area aman. |
-| Berangkat lebih awal | Boleh, dengan menahan E 1,5 detik saat tangan kosong. |
+| Berangkat lebih awal | Diputuskan developer: boleh, dengan menahan E 1,5 detik saat tangan kosong. 60 detik di GDD bagian 3 adalah batas paling lama. |
 | Jeda pra-game | 3 detik di luar 60 detik. Pemain hanya bisa menengok, sirene di detik ke-1,5, lalu kontrol dibuka. |
 | Kapasitas tangan dan NPC | Kapasitas 4 berat. NPC berberat 4, disembunyikan saat dibawa dan tampil sebagai ikon. NPC tertinggal menjadi korban. |
 | Kedatangan di pantai | Pemain di pantai selatan Region 1 pada jam 06:00. Barang langsung di inventori, sisanya di samping bangkai sekoci, dan NPC di dekat pemain. |

@@ -59,7 +59,7 @@
 - **Permadeath:** kelas ini hilang bersama `ShipPhase`, dan timer mulai ulang pada run baru.
 - **Save dan load:** Fase 1 tidak punya save (#82).
 - **Mati sebelum waktu habis:** `RunEndedEvent` menghentikan timer, dan `HandleTimeUp` tidak terpanggil.
-- **Berangkat lebih awal:** `LifeboatExtraction` memanggil `StopCountdown`.
+- **Berangkat lebih awal:** `LifeboatExtraction` memanggil `StopCountdown`. Diputuskan developer: 60 detik adalah batas paling lama, dan pemain boleh berangkat sebelum habis.
 
 ## 5. Keputusan Desain
 

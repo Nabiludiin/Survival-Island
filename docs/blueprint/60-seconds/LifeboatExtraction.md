@@ -266,7 +266,7 @@ Fungsi `GameManager.SaveFase1Loot(List<Item>)` diganti `SaveShipOutcome`. `ShipT
 1. **Sekoci sebagai titik aman dan titik setor:** di dek atas. Menyetor mengosongkan seluruh tangan.
 2. **Gagal mencapai sekoci:** **permadeath langsung** dengan `LeftOnShip`. Pilihan lain adalah tiba di pulau tanpa barang tambahan. Rekomendasi ini mengikuti 60 Seconds dan membuat waktu terasa berbahaya.
 3. **Barang di tangan saat waktu habis:** ikut kalau pemain berada di area aman.
-4. **Berangkat lebih awal:** boleh, dengan menahan `E` 1,5 detik saat tangan kosong.
+4. **Berangkat lebih awal:** boleh, dengan menahan `E` 1,5 detik saat tangan kosong. **Keputusan developer:** "persis 60 detik" di GDD bagian 3 dibaca sebagai batas waktu paling lama, bukan durasi wajib.
 5. **Jeda pra-game:** 3 detik di luar 60 detik. Pemain hanya bisa menengok, sirene di detik ke-1,5, lalu kontrol dibuka.
 6. **Kapasitas tangan:** 4 berat. Satu NPC memenuhi tangan.
 7. **NPC dibawa:** model disembunyikan dan tampil sebagai ikon, bukan agen yang mengikuti.
