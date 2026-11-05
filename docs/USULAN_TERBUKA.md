@@ -18,7 +18,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Infeksi mencapai 100 | HP turun bertahap, dan tidak mati seketika |
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
 | Lucky Machine | Satu mesin disetiap Region |
-| Diterkam | Pemain hanya bisa melepaskan diri sendiri. NPC tidak menolong |
+| Diterkam | Pemain hanya bisa melepaskan diri sendiri. NPC tidak menolong, dan hanya damage dari pemain yang bisa membatalkan terkaman Jaguar atau jerat Tribal |
 | Fitur tambahan yang dipakai | #96, #106, dan #112 |
 | Fitur yang tidak dipakai | #48, #105, dan #117 |
 | Angka inti | Hari 15 menit, 8 sampai 12 kayu per pohon, 5 suku cadang, dan frostbite 1 HP per detik |

@@ -144,7 +144,7 @@ Damage selalu lewat `IDamageable.TakeDamage(in DamageInfo)`, dengan `infection =
 - Saat pemain berada dalam `pounceTriggerRadius` (9 m) dan tidak terhalang, beri tanda selama `pounceTelegraphSeconds` (0,8), berupa geraman lewat `ThreatAudioEmitter.PlayTell` (#114) dan daun bergoyang.
 - Lompat lewat kurva parabola selama `pounceSeconds` (0,6) menuju posisi pemain saat tanda selesai. Mendarat dengan `NavMesh.SamplePosition` dan `agent.Warp`. Kalau gagal, panggil `Despawn` dengan `OffNavMesh`.
 - Kena pemain dalam radius 1,5 m: damage 30, lalu `PlayerPinnedState.TryPin(this)` (#110). `WildlifeAI` memakai `IPinAttacker`. Kalau `TryPin` ditolak, misalnya `pinned.enabled = false`, Jaguar hanya mundur dan jeda ulang berjalan. Selama menahan, damage 5 setiap 0,5 detik.
-- Terkaman batal saat Jaguar menerima `pounceBreakDamage` (40), sesuai pola Hunter di `docs/REFERENSI_MUSUH_L4D.md`.
+- Terkaman batal saat Jaguar menerima `pounceBreakDamage` (40) dari pemain saja (`info.byPlayer == true`). Damage dari NPC, hewan lain, api, atau bencana tidak dihitung, karena pemain harus melepaskan diri sendiri (GDD bagian 3, keputusan developer). Polanya dari Hunter di `docs/REFERENSI_MUSUH_L4D.md`.
 - Meleset: diam selama `pounceMissStunSeconds` (1,5), sebagai celah untuk pemain. Jeda ulang `pounceCooldownSeconds` (12).
 - Saat `Chase`, Jaguar juga boleh menerkam dari tanah pada jarak 6 m, memakai jalur yang sama.
 
@@ -260,3 +260,4 @@ Saat fajar dan senja keduanya bisa berpapasan. Mereka saling mengabaikan: tidak 
 11. Lawan 6 Gagak. **Hasil:** paling banyak 2 Gagak menukik sekaligus.
 12. Tahan `E` pada bangkai sambil memegang Pistol. **Hasil:** ditolak dengan `MissingTool`. Ulangi dengan Pisau. **Hasil:** daging dan kulit masuk inventori, dan sisanya jatuh.
 13. Pakai ulang hewan dari pool sebanyak 20 kali. **Hasil:** HP, `baseOffset`, dan state kembali ke nilai awal.
+14. Saat diterkam Jaguar, beri 50 damage ke Jaguar lewat `DevConsole` dengan `byPlayer = false`. **Hasil:** terkaman tidak batal. Ulangi dengan tembakan Pistol pemain sebesar 40. **Hasil:** terkaman batal.

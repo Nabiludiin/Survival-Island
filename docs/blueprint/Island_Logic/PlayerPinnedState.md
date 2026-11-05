@@ -10,6 +10,7 @@
 
 ```csharp
 public enum PinReleaseReason { Escaped, EscapedWithKnife, AttackerDamaged, AttackerGone, TimedOut, PlayerDied }
+// AttackerDamaged hanya dari damage pemain (byPlayer), sesuai keputusan developer
 
 public interface IPinAttacker
 {

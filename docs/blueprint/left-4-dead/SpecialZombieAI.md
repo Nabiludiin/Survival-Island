@@ -161,7 +161,7 @@ Mengikuti rekomendasi di bagian 5, ketiganya menjadi pola perilaku, bukan `enemy
 
 **Cara pemain lepas:**
 
-- Memberi `tribalReleaseDamage` kepada Tribal, dihitung dari `EnemyHealth.Damaged` sejak jerat mengenai.
+- Memberi `tribalReleaseDamage` kepada Tribal, dihitung dari `EnemyHealth.Damaged` dengan `info.byPlayer == true` saja, sejak jerat mengenai. Damage dari NPC atau sumber lain tidak dihitung, karena pemain harus melepaskan diri sendiri (GDD bagian 3, keputusan developer).
 - Memakai aksi lepas di #110, termasuk Pisau.
 - Membunuh Tribal, atau jaraknya melewati `tribalBreakDistance`.
 - Garis antara Tribal dan pemain terhalang `PhysicsMasks.AIVision` lebih dari 1 detik.
@@ -283,3 +283,4 @@ Pemeriksaan tidak berjalan saat `AttackBuilding` atau di dalam kandang Lucky Mac
 11. Kurung Militer di balik `Obstacle`, lalu menjauh tanpa melihatnya selama 15 detik. **Hasil:** ganti target, lalu kembali ke pool, tanpa `EnemyKilledEvent`.
 12. Pakai ulang Lumut yang sudah bangun dari pool. **Hasil:** kembali `Dormant`, `rage = 0`.
 13. Jeda game saat jerat terbang. **Hasil:** jerat berhenti, dan lanjut setelah jeda selesai.
+14. Saat terjerat Tribal, beri 30 damage ke Tribal lewat `DevConsole` dengan `byPlayer = false`. **Hasil:** jerat tidak lepas. Ulangi dengan 25 damage dari pemain. **Hasil:** jerat lepas dengan alasan `AttackerDamaged`.
