@@ -8,7 +8,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 
 | Topik | Kondisi sekarang |
 |---|---|
-| Lucky Machine per region | Kuota Region 1, 2, dan 4 masih usulan (`LuckyMachine.md`). Keempat mesin memakai tabel hadiah yang sama, dengan batas hadiah unik dihitung bersama. Posisi mesin Region 1, 2, dan 4 ditentukan saat layout #88 |
+| Posisi Lucky Machine Region 1, 2, dan 4 | Bukan keputusan desain. Ditentukan saat layout peta #88, dengan syarat di `LuckyMachine.md` |
 
 ## Keputusan utama
 
@@ -17,7 +17,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Zombie setelah hari ke-60 | Per hari: jumlah +2 persen, HP +2 persen, dan damage +1 persen. Batasnya 1,5x, 2x, dan 1,5x |
 | Infeksi mencapai 100 | HP turun bertahap, dan tidak mati seketika |
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
-| Lucky Machine | Satu mesin disetiap Region |
+| Lucky Machine | Satu mesin disetiap Region. Kuota: Region 1 8 zombie standar atau 3 serigala, Region 2 5 Zombie Tribal atau 2 Jaguar, Region 3 5 Zombie Militer atau 3 Beruang Kutub, Region 4 5 Zombie Desa atau 4 anjing liar. Tabel hadiah sama, hadiah unik sekali per run, dan putaran tidak bisa dipindah antar-mesin |
 | Obor saat badai | Obor tetap menyala saat Storm dan Blizzard, sesuai GDD bagian 5 |
 | Vaksin di kapal | Tetap ada sebagai loot langka, dan dihitung sebagai stok awal. Setelah Fase 1, vaksin baru hanya dari material Region 2 |
 | Fase 1 | 60 detik adalah batas paling lama. Pemain boleh berangkat dengan sekoci sebelum waktu habis |

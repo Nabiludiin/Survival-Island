@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/Island_Logic/LuckyMachine.md`
 **Deskripsi Utama:** Mesin gacha peninggalan peneliti. Aktif lewat tumbal musuh tertentu di kandang vakum, atau gratis selama 30 detik saat bencana besar. Hadiahnya berasal dari data.
 **Issue:** #72 (melengkapi #1)
-**Rujukan GDD:** Bagian 7 (satu mesin di setiap region, dua cara aktivasi, jenis hadiah, serta contoh 5 Zombie Militer atau 3 Beruang Kutub). Kuota mesin Region 1, 2, dan 4, posisi mesin, tabel peluang, batas putaran, catatan hadiah bersama, dan arti "permanen" adalah usulan.
+**Rujukan GDD:** Bagian 7 (satu mesin di setiap region, dua cara aktivasi, jenis hadiah, serta contoh 5 Zombie Militer atau 3 Beruang Kutub). Kuota mesin Region 1, 2, dan 4 serta hadiah bersama disetujui developer sebagai nilai awal. Posisi mesin, tabel peluang, batas putaran, dan arti "permanen" adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -60,10 +60,10 @@ Setiap mesin punya `LuckyMachineData` sendiri, dengan `region` (`RegionType`) da
 
 | Mesin (`region`) | Kuota zombie | Kuota hewan | Sumber |
 |---|---|---|---|
-| `Volcano` | `zombie_standar` 8 | `hewan_serigala` 3 | Usulan |
-| `Amazon` | `zombie_tribal` 5 | `hewan_jaguar` 2 | Usulan |
+| `Volcano` | `zombie_standar` 8 | `hewan_serigala` 3 | Disetujui developer |
+| `Amazon` | `zombie_tribal` 5 | `hewan_jaguar` 2 | Disetujui developer |
 | `Snow` | `zombie_militer` 5 | `hewan_beruang` 3 | GDD bagian 7 |
-| `Logistic` | `zombie_desa` 5 | `hewan_anjing` 4 | Usulan |
+| `Logistic` | `zombie_desa` 5 | `hewan_anjing` 4 | Disetujui developer |
 
 Tiap baris dihitung terpisah, dan tidak dijumlahkan. Kandang hanya menerima `enemyId` yang ada di `quotas` mesinnya, jadi musuh dari region lain tidak dihitung. Musuh lain bisa ditambah di data tanpa mengubah kode.
 
@@ -281,12 +281,12 @@ Setiap mesin yang regionnya dimuat menerima event ini dan membuka jendelanya sen
 3. **Posisi tiap mesin (usulan):** mesin Region 3 tetap di (350, 2050). Posisi tiga mesin lainnya ditentukan saat layout #88, dengan syarat berada dalam jangkauan teritori hewan kuotanya dan sekitar 200 meter dari area base yang wajar. Masalah lama, yaitu jendela gratis erupsi Region 1 yang tidak terjangkau, selesai karena Region 1 kini punya mesin sendiri.
 4. **Batas putaran gratis:** 3 per jendela, sedangkan GDD hanya menyebut 30 detik. Tanpa batas, pemain bisa mendapat sampai 7 putaran.
 5. **Tabungan putaran:** 1, dan gerbang menutup setelah kuota penuh.
-6. **Kuota terpisah per mesin:** tiap mesin hanya menerima musuh regionnya (tabel di bagian 1). Kuota Region 3 berasal dari GDD, sedangkan tiga lainnya usulan. Tiap baris dihitung sendiri, dan masing-masing memberi 1 putaran.
+6. **Kuota terpisah per mesin:** tiap mesin hanya menerima musuh regionnya (tabel di bagian 1). Kuota Region 3 berasal dari GDD, sedangkan tiga lainnya disetujui developer sebagai nilai awal. Tiap baris dihitung sendiri, dan masing-masing memberi 1 putaran.
 7. **Peluang tier:** S 5 persen, A 25 persen, dan B 70 persen, dari blueprint lama.
 8. **Hadiah ganda:** item unik tidak berulang, buff bertumpuk 3 kali, dan modifier mengikuti aturan di bagian 2.
 9. **Hadiah tingkat B berupa barang biasa:** GDD hanya menyebut skin, buff, dan senjata ajaib. `SpawnItem` berisi peluru dan kayu ada karena issue meminta jenis ini.
 10. **Blood Moon tidak memicu mode gratis:** GDD hanya menyebut *Sudden Event*.
-11. **Hadiah bersama (menunggu developer):** keempat mesin memakai tabel hadiah yang sama, dan batas hadiah dihitung bersama lewat `LuckyRewardLedger`. Pilihan lain adalah tabel hadiah berbeda per region.
+11. **Hadiah bersama (disetujui developer):** keempat mesin memakai tabel hadiah yang sama, dan batas hadiah dihitung bersama lewat `LuckyRewardLedger`.
 12. **Putaran tidak bisa dipindah:** putaran tersimpan dari satu mesin hanya bisa dipakai di mesin itu.
 
 **Perubahan kontrak yang diperlukan:** lihat daftar laporan, untuk `SpawnManager`, `DamagePipeline`, `StatusEffectManager`, `VitalsRules`, `ItemUseSystem`, `EquipmentManager`, dan `DurabilitySystem`.

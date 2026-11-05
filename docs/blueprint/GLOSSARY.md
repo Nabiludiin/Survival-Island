@@ -27,7 +27,7 @@ Developer sudah menyetujui keputusan berikut.
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
 | Blood Moon | Setiap 10 hari (GDD bagian 3). Zombie mengabaikan Stealth |
 | Mengendap dan Diterkam | Aturan GDD bagian 3. Pemain hanya bisa lepas sendiri, tanpa bantuan NPC |
-| Lucky Machine | Satu mesin di setiap region. Kuota per region dan hadiah bersama menunggu konfirmasi developer |
+| Lucky Machine | Satu mesin di setiap region, dengan kuota per region dan tabel hadiah bersama (`LuckyMachine.md`) |
 | Fitur tambahan yang dipakai | #96, #106, dan #112 |
 | Fitur yang tidak dipakai | #48, #105, dan #117. Blueprint-nya disimpan sebagai arsip |
 | Angka inti dan usulan kecil | Disetujui sebagai nilai awal, dan boleh berubah saat playtest |
