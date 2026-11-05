@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/Core_Logic/LootSpawnerSystem.md`
 **Deskripsi Utama:** Menyebar loot di titik tertentu, di kapal maupun di pulau, dari seed run, lalu mengingat hasilnya supaya tidak berlipat setelah load.
 **Issue:** #89, #74, #103
-**Rujukan GDD:** Bagian 1 dan 5 (mencari barang di kapal dan pulau). Peluang dan aturan titik adalah usulan.
+**Rujukan GDD:** Bagian 1 (*scavenging*) dan bagian 3 (looting di kapal pada Fase 1, dan looting di pulau sebagai sumber makanan). Peluang dan aturan titik adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 

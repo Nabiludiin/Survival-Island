@@ -68,6 +68,9 @@ Semua pemicu berasal dari event, sehingga sistem gameplay tidak perlu mengenal `
 | `region_snow` | `RegionChangedEvent` ke `Snow` | Pakai pakaian hangat atau obor, kalau tidak terkena frostbite | 75 |
 | `region_logistic` | `RegionChangedEvent` ke `Logistic` | Suku cadang berat memperlambat langkah | 75 |
 | `first_heavy` | `HeavyItemChangedEvent` dengan `isCarried = true` | Tidak bisa lari dan lompat saat membawa barang | 75 |
+| `first_stealth` | `NightfallEvent` kedua, setelah `first_night` tampil | Tahan `Crouch` untuk mengendap. Zombie mendeteksi lewat pandangan dan suara (GDD bagian 3) | 70 |
+| `blood_moon` | `BloodMoonWarningEvent` pertama | Malam ini Blood Moon. Horde menyerbu base, dan mengendap tidak berguna (GDD bagian 3) | 95 |
+| `first_throwable` | `EquippedItemChangedEvent` dengan `Throw_Molotov`, `Throw_Bomb`, `Throw_Rock`, atau `Throw_Flare` | Lempar untuk mengendalikan atau memancing kerumunan zombie (GDD bagian 3) | 50 |
 
 Lucky Machine tidak punya pop-up, karena mesin itu sengaja menjadi kejutan pemain. Isi Diary juga tidak diulang di sini, supaya Diary tetap punya nilai.
 
@@ -157,3 +160,6 @@ Lucky Machine tidak punya pop-up, karena mesin itu sengaja menjadi kejutan pemai
 9. Matikan tutorial di Settings. **Hasil:** tidak ada pop-up baru.
 10. Tekan "Ulang tutorial". **Hasil:** `first_inventory` muncul lagi saat inventori dibuka.
 11. Masuk Region 3 lalu Region 4. **Hasil:** `region_snow` dan `region_logistic` masing-masing tampil sekali.
+12. Jalankan `setday 10` lewat `DevConsole`, lalu tunggu jam 12:00. **Hasil:** `blood_moon` tampil sekali. Pada Blood Moon berikutnya tidak tampil lagi.
+13. Lewati malam pertama, lalu tunggu malam kedua. **Hasil:** `first_stealth` tampil sekali.
+14. Pegang `Throw_Rock`. **Hasil:** `first_throwable` tampil sekali, dan tidak tampil lagi untuk barang lempar lain.

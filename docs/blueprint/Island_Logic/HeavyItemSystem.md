@@ -86,7 +86,7 @@ Titik dipilih acak dari titik buatan tangan, minimal 10 titik untuk 5 barang, se
 `HeavyItem.CanInteract(in ctx)`:
 
 1. Kalau `ctx.IsCarryingHeavyItem`, kembalikan `CarryingHeavyItem`.
-2. Kalau `PlayerTraversal.Mode` bukan `Ground` atau `Crouching`, kembalikan `HandsFull`.
+2. Kalau `PlayerTraversal.Mode` bukan `Ground`, kembalikan `HandsFull`. Mengangkat saat jongkok ditolak, sesuai `PlayerTraversal.md` (tidak bisa jongkok saat membawa Heavy Item).
 3. Selain itu, `None`.
 
 **`public bool PickUp(int index)`:**

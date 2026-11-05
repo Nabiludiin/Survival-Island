@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/60-seconds/ShipInteractable.md`
 **Deskripsi Utama:** Barang dan NPC yang bisa diambil di kapal. Mengikuti `IInteractable` (#17), menghitung berat dari data, dan kembali ke pool setelah diambil.
 **Issue:** #17, #18, #74, #104, #118
-**Rujukan GDD:** Bagian 1 (mengambil barang dan NPC). Berat dan kapasitas tangan adalah usulan.
+**Rujukan GDD:** Bagian 3 (Fase 1: mengambil peluru, makanan kaleng, dan menyelamatkan NPC). Berat dan kapasitas tangan adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 

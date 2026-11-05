@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/Core_Logic/CarryCapacity.md`
 **Deskripsi Utama:** Perpindahan barang dari slot tangan kapal ke inventori pulau, jumlah slot inventori, tumpukan bahan, dan tingkatan Backpack.
 **Issue:** #118
-**Rujukan GDD:** Bagian 3 (barang dari Fase 1 dibawa ke Fase 2, dan item awal). Konversi barang wajib ada untuk mendukung GDD. **Tingkatan Backpack adalah usulan, belum ada di GDD,** dan hanya dipakai kalau developer menyetujuinya. Tanpa tas, inventori tetap 15 slot.
+**Rujukan GDD:** Bagian 3 (barang dari Fase 1 dibawa ke Fase 2, dan item awal). Konversi barang wajib ada untuk mendukung GDD. **Tingkatan Backpack adalah usulan, belum ada di GDD,** dan sudah disetujui developer sebagai nilai awal (lihat bagian 5). Tanpa tas, inventori tetap 15 slot.
 
 ## 1. Arsitektur & Variabel Utama
 

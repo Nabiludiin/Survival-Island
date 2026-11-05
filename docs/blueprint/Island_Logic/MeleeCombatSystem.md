@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/Island_Logic/MeleeCombatSystem.md`
 **Deskripsi Utama:** Sistem pertarungan jarak dekat dan panen dengan Pisau, Kapak, dan Beliung, memakai raycast pendek dari kamera.
 **Issue:** #59 (melengkapi #12, #18, #49, #60, #73, #97, #103, dan #111)
-**Rujukan GDD:** Bagian 2 (`Base_Pisau` sebagai item inti). Angka damage dan stamina adalah usulan.
+**Rujukan GDD:** Bagian 3 (`Base_Pisau` sebagai item inti, dan Pisau untuk lepas saat diterkam). Angka damage dan stamina adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 

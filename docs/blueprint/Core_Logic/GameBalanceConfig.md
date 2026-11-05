@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/Core_Logic/GameBalanceConfig.md`
 **Deskripsi Utama:** Satu sumber angka penyetelan, dengan target pengalaman bermain yang jelas.
 **Issue:** #84
-**Rujukan GDD:** Bagian 1, 3, 5, dan 6. Semua angka di sini adalah usulan awal, dan harus disetel lewat playtest.
+**Rujukan GDD:** Bagian 1, 3, 5, dan 6. Angka yang berasal dari GDD (60 detik, 60 hari, 500 kayu, Blood Moon 10 hari, jendela gratis 30 detik) ditandai di tabelnya. Angka lain adalah usulan awal, dan harus disetel lewat playtest.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -137,7 +137,7 @@ Sebelumnya `timeMultiplier = 50` menghasilkan 28,8 menit per hari dan 28,8 jam t
 | `vitals` | `frostbiteDamagePerSec` | 5 | 1 | Setelah stamina habis, HP penuh habis dalam 100 detik |
 | `resource` | `treeDropMin` / `treeDropMax` | 2 / 4 | 8 / 12 | Rata-rata 10 kayu per pohon |
 | `resource` | `axeDecayPerUse` | 5 | 1 | 100 ayunan per kapak, sekitar 50 pohon |
-| `region` | `bridgeWoodCost` | 500 | 500 | Mengikuti keputusan #85 |
+| `region` | `bridgeWoodCost` | 500 | 500 | GDD bagian 5 (nilai awal 500, bisa disetel) |
 | `region` | `heavyItemSpeedMultiplier` | 0,5 | 0,5 | Sesuai `Claude.md` |
 | `region` | `helicopterPartCount` | Tidak ada | 5 | Disetel bersama #69 |
 | `weather` | `weatherIntervalGameHours` | 300 detik nyata | 8 jam game | 3 kali per hari game |
@@ -237,14 +237,14 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 | `enemyAttack` | #109 | Batas penyerang pemain dan NPC, radius tunggu, jeda meminta izin, toleransi Animation Event, jeda setelah dibatalkan, dan jeda tanda arah |
 | `hitReaction` | #95 | Stagger, efek kaki, ambang armor, knockback, Shove, mayat, ragdoll, dan batas drop per malam |
 | `threat` | #108 | Jeda penilaian, waktu minimum target, selisih skor, aggro, pengurang kerumunan, Blood Moon, kehilangan jejak, target tak terjangkau, dan batas per frame |
-| `stealth` | #49 | Saklar sistem, jarak dan sudut pandang, laju deteksi, pengali jongkok dan lari, radius suara, jadwal tick, dan titik perburuan |
+| `stealth` | #49 | Saklar enabled true (aturan GDD, saklar hanya untuk tes), jarak dan sudut pandang, laju deteksi, pengali jongkok dan lari, radius suara, jadwal tick, dan titik perburuan |
 | `wildlife` | #61 | Jeda FSM, aggro dan suara, teritori, target tak terjangkau, kabur ke sarang, serangan khusus, dan menguliti. Angka per spesies ada di `AnimalData` |
 | `spawn` | #62 | Jeda dan batas spawn, batas zombie dan hewan, jarak, arah belakang, pengaman macet, sapu bersih, target hewan, dan batas pengurangan anggaran dari sarang |
 | `sunlight` | #63 | Jeda cek sinar, sudut matahari, durasi terbakar, batas berlindung, jam sembunyi, waktu turun dan naik, boost, dan jumlah Zombie Desa siang |
 | `specialZombie` | #25 | Angka perilaku varian: jerat Tribal, amarah Lumut, lambat Militer, ledakan Beku, terkaman Desa, dan pengaman macet varian besar. Statistik HP dan kecepatan ada di aset `ZombieData` |
 | `aiDirector` | #27 | `threatCurve` per hari, pengali region, waktu tahap Director, intensitas, ukuran mob, batas kecepatan zombie, dan pengali setelah hari ke-60: postTargetCountPerDay 0,02, postTargetCountMax 1,5, postTargetHpPerDay 0,02, postTargetHpMax 2, postTargetDamagePerDay 0,01, postTargetDamageMax 1,5 (keputusan developer, juga dipakai Blood Moon dan penyergapan) |
 | `crowd` | #93 | Kapasitas agen, batas tick per frame, interval per tingkatan, ambang update tujuan, kelompok, avoidance, buffer overlap, dan stagger animasi |
-| `pinned` | #110 | enabled, kemajuan lepas, biaya stamina, pengali status, Pisau, batas tertahan, batas penyerang lain, dan waktu kebal |
+| `pinned` | #110 | Saklar enabled true (aturan GDD, saklar hanya untuk tes), kemajuan lepas, biaya stamina, pengali status, Pisau, batas tertahan, batas penyerang lain, dan waktu kebal |
 | `trap` | #26 | Damage, jeda, keausan, dan suara Spike Trap, kawat, dan api unggun, serta batas jebakan per region |
 | `throwable` | #96 | enabled true, gaya, sumbu, radius, damage, durasi, dan noise tiap barang, serta bidikan, jeda lempar, dan batas Suar |
 | `lair` | #112 | enabled true, radius aktif, pemicu Dormant, pintu keluar, HP sarang, pengurangan horde, dan porsi zombie yang keluar saat malam |
@@ -304,7 +304,7 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 
 ## 5. Keputusan Desain
 
-**Keputusan developer:** `bridgeWoodCost` bernilai awal 500. Pengali `aiDirector.postTarget*` setelah hari ke-60 (`AIDirector.md`). Laju `vitals.infectionDamagePerSec` 0,3 saat `Infection` 100 (`VitalsRules.md`). Pemicu `objective.chapter2TriggerDay` dan `objective.chapter3TriggerRegion` (`ObjectiveManager.md`). Satu Lucky Machine di setiap region, dengan angka `luckyMachine` yang sama untuk keempat mesin (`LuckyMachine.md`).
+**Dari GDD:** `bridgeWoodCost` bernilai awal 500 (bagian 5). **Keputusan developer:** Pengali `aiDirector.postTarget*` setelah hari ke-60 (`AIDirector.md`). Laju `vitals.infectionDamagePerSec` 0,3 saat `Infection` 100 (`VitalsRules.md`). Pemicu `objective.chapter2TriggerDay` dan `objective.chapter3TriggerRegion` (`ObjectiveManager.md`). Satu Lucky Machine di setiap region, dengan angka `luckyMachine` yang sama untuk keempat mesin (`LuckyMachine.md`).
 
 **Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):**
 

@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/60-seconds/ShipPlayerController.md`
 **Deskripsi Utama:** Pergerakan pemain Fase 1. Kamera memakai prefab rig `FirstPersonCamera`, interaksi memakai `PlayerInteractor`, dan input memakai `InputManager`.
 **Issue:** #17, #18, #74, #75, #83, #102
-**Rujukan GDD:** Bagian 1 (Fase 1, first-person). Level kontrol dan aksi dorong adalah usulan.
+**Rujukan GDD:** Bagian 1 (genre first-person) dan bagian 3 (Fase 1 di kapal). Level kontrol dan aksi dorong adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 

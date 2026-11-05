@@ -317,13 +317,13 @@ Runtuhan tidak memanggil dirinya sendiri, jadi tidak ada rekursi. Setiap penghap
 
 ### Pantai dan alasan air pasang
 
-GDD bagian 4 memberi dua alasan: bangunan "akan hancur oleh air pasang atau dilarang oleh sistem". Blueprint ini mengikuti **dilarang oleh sistem**, dengan alasan air pasang yang dijelaskan di dalam game:
+GDD bagian 4: "Sistem menolak penempatan, dan Diary menjelaskan bahwa air pasang akan menghanyutkan bangunan di sana." Blueprint ini mengikuti aturan itu:
 
 - Hologram merah dengan pesan dari kunci `build.error.Beach` (#104), yang berisi `Pasir tidak stabil. Air pasang akan menghanyutkan bangunan ini` di tabel kunci.
 - Diary Bab 1 berisi peringatan yang sama (#81).
 - `TideManager` (#91) tidak perlu merusak bangunan, karena bangunan tidak pernah berdiri di pasir.
 
-Perubahan teks GDD tidak dilakukan di sini. Usulan teksnya ada di bagian 5.
+Teks ini sudah menjadi GDD bagian 4.
 
 ### Simpan dan muat
 
@@ -415,7 +415,7 @@ public class StructureRecord
 4. **Batas bangunan:** 3 tingkat, 2 sel menjorok, dan 400 struktur.
 5. **Pengembalian bongkar:** 50 persen dikali rasio HP, dibulatkan ke bawah, dan ditolak selama 5 detik setelah diserang.
 6. **Area larangan bangun:** seam, lokasi jembatan, dan helipad.
-7. **Teks GDD bagian 4, untuk disetujui:** "Pemain dilarang membangun di atas pasir pantai. Sistem menolak penempatan, dan Diary menjelaskan bahwa air pasang akan menghanyutkan bangunan di sana." Rekomendasi: pakai teks ini, karena satu aturan lebih jelas daripada dua kemungkinan.
+7. **Teks GDD bagian 4:** sudah diterapkan di GDD. "Pemain dilarang membangun di atas pasir pantai. Sistem menolak penempatan, dan Diary menjelaskan bahwa air pasang akan menghanyutkan bangunan di sana."
 
 ## 6. Skenario Tes
 

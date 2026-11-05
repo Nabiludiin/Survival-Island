@@ -25,6 +25,8 @@ Developer sudah menyetujui keputusan berikut.
 | Zombie setelah hari ke-60 | Per hari: jumlah +2 persen, HP +2 persen, dan damage +1 persen. Batasnya 1,5x, 2x, dan 1,5x |
 | Infeksi mencapai 100 | HP turun bertahap, tidak mati seketika |
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
+| Blood Moon | Setiap 10 hari (GDD bagian 3). Zombie mengabaikan Stealth |
+| Mengendap dan Diterkam | Aturan GDD bagian 3. Pemain hanya bisa lepas sendiri, tanpa bantuan NPC |
 | Lucky Machine | Satu mesin di setiap region. Kuota per region dan hadiah bersama menunggu konfirmasi developer |
 | Fitur tambahan yang dipakai | #96, #106, dan #112 |
 | Fitur yang tidak dipakai | #48, #105, dan #117. Blueprint-nya disimpan sebagai arsip |

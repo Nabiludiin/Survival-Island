@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/60-seconds/ShipTimerManager.md`
 **Deskripsi Utama:** Menghitung mundur Fase 1 dan mengatur atmosfer kepanikan lewat audio dan efek layar. Hasil akhir Fase 1 dan perpindahan scene milik `LifeboatExtraction` (#74).
 **Issue:** #74, #82
-**Rujukan GDD:** Bagian 1 (Fase 1 selama 60 detik). Efek kepanikan adalah usulan.
+**Rujukan GDD:** Bagian 3 (Fase 1 selama persis 60 detik). Efek kepanikan adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 
@@ -63,7 +63,7 @@
 
 ## 5. Keputusan Desain
 
-**Sudah ditetapkan dokumen lain:** alur Fase 1 dan pemanggilan `EnterIslandPhase` (`LifeboatExtraction.md`). Durasi 60 detik (GDD bagian 1).
+**Sudah ditetapkan dokumen lain:** alur Fase 1 dan pemanggilan `EnterIslandPhase` (`LifeboatExtraction.md`). Durasi 60 detik (GDD bagian 3).
 
 **Menunggu developer:** tidak ada yang menghalangi.
 

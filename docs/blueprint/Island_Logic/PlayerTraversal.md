@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/Island_Logic/PlayerTraversal.md`
 **Deskripsi Utama:** Gerakan pemain yang belum ada di `IslandPlayerController`: jongkok, tangga dan tali, damage jatuh, lereng curam, dan pengaruh permukaan.
 **Issue:** #101
-**Rujukan GDD:** Bagian 3 (HP habis menyebabkan kematian) dan bagian 5 (jurang di Region 2, puncak es di Region 3, dan pengangkutan barang berat). Semua mekanik gerak di sini adalah usulan, karena GDD tidak merincinya.
+**Rujukan GDD:** Bagian 3 (HP habis menyebabkan kematian) dan bagian 5 (jurang di Region 2, puncak es di Region 3, dan pengangkutan barang berat). Jongkok mendukung aturan Mengendap di GDD bagian 3 (pemain bisa menghindar dengan mengendap, kecuali saat Blood Moon). Mekanik gerak lain dan semua angka adalah usulan, karena GDD tidak merincinya.
 
 ## 1. Arsitektur & Variabel Utama
 

@@ -233,7 +233,7 @@ Damage kondisi dari #111 memanggil `ReduceHP` lewat `ApplyVitalDamage`, tanpa `P
 | `Drown` | `Drowned` |
 | `Poison` | `Poison` |
 
-`Infection >= 100` tidak membunuh langsung. Kematian `Zombified` hanya terjadi saat HP habis dengan `DamageType.Infection` (GDD bagian 3, baris HP 5 di `VitalsRules.md`). `LeftOnShip` (#74) tidak melewati damage, tetapi langsung lewat `GameManager.TriggerGameOver`.
+`Infection >= 100` tidak membunuh langsung. Kematian `Zombified` hanya terjadi saat HP habis dengan `DamageType.Infection` (GDD bagian 3 menyebut kematian karena infeksi; aturan "tidak mati seketika" adalah keputusan #85; baris HP 5 di `VitalsRules.md`). `LeftOnShip` (#74) tidak melewati damage, tetapi langsung lewat `GameManager.TriggerGameOver`.
 
 ### Ledakan dan target unik
 

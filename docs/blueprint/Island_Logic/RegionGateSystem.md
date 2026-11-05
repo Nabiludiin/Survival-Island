@@ -133,7 +133,7 @@ Jembatan berada di layer `Structure` supaya bisa dipijak, tetapi tidak punya `Ba
 
 | Lapis | Cara | Mencegah |
 |---|---|---|
-| 1. Jarak | Lebar jurang minimal `ravineMinWidth` 30 meter. Lompatan lari terjauh sekitar 10 meter (`jumpHeight` 2, `sprintSpeed` 8) | Melompat |
+| 1. Jarak | Lebar jurang minimal `ravineMinWidth` 30 meter. Lompatan lari terjauh sekitar 7,5 meter (`jumpHeight` 1,1, `sprintSpeed` 8) | Melompat |
 | 2. Dinding | `GateBarrier` setinggi 30 meter di sisi seberang jurang, dan mati hanya saat seam terbuka | Lompat dari tempat tinggi |
 | 3. Air | `GateBarrier` memanjang dari tebing sampai ke laut, melewati batas renang stamina (42 meter, #13) | Berenang memutar |
 | 4. Bangunan | `NoBuildVolume` di sekitar `BridgeSite` dan tepi jurang (`BuildMenu.md`) | Tangga atau lantai buatan |

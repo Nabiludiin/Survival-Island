@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/Core_Logic/HUDManager.md`
 **Deskripsi Utama:** Menampilkan informasi *real-time* kepada pemain (darah, stamina, lapar, haus, infeksi, peluru, hotbar, tujuan, dan penanda Fase 1) di layar. HUD hanya mendengar event atau membaca data.
 **Issue:** #18, #17, #51, #58, #60, #74, #81, #96, #111
-**Rujukan GDD:** Bagian 3 (status karakter) dan bagian 1 (timer Fase 1). Tata letak dan tanda tambahan adalah usulan.
+**Rujukan GDD:** Bagian 3 (status karakter dan timer 60 detik Fase 1). Tata letak dan tanda tambahan adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 

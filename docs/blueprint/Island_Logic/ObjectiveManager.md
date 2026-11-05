@@ -59,7 +59,7 @@ public class ObjectiveData : ScriptableObject
 
 ### Bab Diary
 
-Semua bab berada dalam satu buku `DiaryBook` di shelter tua yang hancur, Region 1, sesuai GDD bagian 4.
+Semua bab berada dalam satu buku `DiaryBook` di shelter tua yang hancur, sesuai GDD bagian 4. Penempatan shelter di Region 1 adalah usulan, karena GDD tidak menyebut regionnya.
 
 | Bab | Terbuka saat | Hadiah | Isi sesuai GDD |
 |---|---|---|---|

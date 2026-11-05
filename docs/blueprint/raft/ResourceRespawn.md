@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/raft/ResourceRespawn.md`
 **Deskripsi Utama:** Aturan alat panen, status habis pada `ResourceNode`, jadwal tumbuh kembali berbasis hari game, kepadatan node per region, dan item jatuh yang memakai pool.
 **Issue:** #73
-**Rujukan GDD:** Bagian 1 (target 60 hari, dan run bisa berlanjut sesudahnya), bagian 5 (kayu dan batu Region 1, jembatan 500 kayu, material medis Region 2). Tabel alat dan jadwal tumbuh adalah usulan.
+**Rujukan GDD:** Bagian 1 (target 60 hari), bagian 3 (melewati hari ke-60 bukan Game Over, jadi run bisa berlanjut), bagian 5 (kayu dan batu Region 1, jembatan 500 kayu, material medis Region 2). Tabel alat dan jadwal tumbuh adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 

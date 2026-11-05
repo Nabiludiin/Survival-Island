@@ -2,7 +2,7 @@
 **Lokasi:** `docs/blueprint/Core_Logic/AnimationController.md`
 **Deskripsi Utama:** Satu pembungkus `Animator` untuk tangan pemain, zombie, dan hewan. Blueprint ini mengatur state machine, parameter, dan transisi untuk jalan, lari, reload senjata, dan serangan musuh.
 **Issue:** #12
-**Rujukan GDD:** Tidak disebut langsung. Mendukung Bagian 3 (combat dan zombie terbakar) dan Bagian 5 (musuh per region). Animasi terbakar mengikuti `Claude.md` Pilar 3.
+**Rujukan GDD:** Bagian 3 (zombie terbakar dan mati terkena sinar matahari, combat, dan Diterkam) dan bagian 5 (musuh per region). Bentuk animasi adalah usulan.
 
 ## 1. Arsitektur & Variabel Utama
 

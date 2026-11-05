@@ -42,7 +42,7 @@ public enum DespawnReason : byte { Killed, Burned, ReturnedToDen, Harvested, Stu
 | `Snow` | `hewan_serigala_salju` (70, 2-3), `hewan_beruang` (30, 1) | `zombie_standar` (40), `zombie_militer` (30), `zombie_beku` (30) |
 | `Logistic` | `hewan_anjing` (60, 2-4), `hewan_gagak` (40, 5-8) | `zombie_desa` (100) |
 
-Varian Runner, Tank, dan Spitter mengikuti keputusan #25, dan ditambahkan sebagai baris baru dengan `minDay`.
+Runner, Tank, dan Spitter tidak menjadi `enemyId` baru. Sesuai `SpecialZombieAI.md` (#25), ketiganya hanya pola perilaku pada zombie yang ada di GDD bagian 5, jadi tabel ini tidak berubah.
 
 ### Pencatatan per musuh
 
