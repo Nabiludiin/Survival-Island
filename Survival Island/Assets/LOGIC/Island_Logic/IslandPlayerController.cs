@@ -19,7 +19,7 @@ namespace SurvivalIsland
     /// Mouse look milik FirstPersonCamera (#102). Stamina milik SurvivalStats (#111).
     ///
     /// Catatan implementasi (Langkah 3): HeavyItemSystem.Instance.IsCarrying (Langkah 6) dibaca lewat HeavyItemChangedEvent
-    /// sticky, supaya tidak bergantung pada kelas yang belum ada. Teleport belum memanggil ZoneManager.ResyncAll (TODO Langkah 6).
+    /// sticky, supaya tidak bergantung pada kelas yang belum ada. Teleport memanggil ZoneManager.ResyncAll (ditambah Langkah 6).
     /// Save posisi (player_transform, LoadOrder 80) ditulis di sini sesuai tabel WorldStateSave.md.
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
@@ -176,7 +176,8 @@ namespace SurvivalIsland
             controller.enabled = wasEnabled;
             velocity = Vector3.zero;
             if (traversal != null) traversal.ResetFallTracking();
-            // TODO Langkah 6: ZoneManager.Instance.ResyncAll(position), karena OnTriggerExit tidak dijamin terkirim.
+            // Langkah 6 (ZoneManager.md): hitung ulang zona, karena OnTriggerExit tidak dijamin terkirim.
+            ZoneManager.ResyncAll(position);
         }
 
         /// <summary>Dorongan sesaat (lepas dari tangga dengan Space, #101).</summary>

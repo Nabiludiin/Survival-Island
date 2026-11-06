@@ -183,3 +183,12 @@ Ini panduan level design, dan dicek oleh alat Editor `ZoneCoverageAudit` (usulan
 12. Jalankan Play Mode dua kali di Editor dengan Domain Reload dimatikan. **Hasil:** hitungan dimulai dari 0 setiap kali.
 13. Jalankan `ZoneCoverageAudit` pada peta yang sengaja diberi celah 30 meter. **Hasil:** titik celah dilaporkan.
 14. Jeda game saat berdiri di seam. **Hasil:** tidak ada event selama jeda.
+
+## 7. Catatan Implementasi (Langkah 6)
+
+- File: `Island_Logic/ZoneManager.cs` dan `Island_Logic/ZoneTracker.cs` (kelas statis). `RegionType` ditulis Langkah 4 dan `RegionChangedEvent` ditulis Langkah 5, jadi tidak dideklarasikan ulang.
+- `ZoneTracker.EnsureScene` memakai `Scene.handle`. `Reset` juga dipanggil lewat `[RuntimeInitializeOnLoadMethod(SubsystemRegistration)]`, begitu juga daftar `ZoneManager.all`.
+- `ResyncAll` langkah 3-4 dikerjakan `ZoneTracker.ResolveAfterResync`, dengan zona pertama yang berisi pemain sebagai pengganti.
+- `OnDisable` hanya mengeluarkan trigger dari `all` dan tidak menerbitkan event, karena `OnDisable` juga berjalan saat scene `IslandPhase` dilepas.
+- `IslandPlayerController.Teleport` sudah memanggil `ZoneManager.ResyncAll(position)`.
+- Alat Editor `ZoneCoverageAudit` (usulan) belum ditulis. `OnDrawGizmos` menggambar kotak berwarna per region.

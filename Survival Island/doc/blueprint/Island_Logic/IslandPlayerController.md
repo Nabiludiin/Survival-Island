@@ -107,4 +107,9 @@ Kode: `Survival Island/Assets/LOGIC/Island_Logic/IslandPlayerController.cs`.
 - `walkSpeed`, `sprintSpeed`, dan `gravity` dipindah ke `GameBalanceConfig.traversal` (rekomendasi bagian 5). Angka tambahan `traversal.groundCheckDistance` 0,2 (usulan Langkah 3).
 - Pemeriksaan tanah memakai `PhysicsQuery.SphereCast` pendek ke `PhysicsMasks.Ground`, ditambah `CharacterController.isGrounded`.
 - **Save posisi** (`player_transform`, `LoadOrder` 80, tabel `WorldStateSave.md`) ditulis di kelas ini: `GetSafeSavePosition()`, `yaw`, dan `pitch`.
-- Fungsi tambahan: `AddImpulse(Vector3)` (lepas dari tangga), `Velocity`, `Controller`. `Teleport` belum memanggil `ZoneManager.ResyncAll` (TODO Langkah 6).
+- Fungsi tambahan: `AddImpulse(Vector3)` (lepas dari tangga), `Velocity`, `Controller`. `Teleport` memanggil `ZoneManager.ResyncAll` sejak Langkah 6.
+
+## Catatan Implementasi (Langkah 6)
+
+- `Teleport` sekarang memanggil `ZoneManager.ResyncAll(position)` setelah posisi baru dipasang (satu baris, `ZoneManager.md`). TODO Langkah 3 di atas sudah selesai.
+- Efek Heavy Item tidak berubah: Sprint dan Jump tetap dimatikan lewat `HeavyItemChangedEvent`, dan `HeavyItemSystem` memasang `SpeedModifierId.HeavyItem`. `RegionalWeather` memasang `SpeedModifierId.Weather`.

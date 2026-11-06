@@ -243,3 +243,14 @@ Barang yang tergeletak di dalam trigger juga terpasang, sehingga pemain tidak di
 15. Temukan lore `PartLocation`. **Hasil:** barang indeks terkecil yang belum ditemukan mendapat penanda. Saat semua sudah ditemukan, tidak ada perubahan.
 16. Pakai `Keluar dari Tersangkut` saat membawa barang. **Hasil:** barang jatuh dengan `Unstuck`, tanpa suara jatuh keras.
 17. Jalankan pemeriksaan Editor pada `PartSpawnPointTable`. **Hasil:** tiap titik punya `isReachable` yang benar.
+
+## 7. Catatan Implementasi (Langkah 6)
+
+- File: `Island_Logic/HeavyItemSystem.cs` (`PartState`, `PartRecord`, `DropReason`), `HeavyItemData.cs`, `HeavyItem.cs`, dan `PartSpawnPointTable.cs` (`PartSpawnPoint`). `HeavyItemChangedEvent` ditulis Langkah 3.
+- Sprint dan Jump mati, regenerasi stamina, kunci senjata, dan obor disimpan sudah ditangani `IslandPlayerController`, `SurvivalStats`, dan `EquipmentManager` lewat `HeavyItemChangedEvent`, jadi file Langkah 3 itu tidak diubah. `PlayerInteractor.BuildContext` sekarang mengisi `IsCarryingHeavyItem` dari `HeavyItemSystem.IsCarrying`.
+- `PartSpawnPointTable` ditulis sebagai ScriptableObject berisi posisi dunia, dengan menu konteks Editor untuk mengisi `isReachable` dari NavMesh.
+- `RunSeedManager.BuildLayout` masih kosong (#89). Kalau `CurrentLayout.partPointByPart` kurang atau tidak sah, `HeavyItemSystem` memilih titik dengan aturan yang sama (`Fork(PartLocation, 0)`, `Shuffle`, `minPartPointSpacing`). Bagian ini dihapus setelah `BuildLayout` diisi.
+- `PartRecord.spawnPointIndex` ditambahkan sebagai cadangan `ReturnToValid`.
+- `RegionStreaming` (#88) belum ada: semua barang aktif sejak awal, `RegionLoadStateChangedEvent` tidak didengar, dan batas bawah region belum diperiksa di `RecoveryTick`.
+- `SwimStateChangedEvent` (#13) belum ada; berenang dibaca dari `PlayerTraversal.Mode == Swimming`. `CompassSystem` (#30), `LoreHintGrantedEvent` (#100), notifikasi (#22), dan `VFXManager` (#15) ditandai TODO.
+- `carryAnchor` diisi di Inspector atau lewat `SetCarryAnchor`. Kalau kosong, barang menempel pada transform pemain.

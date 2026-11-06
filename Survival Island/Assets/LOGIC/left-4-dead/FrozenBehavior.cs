@@ -6,7 +6,7 @@ namespace SurvivalIsland
     /// <summary>
     /// Zombie Beku: meledak dingin saat mati. SpecialZombieAI.md (#25). GDD bagian 5, Region 3.
     /// Tidak meledak kalau mati karena api (es sudah mencair) atau BurnToAshes (tidak lewat Died).
-    /// Catatan Langkah 5: WarmthSystem.ApplyColdBurst (#65, Langkah 6) belum ada, jadi pengurangan Warmth ditandai TODO.
+    /// Catatan Langkah 6: pengurangan Warmth lewat WarmthSystem.ApplyColdBurst (#65) disambungkan di BurstRoutine langkah 4.
     /// </summary>
     public class FrozenBehavior : SpecialZombieAI
     {
@@ -38,9 +38,25 @@ namespace SurvivalIsland
                 sourceId = zombie != null ? zombie.enemyId : "zombie_beku", byPlayer = false
             };
             ExplosionDamage.Apply(center, b.frozenBurstRadius, info);
-            // 4. TODO #65: WarmthSystem.Instance.ApplyColdBurst(frozenBurstWarmthLoss) kalau pemain kena dan garis pandang bebas.
+            // 4. Langkah 6 (#65): Warmth berkurang kalau pemain dalam radius dan garis pandang bebas.
+            ApplyColdBurstToPlayer(center, b.frozenBurstRadius, b.frozenBurstWarmthLoss);
             // 5. NoiseSourceKind.Structure dipakai untuk ledakan (usulan blueprint).
             NoiseEmitter.Emit(center, b.frozenBurstRadius, NoiseSourceKind.Structure);
+        }
+
+        /// <summary>Langkah 6: pemain dalam radius dengan garis pandang bebas kehilangan Warmth (frozenBurstWarmthLoss).</summary>
+        private static void ApplyColdBurstToPlayer(Vector3 center, float radius, float warmthLoss)
+        {
+            var warmth = WarmthSystem.Instance;
+            if (warmth == null) return;
+            Vector3 target = warmth.transform.position + Vector3.up;
+            Vector3 toPlayer = target - center;
+            float dist = toPlayer.magnitude;
+            if (dist > radius) return;
+            // Garis pandang: dinding atau medan di antara ledakan dan pemain menghalangi.
+            if (dist > 0.01f && PhysicsQuery.Raycast(new Ray(center, toPlayer / dist), out var hit, dist, PhysicsMasks.Explosion)
+                && hit.collider.GetComponentInParent<WarmthSystem>() == null) return;
+            warmth.ApplyColdBurst(warmthLoss);
         }
 
         public override void OnReturned()

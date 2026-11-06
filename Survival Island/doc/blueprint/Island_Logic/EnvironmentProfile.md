@@ -189,3 +189,12 @@ Tujuannya: Region 2 dan malam terasa perlu senter, tetapi layar tidak hitam tota
 10. Simpan di Region 4 malam hari, lalu load. **Hasil:** suasana langsung benar, tanpa transisi.
 11. Ubah `brightness` ke 0,8 dan 1,2 pada malam gelap. **Hasil:** ambient mengikuti, tanpa turun di bawah `minAmbientLuminance`.
 12. Picu Blood Moon. **Hasil:** langit `#801010`, masuk dalam 20 detik, dan keluar dalam 10 detik.
+
+## 7. Catatan Implementasi (Langkah 6)
+
+- File: `Island_Logic/EnvironmentDirector.cs` (`EnvEventId`, `WeatherEnvironmentLayer`, `EnvironmentEventLayer`) dan `Island_Logic/RegionEnvironmentProfile.cs`. `ZoneTracker` ditulis di `Island_Logic/ZoneTracker.cs` (lihat `ZoneManager.md`).
+- Tabel "Lapisan event" disimpan di `GameBalanceConfig.environment.eventLayers`. Warna matahari event diberi nilai awal `#FF5040` (Blood Moon) dan `#FF9A50` (erupsi), karena tabel hanya menyebut "warna merah" dan "warna jingga". Kolom "warna langit" `#801010` belum dipakai, karena skybox memakai tekstur. Keduanya perlu disetel saat playtest.
+- Bobot event bergerak ke target `PushEventLayer` memakai `blendInSeconds` dan `blendOutSeconds` per lapisan (-1 berarti `eventBlendSeconds`).
+- `postProfile` disimpan sebagai `Object`, supaya assembly `SurvivalIsland` belum perlu referensi URP. `PostProcessController` (#23), `SettingsManager.brightness` (#19), dan interior `InteriorZone` (#112) belum ada (TODO di kode).
+- Luminansi dihitung dengan koefisien Rec. 709. Ambient di bawah batas dinaikkan dengan skala yang sama di semua kanal.
+- `Awake` menyetel `RenderSettings.fog = true`, mode `ExponentialSquared`, dan `ambientMode = Flat`. `SunlightExposure` (Langkah 5) hanya membaca `RenderSettings.sun`; sekarang `DayNightDirector.SunDirection` sudah ada dan bisa dipakai di sana.

@@ -128,7 +128,7 @@ Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Lan
 | **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
-| **6** | `ZoneManager`, frostbite, jembatan kayu, barang berat, `WeatherManager` | `Island_Logic/` | Belum dimulai |
+| **6** | `ZoneManager`, frostbite, jembatan kayu, barang berat, `WeatherManager` | `Island_Logic/` | Ditulis, belum dikompilasi |
 | **7** | *Sudden Event*, `LuckyMachine`, `DiaryManager`, alur menang dan kalah | `Island_Logic/`, `Core_Logic/` | Belum dimulai |
 
 Isi kolom **Status** dengan salah satu: `Belum dimulai`, `Sedang ditulis`, `Ditulis, belum diuji di Unity`, atau `Diuji di Unity`. Jangan menulis `Diuji di Unity` sebelum *script* benar-benar dijalankan di Unity.
@@ -237,3 +237,42 @@ Langkah 5 (Pilar 3 "L4D"): AI musuh `NavMeshAgent`, spawn siang dan malam, gunpl
 5. Pool di `ObjectPooler`, tag = `enemyId`: `zombie_standar` 50, `zombie_desa` 30, varian zombie lain 12, `hewan_serigala` dan `hewan_anjing` 8, `hewan_gagak` 16, hewan lain 4, serta `Tribal_Snare` (layer `Projectile`, komponen `TribalSnare`).
 6. Aset **Survival > Weapon Data** untuk `Base_Pistol` (nilai di `GunController.md`), diisi ke `ItemData.weaponData`. `equipPrefab` Pistol memakai `GunController` dengan `ParticleSystem` muzzle flash, dan `equipPrefab` Pisau/Kapak/Beliung memakai `MeleeCombatSystem`.
 7. Aset **Survival > Threat Profile**: `Threat_Zombie` dan `Threat_Animal` (nilai di `ThreatSystem.md`). Letakkan `DenPoint` dan `AnimalTerritory` di scene region.
+
+## 🧩 Ditambahkan Langkah 6
+
+Langkah 6 (sistem region): `ZoneManager`, cuaca, suasana region, frostbite Region 3, jembatan kayu Region 2, dan barang berat Region 4. Status: **ditulis, belum dikompilasi di Unity**. Kode hanya dicek dengan `dotnet build` (netstandard2.1, C# 9) terhadap DLL Unity 6000.3.10f1 dan DLL Input System, TextMeshPro, serta UGUI dari `Library/ScriptAssemblies` checkout utama, tanpa stub: 0 error dan 0 warning pada konfigurasi Editor, rilis, dan `DEVELOPMENT_BUILD`. Belum ada yang dijalankan di Play Mode. File `.meta` dibuat manual dengan GUID acak.
+
+| File | Blueprint |
+|---|---|
+| `Island_Logic/ZoneManager.cs`, `ZoneTracker.cs` | `ZoneManager.md`, `EnvironmentProfile.md` "Zona bertumpuk" (#92) |
+| `Island_Logic/WeatherType.cs`, `RegionalWeather.cs` (`WeatherEffects`, `WeatherOverride`, `WeatherOverrideHandle`), `RegionWeatherTable.cs` (`WeatherWeight`) | `RegionalWeather.md` (#115) |
+| `Island_Logic/WeatherManager.cs` | `WeatherManager.md` (#115) |
+| `Island_Logic/EnvironmentDirector.cs` (`EnvEventId`, `WeatherEnvironmentLayer`, `EnvironmentEventLayer`), `RegionEnvironmentProfile.cs` | `EnvironmentProfile.md` (#92) |
+| `Island_Logic/WarmthSystem.cs`, `TorchController.cs` | `WarmthSystem.md` (#65) |
+| `Island_Logic/RegionGateSystem.cs` (`GateKind`, `GateRule`), `BridgeSite.cs`, `GateBlocker.cs`, `RavineRecoveryVolume.cs` | `RegionGateSystem.md` (#68) |
+| `Island_Logic/HeavyItemSystem.cs` (`PartState`, `PartRecord`, `DropReason`), `HeavyItemData.cs`, `HeavyItem.cs`, `PartSpawnPointTable.cs` (`PartSpawnPoint`) | `HeavyItemSystem.md` (#69) |
+
+Kontrak yang dipakai apa adanya: `RegionType` (Langkah 4), `RegionChangedEvent` (Langkah 5), `WarmthChangedEvent` dan `HeavyItemChangedEvent` (Langkah 3), serta `SpeedModifierId` (Langkah 3). Kontrak baru untuk Langkah 7: `WeatherType`, `RegionalWeather.PushOverride`/`PopOverride` (Badai Tropis), `EnvironmentDirector.PushEventLayer`/`PopEventLayer` (erupsi, Blood Moon), `HeavyItemSystem.MarkInstalled`/`InstalledCount`/`TryGetNearestPart`, `RegionGateSystem.IsUnlocked`/`WoodRemaining`/`HasBridgeBlueprint`, dan `RegionGateSystem.HandleDiaryChapter(int)` sampai `DiaryChapterUnlockedEvent` ada.
+
+### Perubahan kecil di file Langkah lain
+
+- `Core_Logic/GameEvents.cs`: bagian baru "Ditambahkan Langkah 6" di akhir file (`WeatherChangedEvent`, `RegionUnlockedEvent`, `BridgeProgressChangedEvent`).
+- `Core_Logic/GameBalanceSections.cs`: bagian baru "Ditambahkan Langkah 6" di akhir file (tambahan `region` #68, tambahan `weather` #115, `warmth`, `heavyItem`, `environment`). Lima deklarasi kelas di atas (`RegionBalance`, `WeatherBalance`, `WarmthBalance`, `HeavyItemBalance`, `EnvironmentBalance`) hanya ditambah kata `partial`, sama seperti cara Langkah 4.
+- `Island_Logic/IslandPlayerController.cs`: `Teleport` memanggil `ZoneManager.ResyncAll(position)` (satu baris, TODO Langkah 3).
+- `Island_Logic/PlayerInteractor.cs`: `BuildContext` mengisi `IsCarryingHeavyItem` dari `HeavyItemSystem.IsCarrying` (TODO Langkah 2).
+- `left-4-dead/FrozenBehavior.cs`: ledakan Zombie Beku memanggil `WarmthSystem.ApplyColdBurst` untuk pemain dalam radius dengan garis pandang bebas (TODO Langkah 5).
+- Kolom **Status** Langkah 6 di tabel "Status Langkah" diubah menjadi `Ditulis, belum dikompilasi`.
+
+Kecepatan setengah, Sprint dan Jump mati, regenerasi stamina, dan kunci senjata saat membawa barang berat sudah berjalan di `IslandPlayerController`, `SurvivalStats`, dan `EquipmentManager` lewat `HeavyItemChangedEvent`, jadi file itu tidak diubah. Frostbite (Stamina dulu, lalu HP) sudah dihitung `SurvivalStats` dari `WarmthChangedEvent.isFreezing`.
+
+### Belum diimplementasikan (sistem pendukung belum ada)
+
+`RegionStreaming` dan `RegionBoundaryGuard` (#88, diganti `ZoneTracker.Active` dan posisi aman di `RegionGateSystem`), `SwimStateChangedEvent`/`SwimmingController` (#13, diganti `PlayerTraversal.Mode == Swimming`), `InteriorZone` (#112), `CampfireManager` (#44), `PostProcessController` (#23), `SettingsManager.brightness` (#19), `VFXManager` (#15), `NotificationManager` (#22), `CompassSystem` (#30), `LoreHintGrantedEvent` (#100), `LightSource` (#98), `DevConsole` (#56), `DiaryChapterUnlockedEvent` (#81, Langkah 7), isi `RunSeedManager.BuildLayout` untuk suku cadang (#89, diganti pemilihan cadangan di `HeavyItemSystem`), aksi `Pakai` pakaian hangat di UI inventori, `NavMeshLink` seam, dan alat Editor `ZoneCoverageAudit`. Semuanya ditandai TODO di kode dan dicatat di bagian "Catatan Implementasi (Langkah 6)" pada blueprint terkait.
+
+### Penyiapan di Unity untuk Langkah 6 (belum dilakukan)
+
+1. Scene `IslandPhase`: satu objek manager berisi `RegionalWeather` (4 aset **Create > Survival > Regional Weather Table**, isi lewat menu konteks "Isi nilai awal region"), `WeatherManager` (anak kamera: `rainParticles`, `stormLeavesParticles`, dua `AudioSource` di grup mixer `Ambient`), `EnvironmentDirector` (4 aset **Create > Survival > Region Environment Profile** dengan menu konteks "Isi nilai awal region", Directional Light matahari, material `SkyboxBlended` opsional), `RegionGateSystem` (isi `rules[].barriers` dengan `GateBarrier` dan `GateBlocker`), dan `HeavyItemSystem` (5 aset **Create > Survival > Heavy Item**, aset **Create > Survival > Part Spawn Point Table** minimal 10 titik, `carryAnchor` di depan kamera pemain).
+2. Trigger zona: `BoxCollider` raksasa (IsTrigger, layer `ZoneTrigger`) dengan `ZoneManager` per region, bertumpuk minimal 10 meter di seam, dari dasar laut sampai puncak.
+3. Pemain Fase 2: tambahkan `WarmthSystem` di samping `SurvivalStats`. Item `Tool_Torch` memakai `equipPrefab` dengan `TorchController` (`Light`, `ParticleSystem`). Item `Gear_WarmClothes` memakai `isWarmClothing = true`.
+4. Region 1: `BridgeSite` di tepi jurang `S1` (layer `Interactable`, 20 ruas, `deckCollider` di layer `Structure`, papan TMP), `NoBuildVolume` di sekitarnya, dan `RavineRecoveryVolume` (trigger layer `ZoneTrigger`) 5 meter di atas dasar jurang.
+5. Prefab suku cadang: layer dan tag `HeavyItem`, `HeavyItem`, `Rigidbody`, dan collider bukan trigger. Pool `Fx_Snow`, `Fx_Blizzard`, `Fx_AshLight`, `Fx_Spores`, `Fx_SnowDust`, dan `Fx_Mist` di `ObjectPooler`.

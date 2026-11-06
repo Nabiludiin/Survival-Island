@@ -194,3 +194,10 @@ Kalau `Present` dipanggil lagi di tengah crossfade, deck yang sedang memudar dip
 12. Tahan obor saat `Storm` di Region 1, lalu saat `Blizzard` di Region 3. **Hasil:** obor tetap menyala. `WeatherManager` tidak memanggil sistem obor.
 13. Mati saat `Blizzard`, lalu mulai run baru. **Hasil:** tidak ada peringatan pool tersisa dari `ObjectPooler.ResetForNewRun`.
 14. Jeda game selama crossfade. **Hasil:** emisi berhenti di tengah, lalu lanjut setelah jeda selesai.
+
+## 7. Catatan Implementasi (Langkah 6)
+
+- File: `Island_Logic/WeatherManager.cs`. `WeatherType` ada di `Island_Logic/WeatherType.cs`.
+- Komponen tidak memakai `enabled = false` saat cuaca tetap, karena `OnDisable` mengembalikan partikel pool dan menghentikan deck. Penggantinya penanda `idle`, sehingga `Update` langsung keluar.
+- `SwimStateChangedEvent` (#13) belum ada. `isUnderwater` diisi lewat `SetUnderwater(bool)` sampai event itu ditulis.
+- `VFXManager.densityMultiplier` (#15) belum ada, jadi dianggap 1.
