@@ -240,7 +240,7 @@ Langkah 5 (Pilar 3 "L4D"): AI musuh `NavMeshAgent`, spawn siang dan malam, gunpl
 
 ## 🧩 Ditambahkan Langkah 7
 
-Langkah 7: *Sudden Event* (`DisasterManager`, Fireball Region 1 dari `ObjectPooler`, `MajorDisasterStartedEvent`), `LuckyMachine` (kuota musuh per region lewat kandang, mode gratis 30 detik saat bencana besar, hadiah gacha), `DiaryManager` (panel teks yang menjeda lewat `UIFocusStack`), dan alur menang dan kalah (`RescueEventManager`, `DeathCinematic`). Status: **ditulis, belum dikompilasi di Unity.** Kode hanya dicek dengan `dotnet build` (netstandard2.1, C# 9) terhadap DLL UnityEngine 6000.3.10f1 serta `Unity.InputSystem`, `Unity.TextMeshPro`, dan `UnityEngine.UI` dari `Library/ScriptAssemblies` checkout utama: 0 error dan 0 warning di Editor, rilis, dan `DEVELOPMENT_BUILD`. Pengecekan itu memakai stub `HeavyItemSystem`, `HeavyItem`, `PartRecord`, dan `PartState` (milik Langkah 6, tidak di-commit), jadi branch ini baru terkompilasi di Unity setelah digabung dengan Langkah 6. Belum ada yang dijalankan di Play Mode.
+Langkah 7: *Sudden Event* (`DisasterManager`, Fireball Region 1 dari `ObjectPooler`, `MajorDisasterStartedEvent`), `LuckyMachine` (kuota musuh per region lewat kandang, mode gratis 30 detik saat bencana besar, hadiah gacha), `DiaryManager` (panel teks yang menjeda lewat `UIFocusStack`), dan alur menang dan kalah (`RescueEventManager`, `DeathCinematic`). Status: **ditulis, belum dikompilasi di Unity.** Kode hanya dicek dengan `dotnet build` (netstandard2.1, C# 9) terhadap DLL UnityEngine 6000.3.10f1 serta `Unity.InputSystem`, `Unity.TextMeshPro`, dan `UnityEngine.UI` dari `Library/ScriptAssemblies` checkout utama: 0 error dan 0 warning di Editor, rilis, dan `DEVELOPMENT_BUILD`. Branch ini sendirian butuh `HeavyItemSystem`, `HeavyItem`, `PartRecord`, dan `PartState` milik Langkah 6, jadi baru terkompilasi setelah digabung. Uji gabung dengan branch Langkah 6 (`claude/sleepy-cerf-920dd6`, df3176d06) di worktree sementara: konflik teks hanya di akhir `GameEvents.cs`, `GameBalanceSections.cs`, dan file README ini. Setelah kedua sisi diambil, `dotnet build` tanpa stub memberi 0 error dan 0 warning di ketiga konfigurasi. Belum ada yang dijalankan di Play Mode.
 
 | File | Blueprint |
 |---|---|
@@ -260,9 +260,10 @@ Langkah 7: *Sudden Event* (`DisasterManager`, Fireball Region 1 dari `ObjectPool
 
 ### Titik bentrok saat merge dengan Langkah 6
 
-- `HeavyItemBridge.cs` adalah satu-satunya file yang memanggil `HeavyItemSystem` dan `HeavyItem`, dengan nama dari `HeavyItemSystem.md`. Kalau nama di kode Langkah 6 berbeda, sesuaikan file itu saja.
-- `GameEvents.cs`, `GameBalanceSections.cs`, dan file README ini: ambil kedua bagian akhir. Di dua file `.cs`, pastikan tiap bagian ditutup lengkap dan hanya ada satu `}` penutup namespace.
-- Kalau Langkah 6 juga menulis `HelicopterPartInstalledEvent`, `HelicopterReadyEvent`, atau `BloodMoonStartedEvent`, hapus salah satu.
+- `HeavyItemBridge.cs` adalah satu-satunya file yang memanggil `HeavyItemSystem` dan `HeavyItem`, dan sudah memakai API kode Langkah 6 (`PartCount`, `GetRecord`, `HeavyItem.Index`).
+- `GameEvents.cs` dan `GameBalanceSections.cs`: ambil kedua bagian akhir. Git menggabungkan `}` terakhir kedua sisi, jadi tambahkan satu `    }` penutup struct atau kelas terakhir Langkah 7 sebelum komentar "Ditambahkan Langkah 6".
+- Tabel **Status Langkah** di file README ini: pakai status baru untuk Langkah 6 dan Langkah 7, lalu ambil kedua bagian akhir.
+- Langkah 6 tidak menulis event helikopter, `MajorDisasterStartedEvent`, atau `BloodMoonStartedEvent`, jadi tidak ada deklarasi ganda.
 
 ### Belum diimplementasikan (sistem pendukung belum ada)
 

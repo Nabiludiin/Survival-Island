@@ -191,7 +191,7 @@ GDD tidak meminta event paksa di hari ke-60. Hari ke-60 adalah target, dan melew
 
 Kode: `Island_Logic/RescueEventManager.cs` (`RescueState`), `HelicopterFrame.cs`, `PartInstallZone.cs`, `CockpitInteractable.cs`, dan `HeavyItemBridge.cs`.
 
-- **`HeavyItemSystem` milik Langkah 6.** Semua pemanggilan `HeavyItemSystem` dan `HeavyItem` dikumpulkan di `HeavyItemBridge.cs`, dengan nama dari `HeavyItemSystem.md` (`Instance`, `MarkInstalled`, `records`, `PartState`, dan `HeavyItem.PartId`). Kalau nama di kode Langkah 6 berbeda, cukup file itu yang disesuaikan saat digabung.
+- **`HeavyItemSystem` milik Langkah 6.** Semua pemanggilan `HeavyItemSystem` dan `HeavyItem` dikumpulkan di `HeavyItemBridge.cs`. Kode Langkah 6 (df3176d06) sedikit berbeda dari `HeavyItemSystem.md`: `records` bersifat private dan dibaca lewat `PartCount` dan `GetRecord(i)`, dan `HeavyItem` hanya punya `Index`, sehingga `partId = GetRecord(heavyItem.Index).partId`. `MarkInstalled` tidak menerbitkan event, jadi `HelicopterPartInstalledEvent` tetap dikirim `RescueEventManager`.
 - `HelicopterFrame` mendaftar ke `RescueEventManager.RegisterFrame` untuk posisi kokpit. Kalau kerangka tidak dimuat saat pemanasan, mesin mati seperti saat pemain menjauh.
 - Angka tambahan: `rescue.partInstallRadius` (4) untuk `ReconcileLyingParts`.
 - `LiftOff(bool force)`: `force = true` untuk `heli liftoff` di DevConsole. `DebugSetWarmup` untuk `heli warmup`.
