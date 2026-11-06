@@ -8,8 +8,8 @@ namespace SurvivalIsland
     /// Input dari EquipmentManager (PrimaryAction), jadi komponen ini tidak membaca klik kiri.
     /// Damage awal dari ItemData.weaponDamage; jarak dan jeda di prefab viewmodel (data, bukan logika, #84).
     ///
-    /// Catatan Langkah 5 (TODO): ResourceNode.ReceiveHit (#73, Langkah 4) belum digabung, jadi panen lewat melee belum
-    /// tersambung; DurabilitySystem.ApplyWear (#113), WeaponStatCalculator (#113), AnimationController (#12),
+    /// Panen memanggil ResourceNode.ReceiveHit milik Langkah 4, jadi file ini terkompilasi setelah branch Langkah 4 digabung.
+    /// Catatan Langkah 5 (TODO): DurabilitySystem.ApplyWear (#113), WeaponStatCalculator (#113), AnimationController (#12),
     /// Fire Axe (#97) belum ada.
     /// </summary>
     public class MeleeCombatSystem : EquippableBehaviour
@@ -73,7 +73,15 @@ namespace SurvivalIsland
             isInDamageMoment = true;
             if (PhysicsQuery.Raycast(new Ray(camT.position, camT.forward), out var hit, attackRange, PhysicsMasks.Melee))
             {
-                // TODO #73: kalau hit punya ResourceNode, node.ReceiveHit(item.toolClass, hit.point) dan ApplyWear bila Hit.
+                // ResourceNode (#73, ditulis Langkah 4): panen. Keausan hanya kalau hasilnya Hit (TODO #113: ApplyWear).
+                var node = hit.collider.GetComponentInParent<ResourceNode>();
+                if (node != null)
+                {
+                    var item = itemId != null ? ItemDatabase.Get(itemId) : null;
+                    node.ReceiveHit(item != null ? item.toolClass : ToolClass.None, hit.point, true);
+                    isInDamageMoment = false;
+                    return;
+                }
                 GameObject player = IslandPlayerController.Instance != null ? IslandPlayerController.Instance.gameObject : gameObject;
                 var info = new DamageInfo
                 {
