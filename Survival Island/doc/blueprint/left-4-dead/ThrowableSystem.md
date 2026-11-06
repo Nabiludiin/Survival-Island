@@ -216,3 +216,14 @@ Batas issue: ledakan tong ada di `EnvironmentalHazard`, api menyebar di #97, dan
 11. Lempar 30 barang berurutan sambil membuka Profiler. **Hasil:** tanpa `Instantiate` setelah pool terisi, dan proyektil yang dipakai ulang tidak membawa kecepatan lama.
 12. Jeda saat sumbu Bom berjalan. **Hasil:** tidak meledak sampai jeda selesai.
 13. Mati, lalu mulai run baru. **Hasil:** tidak ada Suar yang tersisa, dan pilihan kembali ke jenis pertama.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `ThrowableSystem.cs`, `ThrowableData.cs`, `ThrowableProjectile.cs`, dan `LureTargetable.cs` di `Assets/LOGIC/left-4-dead/`. Config `throwable` ada di `Core_Logic/GameBalance.GrupF.cs`, dengan tambahan `fireTickSeconds` 1 untuk cadangan Molotov. Event `ThrowableChangedEvent` ada di `Core_Logic/GameEvents.GrupF.cs`.
+- Angka disalin ke salinan `ThrowableData`, yang dibuat sekali lewat `Instantiate` saat `OnEnable`. Dengan begitu, aset asli tidak berubah di Editor.
+- `FireSystem` (#97) belum ada. Molotov memakai area api cadangan di proyektil, yaitu tick `Fire` lewat `OverlapSphere` dengan `PhysicsMasks.Explosion`, sesuai Kasus Khusus.
+- Pengali `playerExplosionSelfMultiplier` untuk pemain dan NPC belum diterapkan oleh penerima damage (`SurvivalStats` dan #76). Proyektil sudah mengirim `byPlayer = true`.
+- `ThreatSystem` belum punya override 2 Lure, dan belum membaca `reactsToLure`. `LureTargetable` sudah terdaftar sebagai kandidat lewat `RegisterCandidate`.
+- `EquipmentManager` belum punya API untuk menurunkan viewmodel sebentar saat melempar.
+- Sakelar `enabled = false` belum menyembunyikan resep di `CraftingManager` (#77).
+- Proyektil dimunculkan lebih dulu, baru barang dikurangi, supaya barang tidak hilang kalau pool penuh.

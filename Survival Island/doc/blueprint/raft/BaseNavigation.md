@@ -369,3 +369,15 @@ public class BreachSlots
 15. Biarkan 60 zombie mengejar sambil membuka Profiler. **Hasil:** paling banyak 4 `CalculatePath` per frame, dan tanpa alokasi GC dari pemeriksaan.
 16. Kunci pintu, simpan, keluar, lalu lanjutkan. **Hasil:** pintu tetap terkunci dan NavMesh sesuai.
 17. Biarkan fajar tiba saat zombie memukul dinding. **Hasil:** zombie terbakar, dan posisi serangan kembali kosong.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `BaseNavigation.cs`, `BaseDoor.cs`, `BaseDoorLatch.cs`, dan `BaseAnchor.cs` di `Assets/LOGIC/raft/`. Config `baseNav` ada di `Core_Logic/GameBalance.GrupF.cs`. Event `DoorStateChangedEvent` dan `PlayerBaseStateChangedEvent` ada di `Core_Logic/GameEvents.GrupF.cs`.
+- Status jalur per zombie (`blockedTimer`, posisi serangan, dan `currentBreach`) disimpan di `BaseNavigation`, bukan di `EnemyAI`. Dengan begitu, `EnemyAI` cukup memanggil `NotifySpawned`, `PollChase`, `PollAttacking`, dan `Forget`. `PollChase` mengembalikan `BlockedCheck` (`Clear`, `Breach`, `Wait`, atau `NoStructure`).
+- Ujung jalur dibaca dari `agent.pathEndPosition`, bukan `agent.path.corners`, supaya tanpa alokasi.
+- **Cara menghitung pusat base belum diputuskan developer (bagian 5, usulan 7).** Untuk sementara, pusat base adalah rata-rata posisi semua struktur, yang dihitung ulang saat jumlah struktur berubah.
+- `StructureRegistry` tidak membuka daftar struktur. Karena itu, pusat base dan pengaturan `NavMeshObstacle` memakai `FindObjectsByType<StructureNode>`, hanya saat jumlah struktur berubah.
+- `BaseDoor` memakai `ISaveable` hanya sebagai bentuk `extraJson` yang dipanggil `StructureRegistry`. `BaseDoor` tidak mendaftar ke `WorldStateSave`.
+- Volume pemeriksaan busur dan lubang pintu diatur lewat field Inspector (`doorwayCenter`, `swingCenter`, dan ukurannya).
+- `RegionStreaming` (#88) dan `RegionLoadStateChangedEvent` belum dipakai. Region dianggap sudah dimuat.
+- `BaseAnchor` sudah terdaftar di `ThreatSystem` sebagai kandidat. Override 3 di `ThreatSystem` masih TODO di kode lama.
