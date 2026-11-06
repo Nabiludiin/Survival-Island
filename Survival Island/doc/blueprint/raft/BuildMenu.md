@@ -440,3 +440,23 @@ public class StructureRecord
 18. Bangun di Region 1, pergi sampai region dilepas, lalu simpan dan lanjutkan dari Region 3. **Hasil:** tidak ada error, dan bangunan muncul saat Region 1 dimuat lagi.
 19. Coba bangun di seam `S1`. **Hasil:** ditolak dengan `NoBuildZone`.
 20. Mati, lalu mulai run baru. **Hasil:** tidak ada struktur lama.
+
+## 7. Catatan Implementasi (Langkah 4)
+
+Kode: `Survival Island/Assets/LOGIC/raft/BuildableData.cs` (`BuildCategory`, `BuildSlotKind`, `SupportRule`, `NavObstacleMode`, `HammerMode`, `ItemCost`), `BuildManager.cs` (`PlacementError`), `StructureNode.cs` (`GridKey`, `GridLayer`), `StructureRegistry.cs` (`StructureRecord`, `StructureSaveData`), `HammerEquippable.cs`, `BuildMenu.cs`, `NoBuildVolume.cs`, `IStructureHealth.cs`. Angka di `GameBalanceConfig.build`.
+
+- **`IStructureHealth`:** `BaseHealth` milik DamagePipeline (Langkah 5). `BuildManager` dan `StructureRegistry` memanggil interface ini (`StructureId`, `Data`, `CurrentHP`, `HpRatio`, `LastDamageTime`, `Initialize`, `Remove`), dan `BaseHealth` menerapkannya. Runtuhan memanggil `IDamageable.TakeDamage` dengan `DamageType.Structural`. Kalau prefab belum punya `BaseHealth`, runtuhan menghapus objek lewat jalur `StructureDestroyedEvent` yang sama, dengan peringatan.
+- **Kunci grid (`GridKey`):** koordinat digandakan. Tengah sel `(2cx, 2cz)`, tengah sisi `(2cx, 2cz±1)` atau `(2cx±1, 2cz)`, ditambah `level` dan `GridLayer`. Sisi utara sel A dan sisi selatan tetangganya otomatis satu kunci.
+- **Lapisan sel:** `Cell` dengan `GroundOrWall` atau `WallBelow` (lantai, atap) memakai lapisan `Floor`. `Cell` dengan `FloorOrGround` (kasur, peti, tangga, jebakan, api unggun) memakai lapisan `Object`, sehingga perabot bisa berdiri di atas lantai pada sel yang sama. `WallMount` memakai `MountA` atau `MountB` sesuai sisi dinding yang menghadap pemain.
+- **Tetangga grafik:** lantai dengan dinding di sisinya pada tingkat sama dan tingkat bawah (biaya 0), lantai dengan objek di sel sama (0), dinding dengan dinding atas dan bawah (0), dinding dengan obor dinding (0), dan lantai dengan lantai bersebelahan pada tinggi sama (biaya 1). Hubungan dihitung dua arah.
+- **`ValidatePlacement`** privat dan memakai struct `Placement` hasil bidikan terakhir, bukan `(data, pos, rot, level)`. Urutan 12 baris sama dengan tabel.
+- **Kotak overlap dan tapak pantai** dihitung dari `BoxCollider`/`MeshCollider` prefab (atau `MeshFilter`). Prefab lantai memakai pivot di permukaan atas, dengan rok kayu ke bawah, supaya dinding di atasnya tidak dianggap tumpang tindih.
+- **Hologram:** salinan prefab dibuat di bawah induk nonaktif, lalu semua `Behaviour`, `Rigidbody`, dan `Collider` dibuang sebelum diaktifkan, dan layernya menjadi `StructureGhost`. Awake komponen struktur tidak pernah berjalan pada hologram.
+- **`NoBuildVolume`** tidak memakai collider, karena `PhysicsQuery` selalu mengabaikan trigger (#87). Kotak lokal didaftarkan di daftar statis.
+- **`StructureRecord`** mendapat field `key` (`GridKey`) dan `grounded`, karena tingkat dan sisi `WallMount` tidak bisa dihitung ulang dari posisi saja.
+- **Induk struktur:** `RegionStreaming` (#88) belum ada, jadi struktur menjadi anak `BuildManager.structureRoot` lewat `GetStructureRoot(pos)`. TODO #88.
+- **Tombol `B`** dibaca `BuildManager.Update`. Menu dibuka lewat `BuildMenu.Open()`.
+- **`BuildMenu`:** dua cincin ditampilkan sebagai daftar tombol, belum radial. Struktur tanpa `cost` (misalnya `Build_Campfire` dari item) tidak muncul di menu palu.
+- **Struktur lebih dari satu sel** (`gridSize > 1`) belum didukung. Semua struktur awal berukuran satu sel.
+- **Belum ada (TODO):** mode Repair dan Upgrade (#47), durabilitas palu (#113), `GhostStatusIcon` dan teks `build.error.*` (#104), batas jebakan (#26) dan lampu (#98), isi peti saat bongkar (#46), notifikasi #22, suara #16, `BaseNavigation` (#78, `navMode` baru disimpan sebagai data), dan aset `BuildableData` (dibuat di Unity).
+- Belum diuji di Unity.

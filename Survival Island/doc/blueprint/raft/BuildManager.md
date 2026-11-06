@@ -113,3 +113,7 @@ Aturan atap lama pindah ke `SupportRule.WallBelow` di `BuildMenu.md`.
 8. Serang dinding baru dengan zombie. **Hasil:** `BaseHealth` dari prefab menerima damage.
 
 Belum diuji di Unity, karena blueprint ini baru rancangan.
+
+## 7. Catatan Implementasi (Langkah 4)
+
+Kode: `Survival Island/Assets/LOGIC/raft/BuildManager.cs`. Penyimpangan dan rincian dicatat di `BuildMenu.md` bagian 7. Restriksi pantai memakai `SurfaceDetection.Instance.IsBeachFootprint` (baris 5) dan `TryGetSurfaceAt` (baris 4, `UnknownSurface`).

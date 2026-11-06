@@ -352,3 +352,8 @@ Target memeriksa aturan ini di `TakeDamage`, jadi senjata tidak perlu tahu jenis
 14. Buka Profiler dan tembak 100 kali. **Hasil:** jalur `DamageRouter` tanpa alokasi GC selain `GetComponentInParent` yang tidak mengalokasi di build.
 15. Ledakkan tong di tengah 4 zombie. **Hasil:** tiap zombie terdorong atau jatuh menjauhi pusat ledakan, dengan `hitDirection` berbeda per target.
 16. Pakai profil kesulitan uji dengan `enemyDamageMultiplier` 2 pada hari 1. **Hasil:** pukulan zombie standar 30, karena pengali hanya diterapkan di langkah 4 `SurvivalStats`.
+
+## Catatan Implementasi (Langkah 4)
+
+- `BaseHealth` ditulis Langkah 5 sebagai `BaseHealth : MonoBehaviour, IDamageable, IStructureHealth`. `IStructureHealth` (`raft/IStructureHealth.cs`) berisi anggota `BaseHealth` yang dipanggil `BuildManager` dan `StructureRegistry` (Langkah 4).
+- `StructureDamagedEvent` dan `StructureDestroyedEvent` dideklarasikan Langkah 4 di `GameEvents.cs`, karena `StructureRegistry` sudah mendengarnya. `BuildableData.resistances` memakai `DamageResistance` milik Langkah 5.

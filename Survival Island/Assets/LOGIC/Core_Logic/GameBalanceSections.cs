@@ -63,7 +63,7 @@ namespace SurvivalIsland
 
     /// <summary>Panen (angka inti #84). Tambahan #73 diisi Langkah 4.</summary>
     [Serializable]
-    public class ResourceBalance
+    public partial class ResourceBalance
     {
         public int treeDropMin = 8;
         public int treeDropMax = 12;
@@ -373,7 +373,7 @@ namespace SurvivalIsland
 
     /// <summary>Bagian infection (#64). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable]
-    public class InfectionBalance
+    public partial class InfectionBalance
     {
         // Ditambahkan Langkah 2 karena IslandArrival (#74) memberi vaksin awal. Field lain #64 diisi Langkah 4.
         public int startingVaccineDoses = 2;
@@ -396,7 +396,7 @@ namespace SurvivalIsland
     [Serializable] public class StatusEffectsBalance { }
 
     /// <summary>Bagian crafting (#77). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class CraftingBalance { }
+    [Serializable] public partial class CraftingBalance { }
 
     /// <summary>Bagian repair (#113). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class RepairBalance { }
@@ -411,10 +411,10 @@ namespace SurvivalIsland
     [Serializable] public class DebrisBalance { }
 
     /// <summary>Bagian surface (#86). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class SurfaceBalance { }
+    [Serializable] public partial class SurfaceBalance { }
 
     /// <summary>Bagian build (#79). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class BuildBalance { }
+    [Serializable] public partial class BuildBalance { }
 
     /// <summary>Bagian baseNav (#78). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class BaseNavBalance { }
@@ -426,7 +426,7 @@ namespace SurvivalIsland
     [Serializable] public class StorageBalance { }
 
     /// <summary>Bagian sleep (#67). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class SleepBalance { }
+    [Serializable] public partial class SleepBalance { }
 
     /// <summary>Bagian gun (#58). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class GunBalance { }
@@ -586,4 +586,119 @@ namespace SurvivalIsland
 
     /// <summary>Bagian hazard (#59). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class HazardBalance { }
+
+    // =====================================================================================
+    // Ditambahkan Langkah 4. Bagian yang dipakai Langkah 4 ditandai `partial` di atas (satu kata per baris),
+    // lalu field-nya diisi di sini, supaya semua tambahan Langkah 4 berada di satu bagian di akhir file.
+    // Nilai dari tabel "Angka per sistem" di GameBalanceConfig.md (#64, #73, #77, #79, #86, #67).
+    // =====================================================================================
+
+    /// <summary>Tambahan resource (#73, ResourceRespawn.md). treeDropMin/Max, axeDecayPerUse, harvestNoiseRadius ada di atas.</summary>
+    public partial class ResourceBalance
+    {
+        public int rockDropMin = 4;
+        public int rockDropMax = 6;
+        public float pickaxeDecayPerUse = 1f;
+        public float knifeDecayPerHarvest = 0.5f;
+        public float coconutRespawnDays = 3f;
+        public float stoneRespawnDays = 2f;
+        public float regrowJitterHours = 6f;
+        public float regrowMinPlayerDistance = 25f;     // Usulan disetujui: node tidak tumbuh di depan pemain
+        public float regrowClearRadius = 3f;            // Usulan disetujui: radius bebas bangunan
+        public int regrowChecksPerFrame = 20;
+        public int dropChunkSize = 4;                   // 10 kayu menjadi 3 WorldItem
+        public float dropSettleSeconds = 3f;
+        public float dropMaxFallMeters = 4f;
+        public float dropImpulse = 1.5f;                // Dorongan acak item jatuh. Nilai usulan Langkah 4 ("Item jatuh" langkah 3)
+        public RegionNodeMinimum[] minNodesPerRegion =
+        {
+            new RegionNodeMinimum { region = RegionType.Volcano, trees = 120, rocks = 40 },
+            new RegionNodeMinimum { region = RegionType.Amazon, trees = 60, rocks = 20, mushrooms = 10, sapTrees = 8 },
+            new RegionNodeMinimum { region = RegionType.Snow, trees = 20, rocks = 40 },
+            new RegionNodeMinimum { region = RegionType.Logistic, trees = 30, rocks = 20 },
+        };
+    }
+
+    /// <summary>Jumlah node minimum per region (tabel kepadatan ResourceRespawn.md). Dibaca ResourceAuditWindow.</summary>
+    [Serializable]
+    public struct RegionNodeMinimum
+    {
+        public RegionType region;
+        public int trees, rocks, mushrooms, sapTrees;
+    }
+
+    /// <summary>Isi infection (#64, InfectionSystem.md). startingVaccineDoses ditulis Langkah 2 di atas.</summary>
+    public partial class InfectionBalance
+    {
+        public float gainStandard = 5f;
+        public float gainTribal = 6f;
+        public float gainMoss = 8f;
+        public float gainMilitary = 10f;
+        public float gainFrozen = 5f;
+        public float gainVillage = 6f;
+        public float stage2At = 25f;
+        public float stage3At = 50f;                    // Sama dengan vitals.regenMaxInfection
+        public float stage4At = 75f;                    // Sama dengan vitals.infectionDamageThreshold
+        public float[] stageMaxStamina = { 1f, 0.9f, 0.75f, 0.5f };
+        public float[] stageStaminaRegen = { 1f, 1f, 0.75f, 0.5f };
+        public float[] stageVision = { 0f, 0.15f, 0.4f, 0.8f };
+        public float selfProgressPerGameHour = 0f;      // Usulan disetujui: infeksi hanya naik saat diserang
+        public float selfProgressMinInfection = 50f;
+        public float vaccineReduction = 50f;
+        public float vaccineInjectSeconds = 4f;
+        public float medicVaccineMultiplier = 1.25f;
+        public float criticalWarningAt = 90f;
+        public float zombifyCinematicSeconds = 4f;
+    }
+
+    /// <summary>Isi crafting (#77, CraftingStation.md).</summary>
+    public partial class CraftingBalance
+    {
+        public int maxQueue = 5;
+        public float stationRangeMeters = 4f;
+        public float leaveGraceMeters = 2f;
+        public float stationCheckSeconds = 0.5f;
+        public float hitPauseSeconds = 1.5f;
+        public float npcCrafterSpeedMultiplier = 1.5f;
+    }
+
+    /// <summary>Isi surface (#86, SurfaceDetection.md).</summary>
+    public partial class SurfaceBalance
+    {
+        public float probeUp = 1f;
+        public float probeDown = 3f;
+        public float beachBuildSandWeight = 0.35f;      // Usulan disetujui (#85): 35 persen pasir pada salah satu titik tapak
+        public int nearSandSampleCount = 8;
+        public int runtimeBakeRowsPerFrame = 64;
+        public int debugGridCells = 64;
+        public float debugGridSpacing = 1f;
+    }
+
+    /// <summary>Isi build (#79, BuildMenu.md dan BuildManager.md).</summary>
+    public partial class BuildBalance
+    {
+        public float gridSize = 2.5f;
+        public float maxBuildDistance = 6f;
+        public float levelHeight = 2.5f;
+        public float heightSnap = 0.25f;
+        public float maxFoundationHeightDelta = 1.25f;
+        public float groundProbeHeight = 5f;
+        public int maxLevels = 3;
+        public int maxHorizontalSpan = 2;
+        public int maxStructures = 400;
+        public float overlapShrink = 0.1f;
+        public int maxCollapsePerFrame = 4;
+        public int maxCollapseVfxPerSecond = 8;
+        public float demolishHoldSeconds = 1.2f;
+        public float demolishRefundRatio = 0.5f;
+        public float demolishBlockedAfterDamageSeconds = 5f;
+        public float hammerDecayPerBuild = 1f;
+        public float hammerDecayPerDemolish = 1f;
+    }
+
+    /// <summary>Bagian sleep (#67) yang dipakai DayNightDirector. Field lain diisi Langkah pemilik SleepSystem.</summary>
+    public partial class SleepBalance
+    {
+        public float maxGameHoursPerStep = 0.25f;       // Batas maju jam dalam satu langkah DayNightDirector (SleepSystem.md)
+    }
 }

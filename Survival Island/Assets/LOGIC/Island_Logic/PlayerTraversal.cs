@@ -416,8 +416,9 @@ namespace SurvivalIsland
             surfaceTimer -= Time.deltaTime;
             if (surfaceTimer > 0f) return;
             surfaceTimer = t.surfaceCheckSeconds;
-            // TODO Langkah 4 (#86): var surface = SurfaceDetection.Instance.GetSurfaceAt(transform.position);
-            ApplySurface(currentSurface, t);
+            // Hook Langkah 4 (#86): permukaan dari SurfaceDetection kalau ada.
+            var surface = SurfaceDetection.Instance != null ? SurfaceDetection.Instance.GetSurfaceAt(transform.position) : currentSurface;
+            ApplySurface(surface, t);
         }
 
         private void ApplySurface(SurfaceType surface, TraversalBalance t)

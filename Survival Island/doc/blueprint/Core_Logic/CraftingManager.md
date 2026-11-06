@@ -134,3 +134,7 @@ Ikuti 16 skenario di `CraftingStation.md` bagian 6. Tambahan khusus save dan tec
 3. Hapus entri `world_recipes` dari file save, lalu lanjutkan. **Hasil:** antrean kosong, resep awal tetap terbuka, tanpa error.
 4. Lanjutkan run dengan 1 job di antrean. **Hasil:** ikon antrean di HUD langsung tampil.
 5. Mati, lalu mulai run baru. **Hasil:** `GetUnlockedIds()` kosong, dan antrean kosong.
+
+## 7. Catatan Implementasi (Langkah 4)
+
+Kode: `Survival Island/Assets/LOGIC/Core_Logic/CraftingManager.cs`. Rincian dan penyimpangan dicatat di `CraftingStation.md` bagian 7.

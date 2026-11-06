@@ -126,7 +126,7 @@ Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Lan
 | **1** | Kerangka `GameManager`, `UIManager`, `ObjectPooler`, `SaveSystem`, dan pola *State Management* inti | `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **2** | Fase 1: `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | `60-seconds/` | Terkompilasi, belum diuji di Play Mode |
 | **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
-| **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Belum dimulai |
+| **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Ditulis, belum dikompilasi |
 | **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/` | Belum dimulai |
 | **6** | `ZoneManager`, frostbite, jembatan kayu, barang berat, `WeatherManager` | `Island_Logic/` | Belum dimulai |
 | **7** | *Sudden Event*, `LuckyMachine`, `DiaryManager`, alur menang dan kalah | `Island_Logic/`, `Core_Logic/` | Belum dimulai |
@@ -160,3 +160,31 @@ Isi kolom **Status** dengan salah satu: `Belum dimulai`, `Sedang ditulis`, `Ditu
 1. Baca `Survival Island/Claude.md` untuk aturan menulis kode.
 2. Pastikan blueprint utama dan prasyarat Langkah itu sudah ada di `Survival Island/doc/blueprint/`.
 3. Setelah menulis, perbarui tabel **Status Langkah** di atas.
+
+## 🧩 Ditambahkan Langkah 4
+
+Status: ditulis, belum dikompilasi di Unity. Sudah dicek dengan `dotnet build` (netstandard2.1, C# 9) terhadap DLL Unity 6000.3.10f1 dan DLL Input System, TextMeshPro, serta UGUI dari `Library/ScriptAssemblies` checkout utama: 0 error dan 0 warning pada konfigurasi Editor, rilis, dan `DEVELOPMENT_BUILD`. Pengecekan itu memakai stub `DamageResistance` (milik Langkah 5), jadi branch Langkah 4 sendirian baru terkompilasi di Unity setelah digabung dengan Langkah 5.
+
+| File | Blueprint |
+|---|---|
+| `left-4-dead/DayNightDirector.cs` | `DayNightDirector.md` |
+| `raft/InfectionSystem.cs` | `InfectionSystem.md` (#64) |
+| `Core_Logic/SurfaceDetection.cs` (`SurfaceSample`), `SurfaceTag.cs`, `TerrainSurfaceSource.cs`, `SurfaceMapAsset.cs`, `SurfaceLayerMap.cs`, `SurfaceBakeTool.cs` (Editor) | `SurfaceDetection.md` (#86) |
+| `raft/ResourceNode.cs`, `ResourceNodeData.cs` (`NodeType`, `NodeStatus`, `HitResult`, `ToolRule`, `RegrowRule`, `IRegrowable`), `ResourceDropGuard.cs`, `ResourceRespawn.cs` | `ResourceNode.md`, `ResourceRespawn.md` (#73) |
+| `Core_Logic/CraftingRecipe.cs`, `RecipeDatabase.cs`, `CraftingManager.cs` (`CraftResult`, `CraftJob`, `CraftingSaveData`), `CraftingStation.cs`, `CraftingPanel.cs` | `CraftingManager.md`, `CraftingStation.md` (#77) |
+| `Core_Logic/TechTreeManager.cs`, `TechNodeData.cs` (`TechUnlockTrigger`) | `TechTreeManager.md` |
+| `raft/BuildableData.cs`, `BuildManager.cs` (`PlacementError`), `StructureNode.cs` (`GridKey`, `GridLayer`), `StructureRegistry.cs` (`StructureRecord`), `HammerEquippable.cs`, `BuildMenu.cs`, `NoBuildVolume.cs`, `IStructureHealth.cs` | `BuildManager.md`, `BuildMenu.md` (#79) |
+| `Island_Logic/RegionType.cs` | `GLOSSARY.md` (pemilik `ZoneManager`, Langkah 6) |
+
+Kontrak untuk Langkah lain: `RegionType` (Langkah 5 dan 6 tidak mendeklarasikan ulang), `IStructureHealth` (diterapkan `BaseHealth` Langkah 5), `StructureDamagedEvent` dan `StructureDestroyedEvent` (dikirim `BaseHealth`), serta `ResourceNode.ReceiveHit(ToolClass, Vector3, bool)` untuk `MeleeCombatSystem`.
+
+Tambahan di file bersama: event di bagian "Ditambahkan Langkah 4" pada `Core_Logic/GameEvents.cs`; config `resource`, `infection`, `crafting`, `surface`, `build`, dan `sleep.maxGameHoursPerStep` di bagian "Ditambahkan Langkah 4" pada `Core_Logic/GameBalanceSections.cs` (deklarasi kelas di atas hanya ditambah kata `partial`). Hook kecil di file Langkah 3: `ItemUseSystem.CurrentTotalGameHours`, cek dan efek vaksin di `ItemUseSystem`, dan `PlayerTraversal.UpdateSurface`. `SurvivalStats.cs` tidak diubah: lapar dan haus sudah berjalan dari Langkah 3, dan infeksi memakai `SetPenalty`, `AddInfection`, serta `ReduceInfection`. Penyimpangan dicatat di bagian "Catatan Implementasi (Langkah 4)" pada blueprint terkait.
+
+### Penyiapan di Unity untuk Langkah 4 (belum dilakukan)
+
+1. `SurfaceDetection` di `Managers` pada `PersistentRoot`, lalu daftarkan di `RunLifecycle.orderedServices`.
+2. Scene `IslandPhase`: objek manager berisi `DayNightDirector`, `ResourceRespawn`, `CraftingManager`, `TechTreeManager`, `BuildManager` (isi `buildables`, `ghostValidMat`, `ghostInvalidMat`, `structureRoot`), dan `StructureRegistry`. Canvas HUD: `CraftingPanel` (id `Crafting`) dan `BuildMenu` (id `BuildMenu`), keduanya `releasesCursor`, `blocksGameplayInput`, `closableByEsc`, tanpa `pausesTime`.
+3. Pemain Fase 2: tambahkan `InfectionSystem` di samping `SurvivalStats`.
+4. Tiap Terrain: `TerrainSurfaceSource` dengan aset **Create > Survival > Surface Layer Map**, lalu jalankan **Survival > Surface > Bake Terrain Terpilih**.
+5. Aset `CraftingRecipe` di `Assets/Resources/Recipes/` (resep inti di `CraftingStation.md`), aset `BuildableData` (tabel `BuildMenu.md`), dan aset `ResourceNodeData` (tabel `ResourceRespawn.md`). Prefab struktur: collider di layer `Structure`, `StructureNode`, `BaseHealth` (Langkah 5), dan pivot lantai di permukaan atas. Item `Tool_Hammer` memakai `equipPrefab` dengan `HammerEquippable`.
+6. Node resource: `ResourceNode` + `SaveIdTag`, layer `Obstacle`, dengan `standingVisual` dan `depletedVisual`. Prefab `WorldItem_Generic` mendapat `ResourceDropGuard`.
