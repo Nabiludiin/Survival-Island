@@ -655,4 +655,469 @@ namespace SurvivalIsland
         public bool keepMusic;
         public CinematicStateChangedEvent(bool isPlaying, bool keepMusic) { this.isPlaying = isPlaying; this.keepMusic = keepMusic; }
     }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (FondasiA). Event dari tabel GameEventBus.md.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Event grup FondasiA (sistem pendukung). Sumber: tabel "Daftar event global" di Core_Logic/GameEventBus.md (#107).
+    // Hanya event yang DIKIRIM sistem grup ini, ditambah SubtitleRequestedEvent yang pendengarnya milik #104
+    // (pengirimnya, NarrativeSequencer, DisasterManager, dan NPCBarks, memakai struct ini dan tidak mendeklarasikannya ulang).
+    // =====================================================================================
+
+    /// <summary>Bagian setting yang berubah. Graphics = setelah ApplyGraphics, All = setelah Initialize atau Commit.</summary>
+    public enum SettingsCategory { All, Graphics }
+
+    /// <summary>Setting pemain berubah. Pengirim: SettingsManager (#19). Didengar VFXManager (#15).</summary>
+    [StickyEvent]
+    public struct SettingsChangedEvent
+    {
+        public SettingsCategory category;
+        public SettingsChangedEvent(SettingsCategory category) { this.category = category; }
+    }
+
+    /// <summary>Pilihan aksesibilitas berubah. Pengirim: LocalizationManager (#104). Didengar LocalizedText dan subtitle.</summary>
+    [StickyEvent]
+    public struct AccessibilityChangedEvent
+    {
+        public AccessibilityOptions options;
+        public AccessibilityChangedEvent(in AccessibilityOptions options) { this.options = options; }
+    }
+
+    /// <summary>Asal subtitle (LocalizationManager.md, tabel sumber subtitle).</summary>
+    public enum SubtitleSourceKind { Scene, Warning, Bark }
+
+    /// <summary>
+    /// Minta satu baris subtitle. Pengirim: NarrativeSequencer (#99, prioritas 3), DisasterManager (#70, prioritas 2),
+    /// NPCBarks (#100, prioritas 1). Didengar SubtitlePresenter.
+    /// </summary>
+    public struct SubtitleRequestedEvent
+    {
+        public string textKey;
+        public string speakerKey;   // Kosong berarti tanpa nama
+        public int priority;
+        public SubtitleSourceKind sourceKind;
+        public SubtitleRequestedEvent(string textKey, string speakerKey, int priority, SubtitleSourceKind sourceKind)
+        { this.textKey = textKey; this.speakerKey = speakerKey; this.priority = priority; this.sourceKind = sourceKind; }
+    }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (FondasiB). Event dari tabel GameEventBus.md.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Event milik sistem pendukung grup FondasiB (StatusEffectManager #20, DurabilitySystem #113).
+    // Sumber: tabel "Daftar event global" di Core_Logic/GameEventBus.md. Nama field mengikuti kolom "Isi".
+    // =====================================================================================
+
+    /// <summary>
+    /// Efek status dipasang, bertumpuk, atau dilepas. Pengirim: StatusEffectManager (#20). Didengar HUDManager (StatusEffectBar).
+    /// Tidak sticky: HUD membaca StatusEffectManager.Active saat aktif.
+    /// </summary>
+    public struct StatusEffectChangedEvent
+    {
+        public string effectId;
+        public bool isActive;
+        public int stacks;
+        public StatusEffectChangedEvent(string effectId, bool isActive, int stacks)
+        { this.effectId = effectId; this.isActive = isActive; this.stacks = stacks; }
+    }
+
+    /// <summary>
+    /// Status durabilitas satu item berubah (Normal, Low, Broken, Destroyed). Pengirim: DurabilitySystem dan ToolRepairSystem (#113).
+    /// Didengar HUDManager (bar hotbar) dan NotificationManager (#22). Tidak sticky.
+    /// </summary>
+    public struct DurabilityStateChangedEvent
+    {
+        public int instanceId;
+        public string itemId;
+        public DurabilityState state;
+        public DurabilityStateChangedEvent(int instanceId, string itemId, DurabilityState state)
+        { this.instanceId = instanceId; this.itemId = itemId; this.state = state; }
+    }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (GrupC2). Event dari tabel GameEventBus.md.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Event grup C2 (sistem pendukung). Sumber: tabel "Daftar event global" di Core_Logic/GameEventBus.md (#107).
+    // Hanya event yang DIKIRIM sistem grup ini: MapMarkerRegistry (milik CompassSystem, #30) dan NarrativeSequencer (#99).
+    // CinematicStateChangedEvent dan SubtitleRequestedEvent sudah ada (GameEvents.cs, GameEvents.FondasiA.cs).
+    // =====================================================================================
+
+    /// <summary>Isi registry penanda berubah. Pengirim: MapMarkerRegistry (milik CompassSystem, #30). Tidak sticky.</summary>
+    public struct MapMarkerChangedEvent
+    {
+        public string markerId;
+        public bool isRemoved;
+        public MapMarkerChangedEvent(string markerId, bool isRemoved) { this.markerId = markerId; this.isRemoved = isRemoved; }
+    }
+
+    /// <summary>Adegan cerita mulai atau selesai. Pengirim: NarrativeSequencer (#99). Didengar CombatMusicDirector (#114).</summary>
+    [StickyEvent]
+    public struct NarrativeStateChangedEvent
+    {
+        public string sceneId;
+        public bool isPlaying;
+        public NarrativeStateChangedEvent(string sceneId, bool isPlaying) { this.sceneId = sceneId; this.isPlaying = isPlaying; }
+    }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (GrupD). Event dari tabel GameEventBus.md.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Event sistem pendukung Grup D (Island_Logic: NPCRoster, NPCCompanion, ObjectiveManager, LoreCollectibles,
+    // RemoteBaseSimulation). Sumber: tabel "Daftar event global" di Core_Logic/GameEventBus.md.
+    // Nama, field, dan status sticky mengikuti tabel itu. NPCRescuedEvent sudah ada di GameEvents.cs.
+    // =====================================================================================
+
+    // ---------------------------------------------------------------- NPC (#76)
+
+    /// <summary>NPC mati, hilang permanen selama run. Pengirim: NPCCompanion, NPCRoster.KillNpc (#76). Tidak sticky.</summary>
+    public struct NPCDiedEvent
+    {
+        public string npcId;
+        public DeathReason reason;
+        public NPCDiedEvent(string npcId, DeathReason reason) { this.npcId = npcId; this.reason = reason; }
+    }
+
+    /// <summary>State FSM satu NPC berubah. Pengirim: NPCCompanion (#76). Tidak sticky.</summary>
+    public struct NPCStateChangedEvent
+    {
+        public string npcId;
+        public NPCState state;
+        public NPCStateChangedEvent(string npcId, NPCState state) { this.npcId = npcId; this.state = state; }
+    }
+
+    // ---------------------------------------------------------------- Objektif (#81, #100)
+
+    /// <summary>Bab Diary terbuka (GDD bagian 4). Pengirim: ObjectiveManager (#81). Tidak sticky.</summary>
+    public struct DiaryChapterUnlockedEvent
+    {
+        public int chapter;
+        public DiaryChapterUnlockedEvent(int chapter) { this.chapter = chapter; }
+    }
+
+    /// <summary>Satu tujuan berubah status. Pengirim: ObjectiveManager (#81). Sticky.</summary>
+    [StickyEvent]
+    public struct ObjectiveChangedEvent
+    {
+        public string objectiveId;
+        public bool isComplete;
+        public ObjectiveChangedEvent(string objectiveId, bool isComplete) { this.objectiveId = objectiveId; this.isComplete = isComplete; }
+    }
+
+    /// <summary>Tujuan aktif di HUD. objectiveId kosong berarti tujuan cadangan. Pengirim: ObjectiveManager (#81). Sticky.</summary>
+    [StickyEvent]
+    public struct ActiveObjectiveChangedEvent
+    {
+        public string objectiveId;
+        public int current;
+        public int target;
+        public ActiveObjectiveChangedEvent(string objectiveId, int current, int target)
+        {
+            this.objectiveId = objectiveId; this.current = current; this.target = target;
+        }
+    }
+
+    /// <summary>Penanda arah tujuan aktif. Didengar CompassSystem (#30). Pengirim: ObjectiveManager (#81). Sticky.</summary>
+    [StickyEvent]
+    public struct ObjectiveMarkerChangedEvent
+    {
+        public bool hasMarker;
+        public UnityEngine.Vector3 position;
+        public string label;
+        public ObjectiveMarkerChangedEvent(bool hasMarker, UnityEngine.Vector3 position, string label)
+        {
+            this.hasMarker = hasMarker; this.position = position; this.label = label;
+        }
+    }
+
+    /// <summary>Lore baru ditemukan di run ini. Pengirim: LoreCollectibles (#100). Tidak sticky.</summary>
+    public struct LoreFoundEvent
+    {
+        public string loreId;
+        public RegionType region;
+        public bool isFirstEver;
+        public LoreFoundEvent(string loreId, RegionType region, bool isFirstEver)
+        {
+            this.loreId = loreId; this.region = region; this.isFirstEver = isFirstEver;
+        }
+    }
+
+    /// <summary>Petunjuk gameplay dari lore. Didengar HeavyItemSystem (#69). Pengirim: LoreCollectibles (#100). Tidak sticky.</summary>
+    public struct LoreHintGrantedEvent
+    {
+        public string loreId;
+        public LoreHintKind hintKind;
+        public RegionType region;
+        public LoreHintGrantedEvent(string loreId, LoreHintKind hintKind, RegionType region)
+        {
+            this.loreId = loreId; this.hintKind = hintKind; this.region = region;
+        }
+    }
+
+    // ---------------------------------------------------------------- Base (#90)
+
+    /// <summary>Serangan simulasi pada base yang ditinggal dimulai. Pengirim: RemoteBaseSimulation (#90). Tidak sticky.</summary>
+    public struct BaseRaidStartedEvent
+    {
+        public string clusterId;
+        public RegionType region;
+        public BaseRaidStartedEvent(string clusterId, RegionType region) { this.clusterId = clusterId; this.region = region; }
+    }
+
+    /// <summary>Hasil serangan simulasi saat fajar. Pengirim: RemoteBaseSimulation (#90). Tidak sticky.</summary>
+    public struct BaseRaidResolvedEvent
+    {
+        public float damageTotal;
+        public int npcInjured;
+        public BaseRaidResolvedEvent(float damageTotal, int npcInjured) { this.damageTotal = damageTotal; this.npcInjured = npcInjured; }
+    }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (GrupE). Event dari tabel GameEventBus.md.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Event sistem pendukung Grup E (EnvironmentalHazard, FireSystem, LightSourceSystem, FlashlightController,
+    // TideManager, SwimmingController, BeachSupplyManager, SleepSystem, RegionStreaming).
+    // Sumber: tabel "Daftar event global" di Core_Logic/GameEventBus.md. Nama dan field mengikuti tabel itu.
+    // =====================================================================================
+
+    // ---------------------------------------------------------------- Pemain
+
+    /// <summary>Tidur mulai atau selesai. Pengirim: SleepSystem (#67). Sticky.</summary>
+    [StickyEvent]
+    public struct SleepStateChangedEvent
+    {
+        public bool isSleeping;
+        public SleepWakeReason reason;
+        public SleepStateChangedEvent(bool isSleeping, SleepWakeReason reason) { this.isSleeping = isSleeping; this.reason = reason; }
+    }
+
+    /// <summary>Status air pemain. Pengirim: SwimmingController (#13). Sticky.</summary>
+    [StickyEvent]
+    public struct SwimStateChangedEvent
+    {
+        public bool isSwimming;
+        public bool isUnderwater;
+        public float breathRatio;
+        public SwimStateChangedEvent(bool isSwimming, bool isUnderwater, float breathRatio)
+        {
+            this.isSwimming = isSwimming;
+            this.isUnderwater = isUnderwater;
+            this.breathRatio = breathRatio;
+        }
+    }
+
+    /// <summary>Tingkat cahaya dan keterlihatan pemain. Pengirim: LightSourceSystem (#98). Sticky.</summary>
+    [StickyEvent]
+    public struct PlayerLightLevelChangedEvent
+    {
+        public float lightLevel01;
+        public float visibility;
+        public PlayerLightLevelChangedEvent(float lightLevel01, float visibility) { this.lightLevel01 = lightLevel01; this.visibility = visibility; }
+    }
+
+    // ---------------------------------------------------------------- Region
+
+    /// <summary>Tingkat air laut. Pengirim: TideManager (#91). Sticky.</summary>
+    [StickyEvent]
+    public struct TideChangedEvent
+    {
+        public float level;
+        public bool isHigh;
+        public TideChangedEvent(float level, bool isHigh) { this.level = level; this.isHigh = isHigh; }
+    }
+
+    /// <summary>Status muat region scene. Pengirim: RegionStreaming (#88). Tidak sticky.</summary>
+    public struct RegionLoadStateChangedEvent
+    {
+        public RegionType region;
+        public RegionLoadState state;
+        public RegionLoadStateChangedEvent(RegionType region, RegionLoadState state) { this.region = region; this.state = state; }
+    }
+
+    // ---------------------------------------------------------------- Suplai (#71)
+
+    /// <summary>Kiriman kargo pantai datang. Pengirim: BeachSupplyManager (#71). Tidak sticky.</summary>
+    public struct BeachSupplyArrivedEvent
+    {
+        public int day;
+        public int crateCount;
+        public BeachSupplyArrivedEvent(int day, int crateCount) { this.day = day; this.crateCount = crateCount; }
+    }
+
+    /// <summary>Satu kargo pantai dibuka. Pengirim: BeachSupplyManager (#71). Tidak sticky.</summary>
+    public struct BeachCrateOpenedEvent
+    {
+        public int day;
+        public BeachCrateOpenedEvent(int day) { this.day = day; }
+    }
+
+    // ---------------------------------------------------------------- Base
+
+    /// <summary>Struktur mulai atau berhenti terbakar. Pengirim: Flammable (#97). Tidak sticky.</summary>
+    public struct StructureBurningEvent
+    {
+        public string structureId;
+        public bool isBurning;
+        public StructureBurningEvent(string structureId, bool isBurning) { this.structureId = structureId; this.isBurning = isBurning; }
+    }
+
+    /// <summary>Obor Dinding atau Lampu menyala/padam. Pengirim: LightFixture (#98). Tidak sticky.</summary>
+    public struct LightSourceToggledEvent
+    {
+        public string structureId;
+        public bool isLit;
+        public LightSourceToggledEvent(string structureId, bool isLit) { this.structureId = structureId; this.isLit = isLit; }
+    }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (GrupF). Event dari tabel GameEventBus.md.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Event sistem pendukung Grup F (left-4-dead: HordeManager, AITraversal, ZombieLair, ThrowableSystem;
+    // raft: BaseNavigation, BuildingIntegrity, BaseDefense).
+    // Sumber: tabel "Daftar event global" di Core_Logic/GameEventBus.md. Nama dan field mengikuti tabel itu.
+    // BloodMoonStartedEvent sudah ada di GameEvents.cs dan TIDAK dideklarasikan ulang di sini.
+    // SleepStateChangedEvent milik SleepSystem (#67), bukan grup ini.
+    // =====================================================================================
+
+    // ---------------------------------------------------------------- Bencana (HordeManager, #50)
+
+    /// <summary>Peringatan Blood Moon jam warningHour pada hari Blood Moon. Pengirim: HordeManager (#50, #114). Tidak sticky.</summary>
+    public struct BloodMoonWarningEvent
+    {
+        public int day;
+        public BloodMoonWarningEvent(int day) { this.day = day; }
+    }
+
+    /// <summary>Blood Moon selesai saat fajar. Pengirim: HordeManager (#50). Tidak sticky.</summary>
+    public struct BloodMoonEndedEvent
+    {
+        public int day;
+        public BloodMoonEndedEvent(int day) { this.day = day; }
+    }
+
+    // ---------------------------------------------------------------- Base (BaseNavigation, #78)
+
+    /// <summary>Status pintu berubah. Pengirim: BaseDoor (#78). Tidak sticky.</summary>
+    public struct DoorStateChangedEvent
+    {
+        public string structureId;
+        public DoorState state;
+        public DoorStateChangedEvent(string structureId, DoorState state) { this.structureId = structureId; this.state = state; }
+    }
+
+    /// <summary>Pemain masuk atau keluar base. Pengirim: BaseNavigation (#78). Sticky.</summary>
+    [StickyEvent]
+    public struct PlayerBaseStateChangedEvent
+    {
+        public bool isInside;
+        public PlayerBaseStateChangedEvent(bool isInside) { this.isInside = isInside; }
+    }
+
+    // ---------------------------------------------------------------- Base (BuildingIntegrity, #47)
+
+    /// <summary>Satu ayunan perbaikan berhasil. Pengirim: BuildingIntegrity (#47). Tidak sticky.</summary>
+    public struct StructureRepairedEvent
+    {
+        public string structureId;
+        public float hpRatio;
+        public StructureRepairedEvent(string structureId, float hpRatio) { this.structureId = structureId; this.hpRatio = hpRatio; }
+    }
+
+    /// <summary>Struktur di-upgrade (structureId tetap). Pengirim: BuildingIntegrity (#47). Tidak sticky.</summary>
+    public struct StructureUpgradedEvent
+    {
+        public string structureId;
+        public string buildableId;
+        public StructureUpgradedEvent(string structureId, string buildableId) { this.structureId = structureId; this.buildableId = buildableId; }
+    }
+
+    // ---------------------------------------------------------------- Region dan musuh (ZombieLair, #112)
+
+    /// <summary>Pemain masuk atau keluar area tertutup. Pengirim: InteriorZone (#112). Sticky.</summary>
+    [StickyEvent]
+    public struct InteriorZoneChangedEvent
+    {
+        public string zoneId;
+        public bool isInside;
+        public bool isDark;
+        public InteriorZoneChangedEvent(string zoneId, bool isInside, bool isDark) { this.zoneId = zoneId; this.isInside = isInside; this.isDark = isDark; }
+    }
+
+    /// <summary>Sarang zombie dibersihkan (sarangnya hancur). Pengirim: ZombieLair (#112). Tidak sticky.</summary>
+    public struct LairClearedEvent
+    {
+        public string lairId;
+        public RegionType region;
+        public LairClearedEvent(string lairId, RegionType region) { this.lairId = lairId; this.region = region; }
+    }
+
+    // ---------------------------------------------------------------- Inventori (ThrowableSystem, #96)
+
+    /// <summary>Barang lempar terpilih atau jumlahnya berubah. itemId kosong kalau tidak ada. Pengirim: ThrowableSystem. Sticky.</summary>
+    [StickyEvent]
+    public struct ThrowableChangedEvent
+    {
+        public string itemId;
+        public int count;
+        public ThrowableChangedEvent(string itemId, int count) { this.itemId = itemId; this.count = count; }
+    }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (GrupG). Event dari tabel GameEventBus.md.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Event sistem pendukung Grup G (raft: Hydration, Disease, Campfire, Fishing, Debris, Storage).
+    // Sumber: tabel "Daftar event global" di Core_Logic/GameEventBus.md. Nama dan field mengikuti tabel itu.
+    // StatusEffectChangedEvent (#20) dan TideChangedEvent (#91) milik sistem lain dan TIDAK dideklarasikan di sini.
+    // =====================================================================================
+
+    /// <summary>Penyakit sekunder mulai atau berakhir. Pengirim: DiseaseManager (#45). Tidak sticky.</summary>
+    public struct DiseaseChangedEvent
+    {
+        public DiseaseType type;
+        public bool isActive;
+        public DiseaseChangedEvent(DiseaseType type, bool isActive) { this.type = type; this.isActive = isActive; }
+    }
+
+    /// <summary>State Kail berganti. endReason hanya bermakna saat state Recovering. Pengirim: FishingSystem (#55).</summary>
+    public struct FishingStateChangedEvent
+    {
+        public FishingState state;
+        public FishingEndReason endReason;
+        public FishingStateChangedEvent(FishingState state, FishingEndReason endReason) { this.state = state; this.endReason = endReason; }
+    }
+
+    /// <summary>Satu baris masak matang (isBurnt false) atau gosong (isBurnt true). Pengirim: CampfireManager (#44).</summary>
+    public struct ItemCookedEvent
+    {
+        public string recipeId;
+        public bool isBurnt;
+        public ItemCookedEvent(string recipeId, bool isBurnt) { this.recipeId = recipeId; this.isBurnt = isBurnt; }
+    }
+
+    /// <summary>Ikan tertangkap. Pengirim: FishingSystem (#55).</summary>
+    public struct FishCaughtEvent
+    {
+        public string itemId;
+        public FishCaughtEvent(string itemId) { this.itemId = itemId; }
+    }
+
+    /// <summary>Barang hanyut masuk inventori. Pengirim: DebrisRetrieval (#106).</summary>
+    public struct DebrisCollectedEvent
+    {
+        public string itemId;
+        public int amount;
+        public DebrisCollectedEvent(string itemId, int amount) { this.itemId = itemId; this.amount = amount; }
+    }
 }

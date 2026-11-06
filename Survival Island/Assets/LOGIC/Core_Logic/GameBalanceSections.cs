@@ -1230,4 +1230,977 @@ namespace SurvivalIsland
         public float messageSeconds = 2f;
         public float skipAfterSeconds = 2f;
     }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (FondasiA). Field bagian config dari tabel blueprint terkait.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Field config grup FondasiA (sistem pendukung): settings (#19), localization (#104), shake (#24),
+    // vfx (#15), notification (#22), postProcess (#23). Kelas bagian sudah dideklarasikan partial di
+    // GameBalanceSections.cs dan sudah punya field di GameBalanceConfig.cs.
+    // Nilai awal mengikuti tabel "Angka penyetelan" di blueprint masing-masing dan tabel
+    // "Bagian config per sistem" di GameBalanceConfig.md. Nilai yang berlaku dibaca dari aset.
+    // =====================================================================================
+
+    /// <summary>Batas menu pengaturan. Blueprint: Core_Logic/SettingsManager.md (#19).</summary>
+    public partial class SettingsBalance
+    {
+        public float sensitivityMin = 0.02f;
+        public float sensitivityMax = 0.5f;
+        public float fovMin = 60f;
+        public float fovMax = 100f;
+        // Usulan disetujui developer (#19): batas sempit, supaya gelapnya Region 2 (GDD bagian 5) tetap terasa.
+        public float brightnessMin = 0.8f;
+        public float brightnessMax = 1.2f;
+    }
+
+    /// <summary>Teks, subtitle, dan aksesibilitas. Blueprint: Core_Logic/LocalizationManager.md (#104).</summary>
+    public partial class LocalizationBalance
+    {
+        public float textScaleMin = 0.85f;
+        public float textScaleMax = 1.5f;
+        public float subtitleMinSeconds = 1.5f;
+        public float subtitleSecondsPerChar = 0.06f;
+        public int subtitleMaxRows = 3;
+        public int maxFlashesPerSecond = 3;
+    }
+
+    /// <summary>Konversi sinyal Impulse ke offset kamera. Blueprint: Core_Logic/CameraShake.md (#24).</summary>
+    public partial class ShakeBalance
+    {
+        public float degreesPerUnit = 2f;
+        public float metersPerUnit = 0.02f;
+        public float rollPerUnit = 1f;
+        public float maxDegrees = 8f;          // Lebih kecil dari camera.maxOffsetDegrees (15)
+        public float maxMeters = 0.12f;
+        public float hitReferenceDamage = 25f; // Damage yang menghasilkan skala 1
+        public float hitScaleMin = 0.5f;
+        public float hitScaleMax = 1.5f;
+    }
+
+    /// <summary>Katalog efek sekali muncul. Blueprint: Core_Logic/VFXManager.md (#15).</summary>
+    public partial class VfxBalance
+    {
+        // Tabel "Katalog efek" di VFXManager.md: poolTag, umur, maxActive, cullDistance, minInterval.
+        // Isi pool di ObjectPooler.pools tidak boleh lebih kecil dari maxActive.
+        public VFXEntry[] catalog =
+        {
+            new VFXEntry("VFX_Muzzle", 0.5f, 8, 0f, 0f),
+            new VFXEntry("VFX_LaserMuzzle", 0.5f, 8, 0f, 0f),
+            new VFXEntry("VFX_Impact", 0.5f, 24, 60f, 0f),
+            new VFXEntry("VFX_ImpactDust", 0.5f, 24, 60f, 0f),
+            new VFXEntry("VFX_ImpactWood", 0.5f, 16, 60f, 0f),
+            new VFXEntry("VFX_LaserImpact", 0.5f, 8, 60f, 0f),
+            new VFXEntry("VFX_Blood", 0.8f, 32, 40f, 0.02f),
+            new VFXEntry("VFX_BloodHeavy", 1.2f, 12, 40f, 0f),
+            new VFXEntry("VFX_MetalSpark", 0.4f, 12, 40f, 0f),
+            new VFXEntry("VFX_WoodDust", 0.8f, 8, 40f, 0.05f),
+            new VFXEntry("VFX_StoneDust", 0.8f, 8, 40f, 0.05f),
+            new VFXEntry("VFX_LeafBurst", 0.8f, 8, 40f, 0.05f),
+            new VFXEntry("VFX_GachaSpark", 2f, 4, 0f, 0f),
+            new VFXEntry("VFX_Splash", 1f, 8, 40f, 0.1f),
+            new VFXEntry("VFX_Explosion", 2f, 4, 0f, 0f),     // Usulan EnvironmentalHazard.md
+            new VFXEntry("VFX_ShipPickup", 0.5f, 4, 0f, 0f),  // Usulan ShipInteractable.md
+        };
+
+        public float lowQualityDensity = 0.5f;
+        public float mediumQualityDensity = 0.75f;
+    }
+
+    /// <summary>Notifikasi pojok layar. Blueprint: Core_Logic/NotificationManager.md (#22).</summary>
+    public partial class NotificationBalance
+    {
+        public int maxVisible = 4;
+        public int queueCapacity = 12;
+        public float infoSeconds = 3f;
+        public float warningSeconds = 5f;
+        public float fadeSeconds = 0.3f;
+        public float mergeWindowSeconds = 2f;
+        public int logCapacity = 100;
+    }
+
+    /// <summary>Efek layar URP. Blueprint: Core_Logic/PostProcessController.md (#23).</summary>
+    public partial class PostProcessBalance
+    {
+        public float lowHpStartRatio = 0.4f;
+        public float lowHpMaxVignette = 0.5f;
+        public float lowHpPulseHz = 1.2f;
+        public float lowHpPulseAmount = 0.08f;
+        public float woundVignette = 0.25f;
+        public float hitPulseAmount = 0.2f;
+        public float hitPulseDecayPerSec = 1f;
+        public float freezeVignette = 0.4f;
+        public float breathVignette = 0.55f;
+        public float breathStartRatio = 0.4f;
+        public float sleepVignette = 0.6f;
+        public float infectionSaturationMin = -35f;
+        public float underwaterBlurStart = 0f;
+        public float underwaterBlurEnd = 8f;
+        public float changePerSec = 1.5f;
+        public float underwaterChangePerSec = 6f;
+        public float deathDesaturateSeconds = 2f;
+    }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (FondasiB). Field bagian config dari tabel blueprint terkait.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Angka penyetelan grup FondasiB. Nilai awal sesuai tabel "Angka penyetelan" tiap blueprint
+    // dan tabel "Bagian config per sistem" di Core_Logic/GameBalanceConfig.md. Semua angka adalah usulan
+    // yang disetujui developer sebagai nilai awal (#85, #113, #20, #103).
+    // =====================================================================================
+
+    /// <summary>Loot per lokasi (RegionLootTable.md, #103). Peluang titik House kosong ada di runSeed.lootPointEmptyChance.</summary>
+    public partial class LootBalance
+    {
+        public float warehouseEmptyChance = 0.25f;   // Titik Warehouse kosong
+        public int chestRollsMin = 1;                // Tumpukan per peti
+        public int chestRollsMax = 3;
+        public int bodyRollsMin = 1;                 // Tumpukan per mayat tentara
+        public int bodyRollsMax = 2;
+        public float amountMulVolcano = 1f;          // Pengali jumlah Region 1
+        public float amountMulAmazon = 1.1f;         // Region 2
+        public float amountMulLogistic = 1.25f;      // Region 4
+        public float amountMulSnow = 1.4f;           // Region 3, area terjauh
+        public float rareWeightPerDay = 0.02f;       // Tambahan bobot item langka per hari
+        public float rareWeightMaxMul = 2f;          // Batas pengali bobot item langka
+        public float amountBonusPer10Days = 0.1f;    // Tambahan jumlah tiap 10 hari
+    }
+
+    /// <summary>Efek status (StatusEffectManager.md, #20).</summary>
+    public partial class StatusEffectsBalance
+    {
+        public int maxActive = 8;                        // Batas efek aktif
+        public float supplementSeconds = 60f;            // Durasi Buff_Supplement
+        public float supplementSpeedMultiplier = 1.2f;   // Kecepatan Buff_Supplement
+        public float expiringWarningSeconds = 5f;        // Ikon berkedip menjelang habis
+    }
+
+    /// <summary>Durabilitas dan perbaikan (ToolRepairSystem.md, DurabilitySystem.md, #113).</summary>
+    public partial class RepairBalance
+    {
+        public float lowRatio = 0.2f;            // Batas status Low
+        public float maxLossPerRepair = 0.1f;    // Penurunan maksimum per perbaikan
+        public int maxRepairs = 6;               // Batas perbaikan item non-inti
+        public float repairSeconds = 3f;         // Lama memperbaiki
+        public float upgradeSeconds = 6f;        // Lama memasang upgrade
+    }
+
+    /// <summary>Upgrade kecil per item (ToolRepairSystem.md, #113).</summary>
+    public partial class UpgradeBalance
+    {
+        public float damageBonus = 0.1f;
+        public int magazineBonus = 2;
+        public float speedBonus = 0.1f;
+        public float durabilityBonus = 0.25f;
+        public int maxPerItem = 2;
+        public float maxDamageMultiplier = 4f;   // Batas akhir pengali damage
+    }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (GrupC1). Field bagian config dari tabel blueprint terkait.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Field config grup C1 (sistem pendukung audio, animasi, dan optimasi): ambientAudio (#52), combatMusic (#114),
+    // footstep (#21), animation (#12), optimization (#62, #93). Kelas bagian sudah dideklarasikan partial di
+    // GameBalanceSections.cs dan sudah punya field di GameBalanceConfig.cs.
+    // Nilai awal mengikuti tabel "Angka penyetelan" di blueprint masing-masing. Field yang ditandai
+    // "tambahan implementasi" adalah angka yang ditulis langsung di teks blueprint (bukan di tabel), dipindah ke config
+    // supaya tidak tertulis di logika (#84). Lihat "Catatan Implementasi (Sistem pendukung)" di blueprint terkait.
+    // =====================================================================================
+
+    /// <summary>Suara latar per area. Blueprint: Core_Logic/AmbientAudio.md (#52).</summary>
+    public partial class AmbientAudioBalance
+    {
+        public float crossfadeSeconds = 3f;
+        public float zoneExitGraceSeconds = 1.5f;
+        public float retargetDuckSeconds = 0.2f;
+        public float dayNightBlendSeconds = 20f;
+        public float underwaterLowpassHz = 800f;
+        public float sleepDuckDb = -6f;
+        public float runEndFadeSeconds = 3f;
+
+        // Tambahan implementasi (angka dari teks AmbientAudio.md bagian 2 dan 4).
+        public float startCrossfadeSeconds = 0.5f;    // "BeginCrossfade(target, 0,5)" saat mulai run dan load
+        public float tideMinVolume = 0.6f;            // "Lerp(0,6, 1, level)" untuk layer followsTide
+        public float oneShotHeightMin = 5f;           // One-shot naik 5 sampai 15 meter dari pemain
+        public float oneShotHeightMax = 15f;
+    }
+
+    /// <summary>Musik pertempuran dan suara penanda musuh. Blueprint: Core_Logic/CombatMusicDirector.md (#114).</summary>
+    public partial class CombatMusicBalance
+    {
+        public float alertThreshold = 0.2f;
+        public float combatThreshold = 0.45f;
+        public float peakThreshold = 0.85f;
+        public float hysteresis = 0.1f;
+        public float riseConfirmSeconds = 0.5f;
+        public float minTierHoldSeconds = 12f;
+        public float riseFadeSeconds = 1.5f;
+        public float fallFadeSeconds = 6f;
+        public float nearRadius = 25f;
+        public float nearSaturation = 6f;
+        public float damageScorePerPoint = 0.02f;
+        public float damageScoreDecayPerSec = 0.05f;
+        public float pinnedScore = 0.7f;
+        public int maxEnemyVoices = 8;
+        public int maxSameVariantVoices = 3;
+        public float occlusionCheckSeconds = 0.25f;
+        public float occlusionLowpassHz = 1500f;
+        public int crowdBedMinEngaged = 12;
+        public float disasterMusicDuckDb = -6f;
+        public float stingerMinInterval = 3f;
+
+        // Tambahan implementasi (angka dari teks CombatMusicDirector.md bagian 2 dan 4).
+        public float evaluateIntervalSeconds = 0.25f;  // EvaluateScore "4 kali per detik"
+        public float phaseFloorRelax = 0.1f;           // Tabel PhaseFloor
+        public float phaseFloorBuildUp = 0.25f;
+        public float phaseFloorPeakFade = 0.5f;
+        public float phaseFloorSustainPeak = 0.85f;
+        public float largeThreatWeight = 3f;           // Bobot musuh cues.isLarge
+        public float alertCalmVolume = 0.5f;           // "Calm lebih pelan" pada tingkat Alert (usulan nilai)
+        public float calmDayNightFadeSeconds = 10f;    // calmDay dan calmNight saling crossfade 10 detik
+        public float scheduleLeadSeconds = 0.1f;       // PlayScheduled(dspTime + 0,1)
+        public int emitterTicksPerFrame = 16;          // Maksimal 16 emitter per frame
+        public int tellPriorityBonus = 2;              // PlayTell memakai priority + 2
+        public float voiceStealFadeSeconds = 0.05f;
+        public float sameClipMinSeconds = 0.15f;
+        public int crowdBedFullEngaged = 24;           // Jumlah musuh untuk volume kerumunan penuh (usulan nilai)
+        public float cinematicFadeOutSeconds = 1f;
+        public float cinematicFadeInSeconds = 2f;
+        public float runEndFadeSeconds = 2f;
+        public float loadStingerSuppressSeconds = 2f;  // bloodMoonStartClip dilewati 2 detik pertama setelah load
+        public float cueMinDistance = 2f;              // Pengaturan sumber 3D
+        public float cueSpread = 60f;
+    }
+
+    /// <summary>Suara langkah pemain. Blueprint: Core_Logic/FootstepAudio.md (#21).</summary>
+    public partial class FootstepBalance
+    {
+        public float stepDistance = 1.75f;
+        public float minSpeed = 0.5f;
+        public float baseVolume = 0.6f;
+        public float crouchVolumeMultiplier = 0.4f;
+        public float sprintSpeedThreshold = 6f;
+        public float sprintVolumeMultiplier = 1.3f;
+        public float heavyVolumeMultiplier = 1.2f;
+        public float pitchMin = 0.93f;
+        public float pitchMax = 1.07f;
+        public float volumeJitter = 0.1f;
+        public float minLandingAirSeconds = 0.25f;
+        public float landingFullFallSpeed = 12f;
+
+        // Tambahan implementasi: "Mathf.Lerp(0.5f, 1.3f, impact01)" di PlayLanding.
+        public float landingVolumeMin = 0.5f;
+        public float landingVolumeMax = 1.3f;
+    }
+
+    /// <summary>Pembungkus Animator. Blueprint: Core_Logic/AnimationController.md (#12).</summary>
+    public partial class AnimationBalance
+    {
+        public float locomotionDampSeconds = 0.1f;
+        public float enemySpeedSampleSeconds = 0.1f;
+        public float minReloadAnimSpeed = 0.5f;
+        public float maxReloadAnimSpeed = 2f;
+    }
+
+    /// <summary>Culling jarak jauh. Blueprint: Core_Logic/OptimizationManager.md (#62, #93). Usulan.</summary>
+    public partial class OptimizationBalance
+    {
+        public float cullingDistance = 50f;
+        public float cullCheckSeconds = 1f;
+
+        // Tambahan implementasi: radius NavMesh.SamplePosition saat agen dinyalakan kembali (Uncull langkah 1).
+        public float uncullSampleRadius = 2f;
+    }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (GrupC2). Field bagian config dari tabel blueprint terkait.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Field config grup C2 (sistem pendukung): combatFeedback (#51), compass (#30), tutorial (#16), stats (#57),
+    // console (#56), narrative (#99). Kelas bagian sudah dideklarasikan partial di GameBalanceSections.cs dan sudah
+    // punya field di GameBalanceConfig.cs. Nilai awal mengikuti tabel "Angka penyetelan" di blueprint masing-masing.
+    // run.endingTimeoutSeconds (NarrativeSequencer.md) sudah ada di RunBalance, jadi tidak ditulis ulang.
+    // =====================================================================================
+
+    /// <summary>Indikator damage, Hit Marker, dan Kill Marker. Blueprint: Core_Logic/CombatFeedbackUI.md (#51).</summary>
+    public partial class CombatFeedbackBalance
+    {
+        public int maxIndicators = 6;               // Sekaligus ukuran pool UI_DamageIndicator
+        public float indicatorSeconds = 1.2f;
+        public float indicatorMergeAngle = 30f;
+        public float minAlpha = 0.35f;
+        public float fullAlphaDamage = 30f;
+        public float sourceOffsetMeters = 10f;
+        public float telegraphSeconds = 0.6f;
+        public float hitMarkerSeconds = 0.12f;
+        public float headshotMarkerScale = 1.3f;
+        public int killBlinkCount = 2;
+        public float killBlinkSeconds = 0.3f;
+        public float tinkMinInterval = 0.08f;
+    }
+
+    /// <summary>Bilah kompas. Blueprint: Core_Logic/CompassSystem.md (#30). Usulan disetujui developer sebagai nilai awal.</summary>
+    public partial class CompassBalance
+    {
+        public float visibleArcDegrees = 180f;
+        public float edgeFadeDegrees = 15f;
+        public bool showDistance = true;
+        public bool clampObjectiveToEdge = true;
+    }
+
+    /// <summary>Pop-up panduan. Blueprint: Core_Logic/TutorialManager.md (#16).</summary>
+    public partial class TutorialBalance
+    {
+        public float displaySeconds = 6f;
+        public float minGapSeconds = 3f;
+        public float dangerHoldSeconds = 4f;
+        public float minSeenSeconds = 2f;
+        public int queueLimit = 4;
+        public float lowVitalThreshold = 50f;
+    }
+
+    /// <summary>Statistik lokal stats.json. Blueprint: Core_Logic/LocalStatsManager.md (#57).</summary>
+    public partial class StatsBalance
+    {
+        public float flushIntervalSeconds = 60f;
+    }
+
+    /// <summary>Konsol pengembang. Blueprint: Core_Logic/DevConsole.md (#56).</summary>
+    public partial class ConsoleBalance
+    {
+        public int maxOutputLines = 200;
+        public int maxHistory = 50;
+    }
+
+    /// <summary>Pemutar adegan. Blueprint: Core_Logic/NarrativeSequencer.md (#99).</summary>
+    public partial class NarrativeBalance
+    {
+        public float beatFadeSeconds = 0.5f;
+        public float musicFadeSeconds = 1f;
+        public float skipHintSeconds = 3f;
+        public float watchdogExtraSeconds = 10f;
+    }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (GrupD). Field bagian config dari tabel blueprint terkait.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Angka penyetelan Grup D. Nilai awal sesuai tabel "Angka penyetelan" tiap blueprint dan tabel
+    // "Bagian config per sistem" di Core_Logic/GameBalanceConfig.md. Semua bagian sudah ada di GameBalanceConfig.
+    // =====================================================================================
+
+    /// <summary>NPC teman (NPCRoster.md, NPCCompanion.md, #76). Semua angka usulan disetujui developer.</summary>
+    public partial class NpcBalance
+    {
+        public float thinkSeconds = 0.25f;              // Jeda pembaruan FSM
+        public float followDistance = 5f;
+        public float followIndoorDistance = 2.5f;       // Saat pemain di dalam base
+        public float teleportDistance = 40f;            // Warp saat Follow tertinggal jauh
+        public float detectRadius = 15f;                // Jarak mencari musuh untuk Attack
+        public float attackLeashDistance = 12f;         // Jarak Attack dari pemain
+        public float baseRegenPerSec = 0.5f;            // HP pulih di base
+        public float workSearchRadius = 30f;            // Jarak mencari tempat kerja
+        public float cookSpeedMultiplier = 1.25f;       // Skill Koki
+        public float builderRepairMultiplier = 1.25f;   // Skill Tukang pada perbaikan
+        public int avoidancePriority = 70;              // Agen NPC memberi jalan (#87)
+        public float corpseSeconds = 60f;               // Lama mayat sebelum dihapus
+        public float followThreatWeight = 0.6f;         // ThreatWeight normal (#108)
+        public float coverThreatWeight = 0.3f;          // ThreatWeight saat TakeCover (#108)
+        // Nama usulan sistem pendukung (dicatat di Catatan Implementasi NPCCompanion.md). Blueprint menyebut angkanya di teks.
+        public float doorKeepAwayRadius = 1.5f;         // NPC Follow tidak berdiri dekat pintu
+        public float commandBlockEnemyRadius = 5f;      // Perintah E ditolak saat bertarung jarak dekat
+        public float fireAvoidMargin = 2f;              // Margin FireSystem.IsNearFire (#97)
+    }
+
+    /// <summary>Tambahan interaksi pulau (IslandInteractable.md, #17).</summary>
+    public partial class InteractBalance
+    {
+        // Usulan sistem pendukung: blueprint hanya menyebut "radius kecil, mengikuti #49". Nilai awal = stealth.noiseWalk.
+        public float containerNoiseRadius = 8f;
+    }
+
+    /// <summary>Tujuan dan Diary (ObjectiveManager.md, #81).</summary>
+    public partial class ObjectiveBalance
+    {
+        public int baseWallCount = 4;                   // Usulan disetujui: 4 dinding + 1 pintu
+        public float hudFlashSeconds = 3f;
+        public int chapter2TriggerDay = 2;              // Keputusan developer
+        public RegionType chapter3TriggerRegion = RegionType.Amazon;   // Keputusan developer. Jangan region di balik S2
+    }
+
+    /// <summary>Temuan lore (LoreCollectibles.md, #100).</summary>
+    public partial class LoreBalance
+    {
+        public int maxPartHintsPerRun = 2;
+    }
+
+    /// <summary>Ucapan NPC (LoreCollectibles.md bagian NPCBarks, #100).</summary>
+    public partial class BarksBalance
+    {
+        public float checkSeconds = 2f;
+        public float globalCooldownSeconds = 6f;
+        public float npcCooldownSeconds = 20f;
+        public float categoryCooldownSeconds = 90f;
+        public float hearRadius = 25f;
+        public float greetRadius = 6f;
+        public float greetAwaySeconds = 120f;
+        public float hurtHpRatio = 0.4f;
+        public float zombieAlertRadius = 15f;
+    }
+
+    /// <summary>Simulasi base yang ditinggal (RemoteBaseSimulation.md, #90). Semua angka usulan disetujui developer.</summary>
+    public partial class RemoteBaseBalance
+    {
+        // Jarak
+        public float remoteDistance = 80f;
+        public float returnDistance = 60f;
+        public float distanceCheckSeconds = 2f;
+        public float clusterRadius = 30f;
+        // Serangan
+        public int minStructuresForRaid = 4;
+        public int maxRaidedClusters = 2;
+        public int firstRaidDay = 3;
+        public float raidChanceBase = 0.5f;
+        public float raidChancePerDay = 0.01f;
+        public float raidChanceMax = 0.9f;
+        public float basePower = 150f;
+        public float powerPerDay = 20f;
+        public float maxPower = 2550f;
+        public float bloodMoonMultiplier = 2f;
+        public float referenceStructures = 12f;
+        public float sizeFactorMin = 0.75f;
+        public float sizeFactorMax = 1.5f;
+        public float varianceFraction = 0.15f;
+        // Pertahanan
+        public float scoreWallWood = 10f;
+        public float scoreWallStone = 25f;
+        public float scoreTrap = 15f;
+        public float scoreNpcGuard = 20f;
+        public float mitigationK = 200f;
+        public float maxMitigation = 0.8f;
+        // Penerapan
+        public float hitChunk = 60f;
+        public float doorWeight = 2f;
+        public float trapWearFraction = 0.3f;
+        public float raidStartHourMin = 20f;
+        public float raidStartHourMax = 23f;
+        public float raidEndHour = 5f;
+        // NPC
+        public float npcInjuryChanceMax = 0.6f;
+        public float npcInjuryDamage = 40f;
+        public float npcDeathChanceOnBreach = 0.35f;
+        public float npcGuardDeathMultiplier = 0.5f;
+        public float npcGuardMinHpRatio = 0.25f;
+        // Peralihan
+        public float takeoverZombiesPerPower = 0.02f;
+        public int takeoverMaxZombies = 12;
+    }
+
+    /// <summary>Pengaman jalur menang (ProgressionSafety.md, #116). Semua angka usulan disetujui developer.</summary>
+    public partial class SafetyBalance
+    {
+        public int unstuckRingSize = 12;
+        public float unstuckSampleSeconds = 5f;
+        public float unstuckNavSampleRadius = 2f;
+        public float unstuckMinRewindDistance = 3f;
+        public float unstuckChannelSeconds = 5f;
+        public float unstuckCooldownSeconds = 180f;
+        public float stuckHintSeconds = 20f;
+        public int minStonePickupsRegion1 = 4;
+        public float woodPerSecondEstimate = 0.4f;
+        public float regionTravelSeconds = 300f;
+        public float partRoundTripSeconds = 240f;
+        public float estimateMargin = 1.5f;
+        // Nama usulan sistem pendukung: blueprint menulis "kurang dari 0,5 meter" di teks.
+        public float stuckHintMoveThreshold = 0.5f;
+    }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (GrupE). Field bagian config dari tabel blueprint terkait.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Angka penyetelan Grup E. Nilai awal sesuai tabel "Angka penyetelan" tiap blueprint dan tabel
+    // "Bagian config per sistem" di Core_Logic/GameBalanceConfig.md. Semua bagian sudah ada di GameBalanceConfig.
+    // Semua angka di sini usulan yang disetujui developer sebagai nilai awal (#85), kecuali disebut lain.
+    // =====================================================================================
+
+    /// <summary>Tong Merah (EnvironmentalHazard.md, #59). Usulan.</summary>
+    public partial class HazardBalance
+    {
+        public float barrelRadius = 5f;
+        public float barrelDamage = 100f;
+        public float chainDelaySeconds = 0.15f;
+        public float fireFuseSeconds = 2f;
+        public float noiseRadius = 40f;
+    }
+
+    /// <summary>Api menjalar (FireSystem.md, #97).</summary>
+    public partial class FireBalance
+    {
+        public int maxBurning = 24;
+        public int maxAreas = 8;
+        public int maxCarvedAreas = 4;
+        public float burnTickSeconds = 0.5f;
+        public float spreadTickSeconds = 1f;
+        public int spreadChecksPerTick = 6;
+        public float areaTickSeconds = 0.5f;
+        public float areaIgniteChancePerTick = 0.25f;
+        public float reigniteCooldownSeconds = 20f;
+        public int maxVegetationGeneration = 3;
+        public float rainSpreadMultiplier = 0.25f;
+        public float rainBurnMultiplier = 0.5f;          // Dipakai sebagai: burnRemaining berkurang 1/0,5 = 2 kali lebih cepat, dan durasi area dikali 0,5
+        public float snowSpreadMultiplier = 0.5f;
+        public float stormAreaMultiplier = 0.25f;
+        public float roofRecheckSeconds = 5f;
+        public float roofCheckDistance = 20f;            // Tambahan implementasi: sama dengan campfire.skyCheckDistance
+        public float extinguishHoldSeconds = 1f;
+        public float fireballAreaRadius = 4f;
+        public float fireballAreaSeconds = 12f;
+        public float fireballDamagePerSec = 8f;
+        public float fireAxeIgniteChance = 0.25f;
+        public float campfireTrapIgniteChancePerTick = 0.1f;
+    }
+
+    /// <summary>Sumber cahaya, keterlihatan, dan batas lampu (LightSourceSystem.md, #98).</summary>
+    public partial class LightBalance
+    {
+        public float visibilityTickSeconds = 0.25f;
+        public float budgetTickSeconds = 0.5f;
+        public float fixtureTickSeconds = 1f;
+        public float ambientDay = 1f;
+        public float ambientNight = 0.1f;
+        public float ambientAmazonDay = 0.45f;
+        public float ambientInterior = 0.1f;
+        public int interiorMaxRealtimeLights = 3;
+        public float stormAmbientMultiplier = 0.7f;
+        public float visibilityInDark = 0.6f;
+        public float visibilityInLight = 1f;
+        public float flashlightVisibilityBonus = 0.3f;
+        public int maxRegisteredSources = 64;
+        public int maxRealtimeLights = 6;
+        public int maxShadowLights = 1;
+        public float budgetSwapMargin = 1.2f;
+        public int maxLightStructures = 24;
+        public float rainFuelMultiplier = 1.5f;
+        public bool stormExtinguishes = true;
+        public float flickerSeconds = 2f;
+        public float attractionChancePerLight = 0.05f;
+        public float attractionChanceMax = 0.35f;
+        public float mossStaticLightLevel = 0.5f;
+        public float lightFadeSeconds = 0.25f;           // Peralihan lampu real-time (blueprint: 0,25 detik)
+        public float addFuelHoldSeconds = 0.6f;          // Tahan E untuk menambah bahan bakar (blueprint: 0,6 detik)
+        public float visibilityPublishDelta = 0.02f;
+    }
+
+    /// <summary>Senter (FlashlightController.md, #98).</summary>
+    public partial class FlashlightBalance
+    {
+        public float maxBattery = 100f;
+        public float drainPerSec = 0.2f;
+        public float batteryRecharge = 100f;
+        public float range = 25f;
+        public float spotAngle = 50f;
+        public float flickerHz = 6f;
+    }
+
+    /// <summary>Air pasang (TideManager.md, #91).</summary>
+    public partial class TideBalance
+    {
+        public float lowWaterY = 0f;
+        public float highWaterY = 1.6f;
+        public float dayAmplitude = 0.6f;
+        public float nightAmplitude = 1f;
+        public float highThreshold = 0.7f;
+        public float lowThreshold = 0.2f;
+        public float warnLevel = 0.55f;
+        public float stormSurgeLevel = 0.25f;
+        public float surgeRatePerGameHour = 0.125f;
+        public float colliderStepMeters = 0.15f;
+        public float wadeDepth = 0.35f;
+        public float wadeStaminaPerSec = 2f;
+        public float highAreaCost = 20f;
+        public float tickSeconds = 0.25f;                // Blueprint: Update setiap 0,25 detik
+        public float visualLerpSpeed = 0.5f;             // Meter per detik untuk gerak halus mesh laut
+        public float publishLevelDelta = 0.05f;
+    }
+
+    /// <summary>Berenang (WaterSwimmingController.md, #13). swimStaminaPerSec dan drownDamagePerSec ada di vitals.</summary>
+    public partial class SwimmingBalance
+    {
+        public float idleStaminaPerSec = 2f;
+        public float swimSpeedMultiplier = 0.5f;
+        public float wadeSpeedMultiplier = 0.7f;
+        public float wadeEnterDepth = 0.5f;
+        public float swimEnterDepth = 1.3f;
+        public float swimExitDepth = 1.0f;
+        public float maxBreathSeconds = 30f;
+        public float breathRecoverPerSec = 10f;
+        public float sinkingBreathMultiplier = 2f;
+        public float sinkSpeed = 0.5f;
+        public float verticalSwimSpeed = 1.5f;
+        public float surfaceEyeOffset = 0.3f;
+        public float waterCheckSeconds = 0.1f;
+        public float landingProbeDistance = 30f;
+        public float breathPublishHz = 4f;               // Blueprint: 4 kali per detik selama breathRatio < 1
+    }
+
+    /// <summary>Kargo pantai mingguan (BeachSupplyManager.md, #71). GDD bagian 6: Weekly Beach Supply setiap 7 hari.</summary>
+    public partial class BeachSupplyBalance
+    {
+        public int intervalDays = 7;                     // GDD bagian 6
+        public int crateCountBase = 2;
+        public int crateCountPerTwoWeeks = 1;
+        public int crateCountMax = 4;
+        public int rollsPerCrate = 3;
+        public float crateLifetimeGameHours = 18f;
+        public float crateMinLevel = 0.85f;
+        public float openHoldSeconds = 1.5f;
+        public float openNoiseRadius = 10f;
+        public float ambushTriggerDistance = 50f;
+        public int ambushAnimalsBase = 2;
+        public int ambushAnimalsMax = 4;
+        public int ambushZombiesBase = 4;
+        public int ambushZombiesMax = 10;
+        public float ambushSpawnRadius = 25f;            // Blueprint: RequestBurst(..., tengah, 25)
+        public float pointNavSampleDistance = 2f;
+        public float pointClearRadius = 1.5f;
+        public float fallbackSpacing = 1.5f;
+    }
+
+    /// <summary>Tidur (SleepSystem.md, #67). maxGameHoursPerStep sudah ada di GameBalanceSections.</summary>
+    public partial class SleepBalance
+    {
+        public float timeMultiplierAsleep = 2160f;
+        public float drainRatioAsleep = 0.5f;
+        public float enemyBlockRadius = 25f;
+        public float enemyWakeRadius = 8f;
+        public float enemyCheckSeconds = 0.5f;
+        public float structureAlarmRadius = 15f;
+        public float minVitalToSleep = 10f;
+        public float retrySeconds = 5f;
+        public float hpPerGameHourInBase = 2f;
+        public float hpPerGameHourOutside = 0f;
+        public float minHoursForStamina = 4f;
+        public float interruptChanceInBase = 0.25f;
+        public float interruptChanceOutside = 0.6f;
+        public float interruptChanceBeach = 1f;
+        public float interruptMinProgress = 0.25f;
+        public float interruptMaxProgress = 0.9f;
+        public int ambushBaseCount = 4;
+        public int ambushCountPerTenDays = 1;
+        public float ambushRadiusInBase = 20f;
+        public float ambushRadiusExposed = 10f;
+        public float beachRadius = 8f;
+        public float beachTideStaminaLoss = 30f;
+    }
+
+    /// <summary>Streaming region (RegionStreaming.md, #88). Usulan teknis.</summary>
+    public partial class StreamingBalance
+    {
+        public float loadDistance = 150f;
+        public float unloadDistance = 250f;
+        public float urgentDistance = 40f;
+        public float checkIntervalSeconds = 0.5f;
+        public int maxLoadedRegions = 2;
+        public float stallNoticeSeconds = 2f;
+        public float stallPanelSeconds = 10f;
+        public float safePositionIntervalSeconds = 1f;
+        public float unusedAssetsMinIntervalSeconds = 120f;
+        public int baseMemoryLimitMB = 1000;
+        public int regionMemoryLimitMB = 1200;
+        public int regionBatchLimit = 600;
+        public int baseBatchLimit = 300;
+        public float regionLoadTimeLimitSeconds = 8f;
+        public float loadRetrySeconds = 5f;              // Blueprint "Scene gagal dimuat": coba lagi setelah 5 detik
+        public float safeGroundProbeDistance = 3f;
+        public float stallSpeedThreshold = 0.3f;         // Pemain dianggap tertahan kalau hampir diam di dekat SeamBarrier
+    }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (GrupF). Field bagian config dari tabel blueprint terkait.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Angka penyetelan Grup F. Nilai awal sesuai tabel "Angka penyetelan" tiap blueprint dan tabel
+    // "Bagian config per sistem" di Core_Logic/GameBalanceConfig.md. Semua bagian sudah ada di GameBalanceConfig.
+    // =====================================================================================
+
+    /// <summary>Blood Moon (HordeManager.md, #50). GDD bagian 3: setiap 10 hari. Isi gelombang usulan disetujui developer.</summary>
+    public partial class BloodMoonBalance
+    {
+        public bool enabled = true;                 // Aturan GDD bagian 3. Saklar hanya untuk tes
+        public int intervalDays = 10;               // GDD bagian 3: hari ke-10, 20, 30, ...
+        public int warningHour = 12;
+        public int waveCount = 4;
+        public float firstWaveDelaySeconds = 20f;
+        public float waveIntervalSeconds = 90f;
+        public int baseWaveSize = 12;
+        public int waveSizePerEvent = 4;
+        public int maxAlive = 50;                   // SpawnOverride.capOverride
+        public int sustainAlive = 20;
+        public float sustainCheckSeconds = 30f;
+        public float burstRadius = 45f;
+        public float baseEngageDistance = 120f;
+    }
+
+    /// <summary>Jalur musuh, pintu, dan deteksi dalam base (BaseNavigation.md, #78). Usulan disetujui developer (#85).</summary>
+    public partial class BaseNavBalance
+    {
+        public float pathCheckIntervalSeconds = 1f;
+        public int maxPathChecksPerFrame = 4;
+        public float spawnGraceSeconds = 2f;
+        public float blockedConfirmSeconds = 1.5f;
+        public float retargetCooldownSeconds = 4f;
+        public float targetSearchRadius = 6f;
+        public int maxAttackersPerWall = 4;
+        public int maxAttackersPerDoor = 3;
+        public float slotSpacing = 0.8f;
+        public float slotStandoff = 0.9f;
+        public float waitRingRadius = 4f;
+        public float insideCheckSeconds = 0.5f;
+        public float insideRayDistance = 6f;
+        public int insideMinWallHits = 3;
+        public float doorSwingSeconds = 0.4f;
+        public float doorNpcAutoCloseSeconds = 1.5f;
+        public float lockedDamageMultiplier = 0.75f;
+    }
+
+    /// <summary>Perbaikan dan upgrade bangunan (BuildingIntegrity.md, #47). Usulan disetujui developer (#85).</summary>
+    public partial class IntegrityBalance
+    {
+        public float repairRange = 4f;
+        public float repairSwingSeconds = 0.6f;
+        public float repairHpRatioPerSwing = 0.15f;
+        public float repairBlockedAfterDamageSeconds = 2f;
+        public float upgradeHoldSeconds = 1f;
+        public float upgradeBlockedAfterDamageSeconds = 5f;
+        public float hammerDecayPerRepairSwing = 0.5f;
+        public float hammerDecayPerUpgrade = 2f;
+        public float noiseRadiusPerSwing = 15f;
+    }
+
+    /// <summary>Jebakan base (BaseDefense.md, #26). Usulan disetujui developer (#85).</summary>
+    public partial class TrapBalance
+    {
+        public float spikeDamagePerHit = 25f;
+        public float spikeHitIntervalSeconds = 1.5f;
+        public float spikeSelfDamagePerHit = 5f;     // Paku rusak setelah 12 kali kena (HP 60)
+        public float spikeNoiseRadius = 6f;
+        public float wireDamagePerHit = 4f;
+        public float wireHitIntervalSeconds = 1f;
+        public float wireSlowMultiplier = 0.5f;
+        public float wireSlowSeconds = 1.5f;
+        public float wireSelfDamagePerHit = 2f;      // Kawat rusak setelah 40 kali kena (HP 80)
+        public float campfireDamagePerHit = 8f;
+        public float campfireHitIntervalSeconds = 1f;
+        public float tickIntervalSeconds = 0.25f;
+        public int maxVictimsPerTrap = 8;
+        public int maxTrapsPerRegion = 30;
+    }
+
+    /// <summary>Barang lempar (ThrowableSystem.md, #96). GDD bagian 3: Molotov, Bom Rakitan, Batu, Suar.</summary>
+    public partial class ThrowableBalance
+    {
+        public bool enabled = true;                  // Sistem dipakai. false hanya sakelar uji
+        public float molotovForce = 15f;
+        public float molotovRadius = 3.5f;
+        public float molotovDamagePerSec = 15f;
+        public float molotovDuration = 8f;
+        public float molotovNoise = 15f;
+        public float bombForce = 13f;
+        public float bombFuse = 3f;
+        public float bombRadius = 6f;
+        public float bombDamage = 120f;
+        public float bombNoise = 40f;
+        public float rockForce = 18f;
+        public float rockNoise = 12f;
+        public float flareForce = 15f;
+        public float flareFuse = 0.5f;
+        public float flareDuration = 15f;
+        public float flareNoise = 25f;
+        public float flareNoiseInterval = 1f;
+        public float holdToAimSeconds = 0.2f;
+        public float throwCooldownSeconds = 0.8f;
+        public int arcPointCount = 30;
+        public float arcTimeStep = 0.06f;
+        public float maxLifetimeSeconds = 25f;
+        public int maxActiveLures = 2;
+        public float fireTickSeconds = 1f;           // Cadangan Molotov sampai FireSystem (#97) ada (Kasus Khusus)
+    }
+
+    /// <summary>Sarang zombie (ZombieLair.md, #112). GDD bagian 3: zombie diam di ruang gelap saat siang.</summary>
+    public partial class LairBalance
+    {
+        public bool enabled = true;                  // Sistem dipakai. false hanya sakelar uji
+        public float activationRadius = 40f;
+        public float deactivationRadius = 60f;
+        public float senseIntervalSeconds = 0.5f;
+        public float proximityWakeRadius = 3f;
+        public float crouchProximityWakeRadius = 1.5f;
+        public float lightWakeRange = 8f;
+        public float lightWakeSeconds = 2f;
+        public float noiseWakeMultiplier = 1f;
+        public float groupWakeRadius = 6f;
+        public float doorWaitSeconds = 6f;
+        public float returnToDormantSeconds = 20f;
+        public float clearedBudgetReduction = 0.1f;
+        public float maxBudgetReduction = 0.3f;
+        public float nightReleaseRatio = 0.5f;
+        public float nestHP = 300f;
+        public float registryTickSeconds = 1f;       // LairRegistry.Tick "tiap 1 detik"
+    }
+
+    /// <summary>
+    /// Bagian AI (#94, AITraversal.md) dari TraversalBalance. Bagian pemain (#101) ada di GameBalanceSections.cs.
+    /// Usulan disetujui developer (#85).
+    /// </summary>
+    public partial class TraversalBalance
+    {
+        public float probeIntervalSeconds = 1.5f;
+        public int maxProbesPerFrame = 2;
+        public float campShotWindowSeconds = 5f;
+        public float linkAvoidSeconds = 5f;
+        public int retreatMaxTries = 3;
+        public float reachTolerance = 2.5f;
+        public float sampleRadius = 1.5f;
+        public float surroundAfterSeconds = 3f;
+        public float rockAfterSeconds = 10f;
+        public float retreatAfterSeconds = 20f;
+        public float surroundRadius = 6f;
+        public int maxRockThrowers = 3;
+        public float rockRangeMin = 5f;
+        public float rockRangeMax = 25f;
+        public float rockCooldownSeconds = 8f;
+        public float campMoveDistance = 5f;
+        public float campShotMultiplier = 2f;
+        public float campTier1Seconds = 45f;
+        public float campTier2Seconds = 90f;
+        public float campRepeatSeconds = 60f;
+        public int campCounterCount = 2;
+        public float offNavGraceSeconds = 1f;
+        public float offNavSampleRadius = 3f;
+        public int linkUsersDefault = 1;
+        public float linkWaitSeconds = 3f;
+        public float jumpSeconds = 0.6f;
+        public float climbSpeed = 1.5f;
+        public float rockDamage = 10f;               // AttackData Zombie_Rock_Throw (#109): damage 10, infeksi 0
+        public float rockWindupSeconds = 1f;         // Ancang-ancang 1 detik
+        public float rockSpeed = 16f;                // Usulan teknis: kecepatan lempar batu zombie
+        public float retreatDistance = 15f;          // Usulan teknis: jarak titik mundur dari pemain
+        public float rockLifetimeSeconds = 6f;       // Usulan teknis: batu yang tidak mengenai apa pun kembali ke pool
+        public float linkAvoidCost = 1000f;          // Usulan teknis: biaya area link yang penuh selama linkAvoidSeconds
+    }
+
+    // =====================================================================================
+    // Ditambahkan: sistem pendukung (GrupG). Field bagian config dari tabel blueprint terkait.
+    // =====================================================================================
+
+    // =====================================================================================
+    // Angka penyetelan sistem pendukung Grup G. Nilai awal dari tabel "Angka penyetelan" tiap blueprint:
+    // raft/HydrationSystem.md (#43), DiseaseManager.md (#45), CampfireManager.md (#44), FishingSystem.md (#55),
+    // DebrisRetrieval.md (#106), StorageChest.md (#46). Semua nilai adalah usulan yang disetujui developer sebagai nilai awal.
+    // =====================================================================================
+
+    public partial class HydrationBalance
+    {
+        // exertionThirstMultiplier sudah ada di GameBalanceSections.cs (Langkah 3).
+        public float dehydratedStaminaRegenMultiplier = 0f;   // Regenerasi stamina saat Thirst nol
+        public float dirtyWaterHoldSeconds = 1f;              // holdSeconds WaterSourcePoint
+        public float collectorCapacityPortions = 4f;          // Isi penuh RainwaterCollector
+        public float rainFillPerGameHour = 0.5f;
+        public float stormFillPerGameHour = 0.75f;
+        public float skyCheckDistance = 20f;                  // Raycast atap ke atas
+        public float structureRecheckRadius = 6f;             // Bangunan baru dalam jarak ini memicu cek ulang atap
+    }
+
+    public partial class DiseaseBalance
+    {
+        public float foodPoisonGameHours = 3f;
+        public float venomGameHours = 2f;
+        public float bleedingGameHours = 6f;
+        public float foodPoisonDamagePerSec = 0.25f;
+        public float venomDamagePerSec = 0.5f;
+        public float bleedingDamagePerSec = 0.3f;
+        public float bleedChance = 0.25f;
+        public float bleedMinDamage = 15f;
+        public float overlayMaxAlpha = 0.18f;
+        public float overlayPulseSeconds = 2.5f;
+    }
+
+    public partial class CampfireBalance
+    {
+        public float cookSeconds = 30f;          // Checklist issue #44
+        public float boilSeconds = 20f;
+        public float burnAfterSeconds = 30f;
+        public int cookRowCount = 3;
+        public float maxFuelSeconds = 300f;
+        public float tickIntervalSeconds = 0.25f;
+        public float rainFuelMultiplier = 1.5f;
+        public bool stormExtinguishes = true;
+        public float warmthRadius = 5f;          // Dibaca WarmthSystem (#65)
+        public int recipeWood = 5;               // Bahan Kit_Campfire (diisi di aset resep rec_campfire)
+        public int recipeStone = 3;
+        public float skyCheckDistance = 20f;     // Sama dengan hydration.skyCheckDistance (aturan cek atap #43)
+        public float structureRecheckRadius = 6f;
+        public float cookedNotifyDistance = 15f; // Notifikasi "Makanan matang" hanya dalam jarak ini
+    }
+
+    public partial class FishingBalance
+    {
+        public float castMinDistance = 6f;
+        public float castMaxDistance = 25f;
+        public float castChargeSeconds = 1.2f;
+        public float castProbeDepth = 40f;
+        public float lureFlightSeconds = 0.8f;
+        public float leashDistance = 32f;
+        public float biteDelayMin = 12f;
+        public float biteDelayMax = 30f;
+        public float rainBiteMultiplier = 0.85f;
+        public float biteWindowSeconds = 2f;
+        public float tensionStart = 0.35f;
+        public float tensionRisePerSec = 0.30f;
+        public float tensionFallPerSec = 0.35f;
+        public float surgeIntervalMin = 1.5f;
+        public float surgeIntervalMax = 3.5f;
+        public float surgeSeconds = 0.8f;
+        public float surgeRisePerSec = 0.35f;
+        public float progressPerSec = 0.10f;
+        public float slackEscapeSeconds = 2f;
+        public float recoverSeconds = 1f;
+        public float lineBreakRecoverSeconds = 5f;
+        public float waterRecheckSeconds = 1f;
+    }
+
+    public partial class DebrisBalance
+    {
+        public bool enabled = true;                  // Sakelar uji
+        public int maxActive = 4;
+        public float spawnIntervalGameHours = 3f;
+        public float spawnCheckSeconds = 1f;
+        public float stormIntervalMultiplier = 0.5f;
+        public float rainIntervalMultiplier = 0.75f;
+        public float highTideIntervalMultiplier = 0.75f;
+        public float spawnPlayerMaxDistance = 150f;
+        public float driftSpeed = 1.2f;
+        public float hookRadius = 2.5f;
+        public float pullSpeed = 4f;
+        public float collectDistance = 3f;
+        public float pullMaxDistance = 32f;
+        public float bobAmplitude = 0.08f;           // Efek mengapung (Mathf.Sin kecil), usulan teknis
+        public float bobFrequency = 1.2f;
+    }
+
+    public partial class StorageBalance
+    {
+        public int chestSlotCount = 20;
+        public float dropScatterRadius = 1.2f;
+    }
 }
