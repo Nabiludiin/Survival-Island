@@ -368,3 +368,14 @@ interruptAtGameHour = startGameHour + HoursUntilDaybreak() * progress;
 21. Tutup jendela saat tidur, lalu lanjutkan. **Hasil:** jam mengikuti waktu penyimpanan, dan pemain dalam keadaan terjaga.
 22. `setday 70`, lalu paksa gangguan tidur. **Hasil:** jumlah penyergap 13, yaitu (4 + 7) x 1,2 dibulatkan, dengan HP 1,2 kali dan damage 1,1 kali.
 23. Di Region 3, tidur di luar ruangan dekat api unggun berisi 60 detik bahan bakar, tanpa pakaian hangat. **Hasil:** api padam karena jam dipercepat, `Warmth` turun, dan saat `isFreezing` menjadi `true` pemain langsung bangun dengan alasan `Freezing`. Waktu kembali normal, dan stamina tidak dipulihkan.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Island_Logic/SleepSystem.cs` (enum `SleepBlockReason`, `SleepWakeReason`), `BedInteractable.cs`, `SleepPanel.cs`. Config `GameBalanceConfig.sleep` di `GameBalance.GrupE.cs` (`maxGameHoursPerStep` sudah ada sebelumnya). Perubahan `DayNightDirector` (override dan langkah kecil) sudah ada di kode lama.
+- `BaseNavigation.IsInsideBase(pos)` belum ada. Karena pemain berdiri di kasur, dipakai `BaseNavigation.IsPlayerInsideBase`.
+- `UIPanelId` belum punya `Sleep`. `SleepPanel` memakai id dari Inspector sampai nilai itu ditambahkan. Panel wajib `pausesTime = false`.
+- Panel didorong lebih dulu. Kalau stack menolak, tidur batal tanpa efek tersisa.
+- Panel yang ditutup sistem lain memakai alasan `Attacked` kalau `PlayerDamagedEvent` sudah datang, selain itu `RunEnded`.
+- Animasi kamera berbaring (#102) TODO.
+- `DebugSetInterrupt(forceNow)` untuk `DevConsole`.
+- Belum diuji di Unity.

@@ -186,3 +186,13 @@ Memancing di tebing karang tetap bisa kapan saja. Diary Bab 1 mengajarkan cara i
 8. Simpan pukul 23:00, lalu load. **Hasil:** tinggi air sama, tanpa lompatan besar.
 9. Datangi `LowTideSpot` pukul 12:00, lalu 18:00. **Hasil:** prompt hanya muncul pada pukul 18:00.
 10. Jalankan `TideZoneAuditWindow` dengan rumput di bawah `MaxWaterY`. **Hasil:** titik itu masuk laporan.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Island_Logic/TideManager.cs`, `TideSafePoint.cs`, `LowTideSpot.cs`, `TideZoneAuditWindow.cs` (Editor, dijalankan saat Play Mode). Config `GameBalanceConfig.tide` di `GameBalance.GrupE.cs`, dengan tambahan `tickSeconds` (0,25), `visualLerpSpeed`, dan `publishLevelDelta` (0,05) dari angka di teks.
+- `WorldItemManager.SweepBelow` (#66) dan pemindahan `HeavyItem` (#69) belum ada: TODO di `StepCollider`.
+- Area NavMesh `Tidal` dibaca dengan `NavMesh.GetAreaFromName`. Kalau belum dibuat, `SetAreaCost` dilewati.
+- `seaTriggerSurfaceOffset` di Inspector menyetel selisih posisi transform trigger laut dengan permukaannya.
+- `DebugSetSurge(value, auto)` untuk perintah `settide` di `DevConsole`.
+- `LowTideSpot` memberi 1 `Food_RawFish` tanpa lempar acak. Inventori penuh menjatuhkan `WorldItem`.
+- Belum diuji di Unity.

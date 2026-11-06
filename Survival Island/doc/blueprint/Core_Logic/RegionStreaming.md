@@ -364,3 +364,16 @@ Perintah `streamstat` di `DevConsole` (#56) menampilkan state tiap region, memor
 12. Pindahkan pemain ke region yang belum dimuat lewat `DevConsole`. **Hasil:** pemain tidak jatuh terus, region dimuat darurat, atau pemain kembali ke posisi aman.
 13. Ukur semua region dengan `streamstat`. **Hasil:** catat angkanya. Nilai di atas batas harus diperbaiki atau batasnya diperbarui di blueprint ini.
 14. Mati saat dua region dimuat. **Hasil:** semua region terlepas, dan run baru tidak membawa status lama.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Core_Logic/RegionStreaming.cs` (`RegionLoadState`, `RegionRecord`, `RegionSeam`), `RegionStateStore.cs`, `RegionSceneRoot.cs`, `SeamBarrier.cs`, `RegionBoundaryGuard.cs`. Event `RegionLoadStateChangedEvent` di `GameEvents.GrupE.cs`, config `GameBalanceConfig.streaming` di `GameBalance.GrupE.cs`, dengan tambahan `loadRetrySeconds` (5), `safeGroundProbeDistance`, dan `stallSpeedThreshold`.
+- Scene region dan koordinat belum dibuat. `regions[]` (Bounds, nama scene, `farMesh`, `structureRoot`) dan `seams[]` (posisi, `SeamBarrier`, `NavMeshLink`) diisi di Inspector sesuai peta konsep. Tidak ada koordinat di kode.
+- `lastUnloadedGameHour` disimpan di dalam `RegionStateStore`, jadi ikut `regionStoreJson`.
+- `GetRegionAt` memakai bidang XZ dari `Bounds`. Posisi di luar semua `Bounds` memakai region dengan pusat terdekat. Helper statis `RegionOf(pos)` dan `IsRegionLoaded(region)` memakai `ZoneTracker.Active` atau `true` kalau `RegionStreaming` tidak ada (scene uji).
+- Panel `Loading` saat tertahan dicari sekali dengan `FindFirstObjectByType<LoadingPanel>`, karena `RunLifecycle` tidak membuka API untuk ini.
+- Pemain dianggap tertahan kalau berada dalam `urgentDistance` dari seam dengan `SeamBarrier` aktif dan hampir diam, atau berdiri di region yang belum `Loaded`.
+- `RegionBoundaryGuard` menahan gravitasi lewat `PlayerTraversal.SetLocked`, hanya kalau pemain tidak sedang terkunci sistem lain.
+- `WorldItemManager.CaptureRegion/RestoreRegion` (#66) belum ada: TODO di `CaptureRegion` dan `RestoreRegion`.
+- `DebugExtraDelaySeconds` dan `DebugStatLine` untuk `streamdelay` dan `streamstat` (#56). Pengukuran memori dan batch belum ditulis.
+- Belum diuji di Unity.

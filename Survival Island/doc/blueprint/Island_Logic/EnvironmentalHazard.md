@@ -184,3 +184,11 @@ Sesuai keputusan developer, hanya damage pemain yang membatalkan terkaman Jaguar
 13. Jeda game saat sumbu api berjalan selama 10 detik nyata. **Hasil:** tong tidak meledak sampai jeda selesai.
 14. Ledakkan tong, lalu jalan menjauh sampai region dilepas dan kembali lagi. **Hasil:** tong tetap hilang.
 15. Ledakkan lima tong berantai sambil membuka Profiler. **Hasil:** tidak ada alokasi GC dari `NotifyExplosion`, dan tidak ada error buffer.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Assets/LOGIC/Island_Logic/EnvironmentalHazard.cs`, config `GameBalanceConfig.hazard` di `GameBalance.GrupE.cs`.
+- Langkah 8 `Detonate`: selama `ExplosionDamage.Apply` belum memanggil `NotifyExplosion` (TODO lama di `ExplosionDamage.cs`), tong memanggil `NotifyExplosion` sendiri setelah `Apply`. Tong yang sudah bersumbu diabaikan, jadi pemanggilan ganda aman setelah `ExplosionDamage` diperbarui.
+- `Arm` diabaikan kalau objek tidak aktif, karena coroutine tidak bisa berjalan di objek nonaktif.
+- Kalau prefab tidak memasang `NoiseEmitter`, suara memakai `NoiseEmitter.Emit(posisi, radius, kind)` statis.
+- Belum diuji di Unity.

@@ -228,3 +228,14 @@ Sumber di atas `maxRegisteredSources` tetap tampil lewat `emissive`, tetapi tida
 15. Save, load, lalu mati dan mulai run baru. **Hasil:** setelah load, sisa bahan bakar sama. Pada run baru, tidak ada lampu tersisa, dan `PlayerVisibility` kembali mengikuti kondisi awal.
 16. Tekan jeda. **Hasil:** bahan bakar dan isi senter tidak berkurang.
 17. Masuk `InteriorZone` dengan lampu base dekat dinding zona. **Hasil:** keterlihatan hanya naik dari senter atau obor, dan lampu real-time tidak melewati `interiorMaxRealtimeLights`.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Island_Logic/LightSourceSystem.cs`, `LightSource.cs`, `LightFixture.cs`, `LightFixtureData.cs`. Config `GameBalanceConfig.light` di `GameBalance.GrupE.cs`, dengan tambahan `lightFadeSeconds` (0,25), `addFuelHoldSeconds` (0,6), dan `visibilityPublishDelta` (0,02) dari angka di teks blueprint.
+- `LightSource` mendapat field `countsForAttraction` dan `isFlashlight`. Tarikan cahaya dihitung dari `LightFixture.All`.
+- `AISensoryHub.SetLightAttraction` belum ada. Titik dan peluang disimpan di `LightAttractionPoint` dan `LightAttractionChance`, dan panggilannya TODO.
+- Baterai: `LightSourceSystem.TryUseBattery(inv, out failKey)` memilih senter, memanggil `FlashlightController.Recharge`, lalu mengurangi `Item_Battery`. Dipanggil `ItemUseSystem` (kode lama, belum disambungkan).
+- `LightFixture` memakai `IInteractable` langsung, dan menyimpan data lewat `StructureRecord.extraJson` (pola `CampfireManager`).
+- Belum ditulis: tahan `E` 0,6 detik untuk menambah bahan bakar, karena `PlayerInteractor` hanya mengenal satu `HoldSeconds` per target. Sementara, `E` saat Obor Dinding mati dan belum penuh juga menambah 1 kayu sebelum menyala.
+- `StructureDestroyedEvent` diurus `LightFixture` (bahan bakar hilang). `LightSource` keluar dari daftar lewat `OnDisable`.
+- Belum diuji di Unity.
