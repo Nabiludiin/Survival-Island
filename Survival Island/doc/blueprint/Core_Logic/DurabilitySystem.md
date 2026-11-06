@@ -143,3 +143,10 @@ Durabilitas 0 berarti `Broken`, bukan langsung hilang. Status selalu dihitung da
 10. Kurangi `maxDurability` kapak di aset, lalu lanjutkan save lama. **Hasil:** bar penuh, tanpa error.
 11. Buka Pause saat memegang senter menyala. **Hasil:** baterai tidak berkurang selama dijeda.
 12. Mati, lalu mulai run baru. **Hasil:** alat baru punya durabilitas penuh.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Assets/LOGIC/Core_Logic/DurabilitySystem.cs` (enum `DurabilityState` dan kelas statis). Event di `GameEvents.FondasiB.cs`.
+- `GetEffectiveMax` membaca upgrade dan modifier lewat `WeaponStatCalculator.HasUpgrade` dan `WeaponStatCalculator.FindModifier` (lihat catatan `ToolRepairSystem.md`).
+- `GetRatio` ditulis dengan nama usulan (masih "Menunggu developer" nomor 2). `HotbarView` memakainya.
+- Validasi Editor untuk item non-inti yang tidak bisa diperbaiki (Menunggu developer nomor 1) belum ditulis.

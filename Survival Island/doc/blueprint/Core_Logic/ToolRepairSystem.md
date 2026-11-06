@@ -233,3 +233,13 @@ Hasilnya dihitung saat item dipasang atau berubah, lalu disimpan oleh pengendali
 16. Mati dan mulai run baru. **Hasil:** item inti kembali penuh, tanpa upgrade.
 17. Buka Pause saat memperbaiki selama 10 detik. **Hasil:** timer tidak berkurang.
 18. Tembak 100 kali dengan Profiler terbuka. **Hasil:** `WeaponStatCalculator` tidak dipanggil per tembakan, dan tidak ada alokasi GC.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Assets/LOGIC/Core_Logic/ToolRepairSystem.cs` (enum `RepairCheck`, manager scene `IslandPhase`), `ItemUpgradeData.cs` (enum `UpgradeKind`, aset), dan `WeaponStatCalculator.cs`.
+- `RepairCheck` tidak dirinci blueprint. Nilai yang dipakai: `Ok`, `ItemMissing`, `NotRepairable`, `NotDamaged`, `NoStation`, `RepairLimit`, `MissingMaterial`, `Busy`, `UpgradeNotApplicable`, `UpgradeInstalled`, `UpgradeLimit`, `UpgradeLocked`. Pemeriksaan upgrade memakai `CanUpgrade(inst, upgrade)`.
+- `WeaponStats` memakai struct yang sudah ada di `WeaponData.cs` (#58). "speed" diterapkan sebagai pembagi `secondsBetweenShots`. `magazineSize` 0 berarti tanpa magazine (melee dan alat), jadi bonus magazine dan batas minimum 1 tidak berlaku. `GetMeleeDamage(baseDamage, inst)` ditambahkan untuk `MeleeCombatSystem`.
+- Belum ada database resmi untuk `ItemUpgradeData` dan `WeaponModifierData`. Sementara dimuat dari `Resources/ItemUpgrades` dan `Resources/WeaponModifiers`, dan bisa diganti lewat `RegisterUpgrades`/`RegisterModifiers`.
+- "Panel ditutup" dibaca dari `CraftingManager.IsPanelOpen` dan dari `UIFocusChangedEvent.isGameplayBlocked == false`. "Stasiun di luar jangkauan" dibaca dari `CraftingManager.IsStationAvailable`.
+- `MeleeCombatSystem.RecalculateStats` belum ada, jadi upgrade pada senjata melee yang sedang dipegang baru terasa saat dipasang ulang (TODO).
+- SFX selesai menunggu `AudioManager` (TODO).

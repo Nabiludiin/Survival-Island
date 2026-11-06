@@ -215,3 +215,11 @@ Tidak ada armor pemain di versi awal (usulan). `Infection` tetap naik sesuai `At
 9. Mati, lalu mulai run baru. **Hasil:** semua titik terisi lagi dari seed baru.
 10. Bunuh zombie Tribal dengan pistol sampai drop keluar. **Hasil:** isinya `Mat_TreeSap` atau `Mat_Mushroom`.
 11. Jalankan 1.000 `TryRoll` sambil membuka Profiler. **Hasil:** tidak ada alokasi GC dari `TryRoll`.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Assets/LOGIC/Core_Logic/RegionLootTable.cs` (enum `LootLocation`, `LootPointKind`, struct `LootEntry`, `ItemStack`, kelas statis `RegionLootTable`) dan `LootTable.cs` (aset, file sendiri karena ScriptableObject).
+- `TStream` = `RandomStream` (struct milik `RunSeedManager`), jadi signature: `TryRoll(LootTable, LootPointKind, int day, ref RandomStream, out ItemData, out int)`.
+- `weightBuffer` dipakai ulang dan diperbesar ke pangkat dua kalau tabel lebih panjang. Elemen sisa diisi 0, karena `PickWeighted` menjumlah seluruh array dan mengabaikan bobot 0.
+- Tafsiran paling sederhana: `GetAmountMul` mengembalikan 1 untuk `Ship` dan `None` (tanpa bonus hari), sesuai kalimat "Lokasi Ship dan None memakai pengali 1".
+- `LootTable.HasEntryFor(kind)` ditambahkan untuk validator Editor di `LootSpawnerSystem.OnValidate`.

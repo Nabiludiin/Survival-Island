@@ -237,3 +237,13 @@ Dipanggil `RegionStreaming.CaptureRegion` satu frame setelah `Unloading`, dan ol
 13. Kecilkan pool `WorldItem_Generic` ke 1, lalu masuk region dengan banyak loot. **Hasil:** sebagian barang tidak muncul tanpa error, dan muncul setelah region dimuat ulang dengan pool normal.
 14. Masuk region pada hari 1 dan hari 20 dengan seed sama, di dua run berbeda. **Hasil:** titik kosong sama, tetapi isi bisa berbeda karena skala hari (#103).
 15. Mati di kapal lalu ulangi dengan seed baru. **Hasil:** objek kapal lama kembali ke pool, dan susunan baru muncul tanpa sisa.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Assets/LOGIC/Core_Logic/LootSpawnerSystem.cs` (`LootPointDef`, `LootPointState`, `LootSpawnerSaveData`, `LootSpawnerSystem`).
+- **Jalur cadangan sebelum #88:** `RegionStreaming`, `RegionSceneRoot`, `RegionStateStore`, dan `RegionLoadStateChangedEvent` belum ada. Sementara itu `homeRegion` diisi di Inspector, spawner pulau mendaftar ke `WorldStateSave` (`LoadOrder` 0), dan penyebaran dipicu `Start()`. Saat melanjutkan save (`WorldStateSave.LoadedGame != null`), `Start()` menunggu dan penyebaran dijalankan di `OnRestoreFinished`, supaya `RestoreState` selalu masuk lebih dulu. Setelah #88 ditulis, pendaftaran cadangan dan pemicu ini dihapus, lalu `HandleRegionLoadState` (sudah ditulis sebagai TODO) disambungkan.
+- **Region dilepas** ditulis sebagai `public void ReleaseForUnload()`, menunggu dipanggil dari event `Unloading` (#88).
+- **`WorldItem.sourceSpawner` belum ada (#66):** spawner menyimpan `ItemInstance` yang dipasang per titik, lalu `SyncLiveItems()` (saat `CaptureState` dan `ReleaseForUnload`) mencocokkan sendiri: objek yang tidak aktif atau `Instance`-nya sudah berganti dianggap diambil (`MarkTaken`), sisanya menyalin `Amount` (`UpdateRemaining`). Akibat sampingan: item yang tersapu pasang (#91) ikut dianggap diambil, berbeda dari "Kasus Khusus". Ini hilang setelah `WorldItem` memanggil `MarkTaken`/`UpdateRemaining` sendiri.
+- Lokasi kapal atau pulau dibaca dari `GameManager.currentPhase` (`SinkingShip` = kapal).
+- `UpdateRemaining(i, 0)` diperlakukan sebagai `MarkTaken(i)`.
+- `spawnerId` otomatis memakai awalan `ship` kalau `table.location == Ship`, selain itu `r<1-4>` dari `homeRegion`.
