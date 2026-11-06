@@ -12,7 +12,7 @@ namespace SurvivalIsland
     ///   Langkah pemiliknya mengisi field-nya sesuai tabel "Bagian config per sistem" di blueprint.
     /// </summary>
     [CreateAssetMenu(menuName = "Survival/Game Balance Config", fileName = "GameBalanceConfig")]
-    public class GameBalanceConfig : ScriptableObject
+    public partial class GameBalanceConfig : ScriptableObject
     {
         // ---------------------------------------------------------------- Angka inti (GameBalanceConfig.md bagian 2)
         public TimeBalance time = new TimeBalance();

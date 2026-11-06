@@ -16,7 +16,7 @@ namespace SurvivalIsland
 
     /// <summary>Waktu dunia. Target: 1 hari game = 15 menit (usulan disetujui developer, #84).</summary>
     [Serializable]
-    public class TimeBalance
+    public partial class TimeBalance
     {
         public float timeMultiplier = 96f;      // 1 hari = 900 detik
         public float dayLengthSeconds = 900f;   // Hanya informasi
@@ -24,7 +24,7 @@ namespace SurvivalIsland
 
     /// <summary>Status tubuh pemain (angka inti #84). Tambahan #111 diisi Langkah 3/4.</summary>
     [Serializable]
-    public class VitalsBalance
+    public partial class VitalsBalance
     {
         public float hungerDrainPerSec = 0.11f;            // Lapar habis dalam 1 hari game
         public float thirstDrainPerSec = 0.15f;            // Haus habis dalam sekitar 0,75 hari game
@@ -105,7 +105,7 @@ namespace SurvivalIsland
 
     /// <summary>Alur run (#82, #99). Dipakai RunLifecycle, AsyncSceneLoader, UIManager.</summary>
     [Serializable]
-    public class RunBalance
+    public partial class RunBalance
     {
         public float endSequenceTimeoutSeconds = 15f;
         public float endingTimeoutSeconds = 120f;
@@ -116,7 +116,7 @@ namespace SurvivalIsland
 
     /// <summary>UI (#83). Dipakai UIFocusStack dan UIManager.</summary>
     [Serializable]
-    public class UIBalance
+    public partial class UIBalance
     {
         public float panelFadeSeconds = 0.15f;
         public float pausedMusicVolumeDb = -12f;
@@ -127,7 +127,7 @@ namespace SurvivalIsland
 
     /// <summary>Seed run (#89). Dipakai RunSeedManager.</summary>
     [Serializable]
-    public class RunSeedBalance
+    public partial class RunSeedBalance
     {
         public int maxSeedRerolls = 8;
         public float lootPointEmptyChance = 0.5f;
@@ -141,7 +141,7 @@ namespace SurvivalIsland
 
     /// <summary>Save (#80). Dipakai WorldStateSave.</summary>
     [Serializable]
-    public class SaveBalance
+    public partial class SaveBalance
     {
         public float combatEnemyRadius = 30f;
         public float combatQuietSeconds = 10f;
@@ -156,17 +156,17 @@ namespace SurvivalIsland
 
     /// <summary>Bagian input (#18). Diisi Langkah 3 (InputManager.md).</summary>
     [Serializable]
-    public class InputBalance
+    public partial class InputBalance
     {
         public float rebindTimeoutSeconds = 5f;
     }
 
     /// <summary>Bagian streaming (#88). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class StreamingBalance { }
+    [Serializable] public partial class StreamingBalance { }
 
     /// <summary>Bagian equipment (#60). Diisi Langkah 3 (EquipmentManager.md).</summary>
     [Serializable]
-    public class EquipmentBalance
+    public partial class EquipmentBalance
     {
         public int hotbarSlotCount = 8;                     // Tombol 1 sampai 8 (#18)
         public float lowerSeconds = 0.15f;
@@ -176,7 +176,7 @@ namespace SurvivalIsland
 
     /// <summary>Bagian items (#66). Diisi Langkah 3 (ItemUseSystem.md).</summary>
     [Serializable]
-    public class ItemsBalance
+    public partial class ItemsBalance
     {
         public float useMoveSpeedMultiplier = 0.5f;
         public float defaultRestoreSeconds = 20f;           // Pemulihan bertahap ala Raft (CATATAN_MEKANIK bagian 2)
@@ -192,7 +192,7 @@ namespace SurvivalIsland
 
     /// <summary>Interaksi tombol E (#17). Diisi Langkah 2 dari Island_Logic/IslandInteractable.md.</summary>
     [Serializable]
-    public class InteractBalance
+    public partial class InteractBalance
     {
         public float range = 3f;                    // Jarak interaksi
         public float sphereRadius = 0.15f;          // Lebar bidikan
@@ -207,7 +207,7 @@ namespace SurvivalIsland
 
     /// <summary>Bagian camera (#102). Diisi Langkah 3 (FirstPersonCamera.md).</summary>
     [Serializable]
-    public class CameraBalance
+    public partial class CameraBalance
     {
         public float maxLookAngle = 80f;
         public float baseFov = 70f;
@@ -250,7 +250,7 @@ namespace SurvivalIsland
 
     /// <summary>Bagian traversal (#101, #94). Diisi Langkah 3 (PlayerTraversal.md, IslandPlayerController.md). Bagian #94 diisi Langkah 5.</summary>
     [Serializable]
-    public class TraversalBalance
+    public partial class TraversalBalance
     {
         // IslandPlayerController.md bagian 5: walkSpeed dan sprintSpeed dipindah ke config (#84)
         public float walkSpeed = 5f;
@@ -290,7 +290,7 @@ namespace SurvivalIsland
 
     /// <summary>Bagian carry (#118). Diisi Langkah 3 (CarryCapacity.md).</summary>
     [Serializable]
-    public class CarryBalance
+    public partial class CarryBalance
     {
         public int baseSlots = 15;
         public int woodStack = 100;
@@ -302,14 +302,14 @@ namespace SurvivalIsland
     }
 
     /// <summary>Bagian console (#56). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class ConsoleBalance { }
+    [Serializable] public partial class ConsoleBalance { }
 
     /// <summary>
     /// Fase 1 (#74, #75). Diisi Langkah 2 dari LifeboatExtraction.md, ShipTimerManager.md,
     /// ShipPlayerController.md, dan ShipInteractable.md. Selain durationSeconds (GDD bagian 3), semua usulan yang disetujui (#85).
     /// </summary>
     [Serializable]
-    public class ShipBalance
+    public partial class ShipBalance
     {
         // LifeboatExtraction.md
         public float durationSeconds = 60f;        // GDD bagian 3. Keputusan developer: batas paling lama
@@ -340,7 +340,7 @@ namespace SurvivalIsland
 
     /// <summary>Bahaya kapal (#75). Diisi Langkah 2 dari ShipHazardManager.md. Semua usulan yang disetujui (#85).</summary>
     [Serializable]
-    public class ShipHazardBalance
+    public partial class ShipHazardBalance
     {
         public float staticTiltDegrees = 4f;
         public float tiltSpeedInfluence = 0.12f;
@@ -378,34 +378,34 @@ namespace SurvivalIsland
 
     /// <summary>Bagian hydration (#43). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable]
-    public class HydrationBalance
+    public partial class HydrationBalance
     {
         public float exertionThirstMultiplier = 1.25f;      // Ditambah Langkah 3: dipakai SurvivalStats.TickDrains (VitalsRules.md, #43)
     }
 
     /// <summary>Bagian campfire (#44). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class CampfireBalance { }
+    [Serializable] public partial class CampfireBalance { }
 
     /// <summary>Bagian disease (#45). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class DiseaseBalance { }
+    [Serializable] public partial class DiseaseBalance { }
 
     /// <summary>Bagian statusEffects (#20). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class StatusEffectsBalance { }
+    [Serializable] public partial class StatusEffectsBalance { }
 
     /// <summary>Bagian crafting (#77). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public partial class CraftingBalance { }
 
     /// <summary>Bagian repair (#113). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class RepairBalance { }
+    [Serializable] public partial class RepairBalance { }
 
     /// <summary>Bagian upgrade (#113). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class UpgradeBalance { }
+    [Serializable] public partial class UpgradeBalance { }
 
     /// <summary>Bagian fishing (#55). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class FishingBalance { }
+    [Serializable] public partial class FishingBalance { }
 
     /// <summary>Bagian debris (#106). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class DebrisBalance { }
+    [Serializable] public partial class DebrisBalance { }
 
     /// <summary>Bagian surface (#86). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public partial class SurfaceBalance { }
@@ -414,25 +414,25 @@ namespace SurvivalIsland
     [Serializable] public partial class BuildBalance { }
 
     /// <summary>Bagian baseNav (#78). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class BaseNavBalance { }
+    [Serializable] public partial class BaseNavBalance { }
 
     /// <summary>Bagian integrity (#47). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class IntegrityBalance { }
+    [Serializable] public partial class IntegrityBalance { }
 
     /// <summary>Bagian storage (#46). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class StorageBalance { }
+    [Serializable] public partial class StorageBalance { }
 
     /// <summary>Bagian sleep (#67). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public partial class SleepBalance { }
 
     /// <summary>Bagian trap (#26). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class TrapBalance { }
+    [Serializable] public partial class TrapBalance { }
 
     /// <summary>Bagian throwable (#96). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class ThrowableBalance { }
+    [Serializable] public partial class ThrowableBalance { }
 
     /// <summary>Bagian lair (#112). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class LairBalance { }
+    [Serializable] public partial class LairBalance { }
 
     /// <summary>Bagian warmth (#65). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public partial class WarmthBalance { }
@@ -441,10 +441,10 @@ namespace SurvivalIsland
     [Serializable] public partial class HeavyItemBalance { }
 
     /// <summary>Bagian swimming (#13). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class SwimmingBalance { }
+    [Serializable] public partial class SwimmingBalance { }
 
     /// <summary>Bagian tide (#91). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class TideBalance { }
+    [Serializable] public partial class TideBalance { }
 
     /// <summary>Bagian environment (#92). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public partial class EnvironmentBalance { }
@@ -453,34 +453,34 @@ namespace SurvivalIsland
     [Serializable] public partial class DisasterBalance { }
 
     /// <summary>Bagian beachSupply (#71). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class BeachSupplyBalance { }
+    [Serializable] public partial class BeachSupplyBalance { }
 
     /// <summary>Bagian bloodMoon (#50). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class BloodMoonBalance { }
+    [Serializable] public partial class BloodMoonBalance { }
 
     /// <summary>Bagian luckyMachine (#72). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public partial class LuckyMachineBalance { }
 
     /// <summary>Bagian npc (#76). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class NpcBalance { }
+    [Serializable] public partial class NpcBalance { }
 
     /// <summary>Bagian objective (#81). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class ObjectiveBalance { }
+    [Serializable] public partial class ObjectiveBalance { }
 
     /// <summary>Bagian loot (#103). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class LootBalance { }
+    [Serializable] public partial class LootBalance { }
 
     /// <summary>Bagian remoteBase (#90). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class RemoteBaseBalance { }
+    [Serializable] public partial class RemoteBaseBalance { }
 
     /// <summary>Bagian fire (#97). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class FireBalance { }
+    [Serializable] public partial class FireBalance { }
 
     /// <summary>Bagian light (#98). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class LightBalance { }
+    [Serializable] public partial class LightBalance { }
 
     /// <summary>Bagian flashlight (#98). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class FlashlightBalance { }
+    [Serializable] public partial class FlashlightBalance { }
 
     /// <summary>Bagian rescue (#14). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public partial class RescueBalance { }
@@ -489,64 +489,64 @@ namespace SurvivalIsland
     [Serializable] public partial class DeathCinematicBalance { }
 
     /// <summary>Bagian stats (#57). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class StatsBalance { }
+    [Serializable] public partial class StatsBalance { }
 
     /// <summary>Bagian narrative (#99). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class NarrativeBalance { }
+    [Serializable] public partial class NarrativeBalance { }
 
     /// <summary>Bagian safety (#116). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class SafetyBalance { }
+    [Serializable] public partial class SafetyBalance { }
 
     /// <summary>Bagian animation (#12). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class AnimationBalance { }
+    [Serializable] public partial class AnimationBalance { }
 
     /// <summary>Bagian vfx (#15). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class VfxBalance { }
+    [Serializable] public partial class VfxBalance { }
 
     /// <summary>Bagian tutorial (#16). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class TutorialBalance { }
+    [Serializable] public partial class TutorialBalance { }
 
     /// <summary>Bagian settings (#19). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class SettingsBalance { }
+    [Serializable] public partial class SettingsBalance { }
 
     /// <summary>Bagian footstep (#21). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class FootstepBalance { }
+    [Serializable] public partial class FootstepBalance { }
 
     /// <summary>Bagian notification (#22). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class NotificationBalance { }
+    [Serializable] public partial class NotificationBalance { }
 
     /// <summary>Bagian postProcess (#23). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class PostProcessBalance { }
+    [Serializable] public partial class PostProcessBalance { }
 
     /// <summary>Bagian shake (#24). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class ShakeBalance { }
+    [Serializable] public partial class ShakeBalance { }
 
     /// <summary>Bagian combatFeedback (#51). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class CombatFeedbackBalance { }
+    [Serializable] public partial class CombatFeedbackBalance { }
 
     /// <summary>Bagian ambientAudio (#52). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class AmbientAudioBalance { }
+    [Serializable] public partial class AmbientAudioBalance { }
 
     /// <summary>Bagian combatMusic (#114). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class CombatMusicBalance { }
+    [Serializable] public partial class CombatMusicBalance { }
 
     /// <summary>Bagian lore (#100). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class LoreBalance { }
+    [Serializable] public partial class LoreBalance { }
 
     /// <summary>Bagian barks (#100). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class BarksBalance { }
+    [Serializable] public partial class BarksBalance { }
 
     /// <summary>Bagian localization (#104). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class LocalizationBalance { }
+    [Serializable] public partial class LocalizationBalance { }
 
     /// <summary>Bagian optimization (#62, #93). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class OptimizationBalance { }
+    [Serializable] public partial class OptimizationBalance { }
 
     /// <summary>Bagian compass (#30). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class CompassBalance { }
+    [Serializable] public partial class CompassBalance { }
 
     /// <summary>Bagian hazard (#59). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class HazardBalance { }
+    [Serializable] public partial class HazardBalance { }
 
     // =====================================================================================
     // Ditambahkan Langkah 4. Bagian yang dipakai Langkah 4 ditandai `partial` di atas (satu kata per baris),
@@ -672,7 +672,7 @@ namespace SurvivalIsland
 
     /// <summary>Jalur damage (DamagePipeline.md, HitboxModifier.md, #59). Headshot 2x: keputusan #85.</summary>
     [Serializable]
-    public class DamageBalance
+    public partial class DamageBalance
     {
         public float headMultiplier = 2f;
         public float torsoMultiplier = 1f;
@@ -685,7 +685,7 @@ namespace SurvivalIsland
 
     /// <summary>Senjata api (GunController.md, #58). Angka per senjata ada di aset WeaponData.</summary>
     [Serializable]
-    public class GunBalance
+    public partial class GunBalance
     {
         public float autoReloadDelay = 0.3f;
         public float dryClickCooldown = 0.25f;
@@ -695,7 +695,7 @@ namespace SurvivalIsland
 
     /// <summary>Waktu dan batas serangan musuh (EnemyAttack.md, #109).</summary>
     [Serializable]
-    public class EnemyAttackBalance
+    public partial class EnemyAttackBalance
     {
         public int maxAttackersOnPlayer = 3;
         public int maxAttackersOnNpc = 2;
@@ -708,7 +708,7 @@ namespace SurvivalIsland
 
     /// <summary>Reaksi kena, mayat, dan drop (EnemyHitReaction.md, #95).</summary>
     [Serializable]
-    public class HitReactionBalance
+    public partial class HitReactionBalance
     {
         public float staggerSeconds = 0.35f;
         public float staggerImmunitySeconds = 1f;
@@ -736,7 +736,7 @@ namespace SurvivalIsland
 
     /// <summary>Pemilihan target (ThreatSystem.md, #108).</summary>
     [Serializable]
-    public class ThreatBalance
+    public partial class ThreatBalance
     {
         public float reselectSeconds = 1f;
         public float farReselectSeconds = 2.5f;
@@ -759,7 +759,7 @@ namespace SurvivalIsland
 
     /// <summary>Pandangan dan suara zombie (AISensory.md, #49). GDD bagian 3: Mengendap.</summary>
     [Serializable]
-    public class StealthBalance
+    public partial class StealthBalance
     {
         public bool enabled = true;                 // Saklar tes. false = semua zombie langsung Aware
         public float sightRange = 22f;
@@ -791,7 +791,7 @@ namespace SurvivalIsland
 
     /// <summary>Hewan siang (WildlifeAI.md, #61). Angka per spesies ada di aset AnimalData.</summary>
     [Serializable]
-    public class WildlifeBalance
+    public partial class WildlifeBalance
     {
         public float tickSeconds = 0.25f;
         public float alertSeconds = 1.5f;
@@ -838,7 +838,7 @@ namespace SurvivalIsland
 
     /// <summary>Tempat dan jenis spawn (SpawnManager.md, #62).</summary>
     [Serializable]
-    public class SpawnBalance
+    public partial class SpawnBalance
     {
         public float tickSeconds = 2f;
         public int maxSpawnsPerTick = 4;
@@ -867,7 +867,7 @@ namespace SurvivalIsland
 
     /// <summary>Terbakar matahari (SunlightExposure.md, #63). GDD bagian 3.</summary>
     [Serializable]
-    public class SunlightBalance
+    public partial class SunlightBalance
     {
         public float checkIntervalSeconds = 2f;
         public float rayLength = 200f;
@@ -887,7 +887,7 @@ namespace SurvivalIsland
 
     /// <summary>Perilaku varian zombie (SpecialZombieAI.md, #25). Statistik varian ada di aset ZombieData.</summary>
     [Serializable]
-    public class SpecialZombieBalance
+    public partial class SpecialZombieBalance
     {
         public float tribalRangeMin = 5f;
         public float tribalRangeMax = 14f;
@@ -928,7 +928,7 @@ namespace SurvivalIsland
 
     /// <summary>Tempo malam dan kurva kesulitan (AIDirector.md, #27). GDD bagian 3: zombie makin kuat setelah hari 60.</summary>
     [Serializable]
-    public class AIDirectorBalance
+    public partial class AIDirectorBalance
     {
         public ThreatKey[] threatCurve =
         {
@@ -976,7 +976,7 @@ namespace SurvivalIsland
 
     /// <summary>Pembagian tick AI (HordeCrowdManager.md, #93).</summary>
     [Serializable]
-    public class CrowdBalance
+    public partial class CrowdBalance
     {
         public int capacity = 64;
         public int maxTicksPerFrame = 12;
@@ -1009,7 +1009,7 @@ namespace SurvivalIsland
 
     /// <summary>Pemain diterkam (PlayerPinnedState.md, #110). GDD bagian 3: lepas sendiri tanpa bantuan NPC.</summary>
     [Serializable]
-    public class PinnedBalance
+    public partial class PinnedBalance
     {
         public bool enabled = true;
         public float mashProgressPerPress = 0.1f;
