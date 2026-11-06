@@ -8,7 +8,6 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 
 | Topik | Kondisi sekarang |
 |---|---|
-| Lokasi proyek Unity | Diputuskan nanti, saat proyek Unity dibuat. Kode tetap ditulis di `Survival Island/LOGIC/` |
 | Posisi Lucky Machine Region 1, 2, dan 4 | Bukan keputusan desain. Ditentukan saat layout peta #88, dengan syarat di `LuckyMachine.md` |
 
 ## Keputusan utama
@@ -23,6 +22,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Usulan dari pelengkapan blueprint | Semua usulan baru di ShipInteractable, ShipTimerManager, ShipPlayerController, UIManager, CompassSystem, ZoneManager, WeatherManager, HitboxModifier, EnvironmentalHazard, NPCCompanion, dan FlashlightController disetujui sebagai nilai awal |
 | Bahan referensi `LOGIC/` di root | Tetap dilacak git. PR #119 ditutup |
 | Ambang lepas jerat Tribal | 40 damage dari pemain, yaitu 2 tusukan Pisau. Menggantikan nilai lama 25 |
+| Proyek Unity | Folder `Survival Island/` adalah root proyek Unity 6 LTS. Kode di `Survival Island/Assets/LOGIC/` |
 | Peluru di kapal | Satu kotak peluru di kapal berisi 12 butir (satu magazine penuh). `Loot_Ship` hanya memilih jenis barang |
 | Berat NPC di kapal | Semua NPC berberat 4, jadi membawa satu NPC memenuhi tangan |
 | Lucky Machine | Satu mesin disetiap Region. Kuota: Region 1 8 zombie standar atau 3 serigala, Region 2 5 Zombie Tribal atau 2 Jaguar, Region 3 5 Zombie Militer atau 3 Beruang Kutub, Region 4 5 Zombie Desa atau 4 anjing liar. Tabel hadiah sama, hadiah unik sekali per run, dan putaran tidak bisa dipindah antar-mesin |

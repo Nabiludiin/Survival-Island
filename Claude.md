@@ -17,7 +17,7 @@ Baca juga sesuai tugas:
 - `Survival Island/doc/CATATAN_MEKANIK.md` dan `Survival Island/doc/REFERENSI_MUSUH_L4D.md` untuk referensi mekanik.
 - `Survival Island/doc/USULAN_TERBUKA.md` untuk keputusan developer dan keputusan yang masih terbuka.
 - Issue terkait di GitHub, termasuk yang disebut di bagian "Batasan".
-- `Survival Island/Claude.md` dan `Survival Island/LOGIC/README.md` saat menulis kode C# (Mode 3).
+- `Survival Island/Claude.md` dan `Survival Island/Assets/LOGIC/README.md` saat menulis kode C# (Mode 3).
 
 ### Aturan yang selalu berlaku
 - **GDD adalah sumber utama aturan game.** Urutan prioritas lengkap ada di `README.md`.
@@ -63,7 +63,7 @@ Kalau diminta membuat Pull Request, pakai branch `fitur-<nama-sistem>` dari `mai
 
 1. Cek tabel prasyarat di Tahap 7.
 2. Kalau blueprint prasyarat belum selesai, laporkan dulu dan tanyakan apakah tetap lanjut.
-3. Tulis *script* modular di `Survival Island/LOGIC`, sesuai blueprint, aturan Tahap 6, dan aturan tambahan di `Survival Island/Claude.md`. Perbarui status Langkah di `Survival Island/LOGIC/README.md`.
+3. Tulis *script* modular di `Survival Island/Assets/LOGIC`, sesuai blueprint, aturan Tahap 6, dan aturan tambahan di `Survival Island/Claude.md`. Perbarui status Langkah di `Survival Island/Assets/LOGIC/README.md`.
 4. Beri komentar pada kode yang mengimplementasikan fitur GDD.
 5. Sebutkan yang sudah diuji dan yang belum. Jangan menyebut berhasil kalau belum dijalankan di Unity.
 

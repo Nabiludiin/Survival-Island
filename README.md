@@ -28,11 +28,15 @@ Survival-Island/
     │       ├── left-4-dead/      # Siklus ancaman, AI musuh, spawn, dan gunplay
     │       ├── Core_Logic/       # Sistem yang dipakai lintas fase
     │       └── Island_Logic/     # Sistem khusus Fase 2 di pulau
-    └── LOGIC/
-        └── README.md             # Lokasi kode gabungan C#, struktur folder, dan status tiap Langkah
+    ├── .gitignore                # Abaikan folder buatan Unity (Library, Temp, Logs, dll.)
+    └── Assets/                   # Root aset proyek Unity (Survival Island/ adalah proyek Unity 6 LTS)
+        └── LOGIC/
+            └── README.md         # Lokasi kode gabungan C#, struktur folder, cara membuka proyek, dan status tiap Langkah
 ```
 
-`LOGIC/` di root dan `Survival Island/LOGIC/` adalah dua folder berbeda. Yang pertama hanya bahan analisis dari game referensi. Yang kedua adalah tempat *script* C# proyek ini.
+Folder `Survival Island/` adalah proyek Unity. `Packages/` dan `ProjectSettings/` dibuat Unity saat folder ini pertama kali dibuka di Unity Hub. Langkahnya ada di `Survival Island/Assets/LOGIC/README.md`.
+
+`LOGIC/` di root dan `Survival Island/Assets/LOGIC/` adalah dua folder berbeda. Yang pertama hanya bahan analisis dari game referensi. Yang kedua adalah tempat *script* C# proyek ini.
 
 ### Tempat menaruh blueprint
 
@@ -134,9 +138,9 @@ Mulai tahap ini setelah blueprint yang dibutuhkan selesai. Perintahnya mengikuti
 
 * **Lokasi Output / Penyatuan File:**
   Semua *script* hasil penggabungan logika **HARUS** disimpan ke dalam folder utama:
-  👉 `Survival-Island\Survival Island\LOGIC`
+  👉 `Survival-Island\Survival Island\Assets\LOGIC`
 
-  Struktur sub-folder dan status tiap Langkah ada di `Survival Island/LOGIC/README.md`. Aturan khusus menulis kode ada di `Survival Island/Claude.md`.
+  Struktur sub-folder dan status tiap Langkah ada di `Survival Island/Assets/LOGIC/README.md`. Aturan khusus menulis kode ada di `Survival Island/Claude.md`.
 
 * **Standar Penulisan:**
 
@@ -179,7 +183,7 @@ Fitur yang diputuskan tidak dipakai, dan blueprint-nya disimpan sebagai arsip: #
 
 Tahap blueprint sudah selesai. Semua issue `Add Blueprint` sudah ditutup, dan keputusan desain tercatat di `Survival Island/doc/USULAN_TERBUKA.md`.
 
-Pekerjaan berikutnya adalah menulis *script* C# lewat perintah "Jalankan Langkah [X]", mengikuti tabel TAHAP 7 di `Claude.md`. Status tiap Langkah dicatat di `Survival Island/LOGIC/README.md`.
+Pekerjaan berikutnya adalah menulis *script* C# lewat perintah "Jalankan Langkah [X]", mengikuti tabel TAHAP 7 di `Claude.md`. Status tiap Langkah dicatat di `Survival Island/Assets/LOGIC/README.md`.
 
 Untuk sistem baru, ikuti alur di atas: buat issue dulu, lalu tulis blueprint-nya.
 
@@ -251,4 +255,4 @@ Blueprint lama memakai bagian 1 dan 2 saja. Lengkapi bagian lainnya saat bluepri
 
 ## 🎯 Pesan Konfirmasi
 
-Jika Anda (Claude) telah membaca `README.md` ini, konfirmasikan pemahaman Anda dengan mengatakan: *"Saya telah memahami alur kerja Survival Island. Saya akan merujuk pada GDD.md dan Claude.md, menyerap logika dari 60 Seconds, Raft, dan L4D, lalu menyatukan seluruh kode ke dalam folder \\Survival-Island\\Survival Island\\LOGIC."*
+Jika Anda (Claude) telah membaca `README.md` ini, konfirmasikan pemahaman Anda dengan mengatakan: *"Saya telah memahami alur kerja Survival Island. Saya akan merujuk pada GDD.md dan Claude.md, menyerap logika dari 60 Seconds, Raft, dan L4D, lalu menyatukan seluruh kode ke dalam folder \\Survival-Island\\Survival Island\\Assets\\LOGIC."*

@@ -2,7 +2,7 @@
 
 Folder ini adalah tempat **kode gabungan C#** Survival Island. Semua *script* yang ditulis dari blueprint di `Survival Island/doc/blueprint/` disimpan di sini, sesuai `README.md` di root (TAHAP 6).
 
-**Status:** belum ada *script*. Proyek Unity belum dibuat, dan belum ada Langkah yang dijalankan.
+**Status:** belum ada *script*. Folder `Survival Island/` sudah menjadi proyek Unity 6 LTS (keputusan developer), tetapi belum pernah dibuka di Unity, dan belum ada Langkah yang dijalankan.
 
 > Jangan tertukar dengan `LOGIC/` di root repo. Folder itu hanya bahan analisis dari game referensi (60 Seconds!, Raft, dan Zombie). Kode dari sana tidak boleh disalin ke folder ini.
 
@@ -11,7 +11,7 @@ Folder ini adalah tempat **kode gabungan C#** Survival Island. Semua *script* ya
 Usulan struktur: sub-folder di sini mengikuti folder blueprint, supaya setiap *script* mudah dicari blueprint-nya.
 
 ```text
-Survival Island/LOGIC/
+Survival Island/Assets/LOGIC/
 ├── README.md          # File ini
 ├── Core_Logic/        # Dari Survival Island/doc/blueprint/Core_Logic/ (GameManager, ObjectPooler, UIManager, dll.)
 ├── 60-seconds/        # Dari Survival Island/doc/blueprint/60-seconds/ (Fase 1: kapal tenggelam)
@@ -46,7 +46,25 @@ Isi kolom **Status** dengan salah satu: `Belum dimulai`, `Sedang ditulis`, `Ditu
 
 ## 🔗 Hubungan dengan Proyek Unity
 
-Proyek Unity belum dibuat. Saat sudah ada, isi folder ini dipakai sebagai folder *script* di dalam `Assets/`. Cara menghubungkannya (disalin, dipindah, atau proyek Unity dibuat di `Survival Island/`) belum diputuskan developer.
+**Keputusan developer:** folder `Survival Island/` adalah root proyek Unity, dengan Unity 6 LTS. Folder ini (`Assets/LOGIC/`) adalah tempat semua *script*. `Survival Island/doc/` berada di luar `Assets/`, jadi tidak diimpor Unity.
+
+### Membuka proyek pertama kali
+
+1. Buka Unity Hub, pilih **Add project from disk**, lalu pilih folder `Survival Island/`.
+2. Pilih editor Unity 6 LTS. Unity membuat `Packages/`, `ProjectSettings/`, dan `Library/` sendiri. `Library/` dan folder buatan lain diabaikan lewat `Survival Island/.gitignore`.
+3. Lewat **Window > Package Manager**, pasang paket yang dipakai blueprint:
+
+| Paket | Dipakai oleh |
+|---|---|
+| Input System | `InputManager` (#18) |
+| AI Navigation | `NavMeshAgent`, `NavMeshSurface`, dan `NavMeshLink` di semua AI musuh, NPC, dan `BaseNavigation` |
+| Universal RP | `PostProcessController`, `EnvironmentProfile` |
+| Cinemachine | Impulse di `CameraShake`. Blueprint memakai nama kelas Cinemachine 2.x. Kalau yang terpasang 3.x, sesuaikan kodenya dan catat di `CameraShake.md` |
+| TextMeshPro | Teks UI. Di Unity 6 sudah termasuk paket uGUI |
+
+4. Commit `Packages/manifest.json`, `Packages/packages-lock.json`, dan `ProjectSettings/` setelah proyek pertama kali dibuka, supaya versi paket sama untuk semua orang.
+
+**Catatan OneDrive:** proyek berada di folder OneDrive. Sinkronisasi OneDrive bisa mengunci file di `Library/` saat Unity menulis. Kalau muncul error akses file, jeda sinkronisasi OneDrive selama Unity terbuka.
 
 ## ✅ Sebelum Menambah Script
 

@@ -1,6 +1,6 @@
 # 🤖 CLAUDE - PERINTAH KHUSUS FOLDER KODE (Survival Island/)
 
-File ini berlaku saat Claude bekerja di folder `Survival Island/`, terutama saat menulis *script* C# di `Survival Island/LOGIC/` (Mode 3: "Jalankan Langkah [X]").
+File ini berlaku saat Claude bekerja di folder `Survival Island/`, terutama saat menulis *script* C# di `Survival Island/Assets/LOGIC/` (Mode 3: "Jalankan Langkah [X]").
 
 **`Claude.md` di root tetap berlaku penuh.** File ini hanya menambah aturan teknis untuk menulis kode. Kalau keduanya berbeda, ikuti urutan prioritas di `README.md` root: `GDD.md`, lalu `Claude.md` root, lalu blueprint.
 
@@ -19,7 +19,7 @@ File ini berlaku saat Claude bekerja di folder `Survival Island/`, terutama saat
    - `Survival Island/doc/blueprint/Core_Logic/ObjectPooler.md`: kontrak `IPoolable` dan reset objek pool.
    - `Survival Island/doc/blueprint/Core_Logic/WorldStateSave.md`: kontrak `ISaveable` untuk data yang disimpan.
 5. `Survival Island/doc/USULAN_TERBUKA.md`: keputusan developer, dan keputusan yang masih terbuka.
-6. `Survival Island/LOGIC/README.md`: struktur folder dan status tiap Langkah.
+6. `Survival Island/Assets/LOGIC/README.md`: struktur folder dan status tiap Langkah.
 
 ---
 
@@ -27,9 +27,9 @@ File ini berlaku saat Claude bekerja di folder `Survival Island/`, terutama saat
 
 1. Cek tabel prasyarat di TAHAP 7 `Claude.md` root. Pastikan blueprint utama dan blueprint prasyaratnya ada di `Survival Island/doc/blueprint/`.
 2. Kalau ada keputusan di "Masih terbuka" (`Survival Island/doc/USULAN_TERBUKA.md`) yang menghalangi Langkah itu, laporkan dan tanyakan dulu sebelum menulis kode.
-3. Tulis *script* di sub-folder `Survival Island/LOGIC/` yang sesuai dengan folder blueprint-nya (lihat `Survival Island/LOGIC/README.md`).
+3. Tulis *script* di sub-folder `Survival Island/Assets/LOGIC/` yang sesuai dengan folder blueprint-nya (lihat `Survival Island/Assets/LOGIC/README.md`).
 4. Satu kelas utama per file. Nama file dan nama kelas sama dengan nama blueprint.
-5. Perbarui kolom **Status** Langkah itu di `Survival Island/LOGIC/README.md`.
+5. Perbarui kolom **Status** Langkah itu di `Survival Island/Assets/LOGIC/README.md`.
 6. Laporkan *script* yang ditulis, bagian blueprint yang belum diimplementasikan, dan apa yang belum diuji di Unity.
 
 ---
