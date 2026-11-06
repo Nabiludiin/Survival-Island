@@ -9,24 +9,24 @@ File ini berlaku saat Claude bekerja di folder `Survival Island/`, terutama saat
 ## 📌 1. Wajib Dibaca Sebelum Menulis Kode
 
 1. `Claude.md` root: aturan dasar, Mode 3, aturan kode TAHAP 6, dan tabel prasyarat TAHAP 7.
-2. `GDD.md`: aturan game yang diimplementasikan.
-3. Blueprint utama Langkah itu di `docs/blueprint/`, beserta blueprint yang disebut di bagian 3 ("Hubungan dengan Sistem Lain").
+2. `Survival Island/doc/GDD.md`: aturan game yang diimplementasikan.
+3. Blueprint utama Langkah itu di `Survival Island/doc/blueprint/`, beserta blueprint yang disebut di bagian 3 ("Hubungan dengan Sistem Lain").
 4. Blueprint fondasi yang dipakai hampir semua *script*:
-   - `docs/blueprint/GLOSSARY.md`: nama resmi kelas, enum, scene, tag, dan layer.
-   - `docs/blueprint/Core_Logic/GameEventBus.md`: cara sistem saling memberi kabar.
-   - `docs/blueprint/Core_Logic/PhysicsLayers.md`: layer, mask, dan `PhysicsQuery`.
-   - `docs/blueprint/Core_Logic/GameBalanceConfig.md`: tempat semua angka penyetelan.
-   - `docs/blueprint/Core_Logic/ObjectPooler.md`: kontrak `IPoolable` dan reset objek pool.
-   - `docs/blueprint/Core_Logic/WorldStateSave.md`: kontrak `ISaveable` untuk data yang disimpan.
-5. `docs/USULAN_TERBUKA.md`: keputusan developer, dan keputusan yang masih terbuka.
+   - `Survival Island/doc/blueprint/GLOSSARY.md`: nama resmi kelas, enum, scene, tag, dan layer.
+   - `Survival Island/doc/blueprint/Core_Logic/GameEventBus.md`: cara sistem saling memberi kabar.
+   - `Survival Island/doc/blueprint/Core_Logic/PhysicsLayers.md`: layer, mask, dan `PhysicsQuery`.
+   - `Survival Island/doc/blueprint/Core_Logic/GameBalanceConfig.md`: tempat semua angka penyetelan.
+   - `Survival Island/doc/blueprint/Core_Logic/ObjectPooler.md`: kontrak `IPoolable` dan reset objek pool.
+   - `Survival Island/doc/blueprint/Core_Logic/WorldStateSave.md`: kontrak `ISaveable` untuk data yang disimpan.
+5. `Survival Island/doc/USULAN_TERBUKA.md`: keputusan developer, dan keputusan yang masih terbuka.
 6. `Survival Island/LOGIC/README.md`: struktur folder dan status tiap Langkah.
 
 ---
 
 ## 🧭 2. Alur "Jalankan Langkah [X]"
 
-1. Cek tabel prasyarat di TAHAP 7 `Claude.md` root. Pastikan blueprint utama dan blueprint prasyaratnya ada di `docs/blueprint/`.
-2. Kalau ada keputusan di "Masih terbuka" (`docs/USULAN_TERBUKA.md`) yang menghalangi Langkah itu, laporkan dan tanyakan dulu sebelum menulis kode.
+1. Cek tabel prasyarat di TAHAP 7 `Claude.md` root. Pastikan blueprint utama dan blueprint prasyaratnya ada di `Survival Island/doc/blueprint/`.
+2. Kalau ada keputusan di "Masih terbuka" (`Survival Island/doc/USULAN_TERBUKA.md`) yang menghalangi Langkah itu, laporkan dan tanyakan dulu sebelum menulis kode.
 3. Tulis *script* di sub-folder `Survival Island/LOGIC/` yang sesuai dengan folder blueprint-nya (lihat `Survival Island/LOGIC/README.md`).
 4. Satu kelas utama per file. Nama file dan nama kelas sama dengan nama blueprint.
 5. Perbarui kolom **Status** Langkah itu di `Survival Island/LOGIC/README.md`.
@@ -64,7 +64,7 @@ Jangan diam-diam menyimpang. Perbarui blueprint-nya, jelaskan alasannya di lapor
 
 - Jangan menyalin kode atau asset dari `LOGIC/` di root repo. Tulis ulang logikanya dengan kata-kata sendiri.
 - Jangan menulis *script* untuk sistem yang belum punya blueprint.
-- Jangan memutuskan desain sendiri. Catat di bagian "Masih terbuka" pada `docs/USULAN_TERBUKA.md`, lalu tanyakan ke developer.
+- Jangan memutuskan desain sendiri. Catat di bagian "Masih terbuka" pada `Survival Island/doc/USULAN_TERBUKA.md`, lalu tanyakan ke developer.
 - Jangan commit, push, membuat Pull Request, atau menutup issue tanpa perintah developer.
 - Jangan menyebut *script* berhasil kalau belum dijalankan di Unity.
 

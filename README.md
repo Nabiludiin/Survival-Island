@@ -4,30 +4,30 @@ Selamat datang di repositori proyek **Survival Island**. File `README.md` ini ad
 
 Jika Anda adalah Claude, **baca dokumen ini dengan sangat teliti sebelum mengeksekusi atau menulis kode apapun.**
 
-**Status proyek:** tahap desain. Logika game ditulis dulu sebagai blueprint `.md` mengikuti `GDD.md`. Proyek Unity dan *script* C# belum dibuat. Nama resmi tercatat di `docs/blueprint/GLOSSARY.md`.
+**Status proyek:** tahap desain. Logika game ditulis dulu sebagai blueprint `.md` mengikuti `GDD.md`. Proyek Unity dan *script* C# belum dibuat. Nama resmi tercatat di `Survival Island/doc/blueprint/GLOSSARY.md`.
 
 ## 📍 Struktur Direktori Utama
 
 ```text
 Survival-Island/
 ├── README.md                     # Alur kerja proyek (file ini)
-├── GDD.md                        # Aturan game dan sumber utama desain
 ├── Claude.md                     # Cara kerja dan standar teknis Claude untuk seluruh proyek
-├── docs/
-│   ├── CATATAN_MEKANIK.md        # Catatan mekanik 60 Seconds!, Raft, dan L4D
-│   ├── REFERENSI_MUSUH_L4D.md    # Referensi perilaku dan angka musuh
-│   ├── USULAN_TERBUKA.md         # Keputusan developer dan keputusan yang masih terbuka
-│   └── blueprint/
-│       ├── GLOSSARY.md           # Nama resmi scene, manager, enum, tag, dan layer
-│       ├── 60-seconds/           # Fase 1: kapal tenggelam
-│       ├── raft/                 # Status, gathering, dan base building
-│       ├── left-4-dead/          # Siklus ancaman, AI musuh, spawn, dan gunplay
-│       ├── Core_Logic/           # Sistem yang dipakai lintas fase
-│       └── Island_Logic/         # Sistem khusus Fase 2 di pulau
 ├── LOGIC/                        # Bahan referensi game asli, bukan kode proyek
 └── Survival Island/
     ├── README.md                 # Cerita, feel, dan gambaran game
     ├── Claude.md                 # Perintah khusus Claude saat menulis kode C# (Mode 3)
+    ├── doc/                      # Semua dokumentasi desain
+    │   ├── GDD.md                # Aturan game dan sumber utama desain
+    │   ├── CATATAN_MEKANIK.md    # Catatan mekanik 60 Seconds!, Raft, dan L4D
+    │   ├── REFERENSI_MUSUH_L4D.md # Referensi perilaku dan angka musuh
+    │   ├── USULAN_TERBUKA.md     # Keputusan developer dan keputusan yang masih terbuka
+    │   └── blueprint/
+    │       ├── GLOSSARY.md       # Nama resmi scene, manager, enum, tag, dan layer
+    │       ├── 60-seconds/       # Fase 1: kapal tenggelam
+    │       ├── raft/             # Status, gathering, dan base building
+    │       ├── left-4-dead/      # Siklus ancaman, AI musuh, spawn, dan gunplay
+    │       ├── Core_Logic/       # Sistem yang dipakai lintas fase
+    │       └── Island_Logic/     # Sistem khusus Fase 2 di pulau
     └── LOGIC/
         └── README.md             # Lokasi kode gabungan C#, struktur folder, dan status tiap Langkah
 ```
@@ -38,11 +38,11 @@ Survival-Island/
 
 | Folder | Isi | Contoh |
 |---|---|---|
-| `docs/blueprint/60-seconds/` | Logika yang hanya berjalan di Fase 1 | `ShipTimerManager.md` |
-| `docs/blueprint/raft/` | Status tubuh, resource, dan bangunan | `SurvivalStats.md`, `BuildManager.md` |
-| `docs/blueprint/left-4-dead/` | Siklus siang dan malam, AI musuh, spawn, dan gunplay | `EnemyAI.md`, `DayNightDirector.md` |
-| `docs/blueprint/Core_Logic/` | Sistem umum yang dipakai beberapa fase | `GameManager.md`, `SaveSystem.md` |
-| `docs/blueprint/Island_Logic/` | Mekanik khusus pulau dan region | `ZoneManager.md`, `LuckyMachine.md` |
+| `Survival Island/doc/blueprint/60-seconds/` | Logika yang hanya berjalan di Fase 1 | `ShipTimerManager.md` |
+| `Survival Island/doc/blueprint/raft/` | Status tubuh, resource, dan bangunan | `SurvivalStats.md`, `BuildManager.md` |
+| `Survival Island/doc/blueprint/left-4-dead/` | Siklus siang dan malam, AI musuh, spawn, dan gunplay | `EnemyAI.md`, `DayNightDirector.md` |
+| `Survival Island/doc/blueprint/Core_Logic/` | Sistem umum yang dipakai beberapa fase | `GameManager.md`, `SaveSystem.md` |
+| `Survival Island/doc/blueprint/Island_Logic/` | Mekanik khusus pulau dan region | `ZoneManager.md`, `LuckyMachine.md` |
 
 ## 📚 Urutan Prioritas Dokumen
 
@@ -50,14 +50,14 @@ Kalau dua dokumen berbeda, ikuti urutan ini:
 
 | Urutan | Dokumen | Peran |
 |---|---|---|
-| 1 | `GDD.md` | Sumber utama aturan game |
+| 1 | `Survival Island/doc/GDD.md` | Sumber utama aturan game |
 | 2 | `Claude.md` | Standar teknis dan cara kerja |
-| 3 | `docs/blueprint/` | Rancangan logika tiap sistem, harus mengikuti GDD |
+| 3 | `Survival Island/doc/blueprint/` | Rancangan logika tiap sistem, harus mengikuti GDD |
 | 4 | Issue GitHub | Daftar pekerjaan dan batas tiap pekerjaan |
-| 5 | `docs/CATATAN_MEKANIK.md`, `docs/REFERENSI_MUSUH_L4D.md` | Bahan referensi dan usulan, bukan aturan |
+| 5 | `Survival Island/doc/CATATAN_MEKANIK.md`, `Survival Island/doc/REFERENSI_MUSUH_L4D.md` | Bahan referensi dan usulan, bukan aturan |
 | 6 | `LOGIC/` | Bahan analisis |
 
-Jangan memutuskan sendiri kalau aturannya bertentangan. Catat di bagian "Masih terbuka" pada `docs/USULAN_TERBUKA.md`, lalu minta keputusan developer. Keputusan yang sudah diambil dipindah ke bagian "Keputusan utama" di file yang sama.
+Jangan memutuskan sendiri kalau aturannya bertentangan. Catat di bagian "Masih terbuka" pada `Survival Island/doc/USULAN_TERBUKA.md`, lalu minta keputusan developer. Keputusan yang sudah diambil dipindah ke bagian "Keputusan utama" di file yang sama.
 
 ## ⚙️ AI Developer Workflow (Alur Kerja Claude)
 
@@ -72,13 +72,13 @@ GDD.md → Issue GitHub → Blueprint .md → Pull Request → Script C# → Tes
 Sebelum menyentuh folder kode atau logika, baca file berikut agar memahami dunia game dan batasan-batasannya:
 
 1. **`Survival Island/README.md`:** Memahami cerita dan *feel* game.
-2. **`GDD.md` (Game Design Document):** Dokumen paling krusial. Berisi seluruh aturan game, narasi (insiden kapal, diary), mekanik 4 Region (Gunung Berapi, Amazon, Es, Desa), mekanik siang/malam (Hewan vs Zombie terbakar), dan *Win Condition* (merakit Helikopter dan kabur, dengan target Hari ke-60. Melewati Hari ke-60 membuat zombie semakin kuat, tetapi bukan Game Over).
+2. **`Survival Island/doc/GDD.md` (Game Design Document):** Dokumen paling krusial. Berisi seluruh aturan game, narasi (insiden kapal, diary), mekanik 4 Region (Gunung Berapi, Amazon, Es, Desa), mekanik siang/malam (Hewan vs Zombie terbakar), dan *Win Condition* (merakit Helikopter dan kabur, dengan target Hari ke-60. Melewati Hari ke-60 membuat zombie semakin kuat, tetapi bukan Game Over).
 3. **`README.md` (File ini):** Memahami alur kerja, struktur folder, dan instruksi penulisan.
 4. **`Claude.md`:** Berisi cara kerja, perintah eksekusi, dan standar teknis yang harus dipatuhi.
 
 ### TAHAP 2: Pilih Pekerjaan dari Issue
 
-1. Cek daftar [Issues](https://github.com/Nabiludiin/Survival-Island/issues) dan folder `docs/blueprint/`, termasuk issue yang sudah ditutup.
+1. Cek daftar [Issues](https://github.com/Nabiludiin/Survival-Island/issues) dan folder `Survival Island/doc/blueprint/`, termasuk issue yang sudah ditutup.
 2. Kalau sistemnya belum ada, buat issue baru dengan [format issue](#-format-issue).
 3. Baca bagian "Kenapa dibutuhkan", "Batasan", dan "Checklist" pada issue.
 4. Baca blueprint dan issue lain yang disebut, supaya pekerjaan tidak tumpang tindih.
@@ -87,7 +87,7 @@ Saat diminta membuat issue saja, berhenti setelah issue terbit. Jangan langsung 
 
 ### TAHAP 3: Ekstraksi Logika dari Referensi
 
-Game ini menggabungkan tiga pilar mekanik utama. Baca `docs/CATATAN_MEKANIK.md` dulu, lalu buka sub-folder di `LOGIC/` hanya kalau butuh detail tambahan.
+Game ini menggabungkan tiga pilar mekanik utama. Baca `Survival Island/doc/CATATAN_MEKANIK.md` dulu, lalu buka sub-folder di `LOGIC/` hanya kalau butuh detail tambahan.
 
 **Tulis ulang logikanya dengan kata-kata sendiri. Jangan menyalin kode atau asset dari game asli.**
 
@@ -154,7 +154,7 @@ Mulai tahap ini setelah blueprint yang dibutuhkan selesai. Perintahnya mengikuti
 
 ## 🗺️ Peta GDD ke Blueprint
 
-Tabel ini menunjukkan tempat setiap aturan GDD dirancang. Kalau issue sudah selesai, blueprint-nya tersimpan di `docs/blueprint/`.
+Tabel ini menunjukkan tempat setiap aturan GDD dirancang. Kalau issue sudah selesai, blueprint-nya tersimpan di `Survival Island/doc/blueprint/`.
 
 | Bagian GDD | Blueprint yang sudah ada | Issue yang masih terbuka |
 |---|---|---|
@@ -205,7 +205,7 @@ Satu kalimat tujuan sistem.
 - Tandai kalau idenya usulan dan belum tercantum di GDD.
 
 ## Checklist
-- [ ] Buat file `docs/blueprint/<folder>/<NamaSistem>.md`.
+- [ ] Buat file `Survival Island/doc/blueprint/<folder>/<NamaSistem>.md`.
 - [ ] Langkah desain yang bisa diperiksa.
 ```
 
@@ -215,7 +215,7 @@ Sebelum membuat issue, pastikan topiknya belum ada di issue terbuka, issue tertu
 
 ```markdown
 # Blueprint: NamaSistem.cs
-**Lokasi:** `docs/blueprint/<folder>/NamaSistem.md`
+**Lokasi:** `Survival Island/doc/blueprint/<folder>/NamaSistem.md`
 **Deskripsi Utama:** Fungsi sistem dalam satu sampai dua kalimat.
 **Issue:** #<nomor>
 **Rujukan GDD:** Bagian <nomor>, atau tulis "Usulan, belum ada di GDD".
@@ -245,7 +245,7 @@ Blueprint lama memakai bagian 1 dan 2 saja. Lengkapi bagian lainnya saat bluepri
 
 - [ ] Sesuai dengan aturan `GDD.md`, atau jelas ditandai sebagai usulan.
 - [ ] Semua poin checklist issue sudah dikerjakan.
-- [ ] Nama kelas, scene, tag, dan enum mengikuti `docs/blueprint/GLOSSARY.md`.
+- [ ] Nama kelas, scene, tag, dan enum mengikuti `Survival Island/doc/blueprint/GLOSSARY.md`.
 - [ ] Semua sistem yang dipanggil punya blueprint atau issue.
 - [ ] Musuh, peluru, dan objek yang sering muncul memakai `ObjectPooler`.
 - [ ] Reset status saat objek dipakai ulang dari pool sudah dijelaskan.

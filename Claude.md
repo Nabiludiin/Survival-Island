@@ -9,19 +9,19 @@
 ## 📌 TAHAP 1: ATURAN DASAR & INGESTI KONTEKS
 Sebelum mulai bekerja, Anda **DIWAJIBKAN** membaca file berikut:
 1. `Survival Island/README.md` -> Pahami *feel*, *lore*, dan narasi perjalanan karakter.
-2. `GDD.md` -> Pahami aturan *gameplay* (Syarat Menang/Kalah, 4 Region, Siklus Siang/Malam, Hewan vs Zombie, Sistem Infeksi).
+2. `Survival Island/doc/GDD.md` -> Pahami aturan *gameplay* (Syarat Menang/Kalah, 4 Region, Siklus Siang/Malam, Hewan vs Zombie, Sistem Infeksi).
 3. `README.md` -> Pahami arsitektur proyek, struktur folder, alur kerja, format issue, dan format blueprint.
 
 Baca juga sesuai tugas:
-- Blueprint terkait di `docs/blueprint/`.
-- `docs/CATATAN_MEKANIK.md` dan `docs/REFERENSI_MUSUH_L4D.md` untuk referensi mekanik.
-- `docs/USULAN_TERBUKA.md` untuk keputusan developer dan keputusan yang masih terbuka.
+- Blueprint terkait di `Survival Island/doc/blueprint/`.
+- `Survival Island/doc/CATATAN_MEKANIK.md` dan `Survival Island/doc/REFERENSI_MUSUH_L4D.md` untuk referensi mekanik.
+- `Survival Island/doc/USULAN_TERBUKA.md` untuk keputusan developer dan keputusan yang masih terbuka.
 - Issue terkait di GitHub, termasuk yang disebut di bagian "Batasan".
 - `Survival Island/Claude.md` dan `Survival Island/LOGIC/README.md` saat menulis kode C# (Mode 3).
 
 ### Aturan yang selalu berlaku
 - **GDD adalah sumber utama aturan game.** Urutan prioritas lengkap ada di `README.md`.
-- **Jangan memutuskan desain sendiri.** Kalau aturan bertentangan atau belum jelas, tanyakan ke developer atau catat di bagian "Masih terbuka" pada `docs/USULAN_TERBUKA.md`.
+- **Jangan memutuskan desain sendiri.** Kalau aturan bertentangan atau belum jelas, tanyakan ke developer atau catat di bagian "Masih terbuka" pada `Survival Island/doc/USULAN_TERBUKA.md`.
 - **Bedakan aturan dan usulan.** Ide yang belum ada di GDD harus ditulis sebagai usulan.
 - **Kerjakan yang diminta saja.** Permintaan membuat issue tidak berarti mengerjakan blueprint-nya.
 - **Jangan commit, push, membuat Pull Request, atau menutup issue** tanpa perintah developer.
@@ -83,7 +83,7 @@ Gunakan pendekatan `Singleton` untuk Manager dan `ScriptableObjects` untuk data 
 - **InventoryManager.cs:** List dinamis. Selalu simpan *item* inti: `Base_Kail`, `Base_Pistol`, dan `Base_Pisau`.
 - **DayNightDirector.cs:** Mengatur *TimeOfDay* (0.0 - 24.0), menggerakkan rotasi `Directional Light` (Matahari/Bulan), dan memicu *event* pergantian hari.
 
-**Catatan:** Nama resmi ada di `docs/blueprint/GLOSSARY.md`. Keputusan desain yang masih terbuka dicatat di bagian "Masih terbuka" pada `docs/USULAN_TERBUKA.md`.
+**Catatan:** Nama resmi ada di `Survival Island/doc/blueprint/GLOSSARY.md`. Keputusan desain yang masih terbuka dicatat di bagian "Masih terbuka" pada `Survival Island/doc/USULAN_TERBUKA.md`.
 
 ---
 

@@ -1,6 +1,6 @@
 # 🧩 Survival Island - Kode Gabungan (LOGIC)
 
-Folder ini adalah tempat **kode gabungan C#** Survival Island. Semua *script* yang ditulis dari blueprint di `docs/blueprint/` disimpan di sini, sesuai `README.md` di root (TAHAP 6).
+Folder ini adalah tempat **kode gabungan C#** Survival Island. Semua *script* yang ditulis dari blueprint di `Survival Island/doc/blueprint/` disimpan di sini, sesuai `README.md` di root (TAHAP 6).
 
 **Status:** belum ada *script*. Proyek Unity belum dibuat, dan belum ada Langkah yang dijalankan.
 
@@ -13,20 +13,20 @@ Usulan struktur: sub-folder di sini mengikuti folder blueprint, supaya setiap *s
 ```text
 Survival Island/LOGIC/
 ├── README.md          # File ini
-├── Core_Logic/        # Dari docs/blueprint/Core_Logic/ (GameManager, ObjectPooler, UIManager, dll.)
-├── 60-seconds/        # Dari docs/blueprint/60-seconds/ (Fase 1: kapal tenggelam)
-├── raft/              # Dari docs/blueprint/raft/ (status, gathering, base building)
-├── left-4-dead/       # Dari docs/blueprint/left-4-dead/ (siang-malam, AI musuh, spawn, gunplay)
-└── Island_Logic/      # Dari docs/blueprint/Island_Logic/ (region, cuaca, Diary, Lucky Machine)
+├── Core_Logic/        # Dari Survival Island/doc/blueprint/Core_Logic/ (GameManager, ObjectPooler, UIManager, dll.)
+├── 60-seconds/        # Dari Survival Island/doc/blueprint/60-seconds/ (Fase 1: kapal tenggelam)
+├── raft/              # Dari Survival Island/doc/blueprint/raft/ (status, gathering, base building)
+├── left-4-dead/       # Dari Survival Island/doc/blueprint/left-4-dead/ (siang-malam, AI musuh, spawn, gunplay)
+└── Island_Logic/      # Dari Survival Island/doc/blueprint/Island_Logic/ (region, cuaca, Diary, Lucky Machine)
 ```
 
 Sub-folder baru dibuat saat Langkah pertama yang membutuhkannya dijalankan. Folder kosong tidak perlu dibuat lebih dulu.
 
 ### Aturan penamaan
 
-- Satu kelas utama per file. Nama file sama dengan nama kelas dan nama blueprint, misalnya `docs/blueprint/Core_Logic/GameManager.md` menjadi `Core_Logic/GameManager.cs`.
+- Satu kelas utama per file. Nama file sama dengan nama kelas dan nama blueprint, misalnya `Survival Island/doc/blueprint/Core_Logic/GameManager.md` menjadi `Core_Logic/GameManager.cs`.
 - Kelas kecil yang hanya dipakai satu sistem boleh satu file dengan pemiliknya, kalau blueprint-nya menulis begitu.
-- Nama kelas, enum, tag, layer, dan scene mengikuti `docs/blueprint/GLOSSARY.md`.
+- Nama kelas, enum, tag, layer, dan scene mengikuti `Survival Island/doc/blueprint/GLOSSARY.md`.
 
 ## 🚀 Status Langkah
 
@@ -51,5 +51,5 @@ Proyek Unity belum dibuat. Saat sudah ada, isi folder ini dipakai sebagai folder
 ## ✅ Sebelum Menambah Script
 
 1. Baca `Survival Island/Claude.md` untuk aturan menulis kode.
-2. Pastikan blueprint utama dan prasyarat Langkah itu sudah ada di `docs/blueprint/`.
+2. Pastikan blueprint utama dan prasyarat Langkah itu sudah ada di `Survival Island/doc/blueprint/`.
 3. Setelah menulis, perbarui tabel **Status Langkah** di atas.
