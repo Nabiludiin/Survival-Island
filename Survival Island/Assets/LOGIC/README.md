@@ -129,7 +129,7 @@ Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Lan
 | **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **6** | `ZoneManager`, frostbite, jembatan kayu, barang berat, `WeatherManager` | `Island_Logic/` | Belum dimulai |
-| **7** | *Sudden Event*, `LuckyMachine`, `DiaryManager`, alur menang dan kalah | `Island_Logic/`, `Core_Logic/` | Belum dimulai |
+| **7** | *Sudden Event*, `LuckyMachine`, `DiaryManager`, alur menang dan kalah | `Island_Logic/`, `Core_Logic/` | Ditulis, belum dikompilasi |
 
 Isi kolom **Status** dengan salah satu: `Belum dimulai`, `Sedang ditulis`, `Ditulis, belum diuji di Unity`, atau `Diuji di Unity`. Jangan menulis `Diuji di Unity` sebelum *script* benar-benar dijalankan di Unity.
 
@@ -237,3 +237,43 @@ Langkah 5 (Pilar 3 "L4D"): AI musuh `NavMeshAgent`, spawn siang dan malam, gunpl
 5. Pool di `ObjectPooler`, tag = `enemyId`: `zombie_standar` 50, `zombie_desa` 30, varian zombie lain 12, `hewan_serigala` dan `hewan_anjing` 8, `hewan_gagak` 16, hewan lain 4, serta `Tribal_Snare` (layer `Projectile`, komponen `TribalSnare`).
 6. Aset **Survival > Weapon Data** untuk `Base_Pistol` (nilai di `GunController.md`), diisi ke `ItemData.weaponData`. `equipPrefab` Pistol memakai `GunController` dengan `ParticleSystem` muzzle flash, dan `equipPrefab` Pisau/Kapak/Beliung memakai `MeleeCombatSystem`.
 7. Aset **Survival > Threat Profile**: `Threat_Zombie` dan `Threat_Animal` (nilai di `ThreatSystem.md`). Letakkan `DenPoint` dan `AnimalTerritory` di scene region.
+
+## 🧩 Ditambahkan Langkah 7
+
+Langkah 7: *Sudden Event* (`DisasterManager`, Fireball Region 1 dari `ObjectPooler`, `MajorDisasterStartedEvent`), `LuckyMachine` (kuota musuh per region lewat kandang, mode gratis 30 detik saat bencana besar, hadiah gacha), `DiaryManager` (panel teks yang menjeda lewat `UIFocusStack`), dan alur menang dan kalah (`RescueEventManager`, `DeathCinematic`). Status: **ditulis, belum dikompilasi di Unity.** Kode hanya dicek dengan `dotnet build` (netstandard2.1, C# 9) terhadap DLL UnityEngine 6000.3.10f1 serta `Unity.InputSystem`, `Unity.TextMeshPro`, dan `UnityEngine.UI` dari `Library/ScriptAssemblies` checkout utama: 0 error dan 0 warning di Editor, rilis, dan `DEVELOPMENT_BUILD`. Pengecekan itu memakai stub `HeavyItemSystem`, `HeavyItem`, `PartRecord`, dan `PartState` (milik Langkah 6, tidak di-commit), jadi branch ini baru terkompilasi di Unity setelah digabung dengan Langkah 6. Belum ada yang dijalankan di Play Mode.
+
+| File | Blueprint |
+|---|---|
+| `Island_Logic/DisasterManager.cs` (`DisasterPhase`), `DisasterData.cs`, `DisasterScheduler.cs`, `Fireball.cs`, `HazardImpactMarker.cs` | `DisasterManager.md` (#70) |
+| `Island_Logic/LuckyMachine.cs`, `LuckyMachineCage.cs`, `LuckyMachineData.cs` (`LuckyRewardKind`, `LuckyTier`, `CageGateState`, `SacrificeQuota`), `LuckyRewardData.cs`, `WeaponModifierData.cs`, `LuckyRewardLedger.cs`, `LuckyMachinePanel.cs` | `LuckyMachine.md` (#72) |
+| `Island_Logic/DiaryManager.cs`, `DiaryPanel.cs`, `DiaryArchivePanel.cs` | `DiaryManager.md` (#81) |
+| `Island_Logic/DiaryEntry.cs` (`DiaryRewardKind`, `DiaryReward`) | `ObjectiveManager.md` (pemilik `ObjectiveManager`, belum ditulis) |
+| `Island_Logic/RescueEventManager.cs` (`RescueState`), `HelicopterFrame.cs`, `PartInstallZone.cs`, `CockpitInteractable.cs`, `HeavyItemBridge.cs` | `RescueEventManager.md` (#14) |
+| `Core_Logic/DeathCinematic.cs` (`DeathStyle`, `DeathProfile`) | `DeathCinematic.md` (#53) |
+
+### Perubahan kecil di file Langkah lain
+
+- `Core_Logic/GameEvents.cs`: bagian baru "Ditambahkan Langkah 7" di akhir file (`MajorDisasterStartedEvent`, `BloodMoonStartedEvent` milik `HordeManager`, `EnemySacrificedEvent`, `LuckyMachineFreeWindowChangedEvent`, `LuckyMachineSpinResolvedEvent`, `HelicopterPartInstalledEvent`, `HelicopterReadyEvent`, `HelicopterEngineChangedEvent`, dan `CinematicStateChangedEvent`).
+- `Core_Logic/GameBalanceSections.cs`: bagian `disaster`, `luckyMachine`, `rescue`, dan `deathCinematic` diisi di bagian baru "Ditambahkan Langkah 7" di akhir file. Empat deklarasi kelas kosongnya hanya ditambah kata `partial`, cara yang sama dengan Langkah 4.
+- `Core_Logic/RunSeedManager.cs` (Langkah 1): field `disasterData`, isi `BuildLayout` untuk blok pertama jadwal bencana, dan `EnsureDisasterScheduleThrough`. Keduanya adalah TODO Langkah 7 yang ditinggalkan Langkah 1.
+- `Core_Logic/RunLifecycle.cs` (Langkah 1): satu baris di `RunEndSequence` langkah 4 yang memutar `DeathCinematic.Instance.Play(reason)` saat mati. `GameManager.cs` tidak diubah, karena `TriggerWinSequence` dan `TriggerGameOver` sudah ada.
+
+### Titik bentrok saat merge dengan Langkah 6
+
+- `HeavyItemBridge.cs` adalah satu-satunya file yang memanggil `HeavyItemSystem` dan `HeavyItem`, dengan nama dari `HeavyItemSystem.md`. Kalau nama di kode Langkah 6 berbeda, sesuaikan file itu saja.
+- `GameEvents.cs`, `GameBalanceSections.cs`, dan file README ini: ambil kedua bagian akhir. Di dua file `.cs`, pastikan tiap bagian ditutup lengkap dan hanya ada satu `}` penutup namespace.
+- Kalau Langkah 6 juga menulis `HelicopterPartInstalledEvent`, `HelicopterReadyEvent`, atau `BloodMoonStartedEvent`, hapus salah satu.
+
+### Belum diimplementasikan (sistem pendukung belum ada)
+
+`ObjectiveManager` (#81, sumber bab terbuka dan buku Diary), `NarrativeSequencer` (#99, ending menang), `StatusEffectManager` (#20, buff permanen), `RegionStateStore` (#88, sementara mesin langsung `Register` ke `WorldStateSave`), `IslandInteractable` (#17), `HordeManager` (#50), `NotificationManager` (#22), `LocalizationManager` (#104), `AudioManager` (#114), `CameraShake` (#24), `VFXManager` (#15), `EnvironmentDirector` (#92), `RegionalWeather` (#115), `RemoteBaseSimulation` (#90), `FireSystem` (#97), `BuildingIntegrity` (`survivesEarthquake`, #47), dan `NPCRoster` (#76). Semuanya ditandai TODO di kode dan dicatat di bagian "Catatan Implementasi (Langkah 7)" pada blueprint terkait.
+
+### Penyiapan di Unity untuk Langkah 7 (belum dilakukan)
+
+1. Aset **Create > Survival > Disaster Data** untuk `Eruption`, `Earthquake`, dan `TropicalStorm` (nilai di `DisasterManager.md`), lalu isi ke `RunSeedManager.disasterData` di `PersistentRoot` dan ke `DisasterManager.disasterData`.
+2. Scene `IslandPhase`: objek manager berisi `DisasterManager`, `LuckyRewardLedger`, `RescueEventManager`, dan `DiaryManager` (isi `diaryPanel` dan `archivePanel`). Canvas: `DiaryPanel` (id `Diary`) dan `DiaryArchivePanel` (id `DiaryArchive`) dengan `pausesTime`, `releasesCursor`, `blocksGameplayInput`, dan `closableByEsc`; `LuckyMachinePanel` (id `LuckyMachine`) sama tetapi tanpa `pausesTime`. Objek panel aktif saat scene dimuat, supaya `Awake` mengisi `Instance`.
+3. Pool di `ObjectPooler`: `Hazard_Fireball` (layer `Projectile`, komponen `Fireball`) dan `Hazard_ImpactMarker` (komponen `HazardImpactMarker`).
+4. Satu prefab mesin per region: `LuckyMachine` + `SaveIdTag` (aset **Create > Survival > Lucky Machine Data** dengan kuota di `LuckyMachine.md`, hadiah **Survival > Lucky Reward** dan **Survival > Weapon Modifier**), layer `Interactable`; anak `LuckyMachineCage` dengan `BoxCollider` trigger 6 x 4 x 4 m di layer `ZoneTrigger`, `Rigidbody` kinematic, objek gerbang dengan `NavMeshObstacle` carve, dan `vacuumPoint`. Isi `duplicateModifierFallback` dengan `lucky_ammo`.
+5. `Region3_Snow`: `HelicopterFrame` dengan bagian per `partId`, anak `PartInstallZone` (trigger `ZoneTrigger`), dan `CockpitInteractable` (layer `Interactable`).
+6. Prefab pemain Fase 1 dan Fase 2: `DeathCinematic` (isi `cameraRig` dan, kalau ada, `PlayerBodyRig` nonaktif dengan tulang `Rigidbody` kinematic dan `focusBone`).
+7. Aset **Create > Survival > Diary Entry** untuk Bab 1 sampai 3, diisi ke `DiaryArchivePanel.chapters`.

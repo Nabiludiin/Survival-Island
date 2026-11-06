@@ -375,8 +375,10 @@ namespace SurvivalIsland
             // 4. Kegagalan sinematik tidak boleh menghentikan permadeath; waktu tunggu tak terskala.
             float timeout = Balance == null ? 0f
                 : result == RunResult.Won ? Balance.run.endingTimeoutSeconds : Balance.run.endSequenceTimeoutSeconds;
-            // TODO #53: Died -> DeathCinematic.Instance.Play(reason). TODO #99: Won -> NarrativeSequencer.PlayEnding().
+            // Langkah 7 (#53): Died -> DeathCinematic.Instance.Play(reason); kalau Instance null, langkah ini dilewati.
+            // TODO #99: Won -> NarrativeSequencer.PlayEnding().
             IEnumerator closing = null;
+            if (result == RunResult.Died && DeathCinematic.Instance != null) closing = DeathCinematic.Instance.Play(reason);
             if (closing != null) yield return RunWithTimeout(closing, timeout);
 
             // 5.

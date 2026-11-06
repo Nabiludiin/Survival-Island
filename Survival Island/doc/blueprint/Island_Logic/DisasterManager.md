@@ -266,3 +266,17 @@ Dengan aturan ini, gempa tidak langsung menghancurkan dinding kayu yang penuh. B
 14. Aktifkan `reduceFlashing`, lalu picu erupsi. **Hasil:** langit berubah perlahan tanpa denyut, dan tidak ada kilatan penuh yang melewati `FlashGuard`.
 15. Matikan subtitle, lalu picu bencana. **Hasil:** subtitle peringatan tetap tampil, dan `warningClip` berbunyi lewat grup `Warning`.
 16. `disaster Earthquake 1` dengan base di region yang tidak dimuat. **Hasil:** hanya struktur tanpa `survivesEarthquake` yang menerima damage, sebanyak 4 hantaman.
+
+## 7. Catatan Implementasi (Langkah 7)
+
+Kode: `Island_Logic/DisasterManager.cs` (`DisasterPhase`), `DisasterData.cs`, `DisasterScheduler.cs`, `Fireball.cs`, dan `HazardImpactMarker.cs`. Jadwal blok dibangun di `Core_Logic/RunSeedManager.cs` (`BuildLayout` dan `EnsureDisasterScheduleThrough`).
+
+Penyimpangan sementara, karena sistem pendukung belum ditulis:
+
+- **`survivesEarthquake` (#47) belum ada di `BuildableData`.** Sampai field itu ada, struktur dengan `id` berisi `Stone` dianggap tahan gempa dan tidak terkena badai. Ganti `SurvivesEarthquake` di `DisasterManager.cs` saat #47 ditulis.
+- **`StructureRegistry.CopyLoadedStructures` belum ada.** Daftar struktur diambil dengan `FindObjectsByType<BaseHealth>`, hanya sekali per denyut gempa atau badai, bukan per frame.
+- **Interval Blood Moon** dibaca dari `GameBalanceConfig.disaster.bloodMoonIntervalDays` (10), salinan sementara sampai bagian `bloodMoon` (#50) diisi. `BloodMoonStartedEvent` ditulis di `GameEvents.cs` bagian Langkah 7, karena `HordeManager` belum ada.
+- **`RunLayoutSources` belum ada.** `DisasterData[]` diisi di `RunSeedManager.disasterData` (Inspector), dan juga di `DisasterManager.disasterData` untuk durasi tahap. Keduanya harus berisi aset yang sama.
+- **Pemeriksaan perlindungan Fireball:** `PhysicsQuery.Raycast` dari 0,5 m di atas titik benturan ke pusat bounds collider target dengan `PhysicsMasks.AIVision`. Kalau yang kena bukan target atau anaknya, target terlindung. Pohon tumbang tidak memeriksa perlindungan, dan damage-nya rata (`treeFallDamage`).
+- Angka tambahan: `fireballDropHeight` (60, tinggi raycast dan awal jatuh) dan `treeFallMarkerSeconds` (2, lama penanda pohon).
+- Belum diimplementasikan (TODO di kode): `NotificationManager` (#22), subtitle dan `AudioManager` (#104, #114), `EnvironmentDirector` langit merah (#92), `RegionalWeather` override badai (#115), `RemoteBaseSimulation` (#90), `CameraShake` (#24), `FireSystem` (#97), `VFXManager` (#15), dan `RegionLoadStateChangedEvent` (#88). Yang sudah berjalan: jadwal, tahap, `MajorDisasterStartedEvent`, Fireball, gempa, badai, pohon tumbang, save, dan override `SpawnManager` (hewan berhenti saat erupsi).

@@ -337,3 +337,9 @@ Kode: `RunSeedManager.cs`, `RandomStream.cs`, dan `RunLayout.cs` di `Survival Is
 - `RandomStream`, `Fork`, `GetStream`, `BeginNewRun`, `ResolveLayout`, `CaptureSave`, dan `RestoreFromSave` sudah ditulis.
 - `BuildLayout` masih mengembalikan susunan kosong dan pemeriksaan selalu lolos, karena `RunLayoutSources`, `PartSpawnPointTable`, daftar NPC, dan `DisasterData` belum ada. `EnsureDisasterScheduleThrough` dan `RunSeedAudit` juga belum ada. Diisi saat #69, #76, dan #70 ditulis.
 - `DisasterType` dan `DisasterScheduleEntry` sudah ditulis di `Island_Logic/DisasterScheduleEntry.cs`, karena `RunLayout` memakainya. `DisasterManager` (Langkah 7) tidak boleh mendeklarasikannya ulang.
+
+## Catatan Implementasi (Langkah 7)
+
+- `BuildLayout` mengisi blok pertama jadwal bencana (hari 1 sampai `disaster.scheduleBlockDays`) lewat `DisasterScheduler.Build`, dengan aliran `DeriveSeed(seed, Disaster, 0)`. Seed parameter dipakai, karena `CurrentSeed` belum ditetapkan saat pemeriksaan.
+- `EnsureDisasterScheduleThrough` ditulis. Blok ke-n memakai `Fork(Disaster, n)`.
+- Sumber `DisasterData[]` sementara adalah field `RunSeedManager.disasterData`, sampai `RunLayoutSources` ditulis.

@@ -144,3 +144,7 @@ Kode: `Survival Island/Assets/LOGIC/Core_Logic/GameManager.cs`. Tambahan kecil t
 - Karena itu ada dua fungsi tulis tambahan: `MarkArrivedOnIsland()` (dipanggil `IslandArrival.Apply`: mengosongkan `savedShipLoot` lalu `hasArrivedOnIsland = true`, #74) dan `MarkTainted()` (dipanggil `DevConsole`, #56).
 - `GameRunSaveData` ditulis di file yang sama, berisi `currentDay`, `hasEscaped`, `hasArrivedOnIsland`, `shipOutcome`, `wasTainted`, dan `phase`.
 - `static GameBalanceConfig CurrentBalance` adalah pembantu baca `Instance.Balance` yang bernilai `null` kalau `GameManager` belum siap.
+
+## 8. Catatan Implementasi (Langkah 7)
+
+`GameManager.cs` tidak diubah. Alur menang dan kalah memakai `TriggerWinSequence` (dipanggil `RescueEventManager.LiftOff`) dan `TriggerGameOver` (lewat `PlayerDiedEvent`) yang sudah ada sejak Langkah 1. Tambahan Langkah 7 hanya di `RunLifecycle.RunEndSequence`: hasil `Died` memutar `DeathCinematic.Instance.Play(reason)` dengan batas waktu `run.endSequenceTimeoutSeconds`. Ending kemenangan (`NarrativeSequencer`, #99) masih TODO.
