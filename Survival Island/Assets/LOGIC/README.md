@@ -58,7 +58,9 @@ Tiga file terakhir adalah kontrak milik Langkah lain yang sudah dibutuhkan Langk
 
 Penyimpangan kecil dari blueprint dicatat di bagian "Catatan Implementasi (Langkah 1)" pada blueprint terkait.
 
-### Penyiapan di Unity untuk Langkah 1 (belum dilakukan)
+### Penyiapan di Unity untuk Langkah 1 (sudah dilakukan)
+
+Sudah dibuat lewat menu **Survival Island > Setup > TMP Essential Resources** lalu **Survival Island > Setup > Langkah 1 - Fondasi** (`Assets/Editor/Langkah1Setup.cs`, boleh dijalankan ulang). Hasilnya `Assets/Data/GameBalanceConfig.asset`, `Assets/Prefabs/PersistentRoot.prefab` (9 layanan yang sudah ada kodenya, urutan sesuai `RunLifecycle.md`, ditambah `SurfaceDetection` setelah `ObjectPooler`), scene `Bootstrap`, dan scene `MainMenu`. Panel memakai UI polos sementara. Diuji di Play Mode (7 November 2026): Bootstrap → MainMenu → **Run Baru** → `ShipPhase` dengan state `InShip` dan seed terbentuk, tanpa error. Pause, layar akhir, dan dialog konfirmasi belum diuji.
 
 1. Buat layer 8 sampai 23 sesuai `PhysicsLayers.md` di **Project Settings > Tags and Layers**. `PhysicsMasks` mencatat kesalahan untuk layer yang belum ada.
 2. Buat aset **Create > Survival > Game Balance Config**, lalu isi ke `GameManager.balanceAsset`.

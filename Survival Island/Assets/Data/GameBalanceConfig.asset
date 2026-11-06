@@ -1,0 +1,921 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01c95626d4aba2b4d84a142a8a1a0635, type: 3}
+  m_Name: GameBalanceConfig
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.GameBalanceConfig
+  time:
+    timeMultiplier: 96
+    dayLengthSeconds: 900
+  vitals:
+    hungerDrainPerSec: 0.11
+    thirstDrainPerSec: 0.15
+    sprintThirstMultiplier: 1.5
+    starvationDamagePerSec: 0.5
+    dehydrationDamagePerSec: 0.5
+    frostbiteStaminaDrainPerSec: 5
+    frostbiteDamagePerSec: 1
+    drownDamagePerSec: 10
+    infectionDamagePerSec: 0.3
+    infectionDamageThreshold: 75
+    regenPerSec: 0.25
+    regenMinHunger: 50
+    regenMinThirst: 50
+    regenMaxInfection: 50
+    regenDelayAfterDamageSeconds: 12
+    sprintStaminaPerSec: 10
+    jumpStaminaCost: 8
+    meleeStaminaCost: 15
+    swimStaminaPerSec: 6
+    climbStaminaPerSec: 5
+    staminaRegenPerSec: 15
+    staminaRegenDelaySeconds: 1.5
+    exhaustedRecoverThreshold: 25
+    exhaustedMeleeCooldownMultiplier: 1.5
+    exhaustedMeleeDamageMultiplier: 0.7
+    lowVitalThreshold: 25
+    lowHungerMaxStaminaMultiplier: 0.75
+    lowThirstRegenMultiplier: 0.5
+    heavyStaminaRegenMultiplier: 0.75
+    lowHPWarningRatio: 0.25
+    vitalsPublishIntervalSeconds: 0.25
+  resource:
+    treeDropMin: 8
+    treeDropMax: 12
+    axeDecayPerUse: 1
+    harvestNoiseRadius: 10
+    rockDropMin: 4
+    rockDropMax: 6
+    pickaxeDecayPerUse: 1
+    knifeDecayPerHarvest: 0.5
+    coconutRespawnDays: 3
+    stoneRespawnDays: 2
+    regrowJitterHours: 6
+    regrowMinPlayerDistance: 25
+    regrowClearRadius: 3
+    regrowChecksPerFrame: 20
+    dropChunkSize: 4
+    dropSettleSeconds: 3
+    dropMaxFallMeters: 4
+    dropImpulse: 1.5
+    minNodesPerRegion:
+    - region: 0
+      trees: 120
+      rocks: 40
+      mushrooms: 0
+      sapTrees: 0
+    - region: 1
+      trees: 60
+      rocks: 20
+      mushrooms: 10
+      sapTrees: 8
+    - region: 2
+      trees: 20
+      rocks: 40
+      mushrooms: 0
+      sapTrees: 0
+    - region: 3
+      trees: 30
+      rocks: 20
+      mushrooms: 0
+      sapTrees: 0
+  region:
+    bridgeWoodCost: 500
+    heavyItemSpeedMultiplier: 0.5
+    helicopterPartCount: 5
+    bridgeDepositHoldSeconds: 1
+    ravineMinWidth: 30
+    gateVerifySeconds: 2
+    ravineFallDamage: 20
+  weather:
+    weatherIntervalGameHours: 8
+    effects:
+    - weather: 0
+      speedMultiplier: 1
+      aiSightMultiplier: 1
+      aiHearingMultiplier: 1
+      warmthLossPerSec: 0
+    - weather: 1
+      speedMultiplier: 1
+      aiSightMultiplier: 0.9
+      aiHearingMultiplier: 0.85
+      warmthLossPerSec: 0.3
+    - weather: 2
+      speedMultiplier: 1
+      aiSightMultiplier: 0.6
+      aiHearingMultiplier: 1
+      warmthLossPerSec: 0
+    - weather: 3
+      speedMultiplier: 0.9
+      aiSightMultiplier: 0.7
+      aiHearingMultiplier: 0.6
+      warmthLossPerSec: 0.5
+    - weather: 4
+      speedMultiplier: 0.95
+      aiSightMultiplier: 0.85
+      aiHearingMultiplier: 0.9
+      warmthLossPerSec: 0.5
+    - weather: 5
+      speedMultiplier: 0.75
+      aiSightMultiplier: 0.45
+      aiHearingMultiplier: 0.6
+      warmthLossPerSec: 2
+    minSevereDay: 2
+    presentBlendSeconds: 6
+    audioVolume: 0.8
+    insideVolumeMultiplier: 0.3
+    insideBlendSeconds: 1.5
+  difficulties:
+  - profileName: Normal
+    hungerMultiplier: 1
+    thirstMultiplier: 1
+    enemyDamageMultiplier: 1
+  run:
+    endSequenceTimeoutSeconds: 15
+    endingTimeoutSeconds: 120
+    gameOverInputDelaySeconds: 1
+    saveWaitTimeoutSeconds: 5
+    sceneLoadMinShowSeconds: 0.5
+  ui:
+    panelFadeSeconds: 0.15
+    pausedMusicVolumeDb: -12
+    pauseAudioFadeSeconds: 0.2
+    loadingBarSpeed: 1.5
+    confirmInputDelaySeconds: 0.25
+  input:
+    rebindTimeoutSeconds: 5
+  runSeed:
+    maxSeedRerolls: 8
+    lootPointEmptyChance: 0.5
+    minShipFoodItems: 3
+    minShipAmmoItems: 2
+    minShipDrinkItems: 1
+    minPartPointSpacing: 30
+    firstMajorDisasterDay: 3
+    minDaysBetweenMajorDisasters: 4
+  damage:
+    headMultiplier: 2
+    torsoMultiplier: 1
+    legMultiplier: 0.5
+    explosionMinFalloff: 0.25
+    playerExplosionSelfMultiplier: 0.5
+    minDamageAfterArmor: 1
+    maxExplosionTargets: 64
+  equipment:
+    hotbarSlotCount: 8
+    lowerSeconds: 0.15
+    raiseSeconds: 0.2
+    offHandAllowedWhileCarrying: 0
+  items:
+    useMoveSpeedMultiplier: 0.5
+    defaultRestoreSeconds: 20
+    dropForwardDistance: 1
+    worldItemDespawnGameHours: 48
+    maxLooseWorldItems: 64
+    staleRatio: 0.5
+    staleHungerMultiplier: 0.75
+    rottenHungerMultiplier: 0.25
+    rottenPoisonChance: 0.8
+    dropPushForce: 1.5
+  interact:
+    range: 3
+    sphereRadius: 0.15
+    scanIntervalSeconds: 0.05
+    targetGraceSeconds: 0.15
+    holdLoseRange: 3.5
+    moveCancelSpeed: 6
+    availableColor: {r: 1, g: 0.95, b: 0.6, a: 1}
+    blockedColor: {r: 0.9, g: 0.15, b: 0.15, a: 1}
+  camera:
+    maxLookAngle: 80
+    baseFov: 70
+    viewmodelFov: 55
+    eyeHeightStand: 1.6
+    eyeHeightSpeed: 6
+    maxOffsetDegrees: 15
+    recoilRecoverPerSec: 12
+    swayAmount: 0.02
+    swayMax: 0.06
+    swaySmooth: 10
+    bobFrequency: 9
+    bobAmplitude: 0.025
+    bobSprintMultiplier: 1.5
+    bobHeavyMultiplier: 1.8
+    fovSprintBonus: 8
+    fovChangeSpeed: 40
+    landingDipMax: 0.25
+    ladderYawRange: 70
+    lowerSpeed: 8
+    heavyLookScale: 0.8
+    landingDipRecoverSpeed: 1.5
+  traversal:
+    walkSpeed: 5
+    sprintSpeed: 8
+    gravity: -9.81
+    groundCheckDistance: 0.2
+    standHeight: 1.8
+    crouchHeight: 1.1
+    heightChangeSpeed: 6
+    eyeHeightCrouch: 0.95
+    crouchSpeedMultiplier: 0.5
+    ladderClimbSpeed: 2.5
+    ropeClimbSpeed: 1.8
+    climbExhaustedMultiplier: 0.4
+    climbEnterSeconds: 0.25
+    climbExitSeconds: 0.35
+    climbJumpOffForce: 3
+    fallSafeSpeed: 9
+    fallLethalSpeed: 20
+    slideMinAngle: 45
+    slideSpeed: 6
+    slideSteerSpeed: 1.5
+    surfaceCheckSeconds: 0.2
+    jumpHeight: 1.1
+    surfaceProfiles:
+    - surface: 0
+      speedMultiplier: 0.9
+      fallDamageMultiplier: 0.9
+    - surface: 1
+      speedMultiplier: 1
+      fallDamageMultiplier: 1
+    - surface: 2
+      speedMultiplier: 1
+      fallDamageMultiplier: 1
+    - surface: 3
+      speedMultiplier: 1
+      fallDamageMultiplier: 1
+    - surface: 4
+      speedMultiplier: 0.8
+      fallDamageMultiplier: 0.75
+    - surface: 5
+      speedMultiplier: 0.7
+      fallDamageMultiplier: 0.75
+    - surface: 6
+      speedMultiplier: 1
+      fallDamageMultiplier: 1
+    - surface: 7
+      speedMultiplier: 1
+      fallDamageMultiplier: 1
+  carry:
+    baseSlots: 15
+    woodStack: 100
+    stoneStack: 100
+    materialStack: 20
+    foodStack: 5
+    ammoStack: 60
+    overflowSpacing: 0.6
+  ship:
+    durationSeconds: 60
+    preGameSeconds: 3
+    sirenAtSeconds: 1.5
+    handCapacity: 4
+    lifeboatSafeRadius: 6
+    lifeboatSafeHeight: 2.5
+    departHoldSeconds: 1.5
+    arrivalNpcSpacing: 2
+    panicStartSeconds: 15
+    tickPitchMin: 1
+    tickPitchMax: 2
+    tickVolume: 0.6
+    vignetteMaxAlpha: 0.55
+    timerShakePixels: 6
+    timerShakeFrequency: 25
+    musicFadeInSeconds: 1
+    musicFadeOutSeconds: 0.5
+    moveSpeed: 5
+    gravity: -9.81
+    groundedStickVelocity: -2
+    pickupColliderPadding: 0.05
+  shipHazard:
+    staticTiltDegrees: 4
+    tiltSpeedInfluence: 0.12
+    driftSpeedMax: 0.4
+    swaySpeed: 1
+    swayDegreesByStage:
+    - 2
+    - 3.5
+    - 5
+    - 7
+    waterRiseMaxPerSec: 0.5
+    waterAnkleDepth: 0.2
+    waterKneeDepth: 0.6
+    waterWaistDepth: 1.2
+    waterHeadDepth: 1.6
+    waterAnkleMultiplier: 0.85
+    waterKneeMultiplier: 0.6
+    waterWaistMultiplier: 0.35
+    collapseWarningSeconds: 3
+    zombieMaxAlive: 8
+    zombieMoveSpeed: 3.5
+    zombieAggroRadius: 12
+    zombieMinSpawnDistance: 10
+    zombieTickSeconds: 0.25
+    shoveRadius: 1.2
+    shoveForwardOffset: 1
+    shoveKnockback: 3
+    shoveStaggerSeconds: 1.5
+    shoveCooldownSeconds: 1.5
+  infection:
+    startingVaccineDoses: 2
+    gainStandard: 5
+    gainTribal: 6
+    gainMoss: 8
+    gainMilitary: 10
+    gainFrozen: 5
+    gainVillage: 6
+    stage2At: 25
+    stage3At: 50
+    stage4At: 75
+    stageMaxStamina:
+    - 1
+    - 0.9
+    - 0.75
+    - 0.5
+    stageStaminaRegen:
+    - 1
+    - 1
+    - 0.75
+    - 0.5
+    stageVision:
+    - 0
+    - 0.15
+    - 0.4
+    - 0.8
+    selfProgressPerGameHour: 0
+    selfProgressMinInfection: 50
+    vaccineReduction: 50
+    vaccineInjectSeconds: 4
+    medicVaccineMultiplier: 1.25
+    criticalWarningAt: 90
+    zombifyCinematicSeconds: 4
+  hydration:
+    exertionThirstMultiplier: 1.25
+  crafting:
+    maxQueue: 5
+    stationRangeMeters: 4
+    leaveGraceMeters: 2
+    stationCheckSeconds: 0.5
+    hitPauseSeconds: 1.5
+    npcCrafterSpeedMultiplier: 1.5
+  surface:
+    probeUp: 1
+    probeDown: 3
+    beachBuildSandWeight: 0.35
+    nearSandSampleCount: 8
+    runtimeBakeRowsPerFrame: 64
+    debugGridCells: 64
+    debugGridSpacing: 1
+  build:
+    gridSize: 2.5
+    maxBuildDistance: 6
+    levelHeight: 2.5
+    heightSnap: 0.25
+    maxFoundationHeightDelta: 1.25
+    groundProbeHeight: 5
+    maxLevels: 3
+    maxHorizontalSpan: 2
+    maxStructures: 400
+    overlapShrink: 0.1
+    maxCollapsePerFrame: 4
+    maxCollapseVfxPerSecond: 8
+    demolishHoldSeconds: 1.2
+    demolishRefundRatio: 0.5
+    demolishBlockedAfterDamageSeconds: 5
+    hammerDecayPerBuild: 1
+    hammerDecayPerDemolish: 1
+  sleep:
+    maxGameHoursPerStep: 0.25
+  save:
+    combatEnemyRadius: 30
+    combatQuietSeconds: 10
+    autosaveRetrySeconds: 10
+    autosaveMaxDeferSeconds: 120
+    autosaveMinHpRatio: 0.1
+    combatRestoreMaxEnemies: 10
+    combatRestoreRadius: 20
+  gun:
+    autoReloadDelay: 0.3
+    dryClickCooldown: 0.25
+    npcFireMaxAngle: 10
+    movingSpeedThreshold: 0.5
+  enemyAttack:
+    maxAttackersOnPlayer: 3
+    maxAttackersOnNpc: 2
+    waitRingRadius: 3.5
+    tokenRetrySeconds: 0.3
+    animEventGraceSeconds: 0.1
+    interruptCooldownSeconds: 0.6
+    telegraphMinInterval: 0.5
+  hitReaction:
+    staggerSeconds: 0.35
+    staggerImmunitySeconds: 1
+    headStaggerMultiplier: 1.5
+    legSlowMultiplier: 0.6
+    legSlowSeconds: 2
+    armorNoFlinchBelow: 0.5
+    meleeKnockback: 0.8
+    explosionKnockback: 2.5
+    knockbackSeconds: 0.25
+    shoveRadius: 1.6
+    shoveConeDot: 0.5
+    shoveKnockback: 2.5
+    shoveStaggerSeconds: 1
+    shoveCooldownSeconds: 0.8
+    shoveStaminaCost: 10
+    corpseHoldSeconds: 6
+    corpseFadeSeconds: 1.5
+    ragdollSettleSeconds: 2
+    maxCorpses: 12
+    maxRagdolls: 4
+    ragdollForce: 6
+    maxDropsPerNight: 10
+  threat:
+    reselectSeconds: 1
+    farReselectSeconds: 2.5
+    farDistance: 30
+    minTargetHoldSeconds: 3
+    switchMargin: 15
+    aggroOverrideSeconds: 4
+    crowdPenalty: 8
+    maxChasersPerNpc: 3
+    bloodMoonPlayerRange: 8
+    loseSightSeconds: 8
+    searchSeconds: 3
+    huntOffsetRadius: 8
+    huntUpdateSeconds: 5
+    unreachableSeconds: 6
+    unreachableBanSeconds: 10
+    maxSelectionsPerFrame: 8
+    maxCandidates: 16
+  stealth:
+    enabled: 1
+    sightRange: 22
+    sightAngleDeg: 120
+    closeSenseRange: 2.5
+    sightGainMin: 0.4
+    sightGainMax: 2
+    decayPerSec: 0.15
+    suspiciousThreshold: 0.35
+    loseAwareSeconds: 6
+    crouchVisibility: 0.6
+    sprintVisibility: 1.2
+    hearGain: 0.5
+    wallMuffle: 0.6
+    sensorTickSeconds: 0.25
+    sensorsPerFrame: 6
+    huntHintSeconds: 8
+    huntHintRadius: 12
+    noiseIdle: 0.5
+    noiseCrouchMove: 2
+    noiseWalk: 8
+    noiseSprint: 20
+    noiseSwim: 10
+    noiseGunshot: 40
+    noiseMelee: 8
+    noiseLandingMax: 15
+    noiseTickSeconds: 0.5
+  wildlife:
+    tickSeconds: 0.25
+    alertSeconds: 1.5
+    crouchAggroMultiplier: 0.6
+    noiseAggroMultiplier: 0.5
+    targetSampleRadius: 2
+    returnHealPerSec: 0.05
+    reaggroCooldownSeconds: 5
+    pathCheckSeconds: 1
+    unreachableConfirmSeconds: 2
+    unreachableGiveUpSeconds: 15
+    fleeSpeedMultiplier: 1.2
+    fleeTimeoutSeconds: 60
+    skinHoldSeconds: 3
+    skinNoiseRadius: 6
+    carcassLifetimeSeconds: 180
+    territorySpawnChance: 0.7
+    wanderWaitMinSeconds: 2
+    wanderWaitMaxSeconds: 6
+    returnSpeedMultiplier: 1.5
+    pounceTriggerRadius: 9
+    groundPounceDistance: 6
+    pounceTelegraphSeconds: 0.8
+    pounceSeconds: 0.6
+    pounceHitRadius: 1.5
+    pounceBreakDamage: 40
+    pinDamage: 5
+    pinDamageInterval: 0.5
+    pounceMissStunSeconds: 1.5
+    pounceCooldownSeconds: 12
+    chargeTriggerDistance: 12
+    chargeTelegraphSeconds: 1
+    chargeDistance: 12
+    chargeSpeed: 10
+    chargeStunSeconds: 2
+    crowCruiseHeight: 4
+    crowDiveHeight: 1.2
+    crowDiveSeconds: 0.5
+    maxDiversAtOnce: 2
+  spawn:
+    tickSeconds: 2
+    maxSpawnsPerTick: 4
+    maxSpawnsPerFrame: 2
+    maxZombiesAlive: 30
+    maxZombiesOverride: 50
+    maxAnimalsAlive: 8
+    minDistance: 20
+    maxDistance: 45
+    sampleRadius: 6
+    attemptsPerSpawn: 8
+    behindChance: 0.75
+    behindHalfAngleDeg: 70
+    despawnDistance: 70
+    stuckCheckSeconds: 5
+    stuckMoveEpsilon: 0.5
+    stuckSeconds: 20
+    stuckForceSeconds: 45
+    cleanupSeconds: 30
+    dayAnimalsAlive: 4
+    nightStartHour: 18
+    dayStartHour: 6
+  sunlight:
+    checkIntervalSeconds: 2
+    rayLength: 200
+    minSunElevationDeg: 35
+    burnStaggerMaxSeconds: 4
+    burnDurationSeconds: 3
+    maxShelteredSeconds: 60
+    seekHidingHour: 5
+    spotSearchRadius: 120
+    submergeSeconds: 2
+    emergeSeconds: 2
+    emergeStaggerSeconds: 4
+    emergeBoostMultiplier: 1.2
+    emergeBoostSeconds: 8
+    daySubmergedCount: 12
+  specialZombie:
+    tribalRangeMin: 5
+    tribalRangeMax: 14
+    tribalWindupSeconds: 1.2
+    tribalProjectileSpeed: 18
+    tribalCooldownSeconds: 10
+    tribalPullSpeed: 2
+    tribalDamagePerSec: 5
+    tribalReleaseDamage: 40
+    tribalBreakDistance: 18
+    mossWakeDistance: 4
+    mossAlertDistance: 8
+    mossLightDistance: 12
+    mossRagePerSec: 0.4
+    mossRageDecayPerSec: 0.2
+    mossTellMinSeconds: 6
+    mossTellMaxSeconds: 10
+    militarySlowMultiplier: 0.5
+    militarySlowFullDistance: 4
+    militarySlowEndDistance: 8
+    militarySlowSeconds: 1
+    frozenBurstRadius: 4
+    frozenBurstDamage: 20
+    frozenBurstDelaySeconds: 0.3
+    frozenBurstWarmthLoss: 25
+    villagePounceMin: 3
+    villagePounceMax: 10
+    villagePounceWindupSeconds: 0.5
+    villagePounceSpeed: 16
+    villagePounceRecoverySeconds: 1.5
+    villagePounceCooldownSeconds: 6
+    largeStuckRetargetSeconds: 2
+    largeStuckUnseenRetargetSeconds: 5
+    largeStuckReturnSeconds: 10
+    largeStuckUnseenReturnSeconds: 15
+    largeUnseenReturnSeconds: 60
+  aiDirector:
+    threatCurve:
+    - day: 1
+      mobSize: 6
+      maxAlive: 12
+      nightBudget: 24
+      maxLarge: 1
+      mobIntervalMin: 100
+      mobIntervalMax: 140
+      specialShare: 0.1
+      hpMultiplier: 1
+      speedMultiplier: 1
+      damageMultiplier: 1
+      recoveryMultiplier: 1
+    - day: 10
+      mobSize: 9
+      maxAlive: 15
+      nightBudget: 40
+      maxLarge: 1
+      mobIntervalMin: 90
+      mobIntervalMax: 125
+      specialShare: 0.15
+      hpMultiplier: 1.05
+      speedMultiplier: 1
+      damageMultiplier: 1
+      recoveryMultiplier: 0.97
+    - day: 20
+      mobSize: 13
+      maxAlive: 18
+      nightBudget: 60
+      maxLarge: 2
+      mobIntervalMin: 80
+      mobIntervalMax: 110
+      specialShare: 0.2
+      hpMultiplier: 1.1
+      speedMultiplier: 1.03
+      damageMultiplier: 1.05
+      recoveryMultiplier: 0.94
+    - day: 30
+      mobSize: 17
+      maxAlive: 22
+      nightBudget: 85
+      maxLarge: 2
+      mobIntervalMin: 70
+      mobIntervalMax: 100
+      specialShare: 0.3
+      hpMultiplier: 1.2
+      speedMultiplier: 1.06
+      damageMultiplier: 1.1
+      recoveryMultiplier: 0.9
+    - day: 40
+      mobSize: 21
+      maxAlive: 25
+      nightBudget: 110
+      maxLarge: 3
+      mobIntervalMin: 60
+      mobIntervalMax: 90
+      specialShare: 0.35
+      hpMultiplier: 1.3
+      speedMultiplier: 1.09
+      damageMultiplier: 1.15
+      recoveryMultiplier: 0.85
+    - day: 50
+      mobSize: 26
+      maxAlive: 28
+      nightBudget: 140
+      maxLarge: 3
+      mobIntervalMin: 55
+      mobIntervalMax: 80
+      specialShare: 0.4
+      hpMultiplier: 1.4
+      speedMultiplier: 1.12
+      damageMultiplier: 1.2
+      recoveryMultiplier: 0.8
+    - day: 60
+      mobSize: 30
+      maxAlive: 30
+      nightBudget: 180
+      maxLarge: 4
+      mobIntervalMin: 45
+      mobIntervalMax: 70
+      specialShare: 0.5
+      hpMultiplier: 1.5
+      speedMultiplier: 1.15
+      damageMultiplier: 1.25
+      recoveryMultiplier: 0.75
+    regionMultiplierVolcano: 0.8
+    regionMultiplierAmazon: 1
+    regionMultiplierSnow: 1
+    regionMultiplierLogistic: 1.2
+    firstWaveDelaySeconds: 20
+    minBuildUpSeconds: 15
+    peakThreshold: 0.9
+    sustainMinSeconds: 3
+    sustainMaxSeconds: 5
+    fadeMaxSeconds: 30
+    relaxMinSeconds: 30
+    relaxMaxSeconds: 45
+    relaxBreakDistance: 60
+    intensityDecayPerSec: 0.033
+    intensityPerPlayerDamage: 0.01
+    intensityPerPin: 0.3
+    intensityPerNearKill: 0.2
+    nearKillMin: 3
+    nearKillMax: 10
+    minWaveSize: 3
+    waveRetrySeconds: 5
+    heldGrowthSeconds: 60
+    heldGrowthMax: 0.5
+    holdMobLargeCount: 3
+    maxZombieSpeed: 7.8
+    postTargetCountPerDay: 0.02
+    postTargetCountMax: 1.5
+    postTargetHpPerDay: 0.02
+    postTargetHpMax: 2
+    postTargetDamagePerDay: 0.01
+    postTargetDamageMax: 1.5
+  crowd:
+    capacity: 64
+    maxTicksPerFrame: 12
+    maxTickMilliseconds: 2
+    intervalCloseVisible: 0.1
+    intervalCloseHidden: 0.2
+    intervalMidVisible: 0.25
+    intervalMidHidden: 0.5
+    intervalFar: 1
+    closeDistance: 15
+    midDistance: 30
+    tierUpdateSeconds: 0.25
+    repathMinSeconds: 0.5
+    repathMinDistance: 1
+    repathMaxDistance: 6
+    repathDistanceFactor: 0.1
+    maxDestinationsPerFrame: 4
+    animStaggerMid: 2
+    animStaggerFar: 4
+    goodAvoidanceCount: 8
+    overlapBufferSize: 16
+    pathfindingIterationsPerFrame: 150
+    fallbackSpawnGraceSeconds: 2
+    fallbackPathCheckIntervalSeconds: 1
+    fallbackBlockedConfirmSeconds: 1.5
+    fallbackBreachSearchRadius: 4
+  pinned:
+    enabled: 1
+    mashProgressPerPress: 0.1
+    mashDecayPerSec: 0.05
+    mashMinPressInterval: 0.08
+    holdProgressPerSec: 0.35
+    struggleStaminaPerPress: 3
+    struggleStaminaHoldPerSec: 10
+    staminaEmptyMultiplier: 0.5
+    hpEmptyMultiplier: 0.75
+    infectionFullMultiplier: 0.75
+    minEscapeMultiplier: 0.35
+    knifeProgress: 0.6
+    knifeDamage: 25
+    knifeCooldownSeconds: 1.5
+    knifeDurabilityCost: 5
+    maxPinSeconds: 8
+    maxOtherAttackers: 1
+    otherAttackerDamageMultiplier: 0.5
+    postEscapeGraceSeconds: 1.5
+    repinImmuneSeconds: 4
+    releasePushDistance: 1
+    holdToStruggle: 0
+  warmth:
+    tickSeconds: 0.5
+    freezeEnterThreshold: 20
+    freezeExitThreshold: 30
+    ambientHeat: 5
+    regionSnowCold: 20
+    blizzardCold: 2
+    rainCold: 8
+    rainFloor: 40
+    stormCold: 12
+    stormFloor: 30
+    waterCold: 15
+    waterFloor: 30
+    snowWaterCold: 30
+    clothesHeat: 20
+    torchHeat: 20
+    protectedFloor: 30
+    campfireHeat: 40
+    indoorHeat: 25
+    shelterCheckSeconds: 2
+    shelterProbeDistance: 6
+    torchBurnSeconds: 300
+    torchRainExtinguishSeconds: 20
+  heavyItem:
+    pickupHoldSeconds: 0.5
+    dropDamageThreshold: 25
+    dropForwardDistance: 1.2
+    validSampleSeconds: 1
+    navSampleRadius: 2
+    recoveryCheckSeconds: 5
+    discoverRadius: 40
+  environment:
+    weatherLayers:
+    - weather: 0
+      addFogDensity: 0
+      sunMultiplier: 1
+      ambientMultiplier: 1
+      fogColor: {r: 1, g: 1, b: 1, a: 1}
+      fogColorWeight: 0
+    - weather: 1
+      addFogDensity: 0.006
+      sunMultiplier: 0.7
+      ambientMultiplier: 0.8
+      fogColor: {r: 0.41960785, g: 0.46666667, b: 0.5019608, a: 1}
+      fogColorWeight: 0.4
+    - weather: 2
+      addFogDensity: 0.03
+      sunMultiplier: 0.75
+      ambientMultiplier: 0.85
+      fogColor: {r: 0.6039216, g: 0.6392157, b: 0.65882355, a: 1}
+      fogColorWeight: 0.6
+    - weather: 3
+      addFogDensity: 0.012
+      sunMultiplier: 0.35
+      ambientMultiplier: 0.6
+      fogColor: {r: 0.23529412, g: 0.2627451, b: 0.28235295, a: 1}
+      fogColorWeight: 0.6
+    - weather: 4
+      addFogDensity: 0.01
+      sunMultiplier: 0.8
+      ambientMultiplier: 0.95
+      fogColor: {r: 0.8509804, g: 0.89411765, b: 0.9254902, a: 1}
+      fogColorWeight: 0.5
+    - weather: 5
+      addFogDensity: 0.07
+      sunMultiplier: 0.3
+      ambientMultiplier: 0.65
+      fogColor: {r: 0.89411765, g: 0.9254902, b: 0.9490196, a: 1}
+      fogColorWeight: 0.9
+    eventLayers:
+    - id: 0
+      priority: 30
+      fogColor: {r: 0.41960785, g: 0.05882353, b: 0.07058824, a: 1}
+      addFogDensity: 0.01
+      sunMultiplier: 0.8
+      sunColor: {r: 1, g: 0.3137255, b: 0.2509804, a: 1}
+      blendInSeconds: 20
+      blendOutSeconds: 10
+    - id: 1
+      priority: 20
+      fogColor: {r: 0.64705884, g: 0.22352941, b: 0.12156863, a: 1}
+      addFogDensity: 0.008
+      sunMultiplier: 0.6
+      sunColor: {r: 1, g: 0.6039216, b: 0.3137255, a: 1}
+      blendInSeconds: -1
+      blendOutSeconds: -1
+    regionBlendSeconds: 8
+    weatherBlendSeconds: 12
+    eventBlendSeconds: 4
+    interiorBlendSeconds: 1.5
+    applyIntervalSeconds: 0.1
+    maxFogDensity: 0.1
+    defaultMinAmbientLuminance: 0.035
+    eruptionRemoteWeight: 0.35
+  disaster:
+    scheduleBlockDays: 60
+    bloodMoonIntervalDays: 10
+    fireballIntervalSeconds: 4
+    fireballIntervalSecondsScale2: 2.5
+    fireballRingMin: 8
+    fireballRingMax: 35
+    fireballMarkerSeconds: 2.5
+    fireballRadius: 6
+    fireballDamageCenter: 35
+    fireballDamageEdge: 10
+    fireballStructureDamage: 60
+    fireballTreeChance: 0.25
+    fireballDropHeight: 60
+    eruptionOffscreenHits: 3
+    quakeDamageRatio: 0.25
+    quakeDamageRatioScale2: 0.5
+    quakePulses: 3
+    quakeRemoteDamagePerHit: 75
+    quakeRemoteHits: 4
+    maxStructuresPerFrame: 16
+    stormPulseSeconds: 30
+    stormStructureDamage: 30
+    treeFallSeconds: 45
+    treeFallRingMin: 12
+    treeFallRingMax: 30
+    treeFallRadius: 3
+    treeFallDamage: 25
+    treeFallStructureDamage: 60
+    treeFallMarkerSeconds: 2
+  luckyMachine:
+    freeWindowSeconds: 30
+    maxFreeSpinsPerWindow: 3
+    maxStoredSpins: 1
+    spinSeconds: 4
+    vacuumSeconds: 1.2
+    tierWeightS: 5
+    tierWeightA: 25
+    tierWeightB: 70
+    gateReopenSeconds: 2
+    cageRewardOffset: 2
+    vacuumEndScale: 0.2
+  rescue:
+    engineWarmupSeconds: 120
+    engineNoiseRadius: 60
+    engineNoiseIntervalSeconds: 5
+    warmupPanicWaveSize: 15
+    targetNightWaveSize: 25
+    abortDistance: 40
+    partInstallRadius: 4
+  deathCinematic:
+    ragdollForce: 300
+    explosionForceMultiplier: 3
+    sinkDrag: 4
+    slowMoScale: 0.35
+    slowMoSeconds: 1.2
+    cameraRiseSeconds: 1.5
+    cameraHeight: 2.5
+    cameraDistance: 3
+    orbitDegreesPerSecond: 12
+    holdSeconds: 3.5
+    collapseHoldSeconds: 5
+    fadeSeconds: 1.5
+    messageSeconds: 2
+    skipAfterSeconds: 2
