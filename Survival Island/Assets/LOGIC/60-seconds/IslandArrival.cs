@@ -7,9 +7,10 @@ namespace SurvivalIsland
     /// Blueprint: 60-seconds/LifeboatExtraction.md bagian "Kedatangan di pantai" (#74). Berada di scene IslandPhase.
     /// Dipanggil RunLifecycle.EnterIslandPhase setelah LoadInitialRegions dan sebelum SaveRequestedEvent.
     ///
+    /// Memakai API Langkah 3: SurvivalStats.ApplyArrivalState, FirstPersonCamera.LookAt, ItemDatabase.Get,
+    /// dan CarryCapacity.ApplyShipLoot (mengembalikan sisa).
+    ///
     /// Belum diimplementasikan (ditandai TODO):
-    /// - HP dari kapal: SurvivalStats (Langkah 3) belum punya fungsi untuk mengisi HP langsung. Infeksi memakai AddInfection.
-    /// - Arah pitch kamera ke lookTarget: FirstPersonCamera menyimpan yaw/pitch sendiri, belum ada fungsi publik untuk mengaturnya.
     /// - Sisa barang yang tidak muat sebagai WorldItem di overflowOrigin (WorldItemManager #66, overflow CarryCapacity).
     /// - NPCRoster.SpawnRescued (#76).
     /// </summary>
@@ -69,12 +70,8 @@ namespace SurvivalIsland
             // 2. Pemain di pantai, menghadap hutan.
             PlacePlayer();
 
-            // 3. HP dan infeksi dibawa dari kapal (usulan disetujui #85), status lain penuh (SurvivalStats baru di scene ini).
-            if (playerStats != null && outcome != null)
-            {
-                // TODO Langkah 3: SurvivalStats belum punya setter HP. Seharusnya HP = outcome.hpOnExit.
-                if (outcome.infectionOnExit > 0f) playerStats.AddInfection(outcome.infectionOnExit);
-            }
+            // 3. HP dan infeksi dibawa dari kapal (usulan disetujui #85), status lain penuh.
+            if (playerStats != null && outcome != null) playerStats.ApplyArrivalState(outcome.hpOnExit, outcome.infectionOnExit);
 
             // 4. Item inti (GDD bagian 3), lalu vaksin awal (#64), sebelum ApplyShipLoot.
             var inv = InventoryManager.Instance;
@@ -88,9 +85,15 @@ namespace SurvivalIsland
             else Debug.LogError("[IslandArrival] InventoryManager tidak ada di IslandPhase.", this);
 
             // 5. Barang kapal masuk inventori lewat aturan konversi #118.
-            if (carryCapacity != null) carryCapacity.ApplyShipLoot(gm.savedShipLoot);
+            if (carryCapacity != null)
+            {
+                var overflow = carryCapacity.ApplyShipLoot(gm.savedShipLoot);
+                // TODO #66 (WorldItemManager belum ditulis): sisa menjadi WorldItem di overflowOrigin (despawns: false),
+                //      berjarak carry.overflowSpacing. Sementara hanya dicatat supaya tidak hilang diam-diam.
+                if (overflow != null && overflow.Count > 0)
+                    Debug.LogWarning($"[IslandArrival] {overflow.Count} jenis barang kapal tidak muat dan belum dimunculkan di pantai.", this);
+            }
             else Debug.LogError("[IslandArrival] CarryCapacity tidak ditemukan. Barang kapal tidak diterapkan.", this);
-            // TODO #66/#118: sisa yang tidak muat menjadi WorldItem di overflowOrigin (despawns: false), jarak carry.overflowSpacing.
 
             // 6. TODO #76 (NPCRoster belum ditulis): NPCRoster.Instance.SpawnRescued(outcome.rescuedNpcIds, npcOrigin).
 
@@ -113,7 +116,7 @@ namespace SurvivalIsland
                 if (tagged != null) player = tagged.transform;
             }
             if (playerStats == null && player != null) playerStats = player.GetComponentInChildren<SurvivalStats>();
-            if (carryCapacity == null) carryCapacity = FindAnyObjectByType<CarryCapacity>();
+            if (carryCapacity == null) carryCapacity = CarryCapacity.Instance != null ? CarryCapacity.Instance : FindAnyObjectByType<CarryCapacity>();
         }
 
         private void PlacePlayer()
@@ -125,15 +128,19 @@ namespace SurvivalIsland
             if (cc != null) cc.enabled = false;
 
             player.position = landingPoint.position;
+            if (cc != null) cc.enabled = wasEnabled;
+
+            // Yaw dan pitch disimpan FirstPersonCamera, jadi arah pandang diatur lewat LookAt, bukan rotasi transform.
             if (lookTarget != null)
             {
-                Vector3 dir = lookTarget.position - landingPoint.position;
-                dir.y = 0f;
-                if (dir.sqrMagnitude > 0.0001f) player.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
+                if (FirstPersonCamera.Instance != null) FirstPersonCamera.Instance.LookAt(lookTarget.position);
+                else
+                {
+                    Vector3 dir = lookTarget.position - landingPoint.position;
+                    dir.y = 0f;
+                    if (dir.sqrMagnitude > 0.0001f) player.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
+                }
             }
-            // TODO Langkah 3 (#102): FirstPersonCamera menyimpan yaw sendiri. Perlu fungsi publik untuk menyamakan yaw/pitch.
-
-            if (cc != null) cc.enabled = wasEnabled;
         }
 
         private void AddById(InventoryManager inv, string itemId, int amount)
