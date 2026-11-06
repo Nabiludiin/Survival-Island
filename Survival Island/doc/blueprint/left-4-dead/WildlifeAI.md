@@ -281,3 +281,11 @@ Saat fajar dan senja keduanya bisa berpapasan. Mereka saling mengabaikan: tidak 
 16. Pasang `AnimalTerritory` Jaguar di dekat jamur Region 2, lalu tunggu spawn siang berulang. **Hasil:** sekitar 70 persen Jaguar muncul dengan `homePoint` di titik itu.
 17. Tembak kaki Babi Hutan yang sedang `Chase`. **Hasil:** kecepatan `chaseSpeed` x `legSlowMultiplier`. Terhuyung menjeda FSM, lalu Babi kembali `Chase`. Picu serudukan sebelum efek kaki habis. **Hasil:** kecepatan serudukan `chargeSpeed` x `legSlowMultiplier`, karena `ApplyStateSpeed` tetap memakai pengali `LegHit`.
 18. Bunuh Serigala siang hari, lalu majukan jam ke 18:00 tanpa melihat bangkainya. **Hasil:** bangkai tetap ada sampai `carcassLifetimeSeconds`, lalu kembali ke pool dengan `Killed`.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `left-4-dead/WildlifeAI.cs` (`AnimalState`), `AnimalData.cs` (`AnimalAttackKind`, `HarvestEntry`), `AnimalCarcass.cs`.
+
+- **Belum ada:** `AmbushPerch` (Jaguar hanya menerkam dari tanah), Gagak terbang dan `CrowFlock` (`FlockDive` memakai gigitan biasa), `FireSystem.IsNearFire` (#97), dan `ThreatAudioEmitter` (#114).
+- Malam dibaca dari `HourChangedEvent`. Gigitan dan racun memakai `EnemyAttack` dengan `AttackData.damageType`.
+- `AnimalCarcass` memakai prompt teks langsung (`Kuliti`) sampai `LocalizationManager` (#104) ada.

@@ -357,3 +357,14 @@ Target memeriksa aturan ini di `TakeDamage`, jadi senjata tidak perlu tahu jenis
 
 - `BaseHealth` ditulis Langkah 5 sebagai `BaseHealth : MonoBehaviour, IDamageable, IStructureHealth`. `IStructureHealth` (`raft/IStructureHealth.cs`) berisi anggota `BaseHealth` yang dipanggil `BuildManager` dan `StructureRegistry` (Langkah 4).
 - `StructureDamagedEvent` dan `StructureDestroyedEvent` dideklarasikan Langkah 4 di `GameEvents.cs`, karena `StructureRegistry` sudah mendengarnya. `BuildableData.resistances` memakai `DamageResistance` milik Langkah 5.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `Core_Logic/EnemyHealth.cs`, `DamageRouter.cs`, `DamageResistance.cs` (`DamageResistance`, `DamageResistanceTable`), `ExplosionDamage.cs`, dan `PhysicsQuery.CollectUniqueDamageables` (ditambahkan ke `Core_Logic/PhysicsQuery.cs`). Kontrak `IDamageable`, `DamageInfo`, `DamageType`, `BodyPart`, dan `DeathReasonMap` tetap dari Langkah 3 dan tidak diubah.
+
+- **`BaseHealth : MonoBehaviour, IDamageable, IStructureHealth`** (`Core_Logic/BaseHealth.cs`). `IStructureHealth` dan `BuildableData` ditulis Langkah 4, dan dipakai `BuildManager` serta `StructureRegistry`. Pengali bawaan: `Bullet` dan `Melee` 0, jenis lain 1, dikali `BuildableData.resistances` dan `SetDamageMultiplier`. Tanpa batas bawah `minDamageAfterArmor`, karena batas itu hanya untuk musuh. `EnemyAttack` menyerang bangunan lewat `IDamageable`.
+- **`DamageRouter.ApplyHit(Collider, Vector3, DamageInfo)`**: overload tambahan untuk overlap. Versi `RaycastHit` memanggilnya.
+- **`EnemyHealth.Heal(float)`**: tambahan untuk pemulihan hewan saat kembali ke teritori (`WildlifeAI.md`), karena damage negatif diabaikan.
+- **`CollectUniqueDamageables`** punya overload yang juga mengisi collider pertama tiap target, dipakai `ExplosionDamage` untuk titik terdekat.
+- **`SurvivalStats.TakeDamage` langkah 3** sekarang memanggil `PlayerPinnedState.ModifyIncomingEnemyDamage` (hook satu baris di file Langkah 3). Langkah 2 (friendly fire ledakan pemain x0,5) masih TODO, karena belum ada sumber ledakan pemain.
+- `EnvironmentalHazard.NotifyExplosion` (#96) dan drop `LootTable` (#103) masih TODO.

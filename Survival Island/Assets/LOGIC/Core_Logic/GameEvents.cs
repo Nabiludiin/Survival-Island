@@ -417,4 +417,123 @@ namespace SurvivalIsland
         public string buildableId;
         public BuildModeChangedEvent(HammerMode mode, string buildableId) { this.mode = mode; this.buildableId = buildableId; }
     }
+
+    // =====================================================================================
+    // Ditambahkan Langkah 5 (musuh, spawn, damage, gunplay, deteksi).
+    // Sumber: tabel "Daftar event global" di GameEventBus.md. RegionChangedEvent dikirim ZoneManager (Langkah 6),
+    // tetapi ditulis di sini karena SpawnManager dan AIDirector sudah mendengarnya. Langkah 6 memakai struct ini
+    // dan tidak mendeklarasikannya ulang. NightfallEvent milik DayNightDirector (Langkah 4) SENGAJA tidak ditulis di sini;
+    // Langkah 5 membaca malam dari HourChangedEvent lewat DayPhaseTracker.
+    // =====================================================================================
+
+    // ---------------------------------------------------------------- Pemain (Langkah 5)
+
+    /// <summary>Noise Sphere. Bukan collider, pendengar menghitung jarak sendiri (AISensory.md). Pengirim: NoiseEmitter.</summary>
+    public struct NoiseEmittedEvent
+    {
+        public UnityEngine.Vector3 position;
+        public float radius;
+        public NoiseSourceKind sourceKind;
+        public NoiseEmittedEvent(UnityEngine.Vector3 position, float radius, NoiseSourceKind sourceKind)
+        { this.position = position; this.radius = radius; this.sourceKind = sourceKind; }
+    }
+
+    /// <summary>Nilai deteksi tertinggi untuk ikon mata. Pengirim: AISensoryHub.</summary>
+    [StickyEvent]
+    public struct PlayerDetectionChangedEvent
+    {
+        public float level01;
+        public bool isAware;
+        public PlayerDetectionChangedEvent(float level01, bool isAware) { this.level01 = level01; this.isAware = isAware; }
+    }
+
+    // ---------------------------------------------------------------- Musuh (Langkah 5)
+
+    /// <summary>Musuh keluar dari pool di Fase 2. Pengirim: SpawnManager.</summary>
+    public struct EnemySpawnedEvent
+    {
+        public string enemyId;
+        public UnityEngine.Vector3 position;
+        public EnemySpawnedEvent(string enemyId, UnityEngine.Vector3 position) { this.enemyId = enemyId; this.position = position; }
+    }
+
+    /// <summary>Musuh terkena damage. Pengirim: EnemyHealth. Didengar VFXManager (#15) dan CombatFeedbackUI (#51).</summary>
+    public struct EnemyHitEvent
+    {
+        public UnityEngine.Vector3 position;
+        public BodyPart bodyPart;
+        public bool isKill;
+        public bool byPlayer;
+        public EnemyHitEvent(UnityEngine.Vector3 position, BodyPart bodyPart, bool isKill, bool byPlayer)
+        { this.position = position; this.bodyPart = bodyPart; this.isKill = isKill; this.byPlayer = byPlayer; }
+    }
+
+    /// <summary>Musuh mati (bentuk resmi OnEnemyKilled). Pengirim: EnemyHealth. Didengar AIDirector, statistik (#57).</summary>
+    public struct EnemyKilledEvent
+    {
+        public string enemyId;
+        public UnityEngine.Vector3 position;
+        public DamageType damageType;
+        public bool byPlayer;
+        public EnemyKilledEvent(string enemyId, UnityEngine.Vector3 position, DamageType damageType, bool byPlayer)
+        { this.enemyId = enemyId; this.position = position; this.damageType = damageType; this.byPlayer = byPlayer; }
+    }
+
+    /// <summary>Tanda serangan ke pemain (Windup). Pengirim: EnemyAttack. Didengar CombatFeedbackUI (#51).</summary>
+    public struct EnemyAttackTelegraphEvent
+    {
+        public UnityEngine.Vector3 position;
+        public string attackId;
+        public EnemyAttackTelegraphEvent(UnityEngine.Vector3 position, string attackId) { this.position = position; this.attackId = attackId; }
+    }
+
+    /// <summary>Tahap AIDirector berganti. Pengirim: AIDirector. Didengar CombatMusicDirector (#114).</summary>
+    [StickyEvent]
+    public struct DirectorPhaseChangedEvent
+    {
+        public DirectorPhase phase;
+        public DirectorPhaseChangedEvent(DirectorPhase phase) { this.phase = phase; }
+    }
+
+    // ---------------------------------------------------------------- Senjata (Langkah 5)
+
+    /// <summary>Isi magazine dan cadangan berubah. Pengirim: GunController. Didengar HUDManager.</summary>
+    [StickyEvent]
+    public struct AmmoChangedEvent
+    {
+        public int inMagazine;
+        public int reserve;
+        public AmmoChangedEvent(int inMagazine, int reserve) { this.inMagazine = inMagazine; this.reserve = reserve; }
+    }
+
+    /// <summary>Senjata api ditembakkan. Pengirim: GunController. Didengar CameraShake (#24) dan statistik (#57).</summary>
+    public struct WeaponFiredEvent
+    {
+        public string itemId;
+        public UnityEngine.Vector3 position;
+        public bool byPlayer;
+        public WeaponFiredEvent(string itemId, UnityEngine.Vector3 position, bool byPlayer) { this.itemId = itemId; this.position = position; this.byPlayer = byPlayer; }
+    }
+
+    /// <summary>Hasil satu tembakan, sekali per tembakan. Pengirim: GunCore. Didengar statistik (#57).</summary>
+    public struct ShotResolvedEvent
+    {
+        public string itemId;
+        public bool hitEnemy;
+        public bool isHeadshot;
+        public bool byPlayer;
+        public ShotResolvedEvent(string itemId, bool hitEnemy, bool isHeadshot, bool byPlayer)
+        { this.itemId = itemId; this.hitEnemy = hitEnemy; this.isHeadshot = isHeadshot; this.byPlayer = byPlayer; }
+    }
+
+    // ---------------------------------------------------------------- Region (dikirim Langkah 6)
+
+    /// <summary>Pemain pindah region. Pengirim: ZoneManager (Langkah 6). Didengar SpawnManager dan AIDirector.</summary>
+    [StickyEvent]
+    public struct RegionChangedEvent
+    {
+        public RegionType from;
+        public RegionType to;
+        public RegionChangedEvent(RegionType from, RegionType to) { this.from = from; this.to = to; }
+    }
 }

@@ -164,9 +164,6 @@ namespace SurvivalIsland
     /// <summary>Bagian streaming (#88). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class StreamingBalance { }
 
-    /// <summary>Bagian damage (#59). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class DamageBalance { }
-
     /// <summary>Bagian equipment (#60). Diisi Langkah 3 (EquipmentManager.md).</summary>
     [Serializable]
     public class EquipmentBalance
@@ -428,42 +425,6 @@ namespace SurvivalIsland
     /// <summary>Bagian sleep (#67). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public partial class SleepBalance { }
 
-    /// <summary>Bagian gun (#58). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class GunBalance { }
-
-    /// <summary>Bagian enemyAttack (#109). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class EnemyAttackBalance { }
-
-    /// <summary>Bagian hitReaction (#95). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class HitReactionBalance { }
-
-    /// <summary>Bagian threat (#108). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class ThreatBalance { }
-
-    /// <summary>Bagian stealth (#49). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class StealthBalance { }
-
-    /// <summary>Bagian wildlife (#61). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class WildlifeBalance { }
-
-    /// <summary>Bagian spawn (#62). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class SpawnBalance { }
-
-    /// <summary>Bagian sunlight (#63). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class SunlightBalance { }
-
-    /// <summary>Bagian specialZombie (#25). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class SpecialZombieBalance { }
-
-    /// <summary>Bagian aiDirector (#27). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class AIDirectorBalance { }
-
-    /// <summary>Bagian crowd (#93). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class CrowdBalance { }
-
-    /// <summary>Bagian pinned (#110). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class PinnedBalance { }
-
     /// <summary>Bagian trap (#26). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class TrapBalance { }
 
@@ -700,5 +661,377 @@ namespace SurvivalIsland
     public partial class SleepBalance
     {
         public float maxGameHoursPerStep = 0.25f;       // Batas maju jam dalam satu langkah DayNightDirector (SleepSystem.md)
+    }
+
+    // =====================================================================================
+    // Ditambahkan Langkah 5 (damage, senjata, musuh, spawn, deteksi, pinned).
+    // Kelas di bawah dulunya baris kosong "[Serializable] public class XBalance { }" di atas. Baris kosong itu dihapus
+    // dan kelas lengkapnya dipindah ke sini, supaya semua perubahan Langkah 5 berada di satu bagian (C# tidak bisa
+    // menambah field ke kelas yang sudah dideklarasikan tanpa partial). Nama field mengikuti tabel angka di blueprint.
+    // =====================================================================================
+
+    /// <summary>Jalur damage (DamagePipeline.md, HitboxModifier.md, #59). Headshot 2x: keputusan #85.</summary>
+    [Serializable]
+    public class DamageBalance
+    {
+        public float headMultiplier = 2f;
+        public float torsoMultiplier = 1f;
+        public float legMultiplier = 0.5f;
+        public float explosionMinFalloff = 0.25f;
+        public float playerExplosionSelfMultiplier = 0.5f;
+        public float minDamageAfterArmor = 1f;
+        public int maxExplosionTargets = 64;
+    }
+
+    /// <summary>Senjata api (GunController.md, #58). Angka per senjata ada di aset WeaponData.</summary>
+    [Serializable]
+    public class GunBalance
+    {
+        public float autoReloadDelay = 0.3f;
+        public float dryClickCooldown = 0.25f;
+        public float npcFireMaxAngle = 10f;
+        public float movingSpeedThreshold = 0.5f;
+    }
+
+    /// <summary>Waktu dan batas serangan musuh (EnemyAttack.md, #109).</summary>
+    [Serializable]
+    public class EnemyAttackBalance
+    {
+        public int maxAttackersOnPlayer = 3;
+        public int maxAttackersOnNpc = 2;
+        public float waitRingRadius = 3.5f;
+        public float tokenRetrySeconds = 0.3f;
+        public float animEventGraceSeconds = 0.1f;
+        public float interruptCooldownSeconds = 0.6f;
+        public float telegraphMinInterval = 0.5f;
+    }
+
+    /// <summary>Reaksi kena, mayat, dan drop (EnemyHitReaction.md, #95).</summary>
+    [Serializable]
+    public class HitReactionBalance
+    {
+        public float staggerSeconds = 0.35f;
+        public float staggerImmunitySeconds = 1f;
+        public float headStaggerMultiplier = 1.5f;
+        public float legSlowMultiplier = 0.6f;
+        public float legSlowSeconds = 2f;
+        public float armorNoFlinchBelow = 0.5f;
+        public float meleeKnockback = 0.8f;
+        public float explosionKnockback = 2.5f;
+        public float knockbackSeconds = 0.25f;
+        public float shoveRadius = 1.6f;
+        public float shoveConeDot = 0.5f;
+        public float shoveKnockback = 2.5f;
+        public float shoveStaggerSeconds = 1f;
+        public float shoveCooldownSeconds = 0.8f;
+        public float shoveStaminaCost = 10f;
+        public float corpseHoldSeconds = 6f;
+        public float corpseFadeSeconds = 1.5f;
+        public float ragdollSettleSeconds = 2f;
+        public int maxCorpses = 12;
+        public int maxRagdolls = 4;
+        public float ragdollForce = 6f;
+        public int maxDropsPerNight = 10;
+    }
+
+    /// <summary>Pemilihan target (ThreatSystem.md, #108).</summary>
+    [Serializable]
+    public class ThreatBalance
+    {
+        public float reselectSeconds = 1f;
+        public float farReselectSeconds = 2.5f;
+        public float farDistance = 30f;
+        public float minTargetHoldSeconds = 3f;
+        public float switchMargin = 15f;
+        public float aggroOverrideSeconds = 4f;
+        public float crowdPenalty = 8f;
+        public int maxChasersPerNpc = 3;
+        public float bloodMoonPlayerRange = 8f;
+        public float loseSightSeconds = 8f;
+        public float searchSeconds = 3f;
+        public float huntOffsetRadius = 8f;
+        public float huntUpdateSeconds = 5f;
+        public float unreachableSeconds = 6f;
+        public float unreachableBanSeconds = 10f;
+        public int maxSelectionsPerFrame = 8;
+        public int maxCandidates = 16;
+    }
+
+    /// <summary>Pandangan dan suara zombie (AISensory.md, #49). GDD bagian 3: Mengendap.</summary>
+    [Serializable]
+    public class StealthBalance
+    {
+        public bool enabled = true;                 // Saklar tes. false = semua zombie langsung Aware
+        public float sightRange = 22f;
+        public float sightAngleDeg = 120f;
+        public float closeSenseRange = 2.5f;
+        public float sightGainMin = 0.4f;
+        public float sightGainMax = 2f;
+        public float decayPerSec = 0.15f;
+        public float suspiciousThreshold = 0.35f;
+        public float loseAwareSeconds = 6f;
+        public float crouchVisibility = 0.6f;
+        public float sprintVisibility = 1.2f;
+        public float hearGain = 0.5f;
+        public float wallMuffle = 0.6f;
+        public float sensorTickSeconds = 0.25f;
+        public int sensorsPerFrame = 6;
+        public float huntHintSeconds = 8f;
+        public float huntHintRadius = 12f;
+        public float noiseIdle = 0.5f;
+        public float noiseCrouchMove = 2f;
+        public float noiseWalk = 8f;
+        public float noiseSprint = 20f;
+        public float noiseSwim = 10f;
+        public float noiseGunshot = 40f;
+        public float noiseMelee = 8f;
+        public float noiseLandingMax = 15f;
+        public float noiseTickSeconds = 0.5f;
+    }
+
+    /// <summary>Hewan siang (WildlifeAI.md, #61). Angka per spesies ada di aset AnimalData.</summary>
+    [Serializable]
+    public class WildlifeBalance
+    {
+        public float tickSeconds = 0.25f;
+        public float alertSeconds = 1.5f;
+        public float crouchAggroMultiplier = 0.6f;
+        public float noiseAggroMultiplier = 0.5f;
+        public float targetSampleRadius = 2f;
+        public float returnHealPerSec = 0.05f;
+        public float reaggroCooldownSeconds = 5f;
+        public float pathCheckSeconds = 1f;
+        public float unreachableConfirmSeconds = 2f;
+        public float unreachableGiveUpSeconds = 15f;
+        public float fleeSpeedMultiplier = 1.2f;
+        public float fleeTimeoutSeconds = 60f;
+        public float skinHoldSeconds = 3f;
+        public float skinNoiseRadius = 6f;
+        public float carcassLifetimeSeconds = 180f;
+        public float territorySpawnChance = 0.7f;   // Disetujui developer (WildlifeAI.md)
+        public float wanderWaitMinSeconds = 2f;
+        public float wanderWaitMaxSeconds = 6f;
+        public float returnSpeedMultiplier = 1.5f;
+        // Terkaman Jaguar
+        public float pounceTriggerRadius = 9f;
+        public float groundPounceDistance = 6f;
+        public float pounceTelegraphSeconds = 0.8f;
+        public float pounceSeconds = 0.6f;
+        public float pounceHitRadius = 1.5f;
+        public float pounceBreakDamage = 40f;
+        public float pinDamage = 5f;
+        public float pinDamageInterval = 0.5f;
+        public float pounceMissStunSeconds = 1.5f;
+        public float pounceCooldownSeconds = 12f;
+        // Serudukan Babi
+        public float chargeTriggerDistance = 12f;
+        public float chargeTelegraphSeconds = 1f;
+        public float chargeDistance = 12f;
+        public float chargeSpeed = 10f;
+        public float chargeStunSeconds = 2f;
+        // Gagak
+        public float crowCruiseHeight = 4f;
+        public float crowDiveHeight = 1.2f;
+        public float crowDiveSeconds = 0.5f;
+        public int maxDiversAtOnce = 2;
+    }
+
+    /// <summary>Tempat dan jenis spawn (SpawnManager.md, #62).</summary>
+    [Serializable]
+    public class SpawnBalance
+    {
+        public float tickSeconds = 2f;
+        public int maxSpawnsPerTick = 4;
+        public int maxSpawnsPerFrame = 2;
+        public int maxZombiesAlive = 30;
+        public int maxZombiesOverride = 50;
+        public int maxAnimalsAlive = 8;
+        public float minDistance = 20f;
+        public float maxDistance = 45f;
+        public float sampleRadius = 6f;
+        public int attemptsPerSpawn = 8;
+        public float behindChance = 0.75f;
+        public float behindHalfAngleDeg = 70f;
+        public float despawnDistance = 70f;
+        public float stuckCheckSeconds = 5f;
+        public float stuckMoveEpsilon = 0.5f;
+        public float stuckSeconds = 20f;
+        public float stuckForceSeconds = 45f;
+        public float cleanupSeconds = 30f;
+        public int dayAnimalsAlive = 4;
+        // Catatan Langkah 5: jam siang dan malam dari DayNightDirector.md (18:00 dan 06:00). Dipakai DayPhaseTracker
+        // selama NightfallEvent (Langkah 4) belum digabung. Hapus setelah DayNightDirector tersedia.
+        public int nightStartHour = 18;
+        public int dayStartHour = 6;
+    }
+
+    /// <summary>Terbakar matahari (SunlightExposure.md, #63). GDD bagian 3.</summary>
+    [Serializable]
+    public class SunlightBalance
+    {
+        public float checkIntervalSeconds = 2f;
+        public float rayLength = 200f;
+        public float minSunElevationDeg = 35f;
+        public float burnStaggerMaxSeconds = 4f;
+        public float burnDurationSeconds = 3f;
+        public float maxShelteredSeconds = 60f;
+        public int seekHidingHour = 5;
+        public float spotSearchRadius = 120f;
+        public float submergeSeconds = 2f;
+        public float emergeSeconds = 2f;
+        public float emergeStaggerSeconds = 4f;
+        public float emergeBoostMultiplier = 1.2f;
+        public float emergeBoostSeconds = 8f;
+        public int daySubmergedCount = 12;
+    }
+
+    /// <summary>Perilaku varian zombie (SpecialZombieAI.md, #25). Statistik varian ada di aset ZombieData.</summary>
+    [Serializable]
+    public class SpecialZombieBalance
+    {
+        public float tribalRangeMin = 5f;
+        public float tribalRangeMax = 14f;
+        public float tribalWindupSeconds = 1.2f;
+        public float tribalProjectileSpeed = 18f;
+        public float tribalCooldownSeconds = 10f;
+        public float tribalPullSpeed = 2f;
+        public float tribalDamagePerSec = 5f;
+        public float tribalReleaseDamage = 40f;     // Keputusan developer (USULAN_TERBUKA.md)
+        public float tribalBreakDistance = 18f;
+        public float mossWakeDistance = 4f;
+        public float mossAlertDistance = 8f;
+        public float mossLightDistance = 12f;
+        public float mossRagePerSec = 0.4f;
+        public float mossRageDecayPerSec = 0.2f;
+        public float mossTellMinSeconds = 6f;
+        public float mossTellMaxSeconds = 10f;
+        public float militarySlowMultiplier = 0.5f;
+        public float militarySlowFullDistance = 4f;
+        public float militarySlowEndDistance = 8f;
+        public float militarySlowSeconds = 1f;
+        public float frozenBurstRadius = 4f;
+        public float frozenBurstDamage = 20f;
+        public float frozenBurstDelaySeconds = 0.3f;
+        public float frozenBurstWarmthLoss = 25f;
+        public float villagePounceMin = 3f;
+        public float villagePounceMax = 10f;
+        public float villagePounceWindupSeconds = 0.5f;
+        public float villagePounceSpeed = 16f;
+        public float villagePounceRecoverySeconds = 1.5f;
+        public float villagePounceCooldownSeconds = 6f;
+        public float largeStuckRetargetSeconds = 2f;
+        public float largeStuckUnseenRetargetSeconds = 5f;
+        public float largeStuckReturnSeconds = 10f;
+        public float largeStuckUnseenReturnSeconds = 15f;
+        public float largeUnseenReturnSeconds = 60f;
+    }
+
+    /// <summary>Tempo malam dan kurva kesulitan (AIDirector.md, #27). GDD bagian 3: zombie makin kuat setelah hari 60.</summary>
+    [Serializable]
+    public class AIDirectorBalance
+    {
+        public ThreatKey[] threatCurve =
+        {
+            new ThreatKey { day = 1,  mobSize = 6,  mobIntervalMin = 100f, mobIntervalMax = 140f, maxAlive = 12, nightBudget = 24,  specialShare = 0.10f, maxLarge = 1, hpMultiplier = 1.00f, speedMultiplier = 1.00f, damageMultiplier = 1.00f, recoveryMultiplier = 1.00f },
+            new ThreatKey { day = 10, mobSize = 9,  mobIntervalMin = 90f,  mobIntervalMax = 125f, maxAlive = 15, nightBudget = 40,  specialShare = 0.15f, maxLarge = 1, hpMultiplier = 1.05f, speedMultiplier = 1.00f, damageMultiplier = 1.00f, recoveryMultiplier = 0.97f },
+            new ThreatKey { day = 20, mobSize = 13, mobIntervalMin = 80f,  mobIntervalMax = 110f, maxAlive = 18, nightBudget = 60,  specialShare = 0.20f, maxLarge = 2, hpMultiplier = 1.10f, speedMultiplier = 1.03f, damageMultiplier = 1.05f, recoveryMultiplier = 0.94f },
+            new ThreatKey { day = 30, mobSize = 17, mobIntervalMin = 70f,  mobIntervalMax = 100f, maxAlive = 22, nightBudget = 85,  specialShare = 0.30f, maxLarge = 2, hpMultiplier = 1.20f, speedMultiplier = 1.06f, damageMultiplier = 1.10f, recoveryMultiplier = 0.90f },
+            new ThreatKey { day = 40, mobSize = 21, mobIntervalMin = 60f,  mobIntervalMax = 90f,  maxAlive = 25, nightBudget = 110, specialShare = 0.35f, maxLarge = 3, hpMultiplier = 1.30f, speedMultiplier = 1.09f, damageMultiplier = 1.15f, recoveryMultiplier = 0.85f },
+            new ThreatKey { day = 50, mobSize = 26, mobIntervalMin = 55f,  mobIntervalMax = 80f,  maxAlive = 28, nightBudget = 140, specialShare = 0.40f, maxLarge = 3, hpMultiplier = 1.40f, speedMultiplier = 1.12f, damageMultiplier = 1.20f, recoveryMultiplier = 0.80f },
+            new ThreatKey { day = 60, mobSize = 30, mobIntervalMin = 45f,  mobIntervalMax = 70f,  maxAlive = 30, nightBudget = 180, specialShare = 0.50f, maxLarge = 4, hpMultiplier = 1.50f, speedMultiplier = 1.15f, damageMultiplier = 1.25f, recoveryMultiplier = 0.75f },
+        };
+        public float regionMultiplierVolcano = 0.8f;
+        public float regionMultiplierAmazon = 1f;
+        public float regionMultiplierSnow = 1f;
+        public float regionMultiplierLogistic = 1.2f;  // GDD bagian 5: "secara masif"
+        public float firstWaveDelaySeconds = 20f;
+        public float minBuildUpSeconds = 15f;
+        public float peakThreshold = 0.9f;
+        public float sustainMinSeconds = 3f;
+        public float sustainMaxSeconds = 5f;
+        public float fadeMaxSeconds = 30f;
+        public float relaxMinSeconds = 30f;
+        public float relaxMaxSeconds = 45f;
+        public float relaxBreakDistance = 60f;
+        public float intensityDecayPerSec = 0.033f;
+        public float intensityPerPlayerDamage = 0.01f;
+        public float intensityPerPin = 0.3f;
+        public float intensityPerNearKill = 0.2f;
+        public float nearKillMin = 3f;
+        public float nearKillMax = 10f;
+        public int minWaveSize = 3;
+        public float waveRetrySeconds = 5f;
+        public float heldGrowthSeconds = 60f;
+        public float heldGrowthMax = 0.5f;
+        public int holdMobLargeCount = 3;
+        public float maxZombieSpeed = 7.8f;
+        // Keputusan developer: pengali setelah hari ke-60
+        public float postTargetCountPerDay = 0.02f;
+        public float postTargetCountMax = 1.5f;
+        public float postTargetHpPerDay = 0.02f;
+        public float postTargetHpMax = 2f;
+        public float postTargetDamagePerDay = 0.01f;
+        public float postTargetDamageMax = 1.5f;
+    }
+
+    /// <summary>Pembagian tick AI (HordeCrowdManager.md, #93).</summary>
+    [Serializable]
+    public class CrowdBalance
+    {
+        public int capacity = 64;
+        public int maxTicksPerFrame = 12;
+        public float maxTickMilliseconds = 2f;
+        public float intervalCloseVisible = 0.1f;
+        public float intervalCloseHidden = 0.2f;
+        public float intervalMidVisible = 0.25f;
+        public float intervalMidHidden = 0.5f;
+        public float intervalFar = 1f;
+        public float closeDistance = 15f;
+        public float midDistance = 30f;
+        public float tierUpdateSeconds = 0.25f;
+        public float repathMinSeconds = 0.5f;
+        public float repathMinDistance = 1f;
+        public float repathMaxDistance = 6f;
+        public float repathDistanceFactor = 0.1f;
+        public int maxDestinationsPerFrame = 4;
+        public int animStaggerMid = 2;
+        public int animStaggerFar = 4;
+        public int goodAvoidanceCount = 8;
+        public int overlapBufferSize = 16;
+        public int pathfindingIterationsPerFrame = 150;
+        // Catatan Langkah 5: angka pemeriksaan terhalang sementara, menyalin nilai baseNav di BaseNavigation.md (#78).
+        // EnemyAI memakai jalur sementara ini sampai BaseNavigation (Langkah 4) digabung. Setelah itu baca baseNav.
+        public float fallbackSpawnGraceSeconds = 2f;
+        public float fallbackPathCheckIntervalSeconds = 1f;
+        public float fallbackBlockedConfirmSeconds = 1.5f;
+        public float fallbackBreachSearchRadius = 4f;
+    }
+
+    /// <summary>Pemain diterkam (PlayerPinnedState.md, #110). GDD bagian 3: lepas sendiri tanpa bantuan NPC.</summary>
+    [Serializable]
+    public class PinnedBalance
+    {
+        public bool enabled = true;
+        public float mashProgressPerPress = 0.1f;
+        public float mashDecayPerSec = 0.05f;
+        public float mashMinPressInterval = 0.08f;
+        public float holdProgressPerSec = 0.35f;
+        public float struggleStaminaPerPress = 3f;
+        public float struggleStaminaHoldPerSec = 10f;
+        public float staminaEmptyMultiplier = 0.5f;
+        public float hpEmptyMultiplier = 0.75f;
+        public float infectionFullMultiplier = 0.75f;
+        public float minEscapeMultiplier = 0.35f;
+        public float knifeProgress = 0.6f;
+        public float knifeDamage = 25f;
+        public float knifeCooldownSeconds = 1.5f;
+        public float knifeDurabilityCost = 5f;
+        public float maxPinSeconds = 8f;
+        public int maxOtherAttackers = 1;
+        public float otherAttackerDamageMultiplier = 0.5f;
+        public float postEscapeGraceSeconds = 1.5f;
+        public float repinImmuneSeconds = 4f;
+        public float releasePushDistance = 1f;
+        public bool holdToStruggle = false;         // Pilihan aksesibilitas #19. Dibaca dari sini sampai SettingsManager ada
     }
 }

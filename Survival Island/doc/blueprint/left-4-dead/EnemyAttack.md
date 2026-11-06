@@ -246,3 +246,11 @@ Saat batal: lepas izin, `nextAttackTime = Time.time + interruptCooldownSeconds`,
 14. Pakai ulang zombie yang mati di tengah ayunan. **Hasil:** tahap `None`, dan langsung bisa menyerang normal.
 15. Jeda game di tengah Windup. **Hasil:** tidak ada damage sampai jeda selesai.
 16. `setday 60`, lalu biarkan zombie standar dari mob memukul pemain. **Hasil:** damage 15 x 1,25 = 18,75, dan jeda setelah kena 1,2 x 0,75 = 0,9 detik.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `left-4-dead/EnemyAttack.cs` (`AttackPhase`), `AttackData.cs`, `AttackCoordinator.cs`.
+
+- `AttackData` mendapat field `damageType` (nilai awal `Melee`), supaya gigitan Ular memakai `Poison` (#61) lewat komponen yang sama.
+- `TryStartStructureAttack` menerima `IDamageable`, karena `BaseHealth` belum ditulis.
+- `AttackCoordinator` tanpa instance di scene mengizinkan semua permintaan (Fase 1). Suara tanda memakai `AudioSource` di prefab sampai `ThreatAudioEmitter` (#114) ada.

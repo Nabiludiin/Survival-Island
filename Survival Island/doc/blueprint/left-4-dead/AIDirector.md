@@ -244,3 +244,11 @@ Keluar lebih awal kalau `CurrentPhase == Inactive`, `isHeld`, `isOverridden`, at
 13. Panggil `GetPostTargetModifiers` dan `GetPostTargetCountMultiplier` pada hari 60, 70, dan 200. **Hasil:** hari 60 semua 1, hari 70 jumlah 1,2, HP 1,2, dan damage 1,1, serta hari 200 berhenti pada 1,5, 2, dan 1,5.
 14. Pakai profil kesulitan uji dengan `enemyDamageMultiplier` 2, lalu biarkan zombie standar hari 1 memukul pemain. **Hasil:** damage 30, bukan 60, karena pengali kesulitan hanya dipakai `SurvivalStats`.
 15. Bunuh 5 zombie, lalu `director`. **Hasil:** `spawnedTonight` tidak berkurang. Kembalikan 1 zombie lewat pengaman macet. **Hasil:** `spawnedTonight` berkurang 1, sekali saja.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `left-4-dead/AIDirector.cs` (`DirectorPhase`, `ThreatKey`, `WaveModifiers`, `WaveRequest`).
+
+- Malam dibaca dari `HourChangedEvent` (`DayPhaseTracker`), bukan `NightfallEvent`.
+- `isHeld` (#67) dan `isOverridden` (#50) punya setter `SetHeld`/`SetOverridden`, tetapi pengirimnya belum ada. `RequestCampCounter` (#94) belum ditulis.
+- Pengali jumlah dari `DifficultyProfile` dianggap 1, karena field-nya belum diberi nama di `GameBalanceConfig`.

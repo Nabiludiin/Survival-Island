@@ -108,3 +108,10 @@
 8. Pukul zombie dengan `Reward_FireAxe` berulang. **Hasil:** sekitar 25 persen pukulan menyalakan target.
 9. Cari `Physics.Raycast` dan `GetComponent<EnemyHealth>` di skrip. **Hasil:** tidak ada.
 10. Bunuh zombie dengan pukulan melee yang memicu knockback. **Hasil:** zombie terdorong atau ragdoll jatuh searah pandangan kamera, bukan diam di tempat.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `Island_Logic/MeleeCombatSystem.cs`.
+
+- Damage dibaca dari `ItemData.weaponDamage`, dengan cadangan 25 di prefab kalau nilainya 0. Jarak (2) dan jeda (1) berada di prefab viewmodel, karena `ItemData` belum punya field untuk itu. Pindahkan ke data senjata kalau #113 menambahkannya.
+- Panen memanggil `ResourceNode.ReceiveHit(toolClass, hitPoint, true)` milik Langkah 4, lalu berhenti tanpa damage. `DurabilitySystem.ApplyWear` (#113), `AnimationController` (#12), dan Fire Axe (#97) masih TODO.

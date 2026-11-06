@@ -239,3 +239,9 @@ Hasil dicatat di `Survival Island/doc/PLAYTEST_LOG.md`.
 8. Jeda game di tengah skenario B selama 10 detik. **Hasil:** tidak ada tick, dan tidak ada lonjakan saat lanjut.
 9. `crowdai 0`, ulangi skenario B. **Hasil:** selisih waktu AI terlihat dan tercatat.
 10. Pada skenario C, amati zombie di depan dinding. **Hasil:** tidak bertumpuk pada satu titik, dan yang menunggu memberi jalan.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `left-4-dead/HordeCrowdManager.cs` (`CrowdTier`, `ICrowdAgent`).
+
+- Belum ada: titik tujuan bersama per kelompok, update Animator bergiliran per tingkatan, dan perintah `stress`/`crowdstat`/`crowdai` (#56). Avoidance per tingkatan diatur `EnemyAI.SetTier` dengan aturan sederhana (Close = Med, Mid = Low, Far = None).
