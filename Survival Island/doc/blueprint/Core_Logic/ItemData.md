@@ -83,3 +83,12 @@ Field `curesDiseases`, `fuelSeconds`, `appliesEffectId`, `isRepairable`, `repair
 3. Pegang `Tool_Axe` pada pohon. **Hasil:** `toolClass` `Axe` diterima node.
 4. Ganti bahasa. **Hasil:** nama item ikut berubah.
 5. Ambil barang di kapal. **Hasil:** berat sesuai `shipWeight`, dan jumlah sesuai `shipPickupAmount`.
+
+## 7. Catatan Implementasi (Langkah 3)
+
+Kode: `Survival Island/Assets/LOGIC/Core_Logic/ItemData.cs` (`ItemType`, `HandUse`, `ToolClass`), `ItemDatabase.cs`.
+
+- **`weaponData` belum ada,** karena `WeaponData` milik `GunController` (#58, Langkah 5). Langkah 5 menambah field itu di `ItemData`.
+- `curesDiseases`, `fuelSeconds`, `appliesEffectId`, `isRepairable`, `repairCost`, dan `repairStation` sudah ada. Tipe kontraknya ditulis Langkah 3: `DiseaseCure` (`raft/DiseaseCure.cs`), `RecipeIngredient` dan `CraftingStationType` (`Core_Logic/RecipeIngredient.cs`).
+- **`ItemDatabase`** (usulan teknis, belum punya blueprint sendiri): kelas statis yang memuat semua aset dari `Resources/Items` sekali saat pertama dipakai. `Get(itemId)`, `ResolveAlias(alias)` (bagian ID setelah garis bawah, huruf kecil: `wood` menjadi `Mat_Wood`), `AllIds`, dan `Register(...)`.
+- Pembantu: `NameKey` (kunci teks dengan pola `item.<itemID>.name`) dan `EffectiveMaxStack` (item berdurabilitas selalu 1). `OnValidate` di Editor memaksa `isDroppable = false` untuk item inti dan `KeyItem`.

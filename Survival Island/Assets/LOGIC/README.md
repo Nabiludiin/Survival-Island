@@ -2,7 +2,7 @@
 
 Folder ini adalah tempat **kode gabungan C#** Survival Island. Semua *script* yang ditulis dari blueprint di `Survival Island/doc/blueprint/` disimpan di sini, sesuai `README.md` di root (TAHAP 6).
 
-**Status:** Langkah 1 (fondasi inti) dan Langkah 2 (Fase 1 kapal) sudah ditulis, tetapi belum pernah dikompilasi atau dijalankan di Unity. Folder `Survival Island/` adalah proyek Unity 6 LTS (keputusan developer) yang belum pernah dibuka di Unity.
+**Status:** Langkah 1 (fondasi inti), Langkah 2 (Fase 1 kapal), dan Langkah 3 (pemain, status tubuh, inventori) sudah ditulis dan digabung. Proyek Unity 6 LTS di `Survival Island/` sudah dibuka di Unity; kompilasi gabungan Langkah 1-3 sedang diperiksa, dan belum ada yang dijalankan di Play Mode.
 
 > Jangan tertukar dengan `LOGIC/` di root repo. Folder itu hanya bahan analisis dari game referensi (60 Seconds!, Raft, dan Zombie). Kode dari sana tidak boleh disalin ke folder ini.
 
@@ -87,6 +87,36 @@ Langkah 2 memanggil kelas Langkah 3 (`InventoryManager`, `ItemData`, `ItemDataba
 3. Pool di `ObjectPooler`: `ShipLoot_Generic` (prefab barang dengan `ShipInteractable`, `InteractHighlight`, `BoxCollider` bukan trigger, layer `Interactable`), `ShipNpc_Generic` (ukuran 3), dan `zombie_standar`.
 4. Scene `IslandPhase`: objek `IslandArrival` di pantai selatan Region 1 dengan `landingPoint`, `lookTarget`, `npcOrigin`, dan `overflowOrigin`.
 
+## 🧩 Isi Langkah 3
+
+| File | Blueprint |
+|---|---|
+| `Core_Logic/InputManager.cs` (`GameInputAction`, `RebindResult`), `GameInputActions.cs` | `InputManager.md` |
+| `Core_Logic/FirstPersonCamera.cs` (`ICameraOffsetSource`, `ViewmodelMode`, `ViewmodelPose`, `PlayerViewSettings`) | `FirstPersonCamera.md` |
+| `Core_Logic/ItemData.cs` (`ItemType`, `HandUse`, `ToolClass`), `ItemDatabase.cs` | `ItemData.md` |
+| `Core_Logic/ItemInstance.cs` (`ItemInstance`, `InventorySlot`, `Freshness`), `ItemUseSystem.cs`, `WorldItem.cs`, `WorldItemManager.cs` | `ItemUseSystem.md` |
+| `Core_Logic/InventoryManager.cs` (`ShipHandEntry`) | `InventoryManager.md` |
+| `Core_Logic/CarryCapacity.cs` | `CarryCapacity.md` |
+| `Core_Logic/EquipmentManager.cs` (`EquipLock`, `EquipState`, `EquipmentSaveData`), `EquippableBehaviour.cs` (`IEquippable`, `ActionPhase`), `ConsumableEquippable.cs`, `FistBehaviour.cs` | `EquipmentManager.md` |
+| `raft/SurvivalStats.cs` (`StaminaUse`, `VitalPenaltySource`, `VitalWarningFlags`) | `SurvivalStats.md`, `VitalsRules.md` |
+| `Island_Logic/IslandPlayerController.cs` | `IslandPlayerController.md` |
+| `Island_Logic/PlayerTraversal.cs` (`TraversalMode`, `SpeedModifierId`), `ClimbableSurface.cs` | `PlayerTraversal.md` |
+| `Core_Logic/DamagePipelineContracts.cs` (`IDamageable`, `DamageInfo`, `DamageType`, `BodyPart`, `DeathReasonMap`) | `DamagePipeline.md` (pemilik Langkah 5) |
+| `Core_Logic/SurfaceType.cs` | `SurfaceDetection.md` (pemilik Langkah 4) |
+| `Core_Logic/RecipeIngredient.cs` (`RecipeIngredient`, `CraftingStationType`) | `CraftingStation.md` (pemilik Langkah 4) |
+| `raft/DiseaseCure.cs` | `DiseaseManager.md` |
+| `raft/SlotArrayOps.cs` | `StorageChest.md` |
+
+Lima baris terakhir adalah kontrak milik Langkah lain yang sudah dibutuhkan Langkah 3. Pemiliknya tidak mendeklarasikannya ulang. Event baru Langkah 3 ada di bagian "Ditambah Langkah 3" pada `Core_Logic/GameEvents.cs`. Config yang diisi: `vitals` (tambahan #111), `input`, `equipment`, `items`, `camera`, `traversal`, `carry`, serta satu field di `hydration` (`exertionThirstMultiplier`). `ShipHandChangedEvent` dan `ship.handCapacity` yang dipakai `InventoryManager` ditulis Langkah 2, jadi branch Langkah 3 hanya terkompilasi setelah digabung dengan branch Langkah 2. Penyimpangan kecil dicatat di bagian "Catatan Implementasi (Langkah 3)" pada blueprint terkait.
+
+### Penyiapan di Unity untuk Langkah 3 (belum dilakukan)
+
+1. **Project Settings > Player > Active Input Handling** = `Input System Package (New)`. Di **Project Settings > Input System Package**: `Update Mode` = `Process Events In Dynamic Update`, `Background Behavior` = `Reset And Disable Non Background Devices`.
+2. Tambahkan `InputManager` ke `Managers` di `PersistentRoot`, di urutan ke-2 `RunLifecycle.orderedServices` (setelah `GameManager`). `EventSystem` persisten memakai `InputSystemUIInputModule`.
+3. Simpan semua aset `ItemData` di folder `Assets/Resources/Items/` (dibaca `ItemDatabase`). Item inti `Base_Kail`, `Base_Pistol`, dan `Base_Pisau` memakai `isCoreItem = true`.
+4. Prefab pemain Fase 2: `CharacterController`, `IslandPlayerController`, `PlayerTraversal`, `SurvivalStats`, `InventoryManager`, `CarryCapacity`, `ItemUseSystem`, `EquipmentManager` (isi `fistBehaviour` dan `consumableBehaviour`), dan rig `FirstPersonCamera` (CameraRig > PitchPivot > OffsetPivot > WorldCamera dan ViewmodelCamera > ViewmodelRoot). `ViewmodelCamera` menjadi Overlay di Camera Stack URP.
+5. Prefab `WorldItem` (layer `WorldItem`, `Rigidbody`, `MeshFilter`, `MeshRenderer`, `MeshCollider` convex) didaftarkan ke `ObjectPooler` dengan tag `WorldItem_Generic`. `WorldItemManager` diletakkan di scene `IslandPhase`.
+
 ## 🚀 Status Langkah
 
 Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Langkah [X]".
@@ -95,7 +125,7 @@ Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Lan
 |---|---|---|---|
 | **1** | Kerangka `GameManager`, `UIManager`, `ObjectPooler`, `SaveSystem`, dan pola *State Management* inti | `Core_Logic/` | Ditulis, belum diuji di Unity |
 | **2** | Fase 1: `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | `60-seconds/` | Ditulis, belum diuji di Unity |
-| **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Belum dimulai |
+| **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Ditulis, belum diuji di Unity |
 | **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Belum dimulai |
 | **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/` | Belum dimulai |
 | **6** | `ZoneManager`, frostbite, jembatan kayu, barang berat, `WeatherManager` | `Island_Logic/` | Belum dimulai |

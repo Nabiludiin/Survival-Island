@@ -359,3 +359,13 @@ Isi keracunan, efek, dan obatnya milik #45. Blueprint ini mengirim `OnConsumed(i
 17. Pakai item dari pool berkali-kali lalu ambil. **Hasil:** tidak ada mesh atau data dari item sebelumnya.
 18. Mati saat inventori terbuka sambil menyeret. **Hasil:** barang kembali ke slot, dan run baru mulai dengan isi awal.
 19. Dengan lapar, haus, dan HP penuh, suntik `Med_Vaccine` saat `Infection` 80. **Hasil:** tidak ditolak oleh aturan "sudah penuh", dan vaksin berjalan. Minum `Drink_CleanWater` saat haus penuh. **Hasil:** ditolak.
+
+## 7. Catatan Implementasi (Langkah 3)
+
+Kode: `Survival Island/Assets/LOGIC/Core_Logic/ItemUseSystem.cs`, `ItemInstance.cs` (`ItemInstance`, `InventorySlot`, `Freshness`), `WorldItem.cs`, `WorldItemManager.cs`.
+
+- **Jam game:** `DayNightDirector` (Langkah 4) belum ada. `ItemUseSystem.CurrentTotalGameHours()` menghitung `(GameManager.currentDay - 1) * 24 + HourChangedEvent.Last.hour` (ketelitian 1 jam, jam awal 6). Langkah 4 boleh mengganti isinya dengan `DayNightDirector.Instance.TotalGameHours`. `GetFreshness(ItemInstance, ItemData)` publik statis.
+- **`WorldItem`** belum mengimplementasikan `IInteractable`, karena `IInteractable` dan `InteractContext` milik #17 belum ada di branch ini. Alur ambil ada di `bool TryPickUp(InventoryManager)`. TODO #17: `Interact(in InteractContext ctx) => TryPickUp(ctx.Inventory)`. `sourceSpawner`, `sourcePointIndex` (#89), dan `homeRegion` (#88) belum ada.
+- **`WorldItemManager`:** `Spawn`, `Despawn`, penghapusan per `HourChangedEvent`, dan batas `maxLooseWorldItems` sudah ada. `CaptureRegion`, `RestoreRegion` (#88), dan `SweepBelow` (#91) belum ditulis.
+- `DropFromSlot` mengembalikan `bool`. Angka tambahan `GameBalanceConfig.items.dropPushForce` 1,5 (usulan Langkah 3, dorongan saat membuang).
+- **Belum ada:** `InventoryPanel` (UI), cek dan efek `InfectionSystem` (#64, sementara memakai `SurvivalStats.ReduceInfection`), `DiseaseManager` (#45), `StatusEffectManager.ApplyById` (#20), dan notifikasi #22. Semua ditandai TODO di kode.

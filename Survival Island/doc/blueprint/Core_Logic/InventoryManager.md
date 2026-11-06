@@ -93,3 +93,13 @@ Setiap perubahan isi tangan menerbitkan `ShipHandChangedEvent { weight, capacity
 6. Setor ke sekoci. **Hasil:** `ClearShipHand` mengosongkan semuanya.
 7. Simpan, keluar, lalu lanjutkan. **Hasil:** isi slot dan `nextInstanceId` sama.
 8. Diterkam tanpa Pisau di tangan. **Hasil:** `FindFirstInstance("Base_Pisau")` tetap mengembalikan Pisau.
+
+## 7. Catatan Implementasi (Langkah 3)
+
+Kode: `Survival Island/Assets/LOGIC/Core_Logic/InventoryManager.cs` (`ShipHandEntry` di file yang sama).
+
+- `SetMaxSlots(int value)` tetap ada. Overload `SetMaxSlots(int value, bool publish)` dipakai `CarryCapacity.RestoreState`, karena `RestoreState` tidak boleh mengirim event.
+- `ShipHandCapacity` membaca `GameBalanceConfig.ship.handCapacity` (field diisi Langkah 2 di `ShipBalance`, nilai awal 4). `ShipHandChangedEvent` juga dideklarasikan Langkah 2.
+- Fungsi baca tambahan: `Slots`, `SlotCount`, `GetSlot`, `IndexOfInstance`, `CountFilledSlots`, `CreateInstance(ItemData)`, dan `AllocateInstanceId()`.
+- `Instance` per scene. Hanya instance `IslandPhase` yang mendaftar ke `WorldStateSave`.
+- Pembusukan mengirim `InventoryChangedEvent { delta = 0 }` hanya saat kesegaran sebuah slot berubah.

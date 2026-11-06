@@ -33,7 +33,32 @@ namespace SurvivalIsland
         public float dehydrationDamagePerSec = 0.5f;
         public float frostbiteStaminaDrainPerSec = 5f;     // GDD bagian 5, Region 3: stamina dikuras dulu
         public float frostbiteDamagePerSec = 1f;           // Lalu HP. Diturunkan dari 5 ke 1 (disetujui developer)
-        // TODO Langkah 3/4: tambahan #111 (damage tenggelam dan infeksi, pemulihan HP, stamina, interval event).
+
+        // Tambahan VitalsRules.md (#111), diisi Langkah 3. Semua usulan yang disetujui developer sebagai nilai awal.
+        public float drownDamagePerSec = 10f;               // HP penuh habis 10 detik setelah oksigen habis (#13)
+        public float infectionDamagePerSec = 0.3f;          // Keputusan developer: infeksi 100 tidak membunuh seketika
+        public float infectionDamageThreshold = 75f;        // Selaras tahap 4 di #64
+        public float regenPerSec = 0.25f;                   // HP penuh pulih dalam 400 detik
+        public float regenMinHunger = 50f;
+        public float regenMinThirst = 50f;
+        public float regenMaxInfection = 50f;
+        public float regenDelayAfterDamageSeconds = 12f;
+        public float sprintStaminaPerSec = 10f;
+        public float jumpStaminaCost = 8f;
+        public float meleeStaminaCost = 15f;
+        public float swimStaminaPerSec = 6f;
+        public float climbStaminaPerSec = 5f;
+        public float staminaRegenPerSec = 15f;
+        public float staminaRegenDelaySeconds = 1.5f;
+        public float exhaustedRecoverThreshold = 25f;
+        public float exhaustedMeleeCooldownMultiplier = 1.5f;
+        public float exhaustedMeleeDamageMultiplier = 0.7f;
+        public float lowVitalThreshold = 25f;
+        public float lowHungerMaxStaminaMultiplier = 0.75f;
+        public float lowThirstRegenMultiplier = 0.5f;
+        public float heavyStaminaRegenMultiplier = 0.75f;
+        public float lowHPWarningRatio = 0.25f;
+        public float vitalsPublishIntervalSeconds = 0.25f;  // VitalsChangedEvent 4 kali per detik
     }
 
     /// <summary>Panen (angka inti #84). Tambahan #73 diisi Langkah 4.</summary>
@@ -129,8 +154,12 @@ namespace SurvivalIsland
 
     // ---------------------------------------------------------------- Bagian yang belum diisi (kerangka)
 
-    /// <summary>Bagian input (#18). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class InputBalance { }
+    /// <summary>Bagian input (#18). Diisi Langkah 3 (InputManager.md).</summary>
+    [Serializable]
+    public class InputBalance
+    {
+        public float rebindTimeoutSeconds = 5f;
+    }
 
     /// <summary>Bagian streaming (#88). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class StreamingBalance { }
@@ -138,11 +167,31 @@ namespace SurvivalIsland
     /// <summary>Bagian damage (#59). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class DamageBalance { }
 
-    /// <summary>Bagian equipment (#60). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class EquipmentBalance { }
+    /// <summary>Bagian equipment (#60). Diisi Langkah 3 (EquipmentManager.md).</summary>
+    [Serializable]
+    public class EquipmentBalance
+    {
+        public int hotbarSlotCount = 8;                     // Tombol 1 sampai 8 (#18)
+        public float lowerSeconds = 0.15f;
+        public float raiseSeconds = 0.2f;                   // Total jeda ganti 0,35 detik (disetujui developer)
+        public bool offHandAllowedWhileCarrying = false;    // Final di #65
+    }
 
-    /// <summary>Bagian items (#66). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class ItemsBalance { }
+    /// <summary>Bagian items (#66). Diisi Langkah 3 (ItemUseSystem.md).</summary>
+    [Serializable]
+    public class ItemsBalance
+    {
+        public float useMoveSpeedMultiplier = 0.5f;
+        public float defaultRestoreSeconds = 20f;           // Pemulihan bertahap ala Raft (CATATAN_MEKANIK bagian 2)
+        public float dropForwardDistance = 1f;
+        public float worldItemDespawnGameHours = 48f;
+        public int maxLooseWorldItems = 64;
+        public float staleRatio = 0.5f;
+        public float staleHungerMultiplier = 0.75f;
+        public float rottenHungerMultiplier = 0.25f;
+        public float rottenPoisonChance = 0.8f;
+        public float dropPushForce = 1.5f;                  // Dorongan kecil saat membuang (ItemUseSystem.md langkah 4). Nilai usulan Langkah 3
+    }
 
     /// <summary>Interaksi tombol E (#17). Diisi Langkah 2 dari Island_Logic/IslandInteractable.md.</summary>
     [Serializable]
@@ -159,14 +208,101 @@ namespace SurvivalIsland
         public UnityEngine.Color blockedColor = new UnityEngine.Color(0.9f, 0.15f, 0.15f);  // Merah
     }
 
-    /// <summary>Bagian camera (#102). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class CameraBalance { }
+    /// <summary>Bagian camera (#102). Diisi Langkah 3 (FirstPersonCamera.md).</summary>
+    [Serializable]
+    public class CameraBalance
+    {
+        public float maxLookAngle = 80f;
+        public float baseFov = 70f;
+        public float viewmodelFov = 55f;
+        public float eyeHeightStand = 1.6f;
+        public float eyeHeightSpeed = 6f;
+        public float maxOffsetDegrees = 15f;
+        public float recoilRecoverPerSec = 12f;
+        public float swayAmount = 0.02f;
+        public float swayMax = 0.06f;
+        public float swaySmooth = 10f;
+        public float bobFrequency = 9f;
+        public float bobAmplitude = 0.025f;
+        public float bobSprintMultiplier = 1.5f;
+        public float bobHeavyMultiplier = 1.8f;
+        public float fovSprintBonus = 8f;
+        public float fovChangeSpeed = 40f;
+        public float landingDipMax = 0.25f;
+        public float ladderYawRange = 70f;
+        public float lowerSpeed = 8f;
+        public float heavyLookScale = 0.8f;                 // Sensitivitas 80 persen saat membawa Heavy Item (FirstPersonCamera.md)
+        public float landingDipRecoverSpeed = 1.5f;         // Pemulihan pegas dip mendarat, m/s. Nilai usulan Langkah 3
+    }
 
-    /// <summary>Bagian traversal (#101, #94). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class TraversalBalance { }
+    /// <summary>Satu baris tabel permukaan (PlayerTraversal.md).</summary>
+    [Serializable]
+    public struct SurfaceProfile
+    {
+        public SurfaceType surface;
+        public float speedMultiplier;
+        public float fallDamageMultiplier;
 
-    /// <summary>Bagian carry (#118). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class CarryBalance { }
+        public SurfaceProfile(SurfaceType surface, float speed, float fall)
+        {
+            this.surface = surface;
+            speedMultiplier = speed;
+            fallDamageMultiplier = fall;
+        }
+    }
+
+    /// <summary>Bagian traversal (#101, #94). Diisi Langkah 3 (PlayerTraversal.md, IslandPlayerController.md). Bagian #94 diisi Langkah 5.</summary>
+    [Serializable]
+    public class TraversalBalance
+    {
+        // IslandPlayerController.md bagian 5: walkSpeed dan sprintSpeed dipindah ke config (#84)
+        public float walkSpeed = 5f;
+        public float sprintSpeed = 8f;
+        public float gravity = -9.81f;
+        public float groundCheckDistance = 0.2f;            // Raycast tanah pendek. Nilai usulan Langkah 3
+        public float standHeight = 1.8f;
+        public float crouchHeight = 1.1f;
+        public float heightChangeSpeed = 6f;
+        public float eyeHeightCrouch = 0.95f;
+        public float crouchSpeedMultiplier = 0.5f;
+        public float ladderClimbSpeed = 2.5f;
+        public float ropeClimbSpeed = 1.8f;
+        public float climbExhaustedMultiplier = 0.4f;
+        public float climbEnterSeconds = 0.25f;
+        public float climbExitSeconds = 0.35f;
+        public float climbJumpOffForce = 3f;
+        public float fallSafeSpeed = 9f;                    // Sekitar jatuh 4 meter
+        public float fallLethalSpeed = 20f;                 // Sekitar jatuh 20 meter
+        public float slideMinAngle = 45f;                   // Sama dengan CharacterController.slopeLimit
+        public float slideSpeed = 6f;
+        public float slideSteerSpeed = 1.5f;
+        public float surfaceCheckSeconds = 0.2f;
+        public float jumpHeight = 1.1f;                     // Menggantikan nilai 2 (celah dinding base)
+        public SurfaceProfile[] surfaceProfiles =
+        {
+            new SurfaceProfile(SurfaceType.Pasir, 0.9f, 0.9f),
+            new SurfaceProfile(SurfaceType.Rumput, 1f, 1f),
+            new SurfaceProfile(SurfaceType.Tanah, 1f, 1f),
+            new SurfaceProfile(SurfaceType.Batu, 1f, 1f),
+            new SurfaceProfile(SurfaceType.Salju, 0.8f, 0.75f),
+            new SurfaceProfile(SurfaceType.Lumpur, 0.7f, 0.75f),
+            new SurfaceProfile(SurfaceType.Kayu, 1f, 1f),
+            new SurfaceProfile(SurfaceType.Logam, 1f, 1f),
+        };
+    }
+
+    /// <summary>Bagian carry (#118). Diisi Langkah 3 (CarryCapacity.md).</summary>
+    [Serializable]
+    public class CarryBalance
+    {
+        public int baseSlots = 15;
+        public int woodStack = 100;
+        public int stoneStack = 100;
+        public int materialStack = 20;
+        public int foodStack = 5;
+        public int ammoStack = 60;
+        public float overflowSpacing = 0.6f;
+    }
 
     /// <summary>Bagian console (#56). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class ConsoleBalance { }
@@ -244,7 +380,11 @@ namespace SurvivalIsland
     }
 
     /// <summary>Bagian hydration (#43). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class HydrationBalance { }
+    [Serializable]
+    public class HydrationBalance
+    {
+        public float exertionThirstMultiplier = 1.25f;      // Ditambah Langkah 3: dipakai SurvivalStats.TickDrains (VitalsRules.md, #43)
+    }
 
     /// <summary>Bagian campfire (#44). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class CampfireBalance { }

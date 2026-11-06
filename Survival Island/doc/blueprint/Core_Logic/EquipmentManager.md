@@ -283,3 +283,13 @@ public struct EquipmentSaveData
 12. Jatuhkan item yang ada di hotbar. **Hasil:** rujukan hilang, dan kotak kosong.
 13. Mati, lalu mulai run baru. **Hasil:** hotbar kembali ke isi awal.
 14. Diam memegang Pistol dengan Profiler terbuka. **Hasil:** `Update` tanpa alokasi GC.
+
+## 7. Catatan Implementasi (Langkah 3)
+
+Kode: `Survival Island/Assets/LOGIC/Core_Logic/EquipmentManager.cs`, `EquippableBehaviour.cs` (`IEquippable`, `ActionPhase`), `ConsumableEquippable.cs`, `FistBehaviour.cs`. `HandUse` berada di `ItemData.cs`.
+
+- **`BuildDefaultHotbar`** dijalankan otomatis pada `InventoryChangedEvent` pertama yang membuat `Base_Pistol` ada (setelah `IslandArrival.Apply` menambah item inti). Penanda `defaultHotbarBuilt` ditambahkan ke `EquipmentSaveData`, supaya hotbar awal tidak dibangun ulang setelah load.
+- **`LastUnequippedInstanceId`:** properti tambahan, dibaca `ItemUseSystem` untuk membatalkan pemakaian hanya kalau item yang dipakai adalah item di tangan.
+- **Konsumsi di hotbar:** makanan tanpa `equipPrefab` memakai satu komponen `consumableBehaviour` bersama (field Inspector).
+- `RequestSlot(-1)` berarti tangan kosong. Properti baca tambahan: `ActiveInstanceId`, `ActiveInstance`, `ActiveHotbarIndex`, `GetHotbarInstanceId`, `OffHandInstanceId`, `OffHandActive`, `State`, `Locks`.
+- Belum ada: cek `DurabilitySystem.GetState == Broken` (#113), notifikasi `Item rusak` (#22), dan suara klik slot kosong. Pukulan `FistBehaviour` menunggu `MeleeCombatSystem` (Langkah 5).

@@ -295,3 +295,12 @@ Saat berganti item, `EquipmentManager` memanggil `SetMainPose(ViewmodelPose)`. T
 14. Simpan saat menghadap utara, keluar, lalu lanjutkan. **Hasil:** arah pandang sama.
 15. Biarkan pemain diterkam, lalu lepas. **Hasil:** kamera tidak melompat setelah lepas.
 16. Buka Profiler selama 60 detik sambil bergerak. **Hasil:** tidak ada alokasi GC dari `LateUpdate`.
+
+## 7. Catatan Implementasi (Langkah 3)
+
+Kode: `Survival Island/Assets/LOGIC/Core_Logic/FirstPersonCamera.cs`. Tambahan kecil:
+
+- **Pengaturan pemain:** `SettingsManager` (#19) belum ada. Nilai awal tabel #19 disimpan di struct `PlayerViewSettings.Default`, dan #19 nanti memanggil `SetViewSettings(PlayerViewSettings)`.
+- Fungsi tambahan: `ResetEyeHeight()` (kembali ke `eyeHeightStand`, dipakai saat berdiri dari jongkok), `SetYawPitch(float, float)` (save #80), dan `LookAt(Vector3)` (arah awal di pantai, #74). Properti `Yaw`, `Pitch`, `WorldCamera`, `ViewmodelCamera`, `ViewmodelRoot`.
+- Angka tambahan di `GameBalanceConfig.camera`: `heavyLookScale` 0,8 (dari teks blueprint) dan `landingDipRecoverSpeed` 1,5 m/s (usulan Langkah 3, pemulihan pegas dip mendarat).
+- Head bob memakai sedikit roll (`bobEuler.z`) sesuai tabel sumber offset. Kecepatan rotasi paksa saat diterkam memakai 360 derajat per detik.
