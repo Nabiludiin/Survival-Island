@@ -154,39 +154,34 @@ Mulai tahap ini setelah blueprint yang dibutuhkan selesai. Perintahnya mengikuti
 
 ## 🗺️ Peta GDD ke Blueprint
 
-Tabel ini menunjukkan tempat setiap aturan GDD dirancang. Kalau issue sudah selesai, blueprint-nya tersimpan di `Survival Island/doc/blueprint/`.
+Tabel ini menunjukkan tempat setiap aturan GDD dirancang. Semua blueprint tersimpan di `Survival Island/doc/blueprint/`, dan semua issue di tabel ini sudah selesai serta ditutup. Daftar lengkap issue dan file ada di bagian akhir `GLOSSARY.md`.
 
-| Bagian GDD | Blueprint yang sudah ada | Issue yang masih terbuka |
+| Bagian GDD | Blueprint utama | Issue (selesai) |
 |---|---|---|
-| **3. Fase 1: Kapal** | `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController`, `LootSpawnerSystem` | #74, #75 |
-| **3. Status: Lapar dan Infeksi** | `SurvivalStats`, `ItemData`, `InventoryManager` | #43, #44, #45, #64, #66, #111 |
-| **3. Siklus Siang dan Malam** | `DayNightDirector`, `EnemyAI`, `ObjectPooler` | #25, #27, #49, #61, #62, #63, #93, #108, #109, #112 |
-| **3. Menang dan Kalah** | `GameManager`, `UIManager`, `SaveSystem` | #14, #53, #80, #82, #116 |
-| **4. Aturan Shelter** | `BuildManager` | #26, #46, #47, #67, #78, #79, #86, #90, #91 |
-| **4. Sistem Diary** | `DiaryManager` | #16, #81, #100 |
-| **5. Region 1: Gunung Berapi** | `ZoneManager`, `ResourceNode` | #70, #73, #77 |
-| **5. Region 2: Hutan Tropis** | `ZoneManager` | #64, #68, #92 |
-| **5. Region 3: Es dan Militer** | `ZoneManager`, `WeatherManager` | #14, #65, #103, #115 |
-| **5. Region 4: Desa** | `IslandPlayerController` | #63, #69 |
-| **6. Event dan Bencana** | `WeatherManager`, `EnvironmentalHazard` | #50, #54, #70, #71 |
+| **3. Fase 1: Kapal** | `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController`, `ShipHazardManager`, `LifeboatExtraction` | #74, #75 |
+| **3. Status: Lapar, Haus, dan Infeksi** | `SurvivalStats`, `VitalsRules`, `HydrationSystem`, `InfectionSystem`, `DiseaseManager`, `ItemUseSystem` | #43, #44, #45, #64, #66, #111 |
+| **3. Siklus Siang dan Malam** | `DayNightDirector`, `SunlightExposure`, `AIDirector`, `HordeManager`, `AISensory`, `ZombieLair`, `WildlifeAI` | #25, #27, #49, #50, #61, #62, #63, #93, #108, #109, #112 |
+| **3. Menang dan Kalah** | `GameManager`, `RunLifecycle`, `WorldStateSave`, `RescueEventManager`, `DeathCinematic` | #14, #53, #80, #82, #116 |
+| **4. Aturan Shelter** | `BuildManager`, `BuildMenu`, `BuildingIntegrity`, `BaseNavigation`, `BaseDefense`, `SurfaceDetection`, `TideManager` | #26, #46, #47, #67, #78, #79, #86, #90, #91 |
+| **4. Sistem Diary** | `DiaryManager`, `ObjectiveManager`, `LoreCollectibles` | #16, #81, #100 |
+| **5. Region 1: Gunung Berapi** | `ZoneManager`, `ResourceNode`, `ResourceRespawn`, `DisasterManager` | #70, #73, #77 |
+| **5. Region 2: Hutan Tropis** | `RegionGateSystem`, `EnvironmentProfile`, `InfectionSystem` | #64, #68, #92 |
+| **5. Region 3: Es dan Militer** | `WarmthSystem`, `RegionalWeather`, `RescueEventManager` | #14, #65, #103, #115 |
+| **5. Region 4: Desa** | `HeavyItemSystem`, `SunlightExposure` | #63, #69 |
+| **6. Event dan Bencana** | `DisasterManager`, `BeachSupplyManager`, `WeatherManager`, `EnvironmentalHazard` | #50, #70, #71 |
 | **7. Lucky Machine** | `LuckyMachine` | #72 |
-| **NPC (bagian 3 dan 4)** | `NPCCompanion` | #76, #117 |
-| **Combat (pilar L4D)** | `MeleeCombatSystem`, `HitboxModifier`, `DurabilitySystem` | #58, #59, #60, #95, #96, #110, #113 |
+| **NPC (bagian 3 dan 4)** | `NPCRoster`, `NPCCompanion` | #76 |
+| **Combat (pilar L4D)** | `GunController`, `MeleeCombatSystem`, `DamagePipeline`, `HitboxModifier`, `PlayerPinnedState`, `ThrowableSystem`, `DurabilitySystem`, `ToolRepairSystem` | #58, #59, #60, #95, #96, #110, #113 |
 
-## 🧭 Urutan Pengerjaan Blueprint yang Disarankan
+Fitur yang diputuskan tidak dipakai, dan blueprint-nya disimpan sebagai arsip: #48 (Farming), #54 (Supply Drop), #105 (World Map), dan #117 (NPC Infection).
 
-Kerjakan dari atas ke bawah, karena tahap berikutnya bergantung pada keputusan tahap sebelumnya.
+## 🧭 Status Pengerjaan
 
-| Tahap | Fokus | Issue |
-|---|---|---|
-| **0** | Keputusan dan fondasi | #85, #107, #87, #84, #82, #83, #18, #88, #89 |
-| **1** | Pemain dan item inti | #59, #60, #66, #102, #111, #101, #17, #118, #56 |
-| **2** | Fase 1 | #74, #75 |
-| **3** | Survival dan base | #64, #43, #44, #45, #20, #77, #73, #113, #55, #48, #106, #86, #79, #78, #47, #46, #67, #80 |
-| **4** | Combat dan musuh | #58, #95, #109, #108, #49, #61, #62, #63, #25, #27, #93, #94, #110, #112, #96, #26 |
-| **5** | Region dan event | #68, #65, #69, #13, #91, #92, #115, #70, #71, #54, #50, #72, #76, #117, #81, #103, #90, #97, #98 |
-| **6** | Akhir run | #14, #116, #53, #57, #99 |
-| **7** | Polesan | #12, #15, #16, #19, #21, #22, #23, #24, #51, #52, #114, #100, #104, #105 |
+Tahap blueprint sudah selesai. Semua issue `Add Blueprint` sudah ditutup, dan keputusan desain tercatat di `Survival Island/doc/USULAN_TERBUKA.md`.
+
+Pekerjaan berikutnya adalah menulis *script* C# lewat perintah "Jalankan Langkah [X]", mengikuti tabel TAHAP 7 di `Claude.md`. Status tiap Langkah dicatat di `Survival Island/LOGIC/README.md`.
+
+Untuk sistem baru, ikuti alur di atas: buat issue dulu, lalu tulis blueprint-nya.
 
 ## 📝 Format Issue
 
