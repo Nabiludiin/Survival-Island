@@ -196,3 +196,13 @@ Menu hanya memanggil fungsi manager ini, dan tidak menulis `QualitySettings` ata
 10. Isi sensitivitas 99 lewat edit `PlayerPrefs`. **Hasil:** dibatasi ke 0,5.
 11. Buka Settings dari `MainMenu` dan dari `Pause`. **Hasil:** isi sama, dan Esc hanya menutup `Settings`.
 12. Atur Brightness 1,2 di Region 2 malam hari. **Hasil:** lebih terang sedikit, dan kesan gelap tetap ada.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Assets/LOGIC/Core_Logic/SettingsManager.cs` (enum `ShadowQuality`, `TextureQuality`, `QualityPreset`, `AudioChannel`, kelas `SettingsData`) dan `SettingsPanel.cs`. Config di `GameBalance.FondasiA.cs`, `SettingsChangedEvent` di `GameEvents.FondasiA.cs` (enum `SettingsCategory { All, Graphics }`, hanya dua nilai yang disebut blueprint).
+- Kamera: `FirstPersonCamera` tidak membaca manager ini sendiri, jadi manager mengirim `SetViewSettings(ViewSettings)` setiap setter kamera dipanggil, saat `Revert`/`ResetToDefaults`, dan sekali saat rig kamera baru muncul (dicek di `Update`).
+- URP (keputusan poin 3): `ApplyGraphics` menulis `QualitySettings` dan juga `UniversalRenderPipelineAsset.shadowDistance` serta `maxAdditionalLightsCount` (kolom `lights` usulan #98). Di Editor perubahan ini ikut tersimpan ke aset URP saat Play Mode. Resolusi bayangan URP tidak diubah. Tabel pemetaan berada di field prefab `shadowLevels`, bukan di kode.
+- Tombol Terapkan memanggil `ApplyGraphics()` saja. `Revert` menerapkan ulang grafis kalau Terapkan sudah ditekan tanpa disimpan (`HasPendingGraphics`).
+- `OnClosed(User)` dengan dialog yang ditolak `UIManager.ShowConfirm` (dialog lain terbuka) langsung `Commit`, mengikuti alasan "pilihan pemain tidak hilang".
+- Tab bahasa dan aksesibilitas memanggil `LocalizationManager.SetLocale` dan `SetAccessibility`, yang langsung tersimpan (tidak ikut `Commit`/`Revert`).
+- `LightSourceSystem.ApplyQuality` dan `TutorialManager.ResetSeen` belum ada (TODO).

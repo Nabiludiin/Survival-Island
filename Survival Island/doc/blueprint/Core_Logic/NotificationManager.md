@@ -222,3 +222,13 @@ Belum diuji di Unity, karena proyek Unity belum dibuat.
 14. Mati, lalu mulai run baru. **Hasil:** tidak ada pesan lama, dan log kosong.
 15. Buka Profiler selama 60 detik tanpa pesan baru. **Hasil:** tidak ada alokasi GC dari `Update`.
 16. Buka `Inventory`, picu adegan `helipad_found`, lalu kirim `notify info`. **Hasil:** pesan disembunyikan selama adegan, dan tampil dengan sisa waktu penuh setelah adegan selesai.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `NotificationManager.cs` (enum `NotificationKind`, struct `NotificationEntry`, `NotificationLogEntry`, `NotificationStyle`), `NotificationRow.cs`, `NotificationLogView.cs`. Config di `GameBalance.FondasiA.cs`.
+- `NotificationEntry` ditambah `age` (jendela gabung) dan `shownTime` (fade masuk).
+- `Get` milik #104 mengembalikan kunci mentah (bukan teks kosong) untuk kunci yang tidak ada, jadi pesan hanya dibuang kalau kuncinya kosong.
+- Teks `Gain` dirakit `+{amount} {nama}` di kode; nama dari `ItemData.displayNameKey`, cadangan `item.<itemId>.name`. Penggabungan jenis lain menambah akhiran ` x{n}`.
+- Kunci teks event yang dipakai: `notif.part_found` ({name}), `notif.part_installed` ({installed}, {total}), `notif.helicopter_ready`, `notif.region_unlocked`, `notif.npc_rescued` ({name}), `notif.structure_destroyed`. Riwayat Fase 1 memakai `ui.log.ship`.
+- Pesan yang masuk sebelum `Initialize` hanya masuk antrean (tidak tercatat di log).
+- Belum ada (TODO): `DiaryChapterUnlockedEvent`, `NPCDiedEvent`, dan `StructureBurningEvent` belum dideklarasikan pemiliknya; nama NPC dari `NPCData` (#76) sementara memakai `npcId`; perintah `notify` di `DevConsole`.
