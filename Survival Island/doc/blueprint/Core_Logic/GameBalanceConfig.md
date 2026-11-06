@@ -331,3 +331,10 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 3. Tebang pohon sampai 500 kayu dan catat waktunya. **Hasil:** sekitar 3 siang penuh. Catat selisihnya di lembar playtest.
 4. Angkut satu suku cadang dari Region 4 ke Region 3 tanpa pakaian hangat. **Hasil:** pemain sampai dengan HP berkurang sekitar 55.
 5. Ubah `timeMultiplier` lewat `DevConsole`. **Hasil:** jam berubah, dan aset asli tidak ikut berubah.
+
+## 7. Catatan Implementasi (Langkah 4)
+
+- Bagian `resource`, `infection`, `crafting`, `surface`, `build`, dan `sleep` ditandai `partial` di `GameBalanceSections.cs`, lalu field Langkah 4 diisi di bagian "Ditambahkan Langkah 4" di akhir file. Nilai sama dengan tabel di bagian 3.
+- `sleep` baru berisi `maxGameHoursPerStep`. Field tidur lain diisi Langkah pemilik `SleepSystem` (#67).
+- Angka baru usulan Langkah 4: `resource.dropImpulse` 1,5 (dorongan item jatuh dari node).
+- `resource.minNodesPerRegion` memakai struct `RegionNodeMinimum { region, trees, rocks, mushrooms, sapTrees }`.

@@ -167,3 +167,11 @@ Daftar node kecil, jadi pencarian linear cukup dan tidak menghasilkan garbage.
 11. Buka Pause selama 10 detik setelah job `rec_hammer` dimulai. **Hasil:** node baru terbuka setelah job selesai, bukan saat dijeda.
 12. Mati, lalu mulai run baru. **Hasil:** semua node terkunci.
 13. Buat dua node yang saling menjadi prasyarat, lalu jalankan validasi Editor. **Hasil:** rantai berputar dilaporkan.
+
+## 7. Catatan Implementasi (Langkah 4)
+
+Kode: `Survival Island/Assets/LOGIC/Core_Logic/TechTreeManager.cs`, `TechNodeData.cs` (`TechUnlockTrigger`).
+
+- Isi pohon masih menunggu developer, jadi belum ada aset `TechNodeData` yang wajib dibuat. `nodes` boleh kosong.
+- **Belum ada (TODO):** `AudioManager.PlaySFX(unlockClip)` (#16) dan validasi Editor (ID unik, rantai berputar, `triggerKey`).
+- Belum diuji di Unity.

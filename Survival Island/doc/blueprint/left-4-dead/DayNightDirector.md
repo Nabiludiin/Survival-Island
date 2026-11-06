@@ -131,3 +131,13 @@ while (remaining > 0f)
 9. Periksa scene. **Hasil:** rotasi `Directional Light` hanya ditulis `EnvironmentDirector`.
 
 Belum diuji di Unity, karena blueprint ini baru rancangan.
+
+## 7. Catatan Implementasi (Langkah 4)
+
+Kode: `Survival Island/Assets/LOGIC/left-4-dead/DayNightDirector.cs`.
+
+- **Event awal run baru:** `Start()` mengirim `DaybreakEvent` (atau `NightfallEvent`) dan `HourChangedEvent` sekali, supaya pendengar sticky punya jam sejak awal. Save yang dimuat menimpanya lewat `OnRestoreFinished`.
+- **`DebugSetTime`:** menyamakan `isNight` dengan jam baru dan mengirim ulang event sticky kalau statusnya berubah. Batas 18:00 dan 06:00 berikutnya tetap mengirim event saat dilewati.
+- **`ItemUseSystem.CurrentTotalGameHours()`** sekarang memakai `DayNightDirector.Instance.TotalGameHours` kalau ada (hook kecil di file Langkah 3). Rumus Langkah 3 tetap sebagai cadangan.
+- Nilai cadangan saat `GameManager.CurrentBalance` kosong: `timeMultiplier` 96 dan `maxGameHoursPerStep` 0,25, sama dengan config.
+- Belum diuji di Unity.

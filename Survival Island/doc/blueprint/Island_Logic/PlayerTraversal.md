@@ -368,3 +368,7 @@ Kode: `Survival Island/Assets/LOGIC/Island_Logic/PlayerTraversal.cs` (`Traversal
 - **Permukaan:** `SurfaceDetection` (#86, Langkah 4) belum ada, jadi permukaan tetap `Tanah` sampai Langkah 4 mengisi `UpdateSurface`. `SurfaceType` ditulis di `Core_Logic/SurfaceType.cs`, dan `surfaceProfiles` di `GameBalanceConfig.traversal`.
 - `NoiseEmitter.EmitLanding` (#49) masih TODO.
 - Mode disimpan sebagai mode dasar ditambah penanda `Swimming` dan `Locked`, sehingga prioritas mode berlaku otomatis. `TryStandForJump()` dipakai `IslandPlayerController` untuk melompat dari jongkok.
+
+## Catatan Implementasi (Langkah 4)
+
+- `UpdateSurface` membaca `SurfaceDetection.Instance.GetSurfaceAt(transform.position)` kalau `SurfaceDetection` ada.

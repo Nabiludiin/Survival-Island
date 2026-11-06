@@ -369,3 +369,8 @@ Kode: `Survival Island/Assets/LOGIC/Core_Logic/ItemUseSystem.cs`, `ItemInstance.
 - **`WorldItemManager`:** `Spawn`, `Despawn`, penghapusan per `HourChangedEvent`, dan batas `maxLooseWorldItems` sudah ada. `CaptureRegion`, `RestoreRegion` (#88), dan `SweepBelow` (#91) belum ditulis.
 - `DropFromSlot` mengembalikan `bool`. Angka tambahan `GameBalanceConfig.items.dropPushForce` 1,5 (usulan Langkah 3, dorongan saat membuang).
 - **Belum ada:** `InventoryPanel` (UI), cek dan efek `InfectionSystem` (#64, sementara memakai `SurvivalStats.ReduceInfection`), `DiseaseManager` (#45), `StatusEffectManager.ApplyById` (#20), dan notifikasi #22. Semua ditandai TODO di kode.
+
+## 8. Catatan Implementasi (Langkah 4)
+
+- `CurrentTotalGameHours()` memakai `DayNightDirector.Instance.TotalGameHours` kalau ada.
+- `TryUse` memanggil `InfectionSystem.CanUseMedicine`, dan `CompleteUse` memanggil `InfectionSystem.ApplyMedicine` untuk item dengan `infectionDelta` negatif. Tanpa `InfectionSystem`, perilaku Langkah 3 tetap berjalan.

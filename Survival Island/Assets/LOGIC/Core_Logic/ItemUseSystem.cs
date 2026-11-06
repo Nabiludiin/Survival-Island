@@ -37,6 +37,8 @@ namespace SurvivalIsland
         /// </summary>
         public static float CurrentTotalGameHours()
         {
+            // Hook Langkah 4: pakai jam DayNightDirector kalau ada (ketelitian penuh). Rumus lama tetap sebagai cadangan.
+            if (DayNightDirector.Instance != null) return (float)DayNightDirector.Instance.TotalGameHours;
             int day = GameManager.Instance != null ? GameManager.Instance.currentDay : 1;
             int hour = EventChannel<HourChangedEvent>.HasLast ? EventChannel<HourChangedEvent>.Last.hour : 6;
             return (day - 1) * 24f + hour;
@@ -123,7 +125,8 @@ namespace SurvivalIsland
                     return false;
                 }
             }
-            // TODO #64: if (data.infectionDelta < 0f && !InfectionSystem.Instance.CanUseMedicine(data)) return false;
+            // Hook Langkah 4 (#64): vaksin ditolak saat tidak terinfeksi.
+            if (data.infectionDelta < 0f && InfectionSystem.Instance != null && !InfectionSystem.Instance.CanUseMedicine(data)) return false;
             // TODO #45: if ((data.curesDiseases != DiseaseCure.None || data.healAmount > 0f) && !DiseaseManager.Instance.CanUseMedicine(data)) return false;
 
             useSlotIndex = slotIndex;
@@ -175,8 +178,12 @@ namespace SurvivalIsland
             }
             // HP dari obat langsung.
             if (data.healAmount > 0f) stats.RestoreHP(data.healAmount);
-            // GDD bagian 3: vaksin menurunkan infeksi. TODO #64: InfectionSystem.Instance.ApplyMedicine(data).
-            if (data.infectionDelta < 0f) stats.ReduceInfection(-data.infectionDelta);
+            // GDD bagian 3: vaksin menurunkan infeksi. Hook Langkah 4 (#64): lewat InfectionSystem kalau ada.
+            if (data.infectionDelta < 0f)
+            {
+                if (InfectionSystem.Instance != null) InfectionSystem.Instance.ApplyMedicine(data);
+                else stats.ReduceInfection(-data.infectionDelta);
+            }
             else if (data.infectionDelta > 0f) stats.AddInfection(data.infectionDelta);
             // TODO #45: DiseaseManager.Instance.OnConsumed(data, freshness) untuk peluang keracunan.
 

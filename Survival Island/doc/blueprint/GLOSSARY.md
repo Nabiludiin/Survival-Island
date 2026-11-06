@@ -340,6 +340,8 @@ Developer sudah menyetujui keputusan berikut.
 | `HammerEquippable` | `EquippableBehaviour` yang meneruskan input palu sesuai mode | #79 |
 | `StructureRegistry` | Daftar struktur, grafik dukungan, bongkar, runtuhan, dan penulis `world_structures` | #79 |
 | `StructureNode` | Komponen posisi grid dan tingkat satu struktur | #79 |
+| `GridKey`, `GridLayer` | Kunci slot grid bangunan (koordinat digandakan, tingkat, lapisan `Floor`/`Object`/`Edge`/`MountA`/`MountB`). Ditambah Langkah 4 | #79 |
+| `IStructureHealth` | Interface bagian `BaseHealth` yang dipanggil `BuildManager` dan `StructureRegistry`. Ditambah Langkah 4 | #79, #59 |
 | `StructureRecord` | Data save satu struktur | #79 |
 | `NoBuildVolume` | Volume larangan bangun di seam, jembatan, dan helipad | #79 |
 | `CollapseDebris` | Efek debu runtuhan dari pool `FX_CollapseDebris` | #79 |

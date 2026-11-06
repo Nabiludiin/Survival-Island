@@ -254,3 +254,17 @@ Status memakai jam absolut. Saat region kembali, `RestoreState` mengisi `Status`
 15. Jalankan `ResourceAuditWindow`. **Hasil:** tiap region memenuhi jumlah minimum, atau peringatan muncul.
 16. Tebang 50 pohon di Region 1, sesuai lembar playtest. **Hasil:** sekitar 500 kayu dalam sekitar 3 siang penuh.
 17. Pukul pohon sekali dengan kapak sambil memantau `eventlog`. **Hasil:** satu `NoiseEmittedEvent` dengan `NoiseSourceKind.Tool` (radius `harvestNoiseRadius`) dari `ResourceNode`, satu suara `Melee` dari ayunan, dan satu `ResourceNodeHitEvent`. Panggil `ReceiveHit(..., byPlayer: false)`. **Hasil:** tidak ada suara `Tool`.
+
+## 7. Catatan Implementasi (Langkah 4)
+
+Kode: `Survival Island/Assets/LOGIC/raft/ResourceNode.cs`, `ResourceNodeData.cs`, `ResourceDropGuard.cs`, `ResourceRespawn.cs`. Angka tambahan di `GameBalanceConfig.resource` (bagian "Ditambahkan Langkah 4").
+
+- **Region node:** `RegionStreaming` (#88) belum ada, jadi `ResourceNode` punya field `region` yang diisi di Inspector. TODO #88: ambil dari region scene.
+- **Save:** `RegionStateStore` (#88) belum ada, jadi node mendaftar langsung ke `WorldStateSave` (`LoadOrder` 0, `SaveId` dari `SaveIdTag`). Node tanpa `SaveIdTag` tidak disimpan.
+- **Jumlah drop:** pohon memakai `resource.treeDropMin/Max`, batu `resource.rockDropMin/Max`, dan `MedicalHerb` memakai `dropMin/dropMax` di aset, karena angka pohon dan batu tercatat di config.
+- **`resource.dropImpulse` (1,5):** angka usulan Langkah 4 untuk dorongan acak item jatuh ("Item jatuh" langkah 3).
+- **`RegionNodeMinimum`** ditambahkan untuk `resource.minNodesPerRegion`. `RegionType` ditulis di `Island_Logic/RegionType.cs` (pemilik `ZoneManager`, Langkah 6) karena sudah dipakai di sini.
+- **`ResourceRespawn.Forget(node)`** dipanggil `ResourceNode.OnDisable`, sesuai "Region dilepas" di bagian 4.
+- **Tanpa `RunSeedManager`** (scene uji), `ResourceNode` memakai aliran cadangan, supaya tidak error.
+- **Belum ada (TODO):** `VFXManager.Play` (#15), `AudioManager` (#16, sementara `AudioSource` opsional di node), notifikasi `Butuh alat lain` (#22), `NoiseEmitter.Emit(..., NoiseSourceKind.Tool)` (#49, Langkah 5), `Flammable` (#97), `CoconutPickup`, `StonePickup`, `CountActiveStones`, `ForceRegrowStones` (#43, #116, butuh `PickupInteractable` #17), dan `ResourceAuditWindow`.
+- Belum diuji di Unity.

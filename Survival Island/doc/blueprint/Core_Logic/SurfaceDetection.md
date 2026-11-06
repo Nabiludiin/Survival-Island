@@ -250,3 +250,15 @@ Layer `Sand/Beach` tidak dipakai lagi (`PhysicsLayers.md`). Urutan lengkap valid
 10. Panggil `GetSurfaceAt` 1000 kali dalam satu frame sambil membuka Profiler. **Hasil:** tanpa alokasi GC, dan waktu tercatat di lembar playtest.
 11. Hapus satu pasangan di `SurfaceLayerMap`, lalu buka audit. **Hasil:** `TerrainLayer` itu masuk laporan.
 12. Hapus `map` dari satu Terrain, lalu tekan Play. **Hasil:** peringatan tercatat, bake cadangan selesai dalam beberapa frame, dan FPS tidak jatuh di atas 0,1 detik.
+
+## 7. Catatan Implementasi (Langkah 4)
+
+Kode: `Survival Island/Assets/LOGIC/Core_Logic/SurfaceDetection.cs` (`SurfaceSample`), `SurfaceTag.cs`, `TerrainSurfaceSource.cs`, `SurfaceMapAsset.cs`, `SurfaceLayerMap.cs`, `SurfaceBakeTool.cs` (Editor, menu **Survival > Surface > Bake Terrain Terpilih**). `SurfaceType` tetap dari Langkah 3.
+
+- **`TerrainSurfaceSource.layerMap`:** field tambahan, karena bake cadangan saat bermain perlu tahu jenis tiap `TerrainLayer`. Alat bake Editor juga membacanya.
+- **Seri bobot:** bake Editor memilih jenis dengan urutan layer lebih awal. Bake cadangan saat bermain memilih nilai enum lebih awal (cukup untuk pengembangan).
+- **`Initialize()`** mendaftarkan `TerrainSurfaceSource` yang sudah aktif sebelum manager siap.
+- **Hook di `PlayerTraversal` (Langkah 3):** `UpdateSurface` membaca `GetSurfaceAt` kalau `SurfaceDetection.Instance` ada.
+- **Penyiapan:** `SurfaceDetection` ditaruh di `Managers` pada `PersistentRoot`, dan didaftarkan di `RunLifecycle.orderedServices`.
+- **Belum ada (TODO):** `SurfaceAuditWindow`, `SurfaceDebugOverlay`, dan perintah `surfacedebug` (#56).
+- Belum diuji di Unity.

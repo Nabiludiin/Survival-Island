@@ -123,3 +123,7 @@ public enum NodeStatus { Standing, Depleted }
 10. Tebang pohon di dalam teritori serigala. **Hasil:** `NoiseEmittedEvent` dengan `NoiseSourceKind.Tool` terkirim, dan serigala langsung mengejar.
 
 Belum diuji di Unity, karena blueprint ini baru rancangan.
+
+## 7. Catatan Implementasi (Langkah 4)
+
+Kode: `Survival Island/Assets/LOGIC/raft/ResourceNode.cs`, `ResourceNodeData.cs` (`NodeType`, `NodeStatus`, `HitResult`, `ToolRule`, `RegrowRule`, `IRegrowable`), `ResourceDropGuard.cs`, `ResourceRespawn.cs`. Rincian di `ResourceRespawn.md` bagian 7.

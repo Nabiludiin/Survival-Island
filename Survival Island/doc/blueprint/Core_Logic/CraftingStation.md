@@ -239,3 +239,17 @@ Panel mendengar `InventoryChangedEvent`, `CraftQueueChangedEvent`, dan `TechNode
 14. Simpan dengan 2 job dan keluar, lalu lanjutkan. **Hasil:** antrean dan sisa waktu sama, dan bahan tidak terpotong dua kali.
 15. Mati lalu mulai run baru. **Hasil:** antrean kosong, dan hanya resep awal yang terbuka.
 16. Buat `rec_vaccine` tanpa `MedicalBench`. **Hasil:** ditolak `NoStation`.
+
+## 7. Catatan Implementasi (Langkah 4)
+
+Kode: `Survival Island/Assets/LOGIC/Core_Logic/CraftingRecipe.cs`, `RecipeDatabase.cs`, `CraftingManager.cs` (`CraftResult`, `CraftJob`, `CraftJobSave`, `CraftingSaveData`), `CraftingStation.cs`, `CraftingPanel.cs`, `TechTreeManager.cs`, `TechNodeData.cs` (`TechUnlockTrigger`). `RecipeIngredient` dan `CraftingStationType` tetap dari Langkah 3.
+
+- **`RecipeDatabase`:** memuat semua `CraftingRecipe` dari `Resources/Recipes` saat pertama dipakai, sama dengan pola `ItemDatabase` Langkah 3.
+- **`CraftingStation`** menerapkan `IInteractable` langsung, karena `IslandInteractable` (#17) belum ada. TODO #17.
+- **`availableMask`** menjadi properti `AvailableMask`, ditambah `IsStationAvailable(type)` dan `StationBit(type)`. Bit = `1 << (int)CraftingStationType`.
+- **`IsPanelOpen`:** diatur `CraftingPanel` saat tampil dan tertutup, supaya batas jarak stasiun mengikuti aturan panel terbuka.
+- **Tombol `C`:** dibaca `CraftingManager.Update` lewat `InputManager.OpenCraftingPressed`, lalu `CraftingPanel` di-push ke `UIFocusStack`. Tombol yang sama di map UI menutup panel lewat `toggleAction`.
+- **Resep `Campfire`** ditolak `RequestCraft` dengan `CraftResult.NoStation`.
+- **`CraftingPanel`:** tampilan sederhana berupa daftar baris (`Button` + `TMP_Text`) dan daftar antrean dengan tombol batal. Nama memakai `displayNameKey` apa adanya sampai #104 ada. Tab Perbaiki (#113) belum ada.
+- **Belum ada (TODO):** notifikasi #22 (`Resep baru`, `Inventori penuh, hasil jatuh`, alasan tolak), SFX (#16), validasi Editor `ProgressionSafety` (#116), dan aset resep inti (dibuat di Unity).
+- Belum diuji di Unity.

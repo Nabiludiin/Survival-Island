@@ -241,3 +241,13 @@ Checklist #45 menulis `Antibiotik untuk infeksi`. Maksudnya infeksi luka, bukan 
 18. Biarkan HP habis di tahap 4 tanpa serangan. **Hasil:** alasan kematian `Zombified`.
 19. Simpan di `Infection` 60, keluar, lalu lanjutkan. **Hasil:** nilai 60, tahap 3, dan penalti aktif tanpa menunggu pukulan.
 20. Mati, lalu mulai run baru. **Hasil:** `Infection` 0, tahap 1, dan penalti hilang.
+
+## 7. Catatan Implementasi (Langkah 4)
+
+Kode: `Survival Island/Assets/LOGIC/raft/InfectionSystem.cs`. Angka di `GameBalanceConfig.infection` (bagian "Ditambahkan Langkah 4").
+
+- `SurvivalStats.cs` (Langkah 3) tidak diubah. Penalti dipasang lewat `SetPenalty`, dan HP tahap 3-4 tetap dihitung `SurvivalStats`.
+- **`Start()`** langsung menghitung tahap dari `Infection` saat ini, sehingga infeksi bawaan Fase 1 langsung berlaku tanpa menunggu `VitalsChangedEvent`.
+- **Hook di `ItemUseSystem` (Langkah 3):** `TryUse` memanggil `CanUseMedicine`, dan `CompleteUse` memanggil `ApplyMedicine` kalau `InfectionSystem.Instance` ada. Kalau tidak ada, perilaku lama (`ReduceInfection`) tetap berjalan.
+- **Belum ada (TODO):** pengali NPC medis (`NPCRoster` #76, sementara 1), notifikasi #22 (tahap, kritis, tidak terinfeksi).
+- Belum diuji di Unity.

@@ -294,4 +294,127 @@ namespace SurvivalIsland
 
     /// <summary>Tombol diganti atau direset. Pengirim: InputManager. Teks tombol di layar membuang cache-nya.</summary>
     public struct InputBindingsChangedEvent { }
+
+    // =====================================================================================
+    // Ditambahkan Langkah 4 (siang-malam, infeksi, bangunan, resource, crafting).
+    // Sumber: tabel "Daftar event global" di GameEventBus.md. StructureDamagedEvent dan StructureDestroyedEvent
+    // dikirim BaseHealth (Langkah 5), tetapi ditulis di sini karena StructureRegistry (Langkah 4) sudah mendengarnya.
+    // Langkah 5 memakai struct ini dan tidak mendeklarasikannya ulang.
+    // =====================================================================================
+
+    // ---------------------------------------------------------------- Waktu (Langkah 4)
+
+    /// <summary>Malam tiba (18:00). Pengirim: DayNightDirector. GDD bagian 3: malam = horde zombie.</summary>
+    [StickyEvent]
+    public struct NightfallEvent
+    {
+        public int day;
+        public NightfallEvent(int day) { this.day = day; }
+    }
+
+    // ---------------------------------------------------------------- Pemain (Langkah 4)
+
+    /// <summary>Tahap infeksi (1-4) berubah. Pengirim: InfectionSystem (#64).</summary>
+    [StickyEvent]
+    public struct InfectionStageChangedEvent
+    {
+        public int stage;
+        public InfectionStageChangedEvent(int stage) { this.stage = stage; }
+    }
+
+    /// <summary>Vaksin selesai dipakai. Pengirim: InfectionSystem (#64).</summary>
+    public struct VaccineUsedEvent
+    {
+        public float reduction;
+        public float infectionAfter;
+        public VaccineUsedEvent(float reduction, float infectionAfter) { this.reduction = reduction; this.infectionAfter = infectionAfter; }
+    }
+
+    // ---------------------------------------------------------------- Inventori dan crafting (Langkah 4)
+
+    /// <summary>Satu job crafting selesai. Pengirim: CraftingManager (#77). Didengar TechTreeManager.</summary>
+    public struct ItemCraftedEvent
+    {
+        public string recipeId;
+        public ItemCraftedEvent(string recipeId) { this.recipeId = recipeId; }
+    }
+
+    /// <summary>Isi antrean crafting berubah. activeRecipeId kosong kalau antrean kosong. Pengirim: CraftingManager.</summary>
+    public struct CraftQueueChangedEvent
+    {
+        public int queueCount;
+        public string activeRecipeId;
+        public CraftQueueChangedEvent(int queueCount, string activeRecipeId) { this.queueCount = queueCount; this.activeRecipeId = activeRecipeId; }
+    }
+
+    /// <summary>Node tech tree terbuka. Pengirim: TechTreeManager (#34). Tidak dikirim ulang saat load.</summary>
+    public struct TechNodeUnlockedEvent
+    {
+        public string nodeId;
+        public TechNodeUnlockedEvent(string nodeId) { this.nodeId = nodeId; }
+    }
+
+    /// <summary>Node resource dipukul. Pengirim: ResourceNode (#73). Didengar AudioManager (#16).</summary>
+    public struct ResourceNodeHitEvent
+    {
+        public NodeType nodeType;
+        public bool isDepleted;
+        public bool byPlayer;
+        public ResourceNodeHitEvent(NodeType nodeType, bool isDepleted, bool byPlayer)
+        {
+            this.nodeType = nodeType;
+            this.isDepleted = isDepleted;
+            this.byPlayer = byPlayer;
+        }
+    }
+
+    // ---------------------------------------------------------------- Base (Langkah 4)
+
+    /// <summary>Struktur selesai dibangun. Pengirim: BuildManager (#79).</summary>
+    public struct StructureBuiltEvent
+    {
+        public string structureId;
+        public string buildableId;
+        public UnityEngine.Vector3 position;
+        public StructureBuiltEvent(string structureId, string buildableId, UnityEngine.Vector3 position)
+        {
+            this.structureId = structureId;
+            this.buildableId = buildableId;
+            this.position = position;
+        }
+    }
+
+    /// <summary>Struktur menerima damage. Pengirim: BaseHealth (Langkah 5, DamagePipeline.md).</summary>
+    public struct StructureDamagedEvent
+    {
+        public string structureId;
+        public float hpRatio;
+        public UnityEngine.Vector3 position;
+        public StructureDamagedEvent(string structureId, float hpRatio, UnityEngine.Vector3 position)
+        {
+            this.structureId = structureId;
+            this.hpRatio = hpRatio;
+            this.position = position;
+        }
+    }
+
+    /// <summary>Struktur hancur atau dibongkar. Pengirim: BaseHealth (Langkah 5). Didengar StructureRegistry (#79).</summary>
+    public struct StructureDestroyedEvent
+    {
+        public string structureId;
+        public UnityEngine.Vector3 position;
+        public StructureDestroyedEvent(string structureId, UnityEngine.Vector3 position)
+        {
+            this.structureId = structureId;
+            this.position = position;
+        }
+    }
+
+    /// <summary>Mode palu atau struktur terpilih berubah. buildableId kosong kalau tidak ada pilihan. Pengirim: BuildManager.</summary>
+    public struct BuildModeChangedEvent
+    {
+        public HammerMode mode;
+        public string buildableId;
+        public BuildModeChangedEvent(HammerMode mode, string buildableId) { this.mode = mode; this.buildableId = buildableId; }
+    }
 }
