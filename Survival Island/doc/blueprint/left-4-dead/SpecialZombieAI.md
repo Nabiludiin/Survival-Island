@@ -117,7 +117,7 @@ public abstract class SpecialZombieAI : MonoBehaviour, IPoolable
 | `GameBalanceConfig.specialZombie.tribalCooldownSeconds` | 10 | Jeda lemparan |
 | `GameBalanceConfig.specialZombie.tribalPullSpeed` | 2 | Kecepatan menarik pemain |
 | `GameBalanceConfig.specialZombie.tribalDamagePerSec` | 5 | Damage selama menahan |
-| `GameBalanceConfig.specialZombie.tribalReleaseDamage` | 40 | Damage yang membuat jerat lepas. Lebih besar dari `pinned.knifeDamage` 25, jadi butuh 2 tusukan Pisau, sejalan dengan `knifeProgress` 0,6. Menunggu konfirmasi developer (`Survival Island/doc/USULAN_TERBUKA.md`) |
+| `GameBalanceConfig.specialZombie.tribalReleaseDamage` | 40 | Damage yang membuat jerat lepas. Lebih besar dari `pinned.knifeDamage` 25, jadi butuh 2 tusukan Pisau, sejalan dengan `knifeProgress` 0,6. Keputusan developer (`Survival Island/doc/USULAN_TERBUKA.md`). |
 | `GameBalanceConfig.specialZombie.tribalBreakDistance` | 18 | Jerat putus di atas jarak ini |
 | `GameBalanceConfig.specialZombie.mossWakeDistance` | 4 | Bangun seketika |
 | `GameBalanceConfig.specialZombie.mossAlertDistance` | 8 | Amarah naik di dalam jarak ini |

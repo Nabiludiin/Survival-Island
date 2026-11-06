@@ -2,8 +2,8 @@
 **Lokasi:** `Survival Island/doc/blueprint/Island_Logic/SupplyDrop.md`
 **Deskripsi Utama:** Event acak siang hari. Pesawat melintas, peti bantuan turun dengan parasut di lokasi acak, dan suar asap merah memancing pemain keluar dari base.
 **Issue:** #54
-**Rujukan GDD:** Usulan, belum ada di GDD sebagai mekanik. GDD bagian 2 hanya menyebut "sistem pengiriman suplai darurat yang masih aktif secara otomatis" sebagai latar.
-**Status:** Usulan, belum ada di GDD. Sistem ini nonaktif sampai developer menyetujui (`GameBalanceConfig.supplyDrop.enabled = false`). Rekomendasi: sebaiknya dipakai, karena cocok dengan latar GDD dan memberi alasan keluar base di luar kargo mingguan.
+**Rujukan GDD:** Tidak dipakai, diputuskan developer. Disimpan sebagai arsip. Sistem lain tidak boleh bergantung pada blueprint ini.
+**Status:** Tidak dipakai, diputuskan developer. Disimpan sebagai arsip.
 
 ## 1. Arsitektur & Variabel Utama
 

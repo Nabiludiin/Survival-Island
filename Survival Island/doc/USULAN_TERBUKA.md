@@ -8,6 +8,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 
 | Topik | Kondisi sekarang |
 |---|---|
+| Lokasi proyek Unity | Diputuskan nanti, saat proyek Unity dibuat. Kode tetap ditulis di `Survival Island/LOGIC/` |
 | Posisi Lucky Machine Region 1, 2, dan 4 | Bukan keputusan desain. Ditentukan saat layout peta #88, dengan syarat di `LuckyMachine.md` |
 
 ## Keputusan utama
@@ -19,6 +20,8 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |
 | Enchant Lucky Machine | Modifier boleh dipasang ke senjata atau alat. Pada alat, damage pukulan dan kecepatan ayun naik, tetapi jumlah pukulan pada resource tetap |
 | Hewan menjaga resource | Suara alat di dalam teritori langsung memicu kejaran. Teritori hewan diletakkan dekat resource lewat `AnimalTerritory`, dengan peluang spawn 0,7 |
+| Usulan dari pelengkapan blueprint | Semua usulan baru di ShipInteractable, ShipTimerManager, ShipPlayerController, UIManager, CompassSystem, ZoneManager, WeatherManager, HitboxModifier, EnvironmentalHazard, NPCCompanion, dan FlashlightController disetujui sebagai nilai awal |
+| Bahan referensi `LOGIC/` di root | Tetap dilacak git. PR #119 ditutup |
 | Ambang lepas jerat Tribal | 40 damage dari pemain, yaitu 2 tusukan Pisau. Menggantikan nilai lama 25 |
 | Peluru di kapal | Satu kotak peluru di kapal berisi 12 butir (satu magazine penuh). `Loot_Ship` hanya memilih jenis barang |
 | Berat NPC di kapal | Semua NPC berberat 4, jadi membawa satu NPC memenuhi tangan |
@@ -29,7 +32,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Air es Region 3 | Pakaian hangat tetap melindungi di air es, sesuai GDD bagian 5. Obor padam di air, jadi tidak melindungi |
 | Diterkam | Pemain hanya bisa melepaskan diri sendiri. NPC tidak menolong, dan hanya damage dari pemain yang bisa membatalkan terkaman Jaguar atau jerat Tribal |
 | Fitur tambahan yang dipakai | #96, #106, dan #112 |
-| Fitur yang tidak dipakai | #48, #105, dan #117 |
+| Fitur yang tidak dipakai | #48, #54, #105, dan #117 |
 | Angka inti | Hari 15 menit, 8 sampai 12 kayu per pohon, 5 suku cadang, dan frostbite 1 HP per detik |
 
 ## Usulan yang menjadi nilai awal, per issue
@@ -302,7 +305,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 
 | Topik | Usulan |
 |---|---|
-| Pemakaian Supply Drop (belum ada di GDD sebagai mekanik) | Pakai, dengan peluang 10 persen per hari. Saklar supplyDrop.enabled tetap false sampai disetujui. |
+| Pemakaian Supply Drop (belum ada di GDD sebagai mekanik) | Diputuskan developer: tidak dipakai. Blueprint disimpan sebagai arsip. |
 | Jam jatuh peti | Hanya siang, jam 08:00 sampai 14:00, supaya pemain sempat pulang sebelum malam. |
 | Lokasi titik jatuh | Cincin 120 sampai 260 meter dari pemain, karena hanya region yang dimuat yang punya Terrain dan NavMesh (#88). |
 | Penjaga peti | Tanpa musuh tambahan. Risiko berasal dari jarak dan hewan teritorial. Tambahkan RequestBurst kecil kalau playtest terasa terlalu aman. |
@@ -813,7 +816,7 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 |---|---|
 | Senjata dan peluru baru | Tambah Wpn_Machete, Wpn_SMG, Wpn_Rifle, dan Ammo_556, karena Pistol, Pisau, dan Kapak saja tidak memberi alasan menjelajah. |
 | Armor pemain dan pengaruhnya pada infeksi | Tidak ada armor pemain di versi awal, dan infeksi tidak berubah. |
-| Isi ulang titik loot selama 60 hari | Tidak terisi lagi. Sumber berulang sudah ada di #73, #71, dan #54. |
+| Isi ulang titik loot selama 60 hari | Tidak terisi lagi. Sumber berulang sudah ada di #73 dan #71. |
 | Skala loot terhadap hari dan jarak | Pengali per lokasi (Region 1 x1, Region 2 x1,1, Region 4 x1,25, Region 3 x1,4), tambahan jumlah tiap 10 hari, dan bobot item langka naik mengikuti hari. |
 | Barang unik | Tiga titik dengan isi tetap: Chest_AuthorCamp, Warehouse_VillageHall, dan Chest_Armory, bukan diacak. |
 

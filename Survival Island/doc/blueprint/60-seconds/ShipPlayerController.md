@@ -215,7 +215,7 @@ Zombie kapal berjalan 3,5 m/s dikali pengali air yang sama (#75). Di lantai keri
 - `MoveDirectionWorld` dibuka untuk perhitungan kemiringan #75.
 - Pemain kapal tidak berlari, tidak melompat, dan tidak berjongkok.
 
-**Usulan baru (menunggu persetujuan developer):**
+**Usulan baru (disetujui developer sebagai nilai awal):**
 
 1. Angka baru `ship.moveSpeed`, `ship.gravity`, dan `ship.groundedStickVelocity` di `GameBalanceConfig`.
 2. Pengaturan `CharacterController` di tabel bagian 1.

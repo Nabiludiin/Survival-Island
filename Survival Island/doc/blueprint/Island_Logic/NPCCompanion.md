@@ -192,7 +192,7 @@ Collider NPC berada di layer `NPC`, yang masuk mask `Interact` (#87).
 
 Daftar usulan umum ada di `NPCRoster.md` bagian 5.
 
-**Usulan baru, menunggu developer:**
+**Usulan baru (disetujui developer sebagai nilai awal):**
 
 1. **HP disimpan langsung di `NPCRecord`:** tidak ada salinan di komponen.
 2. **`corpseSeconds`, `followThreatWeight`, dan `coverThreatWeight` masuk `GameBalanceConfig.npc`.**

@@ -159,7 +159,7 @@ Ini panduan level design, dan dicek oleh alat Editor `ZoneCoverageAudit` (usulan
 
 **Usulan yang disetujui developer sebagai nilai awal:** tidak ada yang baru. Usulan region aktif saat zona bertumpuk dicatat di `EnvironmentProfile.md` bagian 5.
 
-**Usulan baru, menunggu developer:**
+**Usulan baru (disetujui developer sebagai nilai awal):**
 
 1. **`Enter` tidak langsung memindah region:** region aktif pindah saat zona lama ditinggalkan, kecuali pemain datang dari celah. Ini tafsiran langsung dari aturan "hitungan untuk keabsahan, zona terakhir untuk memilih".
 2. **Event pertama dengan `from == to`:** `RegionType` tidak punya nilai kosong di `GLOSSARY.md`.

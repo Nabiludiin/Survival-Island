@@ -168,7 +168,6 @@ Semua berada di `Application.persistentDataPath`.
 | Lore | `world_lore` | `LoreCollectibles` (#100) | Temuan lore dalam run ini |
 | Barang hanyut | `world_debris` | `DebrisRetrieval` (#106) | `nextSpawnGameHour` |
 | Kargo pantai | `world_supply_beach` | `BeachSupplyManager` (#71) | Kargo yang belum diambil |
-| Suplai udara | `world_supply` | `SupplyDropManager` (#54) | Jadwal dan status suplai |
 | Hasil simulasi base | `world_remotebase` | `RemoteBaseSimulation` (#90) | Hasil yang belum diterapkan |
 | Catatan hadiah Lucky Machine | `world_lucky` | `LuckyRewardLedger` (#72) | `grantCounts` sebagai array, dan `pendingSkins`, bersama untuk keempat mesin |
 | Lucky Machine | Lewat `RegionStateStore`, dengan `saveId` dari `SaveIdTag` | `LuckyMachine` (#72) | `quotaProgress`, `storedSpins`, `freeWindowEndGameHour`, `freeSpinsUsed`, dan `gateState`, per mesin. `grantCounts` dan `pendingSkins` ada di `world_lucky`. Buff tersimpan di `player_effects`, sedangkan modifier dan skin di `ItemInstance` |
@@ -308,7 +307,7 @@ Urutan ini mengikuti `RunLifecycle.ContinueRun()`.
 | 10 | 100 | `world_fire`, `LightFixture` per `StructureId`, `world_parts`, `world_helicopter` | Data pulau. `world_fire` dan `LightFixture` merujuk struktur, jadi setelah `world_structures` |
 | 11 | 110 | `world_objectives`, `world_recipes`, `world_lore` | Data progres |
 | 12 | 120 | `world_npcs` | Butuh posisi pemain dan bangunan |
-| 13 | 130 | `world_disasters`, `world_bloodmoon`, `world_supply_beach`, `world_supply`, `world_remotebase`, `ai_director`, dan `world_debris` | Merujuk data di atas |
+| 13 | 130 | `world_disasters`, `world_bloodmoon`, `world_supply_beach`, `world_remotebase`, `ai_director`, dan `world_debris` | Merujuk data di atas |
 
 `RestoreState` hanya mengisi data dan tidak boleh mengirim event. Exception ditangkap per sistem, dicatat, lalu sistem itu memakai nilai awal.
 

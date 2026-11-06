@@ -250,7 +250,7 @@ Objek pool berada di bawah `PersistentRoot`, jadi kelas ini **tidak** menyimpan 
 - Barang dan NPC kapal memakai layer `Interactable`, collider bukan trigger.
 - Prompt disimpan sebagai dua string jadi, dan dibangun ulang hanya saat bahasa berubah.
 
-**Usulan baru (menunggu persetujuan developer):**
+**Usulan baru (disetujui developer sebagai nilai awal):**
 
 1. **Pool NPC terpisah `ShipNpc_Generic`,** berisi tubuh NPC tanpa AI, ukuran 3 sesuai jumlah NPC di #76.
 2. **Kunci teks baru:** `prompt.rescue` (`Selamatkan {name}`) dan `prompt.handsFull` (`Tangan penuh. Setor ke Sekoci`).

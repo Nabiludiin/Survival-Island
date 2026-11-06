@@ -227,7 +227,7 @@ Pemain yang berdiri di atas batu tanpa jalur tidak memicu serangan apa pun, kare
 3. Region anchor sudah dimuat: `RegionStreaming.IsLoaded(GetRegionAt(anchor))`.
 4. Jarak pemain ke anchor `<= bloodMoon.baseEngageDistance`.
 
-**`public bool TryGetBaseAnchor(out Vector3 anchor)`** mengembalikan `false` kalau belum ada struktur. Fungsi ini dipakai #50, #54, #76, dan #108.
+**`public bool TryGetBaseAnchor(out Vector3 anchor)`** mengembalikan `false` kalau belum ada struktur. Fungsi ini dipakai #50, #76, dan #108.
 
 ### Memilih dinding atau pintu
 
@@ -306,7 +306,7 @@ public class BreachSlots
 | `RemoteBaseSimulation` (#90) | Tidak memakai sistem ini saat base ditinggal |
 | `WildlifeAI` (#61) | Hewan memakai `TargetUnreachable` saat terhalang |
 | `RegionStreaming` (#88) | Bangunan nonaktif bersama region, dan syarat `BaseAnchor.IsTargetable` |
-| `ThreatSystem` (#108), `HordeManager` (#50), #54, #76 | Membaca `BaseAnchor` dan `TryGetBaseAnchor` |
+| `ThreatSystem` (#108), `HordeManager` (#50), #76 | Membaca `BaseAnchor` dan `TryGetBaseAnchor` |
 | `AITraversal` (#94) | Respons saat `TryAssignBreachTarget` gagal |
 | `ZombieLair` (#112) | Memakai Area `Interior` |
 

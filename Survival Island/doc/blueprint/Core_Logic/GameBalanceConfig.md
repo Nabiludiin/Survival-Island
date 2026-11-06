@@ -72,7 +72,6 @@ public class GameBalanceConfig : ScriptableObject
     public EnvironmentBalance environment;
     public DisasterBalance disaster;
     public BeachSupplyBalance beachSupply;
-    public SupplyDropBalance supplyDrop;
     public BloodMoonBalance bloodMoon;
     public LuckyMachineBalance luckyMachine;
     public NpcBalance npc;
@@ -261,7 +260,6 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 | `weather` (tambahan) | #115 | effects (tabel `WeatherEffects` per cuaca), minSevereDay, dan presentBlendSeconds 6. `weatherIntervalGameHours` tetap memakai nilai #84 |
 | `disaster` | #70 | scheduleBlockDays 60, fireballIntervalSeconds, fireballRingMin/Max, fireballMarkerSeconds 2,5, fireballRadius, fireballDamageCenter/Edge, fireballStructureDamage, fireballTreeChance 0,25, eruptionOffscreenHits, quakeDamageRatio, quakePulses, maxStructuresPerFrame, stormPulseSeconds, stormStructureDamage, treeFallSeconds 45, treeFallRingMin/Max 12/30 m, treeFallRadius, treeFallDamage, treeFallStructureDamage, quakeRemoteDamagePerHit 75, quakeRemoteHits 4 |
 | `beachSupply` | #71 | intervalDays 7, crateCountBase, crateCountPerTwoWeeks, crateCountMax, rollsPerCrate, crateLifetimeGameHours, crateMinLevel, openHoldSeconds, openNoiseRadius, ambushTriggerDistance, ambushAnimalsBase, ambushZombiesBase |
-| `supplyDrop` | #54 | Saklar enabled false, dailyChance 0,10, minDay 3, cooldownDays 3, jam jatuh 8 sampai 14, jarak titik jatuh 120 sampai 260, serta angka pesawat, parasut, suar, dan kedaluwarsa peti |
 | `bloodMoon` | #50 | Saklar enabled true (aturan GDD), intervalDays 10, warningHour 12, waveCount 4, baseWaveSize 12, waveSizePerEvent 4, maxAlive 50, sustainAlive 20, burstRadius 45, baseEngageDistance 120, dan jeda gelombang |
 | `luckyMachine` | #72 | freeWindowSeconds 30, maxFreeSpinsPerWindow 3, maxStoredSpins 1, spinSeconds 4, vacuumSeconds 1,2, bobot tier 5/25/70, gateReopenSeconds 2, dan cageRewardOffset 2 |
 | `npc` | #76 | thinkSeconds 0,25, jarak ikut 5 dan 2,5, teleportDistance 40, detectRadius 15, attackLeashDistance 12, baseRegenPerSec 0,5, workSearchRadius 30, cookSpeedMultiplier 1,25, builderRepairMultiplier 1,25, dan avoidancePriority 70 |

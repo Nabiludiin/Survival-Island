@@ -171,7 +171,7 @@ Tier memberi air dan makanan lebih dulu pada pekan awal, karena pemain masih mem
 | `RegionStreaming` (#88) | `IsLoaded` |
 | `NotificationManager` (#22), `CompassSystem` (#30) | Pemberitahuan dan arah |
 | `WorldStateSave` (#80) | Menyimpan status |
-| `SupplyDropManager` (#54), `DebrisRetrieval` (#106) | Sumber terpisah |
+| `DebrisRetrieval` (#106) | Sumber terpisah |
 
 ## 4. Kasus Khusus
 
@@ -199,7 +199,7 @@ Tier memberi air dan makanan lebih dulu pada pekan awal, karena pemain masih mem
 4. **Risiko:** hewan siang dan zombie malam, tanpa Zombie Desa. Rekomendasi: pakai, karena pantai berada di Region 1.
 5. **Isi berubah menurut hari:** tiga tier di tabel. Rekomendasi: pakai.
 6. **Barang langka:** `Mat_Scrap` dan `Med_Antibiotic`, tanpa vaksin. Daftar ini bisa diperpanjang setelah #103 selesai.
-7. **`SaveId`:** `world_supply_beach`, terpisah dari #54, karena `Register` menolak `SaveId` ganda.
+7. **`SaveId`:** `world_supply_beach`.
 8. **Setelah hari ke-60:** kiriman terus berjalan tiap 7 hari dengan 4 kargo dan tier `Hari 42+`. Rekomendasi: pakai, supaya run panjang tetap mungkin dimenangkan. Jumlah peluru perlu diuji bersama pengali HP di `AIDirector.md`.
 
 ## 6. Skenario Tes

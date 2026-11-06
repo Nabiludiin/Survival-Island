@@ -62,7 +62,7 @@ public class LootTable : ScriptableObject
 
 Persen dihitung dari entri yang lolos saringan. Jadi total bobot tidak harus 100. H = `House`, C = `Chest`, B = `SoldierBody`, W = `Warehouse`. Tanda * berarti `isRare`.
 
-**Vaksin di `Loot_Ship` (keputusan developer):** vaksin yang ditemukan di kapal dihitung sebagai bagian stok awal yang "sangat sedikit" di GDD bagian 3, bukan vaksin baru. Setelah Fase 1, vaksin baru hanya dari resep dengan material Region 2, jadi tabel loot pulau, `supply_drop`, dan kargo pantai tetap tanpa `Med_Vaccine`.
+**Vaksin di `Loot_Ship` (keputusan developer):** vaksin yang ditemukan di kapal dihitung sebagai bagian stok awal yang "sangat sedikit" di GDD bagian 3, bukan vaksin baru. Setelah Fase 1, vaksin baru hanya dari resep dengan material Region 2, jadi tabel loot pulau dan kargo pantai tetap tanpa `Med_Vaccine`.
 
 | Tabel | Item, jumlah, bobot, titik |
 |---|---|
@@ -79,7 +79,6 @@ Suku cadang helikopter tidak ada di tabel ini (#69). Bobot `Item_Battery` masih 
 | Tabel | Isi | Pemakai |
 |---|---|---|
 | `Debris_Default` | Mengikuti `raft/DebrisRetrieval.md` | #106 |
-| `supply_drop` | `Ammo_9mm` 3-6, 30. `Food_Can` 1-2, 30. `Drink_CleanWater` 1-2, 25. `Med_Bandage` 1, 15. Tanpa `Med_Vaccine`, sesuai GDD bagian 3 | #54 |
 | `Loot_Lair_Cave` | Usulan: `Ammo_9mm` 6-12, 30. `Mat_Scrap` 3-5, 25. `Med_Medkit` 1, 20*. `Food_Can` 2-3, 25 | #112 |
 | `Loot_Lair_MilitaryBunker` | Usulan: `Ammo_9mm` 8-15, 30. `Ammo_556` 10-20, 25*. `Med_Medkit` 1, 20*. `Mat_Scrap` 3-5, 25 | #112 |
 | `Loot_Lair_VillageWarehouse` | Usulan: `Mat_Scrap` 4-6, 30. `Ammo_9mm` 6-10, 25. `Food_Can` 2-4, 25. `Med_Antibiotic` 1, 20* | #112 |
@@ -154,7 +153,7 @@ Peluang titik kosong hanya ditentukan `lootPointEmptyChance` atau `warehouseEmpt
 
 ### Pengisian ulang
 
-Titik loot tidak terisi lagi sepanjang run, termasuk setelah hari ke-60 (usulan). Sumber yang berulang sudah ada dan tidak berhenti setelah hari ke-60: panen (#73), kargo mingguan (#71), dan kotak suplai (#54). Dengan begitu, area yang sudah dijarah tetap kosong, dan pemain terdorong ke region berikutnya.
+Titik loot tidak terisi lagi sepanjang run, termasuk setelah hari ke-60 (usulan). Sumber yang berulang sudah ada dan tidak berhenti setelah hari ke-60: panen (#73) dan kargo mingguan (#71). Dengan begitu, area yang sudah dijarah tetap kosong, dan pemain terdorong ke region berikutnya.
 
 ### Armor pemain
 
@@ -174,7 +173,7 @@ Tidak ada armor pemain di versi awal (usulan). `Infection` tetap naik sesuai `At
 | `GunController` (#58) | Aset `WeaponData` untuk `Wpn_SMG` dan `Wpn_Rifle` |
 | `CarryCapacity` (#118), `DiseaseManager` (#45), `BaseDefense` (#26), `StatusEffectManager` (#20) | Sumber `Bag_Military`, obat, `Mat_Scrap`, dan `Med_Supplement` |
 
-**Batas pekerjaan:** kotak dari langit di #54, kargo pantai di #71, dan resep di #77.
+**Batas pekerjaan:** kargo pantai di #71, dan resep di #77.
 
 ## 4. Kasus Khusus
 

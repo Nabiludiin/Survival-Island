@@ -164,7 +164,7 @@ Semua handler di tabel ini keluar lebih dulu kalau `TopPanel.id == Loading`. Pes
 | `LocalizationManager` (#104) | Teks pesan |
 | `ItemDatabase` (#66) | Memastikan `itemId` sah |
 | `AudioManager` | `PlaySFX(clip)` untuk suara per jenis |
-| Pemanggil langsung | `ItemUseSystem`, `EquipmentManager`, `CraftingStation`, `StorageChest`, `CarryCapacity`, `HeavyItemSystem`, `HydrationSystem`, `InfectionSystem`, `DiseaseManager`, `DisasterManager`, `HordeManager`, `BeachSupplyManager`, `SupplyDropManager`, `FishingSystem`, `ResourceRespawn`, `IslandInteractable`, `RemoteBaseSimulation`, `ObjectiveManager`, `ToolRepairSystem`, dan `WorldStateSave` |
+| Pemanggil langsung | `ItemUseSystem`, `EquipmentManager`, `CraftingStation`, `StorageChest`, `CarryCapacity`, `HeavyItemSystem`, `HydrationSystem`, `InfectionSystem`, `DiseaseManager`, `DisasterManager`, `HordeManager`, `BeachSupplyManager`, `FishingSystem`, `ResourceRespawn`, `IslandInteractable`, `RemoteBaseSimulation`, `ObjectiveManager`, `ToolRepairSystem`, dan `WorldStateSave` |
 | `UIManager` | Panel `Pause` memuat tombol `Log` |
 | `DevConsole` (#56) | Perintah `notify <jenis> <kunci>` |
 

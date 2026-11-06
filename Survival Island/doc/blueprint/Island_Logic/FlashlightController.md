@@ -39,9 +39,9 @@
 | `GameBalanceConfig.flashlight.drainPerSec` | 0,2 | Senter menyala 500 detik, sekitar satu malam |
 | `GameBalanceConfig.flashlight.batteryRecharge` | 100 | Isi per `Item_Battery`, dipakai `ItemUseSystem` |
 | `GameBalanceConfig.light.flickerSeconds` | 2 | Sudah ada (#98). Kedip sebelum baterai habis |
-| `GameBalanceConfig.flashlight.range` | 25 | Jangkauan sorot dalam meter (usulan baru) |
-| `GameBalanceConfig.flashlight.spotAngle` | 50 | Sudut kerucut sorot (usulan baru) |
-| `GameBalanceConfig.flashlight.flickerHz` | 6 | Kecepatan kedip (usulan baru) |
+| `GameBalanceConfig.flashlight.range` | 25 | Jangkauan sorot dalam meter (usulan baru, disetujui developer) |
+| `GameBalanceConfig.flashlight.spotAngle` | 50 | Sudut kerucut sorot (usulan baru, disetujui developer) |
+| `GameBalanceConfig.flashlight.flickerHz` | 6 | Kecepatan kedip (usulan baru, disetujui developer) |
 
 Nilai `range` dan `spotAngle` ditulis ke `flashlight` di `OnEquip`, sehingga lampu yang terlihat dan `IsPointInBeam` selalu memakai angka yang sama.
 
@@ -137,7 +137,7 @@ Tanpa query fisika. Garis pandang diperiksa pemanggil, misalnya Zombie Lumut (#2
 
 1. **Senter dan baterai:** GDD tidak menyebutnya. Rekomendasi: pakai, supaya Region 2 tetap gelap tanpa membuat pemain buta.
 
-**Usulan baru, menunggu developer:**
+**Usulan baru (disetujui developer sebagai nilai awal):**
 
 2. **`Recharge` statis dengan parameter `ItemInstance`:** supaya senter di inventori bisa diisi. Pemanggil di `ItemUseSystem.md` dan `LightSourceSystem.md` perlu menyebut senter targetnya.
 3. **Senter yang dipegang menyala otomatis setelah diisi.**

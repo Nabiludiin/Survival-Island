@@ -24,7 +24,7 @@ public enum RandomStreamId
 {
     ShipLoot, IslandLoot, PartLocation, Weather, Disaster, NPC,
     BeachSupply, Enemy, Gameplay, LuckyMachine,
-    SupplyDrop   // Ditambahkan di akhir, supaya nilai lama tidak bergeser (#54)
+    SupplyDrop   // Dicadangkan. #54 tidak dipakai, tetapi nilai tetap ada supaya urutan aliran tidak bergeser
 }
 
 public struct RandomStream
@@ -70,7 +70,7 @@ Kelas bawaan `System.Random` tidak dipakai, karena statusnya tidak bisa disimpan
 | `Enemy` | Berurutan | Tidak ada | `SpawnManager` (#62), `AIDirector` (#27) |
 | `Gameplay` | Berurutan | Tidak ada | `ResourceNode`, `FishingSystem` (#55), `DebrisRetrieval` (#106), dan drop lain |
 | `LuckyMachine` | Berurutan | Tidak ada | `LuckyMachine` (#72) |
-| `SupplyDrop` | Berkunci | Nomor hari | `SupplyDropManager` (#54) |
+| `SupplyDrop` | Berkunci | Nomor hari | Tidak dipakai (#54 diarsipkan). Nilai enum tetap dicadangkan |
 
 ### Data run
 

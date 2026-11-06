@@ -117,7 +117,7 @@ Pemeriksaan yang sama dijalankan alat audit layer di `PhysicsLayers.md` sebelum 
 
 1. **Kaki 0,5x:** berasal dari blueprint lama. GDD tidak menyebutnya. Rekomendasi: pakai sebagai nilai awal.
 
-**Usulan baru, menunggu developer:**
+**Usulan baru (disetujui developer sebagai nilai awal):**
 
 2. **Lengan dihitung `Torso`:** tidak perlu nilai `BodyPart` baru di `GLOSSARY.md`.
 3. **Hewan kecil hanya punya hitbox `Torso`:** Gagak dan Ular sulit dibidik kepalanya.

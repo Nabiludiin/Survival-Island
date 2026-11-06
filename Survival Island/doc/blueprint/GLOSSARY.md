@@ -29,7 +29,7 @@ Developer sudah menyetujui keputusan berikut.
 | Mengendap dan Diterkam | Aturan GDD bagian 3. Pemain hanya bisa lepas sendiri, tanpa bantuan NPC |
 | Lucky Machine | Satu mesin di setiap region, dengan kuota per region dan tabel hadiah bersama (`LuckyMachine.md`) |
 | Fitur tambahan yang dipakai | #96, #106, dan #112 |
-| Fitur yang tidak dipakai | #48, #105, dan #117. Blueprint-nya disimpan sebagai arsip |
+| Fitur yang tidak dipakai | #48, #54, #105, dan #117. Blueprint-nya disimpan sebagai arsip |
 | Angka inti dan usulan kecil | Disetujui sebagai nilai awal, dan boleh berubah saat playtest |
 
 ---
@@ -156,7 +156,6 @@ Developer sudah menyetujui keputusan berikut.
 | `EnvEventId` | Lapisan event `EnvironmentDirector`, misalnya `Eruption` dan `BloodMoon` | `EnvironmentDirector` (#92) |
 | `DisasterPhase` | `Idle`, `Warning`, `Active`, `Aftermath` | `DisasterManager` (#70) |
 | `MarkerIcon` | `Supply`, `Part`, `Helipad`, `Objective` | `CompassSystem` (#30, #71) |
-| `SupplyDropState` | `Idle`, `Scheduled`, `PlaneInbound`, `Descending`, `Landed` | `SupplyDropManager` (#54) |
 | `LuckyRewardKind` | `WeaponModifier`, `Skin`, `PermanentBuff`, `SpawnItem` | `LuckyMachine` (#72) |
 | `LuckyTier` | `B`, `A`, `S` | `LuckyMachine` (#72) |
 | `CageGateState` | `Open`, `Closed` | `LuckyMachine` (#72) |
@@ -440,8 +439,6 @@ Developer sudah menyetujui keputusan berikut.
 | `BeachCrateTier` | Struct tier isi kargo menurut hari minimum | #71 |
 | `BeachDeliveryState` | Data simpanan kiriman kargo: kargo yang sudah dibuka dan status kiriman | #71 |
 | `BeachSupplyPoint` | Titik buatan tangan di `IslandPhase` untuk posisi kargo: `position`, `isReachable` | #71 |
-| `SupplyPlane` | Prefab pool visual dan suara pesawat | #54 |
-| `SupplyCrate` | Prefab pool peti, turunan `IslandInteractable` | #54 |
 | `LuckyMachineCage` | Komponen trigger kandang, gerbang, dan vakum | #72 |
 | `LuckyMachineData` | ScriptableObject region, kuota, dan tabel hadiah. Satu aset per mesin | #72 |
 | `LuckyRewardLedger` | Catatan hadiah bersama untuk keempat Lucky Machine, disimpan di `world_lucky` | #72 |
@@ -590,7 +587,7 @@ Setiap issue menulis ke file berikut. Kalau issue tidak menyebut nama file, bari
 | #51 | `Core_Logic/CombatFeedbackUI.md` | `CombatFeedbackUI` |
 | #52 | `Core_Logic/AmbientAudio.md` | `AmbientAudio` |
 | #53 | `Core_Logic/DeathCinematic.md` | `DeathCinematic` |
-| #54 | `Island_Logic/SupplyDrop.md` | `SupplyDropManager` |
+| #54 | `Island_Logic/SupplyDrop.md` (tidak dipakai) | `SupplyDropManager` |
 | #55 | `raft/FishingSystem.md` | `FishingSystem` |
 | #56 | `Core_Logic/DevConsole.md` | `DevConsole` |
 | #57 | `Core_Logic/LocalStatsManager.md` | `LocalStatsManager` |

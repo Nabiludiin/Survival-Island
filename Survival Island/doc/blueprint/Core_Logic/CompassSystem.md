@@ -207,7 +207,7 @@ Sticky `CinematicStateChangedEvent.Last` dibaca di `OnEnable`.
 - Bilah digeser lewat `RawImage.uvRect`, bukan dengan memindahkan `RectTransform`, supaya putaran 360 derajat tidak punya sambungan.
 - Huruf arah diletakkan dengan perhitungan yang sama dengan penanda, supaya bisa diterjemahkan.
 
-**Usulan baru (tidak menghalangi kode):**
+**Usulan baru (disetujui developer sebagai nilai awal):**
 
 1. Kompas hanya ada di `IslandPhase`.
 2. Sumbu +Z dunia adalah utara.

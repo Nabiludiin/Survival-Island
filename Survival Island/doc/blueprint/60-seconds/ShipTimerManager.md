@@ -214,7 +214,7 @@ void HandleRunEnded(RunEndedEvent e) { StopCountdown(); }
 - Angka di layar memakai pembulatan ke atas, jadi `0` hanya tampil saat waktu benar-benar habis.
 - Teks ditulis ulang hanya saat angka berubah, tanpa garbage.
 
-**Usulan baru (menunggu persetujuan developer):**
+**Usulan baru (disetujui developer sebagai nilai awal):**
 
 1. Detak jam terdengar sejak timer mulai, lalu makin cepat di bawah 15 detik.
 2. Getar teks timer ikut pengaturan `cameraShakeScale`.

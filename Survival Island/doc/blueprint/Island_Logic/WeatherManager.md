@@ -69,9 +69,9 @@ Bobot adalah target emisi relatif terhadap `baseRate` prefab.
 | Nama | Nilai awal | Fungsi |
 |---|---|---|
 | `GameBalanceConfig.weather.presentBlendSeconds` | 6 | Sudah ada (#115). Lama crossfade, dikirim `RegionalWeather` |
-| `GameBalanceConfig.weather.audioVolume` | 0,8 | Volume dasar audio cuaca (usulan baru) |
-| `GameBalanceConfig.weather.insideVolumeMultiplier` | 0,3 | Pengali volume di dalam `InteriorZone` atau bangunan (usulan baru) |
-| `GameBalanceConfig.weather.insideBlendSeconds` | 1,5 | Transisi masuk dan keluar ruangan, sama dengan `environment.interiorBlendSeconds` (usulan baru) |
+| `GameBalanceConfig.weather.audioVolume` | 0,8 | Volume dasar audio cuaca (usulan baru, disetujui developer) |
+| `GameBalanceConfig.weather.insideVolumeMultiplier` | 0,3 | Pengali volume di dalam `InteriorZone` atau bangunan (usulan baru, disetujui developer) |
+| `GameBalanceConfig.weather.insideBlendSeconds` | 1,5 | Transisi masuk dan keluar ruangan, sama dengan `environment.interiorBlendSeconds` (usulan baru, disetujui developer) |
 
 Pengali kualitas partikel memakai `VFXManager.densityMultiplier` (#15), supaya pengaturan grafis rendah juga mengurangi hujan.
 
@@ -170,7 +170,7 @@ Kalau `Present` dipanggil lagi di tengah crossfade, deck yang sedang memudar dip
 
 1. **Tampilan per cuaca di tabel:** rekomendasi pakai sebagai nilai awal, lalu setel saat playtest.
 
-**Usulan baru, menunggu developer:**
+**Usulan baru (disetujui developer sebagai nilai awal):**
 
 2. **Audio loop dua deck di grup `Ambient`:** menggantikan `PlaySFX`, tanpa parameter mixer baru.
 3. **Volume di dalam ruangan 30 persen:** hujan tetap terdengar dari dalam base.

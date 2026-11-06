@@ -250,7 +250,7 @@ Dipanggil `RunLifecycle` langkah 10. `UIFocusStack.ClearForNewRun()` sudah menut
 
 **Usulan yang disetujui developer sebagai nilai awal (dicatat di #85):** tombol `Log` di `Pause` (#22), dan tombol Keluar dari Tersangkut di Fase 2 (#116).
 
-**Usulan baru di blueprint ini (tidak menghalangi kode):**
+**Usulan baru (disetujui developer sebagai nilai awal):**
 
 1. `UIManager` menjadi pemilik `ConfirmDialog`, dengan `ShowConfirm(ConfirmRequest)`.
 2. API `CinematicPanel` untuk fade hitam dan teks tengah, karena `DeathCinematic.md` sudah menyerahkan tugas ini ke `UIManager`.

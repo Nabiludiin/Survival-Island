@@ -120,7 +120,6 @@ Ukuran pool adalah data, dan berada di prefab `PersistentRoot`, bukan di logika.
 | `FX_CollapseDebris`, `FX_RepairHit`, `FX_UpgradeDust` | 8, 4, 4 | `Fixed` | **Usulan** (#79, #47) |
 | `Tribal_Snare`, `Thrown_Rock` | 6, 4 | `Fixed` | **Usulan** (#25, #94) |
 | Tag proyektil lempar (#96) | 4 per tag | `Fixed` | **Usulan** |
-| `SupplyPlane`, `SupplyCrate` | 1, 1 | `Fixed` | **Usulan** (#54) |
 
 **Perkiraan total:** sekitar 250 musuh dan 400 objek kecil. Angka ini masuk batas memori `streaming.baseMemoryLimitMB` (1.000 MB) milik `RegionStreaming.md`, yang sudah menghitung pool.
 
@@ -237,7 +236,7 @@ Dipanggil `RunLifecycle` langkah 10, setelah `ReturnAllActive` dan pergantian sc
 | `SpawnManager` (#62) | Memanggil `SpawnFromPool(enemyId, ...)` dan `ReturnToPool` lewat `Despawn`. Membaca `GetPoolSize` di `ValidatePools` |
 | `ShipHazardManager` (#75), `EnemyAI` | Zombie kapal memakai pool `zombie_standar`, dan kembali lewat `ReturnToPool` karena `SpawnManager` tidak ada di `ShipPhase` |
 | `WorldItemManager` (#66), `LootSpawnerSystem` | Pool `WorldItem_Generic` dan `ShipLoot_Generic` |
-| `CombatFeedbackUI` (#51), `AmbientAudio` (#52), `FireSystem` (#97), `DisasterManager` (#70), `BeachSupplyManager` (#71), `SupplyDrop` (#54), `ThrowableSystem` (#96), `SpecialZombieAI` (#25), `AITraversal` (#94), `DebrisRetrieval` (#106), `BuildMenu` (#79), `BuildingIntegrity` (#47) | Memanggil `SpawnFromPool` dan `ReturnToPool` untuk pool masing-masing |
+| `CombatFeedbackUI` (#51), `AmbientAudio` (#52), `FireSystem` (#97), `DisasterManager` (#70), `BeachSupplyManager` (#71), `ThrowableSystem` (#96), `SpecialZombieAI` (#25), `AITraversal` (#94), `DebrisRetrieval` (#106), `BuildMenu` (#79), `BuildingIntegrity` (#47) | Memanggil `SpawnFromPool` dan `ReturnToPool` untuk pool masing-masing |
 | `DevConsole` (#56) | Membaca jumlah objek. `killall` memakai jalur `SpawnManager` |
 
 ## 4. Kasus Khusus

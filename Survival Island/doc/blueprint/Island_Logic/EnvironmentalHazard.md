@@ -158,7 +158,7 @@ Sesuai keputusan developer, hanya damage pemain yang membatalkan terkaman Jaguar
 
 1. **Tong Merah:** GDD tidak menyebutnya. Radius 5 dan damage 100 berasal dari blueprint lama, dan dipindah ke `GameBalanceConfig.hazard` (#84).
 
-**Usulan baru, menunggu developer:**
+**Usulan baru (disetujui developer sebagai nilai awal):**
 
 2. **Pemicu:** peluru, ledakan, dan api memicu tong. Pukulan melee dan serangan zombie tidak.
 3. **Sumbu api 2 detik:** memberi waktu pemain menjauh saat Molotov mengenai tong.

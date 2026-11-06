@@ -147,7 +147,6 @@ Sistem baru menambahkan event ke tabel ini, bukan membuat jalur sendiri. Kolom S
 | Bencana | `BloodMoonEndedEvent` | `day` | `HordeManager` | Tidak |
 | Bencana | `BloodMoonWarningEvent` | `day` | `HordeManager` | Tidak |
 | Suplai | `BeachSupplyArrivedEvent` | `day`, `crateCount` | `BeachSupplyManager` | Tidak |
-| Suplai | `SupplyDropLandedEvent` | `position` | `SupplyDropManager` | Tidak |
 | Suplai | `BeachCrateOpenedEvent` | `day` | `BeachSupplyManager` | Tidak |
 | Base | `StructureBuiltEvent` | `structureId`, `buildableId`, `position` | `BuildManager` | Tidak |
 | Base | `StructureDamagedEvent` | `structureId`, `hpRatio`, `position` | `BaseHealth` | Tidak |
