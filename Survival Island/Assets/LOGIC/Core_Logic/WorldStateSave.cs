@@ -18,7 +18,8 @@ namespace SurvivalIsland
     /// Aturan pertempuran (musuh dalam radius, PlayerDamagedEvent, VitalWarningChangedEvent, rasio HP, SleepSystem,
     /// PlayerTraversal), SpawnManager.EngagedEnemyCount dan RequestAmbush (#62), dan notifikasi (#22) sudah tersambung.
     /// Belum diimplementasikan, ditandai TODO di kode:
-    /// - RegionStreaming.CaptureLoadedRegions dan RegionStateStore (regionStoreJson) — #88, menunggu penyiapan scene region.
+    /// RegionStreaming.CaptureLoadedRegions dan RegionStateStore (regionStoreJson, #88) sudah tersambung. Tanpa RegionStreaming
+    /// (scene uji), regionStoreJson kosong dan objek region memakai jalur cadangan Register (RegionSaveRouting).
     /// - Alat Editor SaveIdAuditWindow.
     /// </summary>
     public class WorldStateSave : MonoBehaviour, IBootstrapService
@@ -276,7 +277,8 @@ namespace SurvivalIsland
             string json;
             try
             {
-                // 4. TODO #88: RegionStreaming.Instance.CaptureLoadedRegions();
+                // 4. Region yang dimuat menulis statusnya ke RegionStateStore (#88). Region lain sudah ada di Store.
+                if (RegionStreaming.Instance != null) RegionStreaming.Instance.CaptureLoadedRegions();
                 // 5-6. Exception dari satu sistem menggagalkan save, bukan menulis file setengah jadi.
                 json = BuildEnvelopeJson(reason);
             }
@@ -360,8 +362,8 @@ namespace SurvivalIsland
                 engagedEnemyCount = engaged,
                 seed = seeds.CaptureSave(),
                 game = gm.CaptureRunData(),
-                // TODO #88: RegionStateStore.ToSaveJson().
-                regionStoreJson = string.Empty
+                // #88: status semua region, termasuk yang tidak dimuat.
+                regionStoreJson = RegionStreaming.Instance != null ? RegionStreaming.Instance.Store.ToSaveJson() : string.Empty
             };
 
             var ordered = GetSortedRegistered();
@@ -663,13 +665,18 @@ namespace SurvivalIsland
                 return;
             }
 
-            // TODO #88: RegionStateStore memuat loadedPayload.regionStoreJson (LoadOrder 20).
-
             var entries = loadedPayload.entries ?? Array.Empty<SaveEntry>();
             var ordered = GetSortedRegistered();
+            bool storeLoaded = false;
             for (int i = 0; i < ordered.Count; i++)
             {
                 var saveable = ordered[i];
+                // Urutan 2 (LoadOrder 20): regionStoreJson diisi sebelum sistem LoadOrder di atas 20 dan sebelum region dimuat.
+                if (!storeLoaded && saveable.LoadOrder > 20)
+                {
+                    LoadRegionStore();
+                    storeLoaded = true;
+                }
                 int index = FindEntry(entries, saveable.SaveId);
                 if (index < 0) continue;   // Sistem tanpa data memakai nilai awal
                 try
@@ -683,11 +690,27 @@ namespace SurvivalIsland
                 }
             }
 
+            if (!storeLoaded) LoadRegionStore();
+
             for (int i = 0; i < entries.Length; i++)
             {
                 if (FindRegistered(entries[i].id) == null)
                     Debug.LogWarning($"[WorldStateSave] Data '{entries[i].id}' tidak punya pemilik. Diabaikan.");
             }
+        }
+
+        /// <summary>RegionStateStore memuat regionStoreJson (#88). Tanpa RegionStreaming (scene uji), data itu diabaikan.</summary>
+        private void LoadRegionStore()
+        {
+            var rs = RegionStreaming.Instance;
+            if (rs == null)
+            {
+                if (!string.IsNullOrEmpty(loadedPayload.regionStoreJson))
+                    Debug.LogWarning("[WorldStateSave] regionStoreJson ada, tetapi RegionStreaming tidak ada di scene ini. Diabaikan.");
+                return;
+            }
+            try { rs.Store.LoadFromSaveJson(loadedPayload.regionStoreJson); }
+            catch (Exception ex) { Debug.LogException(ex); }
         }
 
         /// <summary>Panggil OnRestoreFinished (event sticky dikirim ulang), lalu aturan keluar saat pertempuran.</summary>

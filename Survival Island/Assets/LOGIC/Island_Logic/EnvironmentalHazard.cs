@@ -30,6 +30,7 @@ namespace SurvivalIsland
         private bool hasExploded;
         private bool isArmed;
         private bool armedByPlayer;
+        private bool registeredForSave;
 
         public bool IsAlive => !hasExploded;
         public bool HasExploded => hasExploded;
@@ -43,6 +44,13 @@ namespace SurvivalIsland
             if (saveTag == null) saveTag = GetComponent<SaveIdTag>();
             if (noiseEmitter == null) noiseEmitter = GetComponent<NoiseEmitter>();
             if (flammable == null) flammable = GetComponentInChildren<Flammable>(true);
+            // Objek region: RegionStateStore (#88). Tanpa RegionStreaming (scene uji): jalur cadangan WorldStateSave.
+            registeredForSave = RegionSaveRouting.Register(this, this);
+        }
+
+        private void OnDestroy()
+        {
+            RegionSaveRouting.Unregister(this, ref registeredForSave);
         }
 
         private void OnEnable()

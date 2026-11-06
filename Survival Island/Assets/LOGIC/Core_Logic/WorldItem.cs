@@ -7,8 +7,8 @@ namespace SurvivalIsland
     /// Blueprint: Core_Logic/ItemUseSystem.md bagian "WorldItem" (#66). Layer WorldItem (PhysicsLayers.md).
     ///
     /// IInteractable (#17): Interact memanggil TryPickUp(ctx.Inventory), tanpa tahan (IslandInteractable.md, "Item jatuh").
-    /// Belum ada: sourceSpawner/sourcePointIndex (LootSpawnerSystem #89) dan homeRegion (RegionType, #88).
-    /// LootSpawnerSystem sementara mencocokkan sendiri item miliknya (SyncLiveItems).
+    /// sourceSpawner/sourcePointIndex (LootSpawnerSystem #89): diisi spawner, dikosongkan OnReturned. homeRegion (#88):
+    /// diisi WorldItemManager dari RegionStreaming.RegionOf saat muncul dan saat dicatat.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class WorldItem : MonoBehaviour, IPoolable, IInteractable
@@ -33,6 +33,12 @@ namespace SurvivalIsland
         public bool Despawns { get; private set; }
         public float despawnAtGameHour = -1f;            // -1 = tidak hilang
         public float SpawnedAtGameHour { get; private set; }
+
+        /// <summary>Sumber loot (#89). null kalau item dijatuhkan, tumpah dari peti, atau jatuh dari musuh.</summary>
+        public LootSpawnerSystem sourceSpawner;
+        public int sourcePointIndex = -1;
+        /// <summary>Region tempat item berada (ItemUseSystem.md, #88).</summary>
+        public RegionType homeRegion;
 
         private void Awake()
         {
@@ -63,6 +69,9 @@ namespace SurvivalIsland
             Amount = 0;
             Despawns = false;
             despawnAtGameHour = -1f;
+            // Rujukan lama tidak boleh memanggil MarkTaken pada spawner yang salah (LootSpawnerSystem.md Kasus Khusus).
+            sourceSpawner = null;
+            sourcePointIndex = -1;
             if (body != null)
             {
                 body.linearVelocity = Vector3.zero;
@@ -89,6 +98,20 @@ namespace SurvivalIsland
             if (meshCollider != null && meshFilter != null) meshCollider.sharedMesh = meshFilter.sharedMesh;
         }
 
+        /// <summary>Pindahkan item diam di posisi baru (pulih dari RegionStateStore, atau dipindah air pasang #91).</summary>
+        public void PlaceAt(Vector3 pos, Quaternion rot)
+        {
+            transform.SetPositionAndRotation(pos, rot);
+            if (body == null) return;
+            body.position = pos;
+            body.rotation = rot;
+            if (!body.isKinematic)
+            {
+                body.linearVelocity = Vector3.zero;
+                body.angularVelocity = Vector3.zero;
+            }
+        }
+
         /// <summary>Dorongan kecil saat dibuang (ItemUseSystem.md, DropFromSlot langkah 4).</summary>
         public void Push(Vector3 impulse)
         {
@@ -112,11 +135,12 @@ namespace SurvivalIsland
             if (rest > 0)
             {
                 Amount = rest;
-                // TODO #89: sourceSpawner?.UpdateRemaining(sourcePointIndex, rest).
+                // Tanpa ini, load memulihkan jumlah awal dan barang berlipat (ItemUseSystem.md langkah 3).
+                if (sourceSpawner != null) sourceSpawner.UpdateRemaining(sourcePointIndex, rest);
                 if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.partial_pickup", NotificationKind.Info);   // "Sebagian terambil" (#22)
                 return true;
             }
-            // TODO #89: sourceSpawner?.MarkTaken(sourcePointIndex);
+            if (sourceSpawner != null) sourceSpawner.MarkTaken(sourcePointIndex);
             if (WorldItemManager.Instance != null) WorldItemManager.Instance.Despawn(this);
             else if (ObjectPooler.Instance != null) ObjectPooler.Instance.ReturnToPool(PoolTag, gameObject);
             return true;
@@ -151,6 +175,13 @@ namespace SurvivalIsland
         private void OnTriggerEnter(Collider other)
         {
             if (Instance == null || other.gameObject.layer != LayerMask.NameToLayer(PhysicsMasks.WaterLayer)) return;
+            EnterWater();
+        }
+
+        /// <summary>Aturan air (#66). Dipakai juga WorldItemManager.SweepBelow untuk barang biasa saat air pasang (#91).</summary>
+        public void EnterWater()
+        {
+            if (Instance == null) return;
             body.linearDamping = waterDrag;
             var data = ItemDatabase.Get(Instance.itemId);
             if (data != null && !data.isDroppable) return;   // Item penting tidak hilang (#116)

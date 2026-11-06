@@ -11,8 +11,8 @@ namespace SurvivalIsland
     /// Node tidak pernah di-Destroy: saat habis hanya berganti status dan visual, sehingga tunggul tetap ber-collider.
     ///
     /// Catatan implementasi (Langkah 4):
-    /// - RegionStreaming dan RegionStateStore (#88) belum ada, jadi region node diisi lewat field region di Inspector,
-    ///   dan node mendaftar langsung ke WorldStateSave (LoadOrder 0). TODO #88: pindah ke RegionStateStore.
+    /// - Region node dari RegionSceneRoot induk, status lewat RegionStateStore (#88, RegionSaveRouting). Tanpa RegionStreaming
+    ///   (scene uji): region dari Inspector, dan node mendaftar ke WorldStateSave (LoadOrder 0) sebagai jalur cadangan.
     /// - VFXManager.Play (#15), NotificationManager "Butuh alat lain" (#22), dan NoiseEmitter (#49) sudah disambung.
     ///   Belum ada (TODO): suara 3D lewat AudioManager (#16, sementara AudioSource opsional di node),
     ///   Flammable (#97).
@@ -21,7 +21,7 @@ namespace SurvivalIsland
     public class ResourceNode : MonoBehaviour, ISaveable, IRegrowable
     {
         [SerializeField] private ResourceNodeData data;
-        [Tooltip("Region node ini. Sementara diisi tangan sampai RegionStreaming (#88) ada.")]
+        [Tooltip("Region node ini. Dibaca dari RegionSceneRoot induk kalau ada (#88); isian ini untuk scene uji.")]
         [SerializeField] private RegionType region = RegionType.Volcano;
         [SerializeField] private GameObject standingVisual;
         [SerializeField] private GameObject depletedVisual;
@@ -42,6 +42,7 @@ namespace SurvivalIsland
 
         private int currentHits;
         private SaveIdTag saveTag;
+        private bool registeredForSave;
         private float shakeTimer;
         private Quaternion visualBaseRotation;
 
@@ -53,6 +54,8 @@ namespace SurvivalIsland
         private void Awake()
         {
             saveTag = GetComponent<SaveIdTag>();
+            // Region dari RegionSceneRoot induk (#88). Isian Inspector hanya untuk scene uji tanpa RegionSceneRoot.
+            if (RegionSceneRoot.TryGetRegionOf(this, out var r)) region = r;
             if (colliders == null || colliders.Length == 0) colliders = GetComponents<Collider>();
             currentHits = data != null ? data.maxHits : 1;
             if (standingVisual != null) visualBaseRotation = standingVisual.transform.localRotation;
@@ -61,14 +64,15 @@ namespace SurvivalIsland
 
         private void OnEnable()
         {
-            if (WorldStateSave.Instance != null && saveTag != null) WorldStateSave.Instance.Register(this);
+            // Objek region: RegionStateStore (#88). Tanpa RegionStreaming: jalur cadangan WorldStateSave (RegionSaveRouting).
+            if (saveTag != null) registeredForSave = RegionSaveRouting.Register(this, this);
             // Node habis yang dimuat ulang ikut jadwal tumbuh lagi.
             if (IsDepleted && ResourceRespawn.Instance != null) ResourceRespawn.Instance.MarkDepleted(this);
         }
 
         private void OnDisable()
         {
-            if (WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
+            RegionSaveRouting.Unregister(this, ref registeredForSave);
             if (ResourceRespawn.Instance != null) ResourceRespawn.Instance.Forget(this);
         }
 

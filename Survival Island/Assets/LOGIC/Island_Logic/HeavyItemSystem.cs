@@ -34,7 +34,9 @@ namespace SurvivalIsland
     /// Penyimpangan sementara (Catatan Implementasi Langkah 6 di blueprint):
     /// - RunSeedManager.BuildLayout masih kosong (#89). Kalau CurrentLayout.partPointByPart kurang, titik dipilih di sini
     ///   dengan aturan yang sama (Fork PartLocation 0, Shuffle, minPartPointSpacing).
-    /// - RegionStreaming (#88) belum ada: semua barang aktif sejak awal, tanpa RegionLoadStateChangedEvent dan batas bawah region.
+    /// - RegionStreaming (#88): barang Lying hanya aktif kalau regionnya Loaded (RegionLoadStateChangedEvent), dan
+    ///   RecoveryTick memeriksa batas bawah RegionRecord.bounds. Tanpa RegionStreaming (scene uji), semua barang aktif.
+    ///   Data barang tetap di world_parts (manager IslandPhase), bukan RegionStateStore.
     /// - SwimStateChangedEvent (#13, cadangan PlayerTraversal.Mode), CompassSystem (#30), LoreHintGrantedEvent (#100), dan
     ///   notifikasi (#22) sudah disambung. Belum ada (TODO): VFXManager (#15).
     /// </summary>
@@ -94,7 +96,8 @@ namespace SurvivalIsland
             EventChannel<PlayerDiedEvent>.Raised += HandleDied;
             EventChannel<RunEndedEvent>.Raised += HandleRunEnded;
             EventChannel<LoreHintGrantedEvent>.Raised += HandleLoreHint;   // #100
-            // SwimStateChangedEvent (#13) dibaca dari nilai sticky saat membawa barang. TODO #88: RegionLoadStateChangedEvent.
+            // SwimStateChangedEvent (#13) dibaca dari nilai sticky saat membawa barang.
+            EventChannel<RegionLoadStateChangedEvent>.Raised += HandleRegionLoadState;   // #88
             if (WorldStateSave.Instance != null)
             {
                 WorldStateSave.Instance.Register(this);
@@ -116,6 +119,7 @@ namespace SurvivalIsland
             EventChannel<PlayerDiedEvent>.Raised -= HandleDied;
             EventChannel<RunEndedEvent>.Raised -= HandleRunEnded;
             EventChannel<LoreHintGrantedEvent>.Raised -= HandleLoreHint;
+            EventChannel<RegionLoadStateChangedEvent>.Raised -= HandleRegionLoadState;
             if (registeredForSave && WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
             registeredForSave = false;
         }
@@ -236,8 +240,11 @@ namespace SurvivalIsland
                 if (item == null) item = go.AddComponent<HeavyItem>();
                 item.Bind(i);
                 instances[i] = item;
-                // TODO #88: matikan sampai Region4_Village berstatus Loaded.
-                go.SetActive(r.state != PartState.Installed);
+                // Barang tergeletak dimatikan sampai regionnya (awalnya Region4_Village) berstatus Loaded (#88).
+                // Barang Carried dipasang ke pemain di OnRestoreFinished, jadi tetap aktif.
+                bool show = r.state == PartState.Carried
+                    || (r.state == PartState.Lying && RegionStreaming.IsRegionLoaded(r.region));
+                go.SetActive(show);
             }
         }
 
@@ -317,6 +324,8 @@ namespace SurvivalIsland
                 }
                 records[index].position = item.transform.position;
                 records[index].rotation = item.transform.rotation;
+                // Barang jatuh di sisi tempat pemain berada (#88 Kasus Khusus "Serangan saat menyeberang seam").
+                records[index].region = RegionStreaming.RegionOf(item.transform.position);
             }
 
             // 4.
@@ -459,12 +468,13 @@ namespace SurvivalIsland
                 var item = i < instances.Length ? instances[i] : null;
                 if (r.state != PartState.Lying || item == null || !item.gameObject.activeInHierarchy) continue;
 
-                // 1. Barang yang masih bergerak dilewati. TODO #88: kecuali di bawah RegionRecord.bounds.min.y.
-                if (item.Body != null && !item.Body.isKinematic && !item.Body.IsSleeping()) continue;
+                // 1. Barang yang masih bergerak dilewati, kecuali sudah di bawah RegionRecord.bounds.min.y (#88).
+                Vector3 pos = item.transform.position;
+                bool belowRegion = IsBelowRegion(r.region, pos);
+                if (!belowRegion && item.Body != null && !item.Body.isKinematic && !item.Body.IsSleeping()) continue;
 
                 // 2-3.
-                Vector3 pos = item.transform.position;
-                if (!NavMesh.SamplePosition(pos, out _, hb.navSampleRadius, NavMesh.AllAreas))
+                if (belowRegion || !NavMesh.SamplePosition(pos, out _, hb.navSampleRadius, NavMesh.AllAreas))
                 {
                     ReturnToValid(i);
                     continue;
@@ -472,6 +482,7 @@ namespace SurvivalIsland
                 r.position = pos;
                 r.rotation = item.transform.rotation;
                 r.lastValidPosition = pos;
+                r.region = RegionStreaming.RegionOf(pos);
 
                 // Penemuan: barang dalam discoverRadius ditandai (usulan 5), dan penanda kompas mengikuti posisinya (#30).
                 if (player != null && !r.isDiscovered && (pos - playerPos).sqrMagnitude <= discoverSqr) r.isDiscovered = true;
@@ -504,8 +515,64 @@ namespace SurvivalIsland
                 if (item.Body != null) item.Body.position = target;
             }
             r.position = target;
+            r.region = RegionStreaming.RegionOf(target);
             // Notifikasi "Suku cadang dikembalikan" (#22).
             if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.part_returned", NotificationKind.Info);
+        }
+
+        /// <summary>Posisi di bawah RegionRecord.bounds.min.y (jatuh keluar peta). Tanpa RegionStreaming selalu false.</summary>
+        private static bool IsBelowRegion(RegionType region, Vector3 pos)
+        {
+            var rs = RegionStreaming.Instance;
+            return rs != null && rs.TryGetBounds(region, out var b) && b.size != Vector3.zero && pos.y < b.min.y;
+        }
+
+        // ---------------------------------------------------------------- Region dilepas dan dimuat (#88)
+
+        /// <summary>
+        /// HeavyItemSystem.md "Region dilepas dan dipindahkan": Unloading menyalin barang Lying di region itu ke records,
+        /// membuatnya kinematic, lalu mematikannya. Loaded menyalakan barang di posisi tersimpan. Barang yang dibawa adalah
+        /// anak pemain, jadi tidak terpengaruh.
+        /// </summary>
+        private void HandleRegionLoadState(RegionLoadStateChangedEvent e)
+        {
+            if (e.state != RegionLoadState.Unloading && e.state != RegionLoadState.Loaded) return;
+            for (int i = 0; i < records.Length; i++)
+            {
+                var r = records[i];
+                var item = i < instances.Length ? instances[i] : null;
+                if (r == null || item == null || r.state != PartState.Lying) continue;
+
+                if (e.state == RegionLoadState.Unloading)
+                {
+                    if (!item.gameObject.activeSelf) continue;
+                    // Region dihitung dari posisi saat ini, karena barang bisa terguling melewati batas.
+                    r.position = item.transform.position;
+                    r.rotation = item.transform.rotation;
+                    r.region = RegionStreaming.RegionOf(r.position);
+                    if (r.region != e.region) continue;
+                    if (item.Body != null)
+                    {
+                        item.Body.linearVelocity = Vector3.zero;
+                        item.Body.angularVelocity = Vector3.zero;
+                        item.Body.isKinematic = true;
+                    }
+                    item.gameObject.SetActive(false);
+                }
+                else
+                {
+                    if (r.region != e.region || item.gameObject.activeSelf) continue;
+                    item.transform.SetPositionAndRotation(r.position, r.rotation);
+                    item.gameObject.SetActive(true);
+                    // Fisika kembali seperti barang yang dijatuhkan (Drop memakai isKinematic = false).
+                    if (item.Body != null)
+                    {
+                        item.Body.position = r.position;
+                        item.Body.rotation = r.rotation;
+                        item.Body.isKinematic = false;
+                    }
+                }
+            }
         }
 
         // ---------------------------------------------------------------- Titik pasang dan penanda

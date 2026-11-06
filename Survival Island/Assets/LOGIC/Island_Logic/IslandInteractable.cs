@@ -22,9 +22,10 @@ namespace SurvivalIsland
     /// membawa Heavy Item hanya pintu yang boleh dipakai). Highlight Available/Blocked mengikuti CanInteract.
     ///
     /// Catatan implementasi (sistem pendukung, juga di blueprint):
-    /// - RegionStreaming/RegionStateStore (#88) belum ada. Objek dengan saveId mendaftar sendiri ke WorldStateSave sebagai
-    ///   jalur cadangan (pola LootSpawnerSystem). Pendaftaran di Awake dan dilepas di OnDestroy, bukan OnEnable/OnDisable,
-    ///   supaya objek yang sudah dipakai (dimatikan) tetap tersimpan sebagai isConsumed. saveId kosong = tidak disimpan.
+    /// - Objek di region scene disimpan lewat RegionStateStore (#88, RegionSaveRouting). Tanpa RegionStreaming (scene uji),
+    ///   objek dengan saveId mendaftar sendiri ke WorldStateSave sebagai jalur cadangan. Pendaftaran di Awake dan dilepas di
+    ///   OnDestroy, bukan OnEnable/OnDisable, supaya objek yang sudah dipakai (dimatikan) tetap tersimpan sebagai isConsumed.
+    ///   saveId kosong = tidak disimpan.
     /// - PlayerInteractor belum mengisi InteractContext.IsCarryingHeavyItem (#69), jadi HeavyItemSystem.IsCarrying juga dibaca.
     /// </summary>
     public abstract class IslandInteractable : MonoBehaviour, IInteractable, ISaveable
@@ -54,18 +55,13 @@ namespace SurvivalIsland
         protected virtual void Awake()
         {
             if (highlight == null) highlight = GetComponentInChildren<InteractHighlight>();
-            // TODO(RegionStreaming): objek region disimpan lewat RegionStateStore (#88), bukan WorldStateSave.Register.
-            if (!string.IsNullOrEmpty(saveId) && WorldStateSave.Instance != null)
-            {
-                WorldStateSave.Instance.Register(this);
-                registeredForSave = true;
-            }
+            // Objek region disimpan lewat RegionStateStore (#88); tanpa RegionStreaming, jalur cadangan WorldStateSave.Register.
+            if (!string.IsNullOrEmpty(saveId)) registeredForSave = RegionSaveRouting.Register(this, this);
         }
 
         protected virtual void OnDestroy()
         {
-            if (registeredForSave && WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
-            registeredForSave = false;
+            RegionSaveRouting.Unregister(this, ref registeredForSave);
         }
 
         // ---------------------------------------------------------------- IInteractable

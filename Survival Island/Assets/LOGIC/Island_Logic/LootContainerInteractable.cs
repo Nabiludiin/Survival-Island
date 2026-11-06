@@ -88,7 +88,8 @@ namespace SurvivalIsland
             else
                 pos = transform.position + transform.forward * 0.8f + Vector3.up * 0.3f;
             dropIndex++;
-            // TODO(RegionStreaming): WorldItem hasil peti disimpan di RegionStateStore (#66, #88), jadi peti tidak bisa diulang.
+            // WorldItem hasil peti dicatat WorldItemManager ke RegionStateStore saat region dilepas atau disimpan (#66, #88),
+            // dan peti tetap isOpened, jadi isinya tidak bisa diulang.
             WorldItemManager.Instance.Spawn(inv.CreateInstance(item), amount, pos, false);
         }
 

@@ -458,3 +458,10 @@ Kode: `WorldStateSave.cs`, `WorldStateSaveData.cs`, `ISaveable.cs`, dan `SaveIdT
 - **`AppQuit` saat menulis:** kalau `writeTask.Wait` habis waktu, save `AppQuit` dibatalkan dengan log kesalahan.
 - Penulisan langsung (tanpa thread lain) hanya untuk `QuitToMenu` dan `AppQuit`. Alasan lain, termasuk `ArrivedOnIsland` dan `Manual`, memakai `Task.Run`.
 - Belum ada: `RegionStateStore`/`CaptureLoadedRegions` (#88), cek musuh di sekitar pemain, `PlayerDamagedEvent`, `VitalWarningChangedEvent`, rasio HP, `SleepSystem`, `PlayerTraversal`, `SpawnManager.RequestAmbush`, notifikasi #22, dan `SaveIdAuditWindow`. Semuanya ditandai TODO di kode.
+
+## 8. Catatan Implementasi (Sistem pendukung, #88)
+
+- `WriteNow` langkah 4 memanggil `RegionStreaming.Instance.CaptureLoadedRegions()`, dan `regionStoreJson` diisi `RegionStreaming.Instance.Store.ToSaveJson()`. Tanpa `RegionStreaming` (scene uji), `regionStoreJson` kosong.
+- `RestoreBaseScene` memuat `regionStoreJson` ke `RegionStreaming.Instance.Store` tepat sebelum sistem pertama dengan `LoadOrder` di atas 20 (urutan 2 di tabel), atau di akhir kalau tidak ada. Tanpa `RegionStreaming`, data itu diabaikan dengan peringatan.
+- **Jalur cadangan objek region:** `RegionSaveRouting` (`RegionStateStore.cs`) mendaftarkan objek region ke `Register` hanya kalau `RegionStreaming` tidak ada atau objek tidak berada di bawah `RegionSceneRoot`. Dengan begitu tabel "Pendaftaran" tetap berlaku di game sebenarnya, dan scene uji tetap bisa save/load (keputusan sesi induk). Objek region yang sebelumnya tidak mendaftar sama sekali (`EnvironmentalHazard`, `HelipadFoundVolume`, `LowTideSpot`) sekarang ikut jalur cadangan ini.
+- `WorldItemManager` mendaftar sebagai `world_items` (`LoadOrder` 0, tidak ada di tabel) untuk jalur cadangan. Dengan `RegionStreaming`, entri itu berisi daftar kosong, karena `WorldItem` lepas ada di `RegionStateStore`. Tafsiran paling sederhana: `RegionStreaming` di `IslandPhase` mungkin belum `Awake` saat `WorldItemManager.OnEnable`, jadi pilihan isi dibuat saat `CaptureState`.

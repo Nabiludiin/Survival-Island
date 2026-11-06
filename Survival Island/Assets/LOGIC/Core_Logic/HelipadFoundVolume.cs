@@ -8,8 +8,8 @@ namespace SurvivalIsland
     /// GDD bagian 5 Region 3: helipad tempat helikopter. Blueprint: Core_Logic/NarrativeSequencer.md (#99),
     /// bagian "HelipadFoundVolume". Usulan 6 disetujui developer: adegan ini membekukan dunia.
     ///
-    /// Collider trigger di layer ZoneTrigger. ISaveable objek region: tidak mendaftar sendiri, dikumpulkan
-    /// RegionSceneRoot (#88) dan disimpan di RegionStateStore.
+    /// Collider trigger di layer ZoneTrigger. ISaveable objek region: dikumpulkan RegionSceneRoot (#88) dan disimpan di
+    /// RegionStateStore; tanpa RegionStreaming (scene uji) mendaftar ke WorldStateSave lewat RegionSaveRouting.
     /// </summary>
     [RequireComponent(typeof(Collider))]
     public class HelipadFoundVolume : MonoBehaviour, ISaveable
@@ -21,9 +21,14 @@ namespace SurvivalIsland
         [SerializeField] private string sceneId = NarrativeSequencer.HelipadFound;
 
         private bool isConsumed;
+        private bool registeredForSave;
 
         public string SaveId => saveId;
         public int LoadOrder => 0;   // Objek region
+
+        // Di region scene: RegionStateStore (#88). Scene uji tanpa RegionStreaming: jalur cadangan WorldStateSave.
+        private void Awake() { registeredForSave = RegionSaveRouting.Register(this, this); }
+        private void OnDestroy() { RegionSaveRouting.Unregister(this, ref registeredForSave); }
 
         private void OnTriggerEnter(Collider other)
         {

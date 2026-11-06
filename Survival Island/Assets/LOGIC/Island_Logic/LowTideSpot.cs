@@ -17,11 +17,16 @@ namespace SurvivalIsland
         [SerializeField] private InteractHighlight highlight;
 
         private bool harvestedToday;
+        private bool registeredForSave;
 
         private void Awake()
         {
             if (saveTag == null) saveTag = GetComponent<SaveIdTag>();
+            // Objek region: RegionStateStore (#88). Tanpa RegionStreaming (scene uji): jalur cadangan WorldStateSave.
+            registeredForSave = RegionSaveRouting.Register(this, this);
         }
+
+        private void OnDestroy() { RegionSaveRouting.Unregister(this, ref registeredForSave); }
 
         private void OnEnable() { EventChannel<DayChangedEvent>.Raised += HandleDayChanged; }
         private void OnDisable() { EventChannel<DayChangedEvent>.Raised -= HandleDayChanged; }

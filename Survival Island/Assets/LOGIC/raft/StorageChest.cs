@@ -29,7 +29,8 @@ namespace SurvivalIsland
     /// - IslandInteractable (#17) belum ada, jadi kelas ini menerapkan IInteractable langsung.
     /// - SpillContents dipanggil dari StructureDestroyedEvent milik peti ini. BaseHealth.Remove (bongkar) dan kematian
     ///   (TakeDamage) sama-sama menerbitkan event itu, jadi satu jalur menutup keduanya.
-    /// - Peti nonaktif di region yang dilepas (#90) tidak mendengar event: TODO(RemoteBaseSimulation #90 / RegionStateStore #88).
+    /// - Isi yang tumpah di region yang tidak dimuat ditulis ke RegionStateStore lewat WorldItemManager.SpawnOrStore (#88).
+    ///   Peti nonaktif di region yang dilepas (#90) tetap tidak mendengar StructureDestroyedEvent: TODO(RemoteBaseSimulation #90).
     /// </summary>
     public class StorageChest : MonoBehaviour, IInteractable, ISaveable
     {
@@ -230,9 +231,9 @@ namespace SurvivalIsland
                     Vector2 r = UnityEngine.Random.insideUnitCircle * radius;
                     Vector3 pos = transform.position + new Vector3(r.x, 1.5f, r.y);
                     if (PhysicsQuery.Raycast(new Ray(pos, Vector3.down), out var hit, 4f, PhysicsMasks.Ground)) pos = hit.point + Vector3.up * 0.15f;
-                    wim.Spawn(s.instance, s.amount, pos, false);
+                    // Peti di region yang tidak dimuat (#90): data item masuk RegionStateStore dan muncul saat region kembali (#88).
+                    wim.SpawnOrStore(s.instance, s.amount, pos, false);
                 }
-                // TODO(RegionStateStore #88): peti di region yang tidak dimuat menyimpan data item ke RegionStateStore.
             }
             // 3.
             for (int i = 0; i < slots.Length; i++) slots[i].Clear();

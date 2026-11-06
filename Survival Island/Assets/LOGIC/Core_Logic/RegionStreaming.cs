@@ -41,7 +41,8 @@ namespace SurvivalIsland
     /// - Data region dan seam (koordinat Bounds, posisi seam, link) diisi di Inspector. Layout peta usulan ada di blueprint;
     ///   scene region belum dibuat, jadi tidak ada angka koordinat di kode.
     /// - Panel Loading saat tertahan lama dicari sekali dengan FindFirstObjectByType (RunLifecycle tidak membuka API).
-    /// - WorldItemManager.CaptureRegion/RestoreRegion (#66) belum ada: TODO di CaptureRegion dan RestoreRegion.
+    /// - WorldItem lepas dicatat WorldItemManager.CaptureRegion/RestoreRegion (#66). Saat save (CaptureLoadedRegions)
+    ///   objeknya tetap di dunia; hanya saat region dilepas objek dikembalikan ke pool.
     /// - Perintah streamstat dan streamdelay (#56) milik DevConsole; kelas ini membuka DebugExtraDelaySeconds dan DebugStatLine.
     /// </summary>
     public class RegionStreaming : MonoBehaviour
@@ -157,6 +158,14 @@ namespace SurvivalIsland
         /// <summary>true kalau region dimuat, atau RegionStreaming tidak ada (scene uji dengan satu scene).</summary>
         public static bool IsRegionLoaded(RegionType region) => Instance == null || Instance.IsLoaded(region);
 
+        /// <summary>Bounds region dari Inspector (dipakai batas bawah HeavyItemSystem, #69).</summary>
+        public bool TryGetBounds(RegionType region, out Bounds bounds)
+        {
+            var r = Find(region);
+            bounds = r != null ? r.bounds : default;
+            return r != null;
+        }
+
         public RegionLoadState GetState(RegionType region)
         {
             var r = Find(region);
@@ -183,7 +192,7 @@ namespace SurvivalIsland
             for (int i = 0; i < regions.Length; i++)
             {
                 var r = regions[i];
-                if (r != null && r.state == RegionLoadState.Loaded) CaptureRegion(r.region);
+                if (r != null && r.state == RegionLoadState.Loaded) CaptureRegion(r.region, false);
             }
             SyncUnloadHoursToStore();
         }
@@ -433,7 +442,7 @@ namespace SurvivalIsland
             // 2.
             yield return null;
             // 3.
-            CaptureRegion(r.region);
+            CaptureRegion(r.region, true);
             r.lastUnloadedGameHour = NowGameHours();
             Store.SetLastUnloadedGameHour(r.region, r.lastUnloadedGameHour);
             // 4.
@@ -462,8 +471,11 @@ namespace SurvivalIsland
 
         // ---------------------------------------------------------------- Status objek region
 
-        /// <summary>Tulis status semua ISaveable di region ini ke Store.</summary>
-        public void CaptureRegion(RegionType region)
+        /// <summary>
+        /// Tulis status semua ISaveable di region ini ke Store. releasing = true saat region dilepas: WorldItem lepas
+        /// dikembalikan ke pool. false saat save (CaptureLoadedRegions): objek tetap di dunia.
+        /// </summary>
+        public void CaptureRegion(RegionType region, bool releasing)
         {
             var root = RegionSceneRoot.Get(region);
             if (root == null) return;
@@ -476,12 +488,15 @@ namespace SurvivalIsland
                 try { Store.Write(region, s.SaveId, s.CaptureState()); }
                 catch (Exception ex) { Debug.LogException(ex); }
             }
-            // TODO(WorldItemManager #66): WorldItemManager.Instance.CaptureRegion(region, Store) mencatat WorldItem lepas.
+            // WorldItem lepas (#66) dicatat terpisah, karena objeknya milik pool di PersistentRoot, bukan region scene.
+            if (WorldItemManager.Instance != null) WorldItemManager.Instance.CaptureRegion(region, Store, releasing);
         }
 
         /// <summary>Isi status objek region dari Store, lalu OnRestoreFinished. Pencarian ISaveable hanya sekali.</summary>
         public void RestoreRegion(RegionType region)
         {
+            // WorldItem lepas dimunculkan kembali (#66), juga kalau RegionSceneRoot tidak ditemukan.
+            if (WorldItemManager.Instance != null) WorldItemManager.Instance.RestoreRegion(region, Store);
             var root = RegionSceneRoot.Get(region);
             if (root == null)
             {
@@ -502,7 +517,6 @@ namespace SurvivalIsland
                 try { list[i]?.OnRestoreFinished(); }
                 catch (Exception ex) { Debug.LogException(ex); }
             }
-            // TODO(WorldItemManager #66): WorldItemManager.Instance.RestoreRegion(region, Store).
         }
 
         // ---------------------------------------------------------------- Seam dan NavMeshLink

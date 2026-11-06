@@ -113,4 +113,42 @@ namespace SurvivalIsland
             }
         }
     }
+
+    /// <summary>
+    /// Satu jalur simpan untuk objek dunia yang bisa berada di region scene (#88, WorldStateSave.md "Pendaftaran").
+    /// - Ada RegionStreaming dan objek berada di bawah RegionSceneRoot: status dipegang RegionStateStore lewat
+    ///   RegionStreaming.CaptureRegion/RestoreRegion. Objek TIDAK mendaftar ke WorldStateSave (tidak tersimpan dua kali).
+    /// - Selain itu (scene uji tanpa RegionStreaming, atau objek di luar region scene): jalur cadangan WorldStateSave.Register.
+    /// Keputusan sesi induk: scene uji tanpa RegionStreaming tetap bisa save/load.
+    /// </summary>
+    public static class RegionSaveRouting
+    {
+        /// <summary>true kalau status objek ini dipegang RegionStateStore.</summary>
+        public static bool IsStoredByRegion(Component owner)
+        {
+            // GetComponentInParent hanya berjalan naik ke induk, jadi aman di Awake/OnEnable ("Hitch aktivasi").
+            return RegionStreaming.Instance != null && owner != null && owner.GetComponentInParent<RegionSceneRoot>(true) != null;
+        }
+
+        /// <summary>
+        /// Daftarkan ke WorldStateSave hanya kalau objek tidak dipegang RegionStateStore.
+        /// Mengembalikan true kalau terdaftar; simpan nilainya untuk Unregister.
+        /// </summary>
+        public static bool Register(ISaveable saveable, Component owner)
+        {
+            if (saveable == null || string.IsNullOrEmpty(saveable.SaveId)) return false;
+            if (IsStoredByRegion(owner)) return false;
+            var save = WorldStateSave.Instance;
+            if (save == null) return false;
+            save.Register(saveable);
+            return true;
+        }
+
+        /// <summary>Lepas pendaftaran cadangan kalau tadi terdaftar.</summary>
+        public static void Unregister(ISaveable saveable, ref bool registered)
+        {
+            if (registered && WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(saveable);
+            registered = false;
+        }
+    }
 }

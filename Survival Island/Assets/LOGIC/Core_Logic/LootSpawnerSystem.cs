@@ -39,12 +39,12 @@ namespace SurvivalIsland
     /// Satu komponen = satu kelompok titik (satu rumah, gudang, atau dek kapal). Kapal tidak disimpan (#82).
     ///
     /// Catatan implementasi (sistem pendukung), lihat juga bagian akhir blueprint:
-    /// - RegionStreaming, RegionSceneRoot, RegionStateStore, dan RegionLoadStateChangedEvent (#88) belum ada.
-    ///   Sementara itu: homeRegion diisi di Inspector, penyebaran pulau dipicu Start() (atau OnRestoreFinished saat
-    ///   melanjutkan save), dan spawner pulau MENDAFTAR ke WorldStateSave sebagai jalur cadangan supaya tidak berlipat.
-    ///   Setelah #88 ditulis, jalur cadangan ini dihapus (TODO(RegionStreaming) di kode).
-    /// - WorldItem belum punya sourceSpawner/sourcePointIndex (#66). Spawner mencocokkan sendiri objek yang masih miliknya
-    ///   (liveItems + ItemInstance yang dipasang) saat save dan saat region dilepas, lalu memanggil MarkTaken/UpdateRemaining.
+    /// - Pulau dengan RegionStreaming (#88): homeRegion dari RegionSceneRoot induk, status lewat RegionStateStore, dan
+    ///   penyebaran dipicu RegionLoadStateChangedEvent Loaded. Tidak mendaftar ke WorldStateSave.
+    /// - Scene uji tanpa RegionStreaming (keputusan sesi induk): jalur cadangan tetap ada lewat RegionSaveRouting.
+    ///   homeRegion dari Inspector, spawner mendaftar ke WorldStateSave, penyebaran dipicu Start() (atau OnRestoreFinished
+    ///   saat melanjutkan save).
+    /// - WorldItem membawa sourceSpawner/sourcePointIndex (#66) dan memanggil MarkTaken/UpdateRemaining sendiri.
     /// </summary>
     public class LootSpawnerSystem : MonoBehaviour, ISaveable
     {
@@ -57,12 +57,11 @@ namespace SurvivalIsland
         [SerializeField] private LootTable table;
         [Tooltip("Urutan TIDAK boleh diubah setelah rilis. Titik baru ditambahkan di akhir.")]
         [SerializeField] private LootPointDef[] spawnPoints = new LootPointDef[0];
-        [Tooltip("TODO(RegionStreaming): dibaca dari RegionSceneRoot induk setelah #88 ditulis.")]
+        [Tooltip("Dibaca dari RegionSceneRoot induk kalau ada (#88). Isian ini hanya untuk scene uji tanpa RegionSceneRoot.")]
         [SerializeField] private RegionType homeRegion = RegionType.Volcano;
 
         private readonly List<LootPointState> states = new List<LootPointState>();   // Indeks = pointIndex
         private WorldItem[] liveItems = new WorldItem[0];
-        private ItemInstance[] liveInstances = new ItemInstance[0];   // Pengenal pemilik selama sourceSpawner belum ada
         private ShipInteractable[] liveShipItems = new ShipInteractable[0];
         private bool hasSpawned;
         private string restoredJson;
@@ -82,24 +81,22 @@ namespace SurvivalIsland
         private void Awake()
         {
             EnsureArrays();
+            // homeRegion dari RegionSceneRoot induk (LootSpawnerSystem.md "Variabel").
+            if (RegionSceneRoot.TryGetRegionOf(this, out var r)) homeRegion = r;
         }
 
         private void OnEnable()
         {
-            // TODO(RegionStreaming): EventChannel<RegionLoadStateChangedEvent>.Raised += HandleRegionLoadState; (#88)
-            // dan hapus pendaftaran cadangan di bawah. Objek region tidak memanggil WorldStateSave.Register (WorldStateSave.md).
-            if (!IsShipPhase && WorldStateSave.Instance != null && !string.IsNullOrEmpty(spawnerId))
-            {
-                WorldStateSave.Instance.Register(this);
-                registeredForSave = true;
-            }
+            EventChannel<RegionLoadStateChangedEvent>.Raised += HandleRegionLoadState;
+            // Objek region tidak memanggil WorldStateSave.Register (WorldStateSave.md); RegionSaveRouting memilih jalurnya.
+            // Kapal tidak disimpan (#82).
+            if (!IsShipPhase) registeredForSave = RegionSaveRouting.Register(this, this);
         }
 
         private void OnDisable()
         {
-            // TODO(RegionStreaming): EventChannel<RegionLoadStateChangedEvent>.Raised -= HandleRegionLoadState;
-            if (registeredForSave && WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
-            registeredForSave = false;
+            EventChannel<RegionLoadStateChangedEvent>.Raised -= HandleRegionLoadState;
+            RegionSaveRouting.Unregister(this, ref registeredForSave);
         }
 
         private void Start()
@@ -108,6 +105,14 @@ namespace SurvivalIsland
             if (IsShipPhase)
             {
                 SpawnOrRestore();
+                return;
+            }
+
+            // Pulau dengan RegionStreaming: dipicu event Loaded (HandleRegionLoadState). Kalau region sudah Loaded sebelum
+            // spawner aktif, event itu terlewat, jadi sebar di sini. RestoreState sudah masuk lewat RestoreRegion.
+            if (RegionSaveRouting.IsStoredByRegion(this))
+            {
+                if (RegionStreaming.Instance.IsLoaded(homeRegion)) SpawnOrRestore();
                 return;
             }
 
@@ -125,7 +130,6 @@ namespace SurvivalIsland
         {
             int n = spawnPoints != null ? spawnPoints.Length : 0;
             if (liveItems.Length != n) liveItems = new WorldItem[n];
-            if (liveInstances.Length != n) liveInstances = new ItemInstance[n];
             if (liveShipItems.Length != n) liveShipItems = new ShipInteractable[n];
         }
 
@@ -303,9 +307,9 @@ namespace SurvivalIsland
             var w = WorldItemManager.Instance.Spawn(inst, st.amount, def.point.position, false);
             if (w == null) return;   // 4. Pool WorldItem_Generic habis: dicoba lagi saat region dimuat berikutnya
             w.transform.rotation = def.point.rotation;
-            // TODO(WorldItem #66): w.sourceSpawner = this; w.sourcePointIndex = i; (field belum ada di WorldItem)
+            w.sourceSpawner = this;
+            w.sourcePointIndex = i;
             liveItems[i] = w;
-            liveInstances[i] = inst;
         }
 
         // ---------------------------------------------------------------- Saat barang diambil
@@ -318,11 +322,7 @@ namespace SurvivalIsland
             row.isTaken = true;
             row.amount = 0;
             states[pointIndex] = row;
-            if (pointIndex < liveItems.Length)
-            {
-                liveItems[pointIndex] = null;
-                liveInstances[pointIndex] = null;
-            }
+            if (pointIndex < liveItems.Length) liveItems[pointIndex] = null;
         }
 
         /// <summary>Dipanggil WorldItem saat sebagian terambil karena inventori penuh. Mencegah barang berlipat setelah load.</summary>
@@ -339,9 +339,13 @@ namespace SurvivalIsland
             states[pointIndex] = row;
         }
 
+        private bool IsOurs(WorldItem w, int i) =>
+            w != null && w.gameObject.activeInHierarchy && w.sourceSpawner == this && w.sourcePointIndex == i;
+
         /// <summary>
-        /// Pengaman: salin sisa jumlah dari objek yang masih milik spawner ini. Objek yang sudah kembali ke pool
-        /// (Instance diganti atau null, lihat WorldItem.OnReturned) dianggap sudah diambil.
+        /// Pengaman kalau UpdateRemaining terlewat: salin Amount dari objek yang masih milik spawner ini
+        /// (sourceSpawner == this dan sourcePointIndex == i). Objek yang sudah kembali ke pool lewat jalur lain dilewati,
+        /// karena OnReturned mengosongkan sourceSpawner; barisnya tidak diubah (LootSpawnerSystem.md "Region dilepas").
         /// </summary>
         private void SyncLiveItems()
         {
@@ -349,8 +353,7 @@ namespace SurvivalIsland
             {
                 var w = liveItems[i];
                 if (w == null) continue;
-                bool stillOurs = w.gameObject.activeInHierarchy && w.Instance != null && w.Instance == liveInstances[i];
-                if (!stillOurs) MarkTaken(i);
+                if (!IsOurs(w, i)) liveItems[i] = null;
                 else if (w.Amount != states[i].amount) UpdateRemaining(i, w.Amount);
             }
         }
@@ -359,7 +362,6 @@ namespace SurvivalIsland
 
         /// <summary>
         /// Dipanggil saat RegionLoadStateChangedEvent { region == homeRegion, state == Unloading } (#88).
-        /// TODO(RegionStreaming): sambungkan lewat HandleRegionLoadState setelah event #88 ada.
         /// </summary>
         public void ReleaseForUnload()
         {
@@ -369,22 +371,21 @@ namespace SurvivalIsland
             for (int i = 0; i < liveItems.Length; i++)
             {
                 var w = liveItems[i];
-                if (w != null && w.Instance != null && w.Instance == liveInstances[i] && WorldItemManager.Instance != null)
-                    WorldItemManager.Instance.Despawn(w);
+                if (IsOurs(w, i) && WorldItemManager.Instance != null) WorldItemManager.Instance.Despawn(w);
                 liveItems[i] = null;
-                liveInstances[i] = null;
             }
             // 3. states tetap di memori; RestoreState mengisi data terbaru saat region dimuat kembali.
             hasSpawned = false;
             restoredJson = null;
         }
 
-        // TODO(RegionStreaming): private void HandleRegionLoadState(RegionLoadStateChangedEvent e)
-        // {
-        //     if (e.region != homeRegion) return;
-        //     if (e.state == RegionLoadState.Loaded) SpawnOrRestore();
-        //     else if (e.state == RegionLoadState.Unloading) ReleaseForUnload();
-        // }
+        /// <summary>Pemicu pulau (#88): Loaded menyebar atau memulihkan, Unloading melepas objek. Hanya untuk homeRegion.</summary>
+        private void HandleRegionLoadState(RegionLoadStateChangedEvent e)
+        {
+            if (IsShipPhase || e.region != homeRegion || !RegionSaveRouting.IsStoredByRegion(this)) return;
+            if (e.state == RegionLoadState.Loaded) SpawnOrRestore();
+            else if (e.state == RegionLoadState.Unloading) ReleaseForUnload();
+        }
 
         // ---------------------------------------------------------------- ISaveable
 

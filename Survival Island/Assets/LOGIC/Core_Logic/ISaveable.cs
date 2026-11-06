@@ -6,6 +6,7 @@ namespace SurvivalIsland
     ///
     /// - Manager di IslandPhase: Register(this) di OnEnable, Unregister(this) di OnDisable.
     /// - Objek region, struktur pemain, dan WorldItem TIDAK mendaftar sendiri (lewat RegionStateStore #88, StructureRegistry #79).
+    ///   Objek region memakai RegionSaveRouting.Register: tanpa RegionStreaming (scene uji) baru jalur cadangan Register dipakai.
     /// - Objek pool tidak boleh mendaftar.
     /// </summary>
     public interface ISaveable

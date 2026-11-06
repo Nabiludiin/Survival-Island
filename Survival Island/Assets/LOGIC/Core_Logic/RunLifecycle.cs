@@ -18,7 +18,8 @@ namespace SurvivalIsland
     /// Sistem pendukung tersambung: NarrativeSequencer (#99) untuk adegan intro, sekoci, dan ending (tanpa NarrativeSequencer
     /// scene langsung aktif), DeathCinematic (#53), LocalStatsManager.RecordRunEnd (#57), AudioManager.StopWorldAudio,
     /// dan NotificationManager (#22). IslandArrival.Apply (#74) disambungkan Langkah 2.
-    /// Belum (TODO): RegionStreaming.LoadInitialRegions (#88), menunggu penyiapan scene region dan RegionStateStore di save.
+    /// RegionStreaming.LoadInitialRegions (#88) dipanggil saat panel Loading terbuka. Tanpa RegionStreaming (scene uji
+    /// satu scene), langkah itu dilewati.
     /// </summary>
     public class RunLifecycle : MonoBehaviour
     {
@@ -283,7 +284,14 @@ namespace SurvivalIsland
             // 6. Mengisi data scene dasar, termasuk RegionStateStore dan posisi pemain.
             Save.RestoreBaseScene();
 
-            // 7. TODO #88: yield return RegionStreaming.Instance.LoadInitialRegions(posisiPemain);
+            // 7. Region awal dari posisi pemain yang baru dipulihkan (player_transform). Objek region mengambil status dari
+            //    RegionStateStore, yang sudah diisi RestoreBaseScene (WorldStateSave.md "Tahap berikutnya").
+            if (RegionStreaming.Instance != null)
+            {
+                var player = IslandPlayerController.Instance;
+                Vector3 pos = player != null ? player.transform.position : Vector3.zero;
+                yield return RegionStreaming.Instance.LoadInitialRegions(pos);
+            }
 
             // 8. Event sticky dikirim ulang lewat ISaveable.
             Save.FinishRestore();
@@ -329,7 +337,12 @@ namespace SurvivalIsland
                 yield break;
             }
 
-            // 5. TODO #88: yield return RegionStreaming.Instance.LoadInitialRegions(IslandArrival.Instance.LandingPosition);
+            // 5. Region pantai dimuat sebelum pemain ditempatkan (#88).
+            if (RegionStreaming.Instance != null)
+            {
+                Vector3 landing = IslandArrival.Instance != null ? IslandArrival.Instance.LandingPosition : Vector3.zero;
+                yield return RegionStreaming.Instance.LoadInitialRegions(landing);
+            }
             // 6. IslandArrival (#74, Langkah 2) memanggil GameManager.MarkArrivedOnIsland sendiri.
             if (IslandArrival.Instance != null) IslandArrival.Instance.Apply();
             else Debug.LogError("[RunLifecycle] IslandArrival tidak ada di IslandPhase.");

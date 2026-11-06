@@ -7,6 +7,7 @@ namespace SurvivalIsland
     /// Akar tunggal semua objek di satu region scene (Region1_Volcano, Region2_Amazon, Region3_Snow, Region4_Village).
     /// Blueprint: Core_Logic/RegionStreaming.md bagian "Aturan region scene" dan "Pengisian" (#88).
     /// Daftar ISaveable dikumpulkan sekali saat region masuk (GetComponentsInChildren), lalu dipakai CaptureRegion.
+    /// Objek di bawah akar ini memakai RegionSaveRouting (RegionStateStore.cs) untuk memilih jalur simpan.
     /// Awake dan OnEnable hanya mendaftar, tanpa pencarian berat ("Hitch aktivasi").
     /// </summary>
     [DisallowMultipleComponent]
@@ -55,10 +56,14 @@ namespace SurvivalIsland
             collected = true;
             saveables.Clear();
             var found = GetComponentsInChildren<ISaveable>(true);
+            var save = WorldStateSave.Instance;
             for (int i = 0; i < found.Length; i++)
             {
                 if (found[i] == null || string.IsNullOrEmpty(found[i].SaveId)) continue;
                 saveables.Add(found[i]);
+                // Pengaman RegionSaveRouting: objek yang sempat mendaftar ke jalur cadangan (misalnya Awake berjalan sebelum
+                // RegionStreaming.Awake di scene uji gabungan) dilepas, supaya statusnya tidak tersimpan dua kali.
+                if (save != null) save.Unregister(found[i]);
             }
         }
     }

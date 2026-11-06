@@ -24,8 +24,8 @@ namespace SurvivalIsland
     /// Komponen di objek yang sama dengan InteriorZone.
     ///
     /// Catatan implementasi (sistem pendukung):
-    /// - RegionStateStore/RegionSceneRoot (#88) belum ada: status didaftarkan langsung ke WorldStateSave dengan SaveId
-    ///   "lair_" + lairId (pola LuckyMachine Langkah 7). Ganti ke RegionStateStore saat #88 ada.
+    /// - Status dengan SaveId "lair_" + lairId lewat RegionStateStore (#88, RegionSaveRouting). Tanpa RegionStreaming
+    ///   (scene uji), jalur cadangan WorldStateSave.Register.
     /// - EnemyAI belum punya field lair dan EnterDormant(lair): rujukan disimpan LairRegistry, dan areaMask diatur di sini.
     /// - SpawnManager belum bisa mengambil alih zombie dari luar: zombie yang dilepas saat malam tetap dari pool sarang dan
     ///   tidak masuk daftar SpawnManager; bagian yang belum muncul diminta lewat SpawnManager.RequestBurst di pintu keluar.
@@ -68,6 +68,7 @@ namespace SurvivalIsland
         private int interiorMask = -1;
         private PlayerTraversal playerTraversal;
         private bool initialized;
+        private bool registeredForSave;
 
         private static LairBalance Bal => GameManager.CurrentBalance != null ? GameManager.CurrentBalance.lair : null;
         private static bool IsDay => !DayPhaseTracker.IsNight;
@@ -124,7 +125,7 @@ namespace SurvivalIsland
             EventChannel<NightfallEvent>.Raised += HandleNightfall;
             EventChannel<NoiseEmittedEvent>.Raised += HandleNoise;
             EventChannel<RunEndedEvent>.Raised += HandleRunEnded;
-            if (WorldStateSave.Instance != null) WorldStateSave.Instance.Register(this);
+            registeredForSave = RegionSaveRouting.Register(this, this);
         }
 
         private void OnDisable()
@@ -133,7 +134,7 @@ namespace SurvivalIsland
             EventChannel<NightfallEvent>.Raised -= HandleNightfall;
             EventChannel<NoiseEmittedEvent>.Raised -= HandleNoise;
             EventChannel<RunEndedEvent>.Raised -= HandleRunEnded;
-            if (WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
+            RegionSaveRouting.Unregister(this, ref registeredForSave);
             // Region dilepas: zombie kembali ke pool, status tetap.
             if (isSpawned) Despawn();
             LairRegistry.Unregister(this);

@@ -12,8 +12,8 @@ namespace SurvivalIsland
     ///
     /// Penyimpangan sementara (dicatat di blueprint, "Catatan Implementasi (Langkah 7)"):
     /// - IslandInteractable (#17) belum ditulis, jadi kelas ini menerapkan IInteractable langsung (pola CraftingStation).
-    /// - RegionStateStore (#88) belum ditulis, jadi status mesin didaftarkan langsung ke WorldStateSave dengan
-    ///   saveId dari SaveIdTag. Ganti ke RegionStateStore saat #88 ada.
+    /// - Status mesin (saveId dari SaveIdTag) lewat RegionStateStore (#88, RegionSaveRouting). Tanpa RegionStreaming
+    ///   (scene uji), jalur cadangan WorldStateSave.Register.
     /// </summary>
     [RequireComponent(typeof(SaveIdTag))]
     public class LuckyMachine : MonoBehaviour, IInteractable, ISaveable
@@ -60,6 +60,7 @@ namespace SurvivalIsland
         private static float[] weightArray = new float[16];
 
         private SaveIdTag saveTag;
+        private bool registeredForSave;
 
         private LuckyMachineBalance Bal => GameManager.CurrentBalance != null ? GameManager.CurrentBalance.luckyMachine : null;
 
@@ -91,7 +92,7 @@ namespace SurvivalIsland
         private void OnEnable()
         {
             EventChannel<MajorDisasterStartedEvent>.Raised += HandleMajorDisaster;
-            if (WorldStateSave.Instance != null) WorldStateSave.Instance.Register(this);
+            registeredForSave = RegionSaveRouting.Register(this, this);
             ApplyVisuals();
         }
 
@@ -101,7 +102,7 @@ namespace SurvivalIsland
             // Region dilepas saat vakum: semua vakum langsung selesai, supaya hitungan tidak hilang (bagian 4).
             for (int i = vacuums.Count - 1; i >= 0; i--) FinishSacrifice(vacuums[i]);
             vacuums.Clear();
-            if (WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
+            RegionSaveRouting.Unregister(this, ref registeredForSave);
         }
 
         private void EnsureQuotaArray()
