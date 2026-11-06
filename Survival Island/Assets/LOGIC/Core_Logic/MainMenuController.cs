@@ -44,12 +44,26 @@ namespace SurvivalIsland
             bool canContinue = save != null && save.HasContinuableSave();
             if (continueButton != null) continueButton.gameObject.SetActive(canContinue);
             if (save != null && save.LastProblem != SaveProblem.None)
-                // TODO (#104/#22): tampilkan pesan save rusak atau versi tidak cocok di layar.
+            {
                 Debug.LogWarning($"[MainMenuController] Save tidak bisa dilanjutkan: {save.LastProblem}.");
+                // Pesan save rusak atau versi tidak cocok lewat NotificationManager (#22, teks #104).
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show(SaveProblemKey(save.LastProblem), NotificationKind.Warning);
+            }
 
             if (settingsButton != null) settingsButton.interactable = settingsPanel != null;
             if (statsButton != null) statsButton.interactable = statsPanel != null;
 
+        }
+
+        private static string SaveProblemKey(SaveProblem p)
+        {
+            switch (p)
+            {
+                case SaveProblem.Corrupt: return "notif.save_corrupt";                    // "Save rusak dan tidak bisa dilanjutkan"
+                case SaveProblem.NewerVersion: return "notif.save_newer_version";         // "Save dari versi game yang lebih baru"
+                case SaveProblem.OldVersionNoMigration: return "notif.save_old_version";  // "Save versi lama tidak bisa dipakai"
+                default: return string.Empty;
+            }
         }
 
         private void Update()
@@ -61,6 +75,8 @@ namespace SurvivalIsland
             var stack = UIFocusStack.Instance;
             if (run == null || stack == null || run.State != RunState.InMenu) return;
             menuPushed = stack.Push(menuPanel) || stack.Contains(menuPanel);
+            // Peringatan kilatan sekali pada peluncuran pertama, di atas menu (LocalizationManager.md, #104).
+            if (menuPushed) LocalizationManager.Instance?.TryShowFlashWarning();
         }
 
         private void HandleContinueClicked()

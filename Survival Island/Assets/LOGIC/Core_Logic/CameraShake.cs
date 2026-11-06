@@ -295,6 +295,6 @@ namespace SurvivalIsland
             PositionOffset = Vector3.zero;
         }
 
-        // TODO(DevConsole): perintah "shake <kind> [scale]" memanggil CameraShake.Play (#56).
+        // Perintah "shake <kind> [scale]" ada di DevConsole.CmdShake (#56).
     }
 }

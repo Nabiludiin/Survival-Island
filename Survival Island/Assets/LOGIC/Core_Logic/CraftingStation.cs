@@ -14,7 +14,7 @@ namespace SurvivalIsland
     {
         [SerializeField] private CraftingStationType stationType = CraftingStationType.WoodBench;
         [SerializeField] private Transform centerPoint;
-        [SerializeField] private string promptText = "Buka meja crafting";   // TODO #104: kunci teks
+        [SerializeField] private string promptKey = "prompt.crafting_station";   // Kunci teks #104: "Buka meja crafting"
         [SerializeField] private InteractHighlight highlight;
 
         public CraftingStationType StationType => stationType;
@@ -41,7 +41,7 @@ namespace SurvivalIsland
 
         public bool IsAvailable => isActiveAndEnabled;
         public float HoldSeconds => 0f;
-        public string GetPrompt() => promptText;
+        public string GetPrompt() => UIManager.Localize(promptKey);
 
         public InteractBlockReason CanInteract(in InteractContext ctx)
         {

@@ -154,11 +154,11 @@ namespace SurvivalIsland
 
         private static string StationText(CraftingStationType t)
         {
-            // TODO #104: kunci teks.
+            // Kunci teks (#104).
             switch (t)
             {
-                case CraftingStationType.WoodBench: return "Butuh Meja Kayu";
-                case CraftingStationType.MedicalBench: return "Butuh Meja Medis";
+                case CraftingStationType.WoodBench: return UIManager.Localize("ui.crafting.need_wood_bench");       // "Butuh Meja Kayu"
+                case CraftingStationType.MedicalBench: return UIManager.Localize("ui.crafting.need_medical_bench"); // "Butuh Meja Medis"
                 default: return string.Empty;
             }
         }
@@ -182,8 +182,21 @@ namespace SurvivalIsland
             var result = CraftingManager.Instance.RequestCraft(rowRecipes[rowIndex]);
             if (result != CraftResult.Ok)
             {
-                // TODO #22: notifikasi alasan (NoSpace, QueueFull, dan seterusnya).
-                Debug.Log($"[CraftingPanel] Ditolak: {result}");
+                // Notifikasi alasan penolakan (#22).
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show(RejectKey(result), NotificationKind.Info);
+            }
+        }
+
+        private static string RejectKey(CraftResult r)
+        {
+            switch (r)
+            {
+                case CraftResult.Locked: return "notif.craft.locked";                     // "Resep belum terbuka"
+                case CraftResult.NoStation: return "notif.craft.no_station";              // "Butuh meja crafting"
+                case CraftResult.MissingMaterial: return "notif.craft.missing_material";  // "Bahan kurang"
+                case CraftResult.NoSpace: return "notif.craft.no_space";                  // "Inventori penuh"
+                case CraftResult.QueueFull: return "notif.craft.queue_full";              // "Antrean penuh"
+                default: return string.Empty;
             }
         }
 

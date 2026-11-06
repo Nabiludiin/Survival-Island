@@ -341,6 +341,7 @@ namespace SurvivalIsland
             Reg("godmode", "godmode <0/1>", "HP tertahan di 1 dan infeksi di 99.", 1, true, CmdGodmode);
             Reg("additem", "additem <itemId> [jumlah]", "Menambah item. Sisa yang tidak muat jatuh di depan pemain.", 1, true, CmdAddItem);
             Reg("removeitem", "removeitem <itemId> [jumlah]", "Mengurangi item.", 1, true, CmdRemoveItem);
+            Reg("breaktool", "breaktool <itemId>", "Mengisi durabilitas sampai Destroyed (item inti: Broken).", 1, true, CmdBreakTool);
             Reg("setday", "setday <n>", "Melompat ke hari tertentu tanpa menjalankan hari yang terlewati.", 1, true, CmdSetDay);
             Reg("settime", "settime <jam>", "Mengatur jam (0-24).", 1, true, CmdSetTime);
             Reg("setvital", "setvital <hp|stamina|hunger|thirst|infection> <nilai>", "Mengatur satu status tubuh.", 2, true, CmdSetVital);
@@ -363,10 +364,11 @@ namespace SurvivalIsland
             Reg("savecorrupt", "savecorrupt", "Mengubah satu byte file save utama (#80).", 0, true, CmdSaveCorrupt);
             Reg("savedelay", "savedelay <detik>", "Menunda penulisan save (#80).", 1, false, CmdSaveDelay);
             Reg("spawnstat", "spawnstat", "Musuh aktif, Submerged, dan kegagalan titik spawn (#62).", 0, false, CmdSpawnStat);
-            Reg("settide", "settide <low|high>", "Memaksa level air (#91).", 1, true, CmdSetTide);
+            Reg("settide", "settide <low|high|auto>", "Memaksa level air (#91).", 1, true, CmdSetTide);
             Reg("notify", "notify <jenis> <kunci>", "Memanggil NotificationManager.Show.", 2, false, CmdNotify);
             Reg("postfx", "postfx <efek> <0..1>", "Memaksa target efek PostProcessController.", 2, false, CmdPostFx);
             Reg("shake", "shake <kind> [scale]", "Memanggil CameraShake.Play.", 1, false, CmdShake);
+            Reg("shiptime", "shiptime <detik>", "Mengatur sisa waktu timer kapal (#56).", 1, true, CmdShipTime);
             Reg("heli", "heli <status|install <partId>|warmup <detik>|liftoff>", "Perintah helikopter (#14).", 1, false, CmdHeli);
             Reg("stats", "stats", "Ringkasan stats.json (#57).", 0, false, CmdStats);
             Reg("statsreset", "statsreset", "Mengosongkan stats.json (#57).", 0, false, CmdStatsReset);
@@ -451,6 +453,24 @@ namespace SurvivalIsland
             stats.SetInvulnerable(on);
             godmode = on;
             return "godmode " + (on ? "aktif" : "mati");
+        }
+
+        /// <summary>
+        /// breaktool (ProgressionSafety.md, #113): durabilitas instance pertama diisi sampai Destroyed. Batas perbaikan dianggap
+        /// habis, supaya status bisa Destroyed. Item inti berhenti di Broken (DurabilitySystem.GetState).
+        /// </summary>
+        private string CmdBreakTool(string[] args)
+        {
+            string id = ItemDatabase.ResolveAlias(args[0]);
+            var inv = InventoryManager.Instance;
+            if (inv == null) return "InventoryManager tidak ada di scene.";
+            var inst = inv.FindFirstInstance(id);
+            if (inst == null) return $"Item tidak ada di inventori: {args[0]}";
+            if (inst.durability < 0f) return $"{id} tidak punya durabilitas.";
+            var repair = GameManager.CurrentBalance != null ? GameManager.CurrentBalance.repair : null;
+            inst.repairCount = Mathf.Max(inst.repairCount, repair != null ? repair.maxRepairs : 6);
+            var state = DurabilitySystem.ApplyWear(inst, Mathf.Max(1f, inst.durability));
+            return $"breaktool {id}: {state}";
         }
 
         private string CmdAddItem(string[] args)
@@ -685,8 +705,8 @@ namespace SurvivalIsland
             sb.Append("Ready ").Append(rs.IsReady).Append(", Stalled ").Append(rs.IsStalled)
               .Append(", delay ").Append(rs.DebugExtraDelaySeconds.ToString("0.0", CultureInfo.InvariantCulture)).Append(" s\n");
             var regions = (RegionType[])Enum.GetValues(typeof(RegionType));
-            for (int i = 0; i < regions.Length; i++) sb.Append(regions[i]).Append(": ").Append(rs.GetState(regions[i])).Append("  ");
-            // TODO(RegionStreaming): rincian antrean operasi dan waktu muat per region (RegionStreaming.md, #88).
+            // Satu baris per region: state, waktu muat terakhir, dan jumlah objek tersimpan (RegionStreaming.md, #88).
+            for (int i = 0; i < regions.Length; i++) sb.Append('\n').Append(rs.DebugStatLine(regions[i]));
             return sb.ToString();
         }
 
@@ -762,17 +782,32 @@ namespace SurvivalIsland
 
         private string CmdSpawnStat(string[] args)
         {
-            // TODO(SpawnManager): SpawnManager belum punya ringkasan Submerged dan kegagalan titik spawn (#62).
+            // Musuh aktif, jumlah Submerged, dan kegagalan mencari titik spawn (SpawnManager.md, #62).
             var sm = SpawnManager.Instance;
             if (sm == null) return OnlyIsland;
-            var pooler = ObjectPooler.Instance;
-            return pooler != null ? $"Objek pool aktif: {pooler.TotalActive}. Rincian Submerged menunggu SpawnManager (#62)." : "ObjectPooler tidak ada.";
+            var enemies = sm.ActiveEnemies;
+            int submerged = 0;
+            for (int i = 0; i < enemies.Count; i++)
+                if (enemies[i] != null && enemies[i].AI != null && enemies[i].AI.CurrentState == AIState.Submerged) submerged++;
+            return $"Musuh aktif {enemies.Count}, Submerged {submerged}, titik spawn gagal {sm.FailedSpawnPoints}.";
         }
 
         private string CmdSetTide(string[] args)
         {
-            // TODO(TideManager): memaksa level air (#91).
-            return "TODO: settide menunggu TideManager (#91).";
+            // Memaksa level air lewat TideManager.DebugSetSurge (#91). high: Level selalu >= highThreshold;
+            // low: Level selalu <= lowThreshold; auto: surge kembali mengikuti cuaca.
+            var tide = TideManager.Instance;
+            if (tide == null) return OnlyIsland;
+            var t = GameManager.CurrentBalance != null ? GameManager.CurrentBalance.tide : null;
+            if (t == null) return "GameBalanceConfig belum ada.";
+            switch (args[0].ToLowerInvariant())
+            {
+                case "high": tide.DebugSetSurge(t.highThreshold, false); break;
+                case "low": tide.DebugSetSurge(t.lowThreshold - Mathf.Max(t.dayAmplitude, t.nightAmplitude), false); break;
+                case "auto": tide.DebugSetSurge(0f, true); break;
+                default: return Usage("settide");
+            }
+            return "settide " + args[0].ToLowerInvariant();
         }
 
         private string CmdNotify(string[] args)
@@ -797,6 +832,15 @@ namespace SurvivalIsland
             if (args.Length > 1 && !TryFloat(args[1], out scale)) return Usage("shake");
             CameraShake.Play(kind, scale);
             return null;
+        }
+
+        private string CmdShipTime(string[] args)
+        {
+            if (!TryFloat(args[0], out float seconds) || seconds < 0f) return Usage("shiptime");
+            var timer = ShipTimerManager.Instance;
+            if (timer == null) return "Hanya di ShipPhase";
+            timer.DebugSetSecondsLeft(seconds);
+            return "Sisa waktu kapal = " + timer.SecondsLeft.ToString("0.0", CultureInfo.InvariantCulture) + " s";
         }
 
         private string CmdHeli(string[] args)

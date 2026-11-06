@@ -95,9 +95,9 @@ namespace SurvivalIsland
             EventChannel<NPCRescuedEvent>.Raised += HandleNPCRescued;
             EventChannel<StructureDestroyedEvent>.Raised += HandleStructureDestroyed;
             EventChannel<RunEndedEvent>.Raised += HandleRunEnded;
-            // TODO(ObjectiveManager): DiaryChapterUnlockedEvent -> Show("notif.diary_page", Objective) (#81).
-            // TODO(NPCRoster): NPCDiedEvent -> ShowFormat("notif.npc_died", Danger, "name", nama NPC) (#76).
-            // TODO(Flammable): StructureBurningEvent dengan isBurning -> Show("notif.base_burning", Danger) (#44).
+            EventChannel<DiaryChapterUnlockedEvent>.Raised += HandleDiaryChapter;   // ObjectiveManager (#81)
+            EventChannel<NPCDiedEvent>.Raised += HandleNPCDied;                     // NPCRoster/NPCCompanion (#76)
+            EventChannel<StructureBurningEvent>.Raised += HandleStructureBurning;   // Flammable (#44)
         }
 
         private void OnDisable()
@@ -110,6 +110,9 @@ namespace SurvivalIsland
             EventChannel<NPCRescuedEvent>.Raised -= HandleNPCRescued;
             EventChannel<StructureDestroyedEvent>.Raised -= HandleStructureDestroyed;
             EventChannel<RunEndedEvent>.Raised -= HandleRunEnded;
+            EventChannel<DiaryChapterUnlockedEvent>.Raised -= HandleDiaryChapter;
+            EventChannel<NPCDiedEvent>.Raised -= HandleNPCDied;
+            EventChannel<StructureBurningEvent>.Raised -= HandleStructureBurning;
         }
 
         // ---------------------------------------------------------------- Layanan
@@ -508,8 +511,33 @@ namespace SurvivalIsland
         private void HandleNPCRescued(NPCRescuedEvent e)
         {
             if (IsLoading()) return;
-            // TODO(NPCRoster): nama dari NPCData.displayNameKey (#76). Sementara npcId dipakai sebagai nama.
-            ShowFormat("notif.npc_rescued", NotificationKind.Info, "name", e.npcId);
+            ShowFormat("notif.npc_rescued", NotificationKind.Info, "name", NpcName(e.npcId));
+        }
+
+        private void HandleNPCDied(NPCDiedEvent e)
+        {
+            if (IsLoading()) return;
+            ShowFormat("notif.npc_died", NotificationKind.Danger, "name", NpcName(e.npcId));
+        }
+
+        private void HandleDiaryChapter(DiaryChapterUnlockedEvent e)
+        {
+            if (IsLoading()) return;
+            Show("notif.diary_page", NotificationKind.Objective);   // "Halaman baru di Diary"
+        }
+
+        private void HandleStructureBurning(StructureBurningEvent e)
+        {
+            if (IsLoading() || !e.isBurning) return;
+            Show("notif.base_burning", NotificationKind.Danger);
+        }
+
+        /// <summary>Nama NPC dari NPCData.displayNameKey (#76). Tanpa NPCRoster atau data, npcId dipakai sebagai nama.</summary>
+        private static string NpcName(string npcId)
+        {
+            var data = NPCRoster.Instance != null ? NPCRoster.Instance.GetData(npcId) : null;
+            if (data == null || string.IsNullOrEmpty(data.displayNameKey)) return npcId;
+            return Localize(data.displayNameKey);
         }
 
         private void HandleStructureDestroyed(StructureDestroyedEvent e)
@@ -526,6 +554,6 @@ namespace SurvivalIsland
             return loc != null ? loc.Get(key) : key;
         }
 
-        // TODO(DevConsole): perintah "notify <jenis> <kunci>" memanggil Show (#56).
+        // Perintah "notify <jenis> <kunci>" ada di DevConsole.CmdNotify (#56).
     }
 }

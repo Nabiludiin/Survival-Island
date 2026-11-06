@@ -218,7 +218,7 @@ namespace SurvivalIsland
             Cursor.lockState = cursorFree ? CursorLockMode.None : CursorLockMode.Locked;
             Cursor.visible = cursorFree;
             AudioListener.pause = paused;
-            // TODO (AudioManager belum ditulis, bukan Langkah 1): AudioManager.Instance.SetPausedMix(paused);
+            AudioManager.Instance?.SetPausedMix(paused);   // Campuran audio jeda (#83)
 
             bool changed = paused != IsPaused || blocked != IsGameplayInputBlocked;
             IsPaused = paused;

@@ -14,7 +14,8 @@ namespace SurvivalIsland
     /// - Perilaku zombie: EnemyAI.SetTarget, AIState.Dormant, bangun dalam zombieAggroRadius, kembali Dormant saat macet,
     ///   gigitan Zombie_Ship_Bite, dan EnemyHealth.Died (Langkah 5). Sekarang kelas ini memunculkan zombie dari pool,
     ///   mengatur agent.speed dengan pengali air, dan mengembalikan zombie yang terendam.
-    /// - Suara alarm dan kapal (AudioManager), CameraShake.Play (#24), efek basah layar (#23).
+    /// - Volume alarm kapal (AudioManager belum punya kanal alarm), efek basah layar (#23).
+    /// CameraShake.Play (#24) dan suara air guncangan akhir (AudioManager) sudah tersambung.
     /// - Alat Editor ShipRouteAudit.
     /// </summary>
     public class ShipHazardManager : MonoBehaviour
@@ -36,6 +37,8 @@ namespace SurvivalIsland
         [Tooltip("Arah turun lantai kapal (dunia, horizontal). Mengikuti kemiringan tetap geometri.")]
         [SerializeField] private Vector3 downhillDirection = Vector3.right;
         [SerializeField] private ShipSwaySource swaySource;
+        [Tooltip("Suara air saat guncangan akhir (FinalShudder).")]
+        [SerializeField] private AudioClip finalShudderClip;
 
         [Header("Pemain")]
         [SerializeField] private ShipPlayerController playerController;
@@ -165,11 +168,13 @@ namespace SurvivalIsland
             {
                 case ShipHazardKind.AlarmUp:
                     // README 60-seconds: T=45 alarm kapal semakin keras.
-                    // TODO (AudioManager belum ditulis): naikkan volume alarm kapal.
+                    // TODO(AudioManager): naikkan volume alarm kapal. AudioManager belum punya kanal atau fungsi alarm.
                     break;
                 case ShipHazardKind.CameraShake:
                     // README 60-seconds: T=30 kamera mulai bergetar.
-                    // TODO #24 (CameraShake belum ditulis): CameraShake.Play(CameraShakeKind.<entry.targetId>).
+                    // targetId = nama CameraShakeKind, misalnya ShipRumble (#24).
+                    if (System.Enum.TryParse(entry.targetId, out CameraShakeKind shakeKind)) CameraShake.Play(shakeKind);
+                    else Debug.LogWarning($"[ShipHazardManager] CameraShakeKind '{entry.targetId}' tidak dikenal.", this);
                     break;
                 case ShipHazardKind.SpawnZombies:
                     SpawnZombies(entry.targetId, entry.value);
@@ -188,7 +193,8 @@ namespace SurvivalIsland
                     break;
                 case ShipHazardKind.FinalShudder:
                     FinalShudderPlayed = true;
-                    // TODO #24 (CameraShake belum ditulis): CameraShake.Play(CameraShakeKind.ShipFinalShudder), dan suara air.
+                    CameraShake.Play(CameraShakeKind.ShipFinalShudder);   // #24
+                    AudioManager.Instance?.PlaySFX(finalShudderClip);
                     break;
             }
         }

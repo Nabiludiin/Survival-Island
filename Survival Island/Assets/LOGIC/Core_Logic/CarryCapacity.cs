@@ -114,8 +114,8 @@ namespace SurvivalIsland
             if (equippedBag != null) filled += 1;
             if (filled > newCapacity)
             {
-                // TODO #22: pesan "Kosongkan tas dulu".
-                Debug.Log("[CarryCapacity] Kosongkan tas dulu.");
+                // Pesan penolakan (#22): "Kosongkan tas dulu".
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.bag_not_empty", NotificationKind.Info);
                 return false;
             }
 

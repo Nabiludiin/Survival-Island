@@ -66,8 +66,8 @@ namespace SurvivalIsland
             bool onIsland = run != null && run.State == RunState.OnIsland;
 
             // Tombol Keluar dari Tersangkut hanya saat OnIsland (#116).
-            // TODO Langkah 7 (ProgressionSafety #116 belum ditulis): ubah unstuckAvailable menjadi true.
-            const bool unstuckAvailable = false;
+            // ProgressionSafety (#116) ada di IslandPhase.
+            bool unstuckAvailable = ProgressionSafety.Instance != null;
             if (unstuckButton != null) unstuckButton.gameObject.SetActive(onIsland && unstuckAvailable);
 
             // Fase 1 tidak punya save (#82), jadi labelnya "Keluar ke Menu" (usulan UIManager.md, disetujui).
@@ -98,14 +98,31 @@ namespace SurvivalIsland
         {
             var ui = UIManager.Instance;
             if (ui == null || ui.notificationLogView == null) return;
-            // TODO (NotificationManager #22 belum ditulis): isi daftar lewat NotificationManager.Instance.GetLog(list).
+            // TODO(UI): notificationLogView belum punya komponen daftar. Isi lewat NotificationManager.Instance.GetLog(list) (#22).
             SetLogVisible(!ui.notificationLogView.activeSelf);
         }
 
         private void HandleUnstuckClicked()
         {
-            // TODO Langkah 7: ShowConfirm(ui.unstuck.confirm), lalu ProgressionSafety.Instance.RequestUnstuck()
-            // dan tampilkan ui.unstuck.<UnstuckResult> di unstuckResultText.
+            // ConfirmDialog dulu (ProgressionSafety.md), lalu RequestUnstuck saat pemain memilih Ya.
+            var ui = UIManager.Instance;
+            if (ui == null || ProgressionSafety.Instance == null) return;
+            ui.ShowConfirm(new ConfirmRequest
+            {
+                titleKey = "ui.unstuck.title",
+                bodyKey = "ui.unstuck.confirm",
+                onResult = HandleUnstuckConfirmed
+            });
+        }
+
+        private void HandleUnstuckConfirmed(bool yes)
+        {
+            if (!yes) return;
+            var safety = ProgressionSafety.Instance;
+            if (safety == null) return;
+            // Started menutup panel Pause sendiri. Hasil lain ditampilkan sebagai ui.unstuck.<UnstuckResult>.
+            UnstuckResult result = safety.RequestUnstuck();
+            if (unstuckResultText != null) unstuckResultText.text = UIManager.Localize("ui.unstuck." + result);
         }
 
         private void HandleSaveQuitClicked()

@@ -309,8 +309,8 @@ namespace SurvivalIsland
             freshnessCache.Clear();
             if (dropped)
             {
-                // TODO #22 (NotificationManager): notifikasi "Beberapa barang terjatuh".
-                Debug.Log("[InventoryManager] Beberapa barang terjatuh karena kapasitas turun.");
+                // Notifikasi (#22, CarryCapacity.md): "Beberapa barang terjatuh".
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.items_dropped", NotificationKind.Warning);
             }
             if (publish) PublishChanged(string.Empty, 0);
         }

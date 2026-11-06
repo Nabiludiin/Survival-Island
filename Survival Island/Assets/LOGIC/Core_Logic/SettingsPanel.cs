@@ -176,8 +176,11 @@ namespace SurvivalIsland
             AddToggle(chromaticToggle, v => Settings?.SetChromaticAberration(v));
 
             AddToggle(tutorialToggle, v => Settings?.SetTutorialEnabled(v));
-            // TODO(TutorialManager): replayTutorialButton memanggil TutorialManager.Instance.ResetSeen() (#16).
-            if (replayTutorialButton != null) replayTutorialButton.interactable = false;
+            // Tombol "Ulang tutorial" mengosongkan tanda sudah dibaca (#16).
+            if (replayTutorialButton != null)
+            {
+                replayTutorialButton.onClick.AddListener(() => TutorialManager.Instance?.ResetSeen());
+            }
             if (resetDefaultsButton != null) resetDefaultsButton.onClick.AddListener(() => { Settings?.ResetToDefaults(); RefreshAll(); });
 
             for (int i = 0; i < bindingRows.Length; i++)

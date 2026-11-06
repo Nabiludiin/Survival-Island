@@ -14,8 +14,8 @@ namespace SurvivalIsland
     /// Komponen scene, ada di ShipPhase dan IslandPhase (#82). Awake hanya mengisi Instance. HUD hanya mendengar event
     /// atau membaca data, tidak mengirim event. Tidak disimpan: nilai kembali lewat event sticky di OnEnable/OnRestoreFinished.
     ///
-    /// Belum tersambung karena sistem pengirimnya belum ada (TODO di kode): ThrowableChangedEvent (#96),
-    /// ActiveObjectiveChangedEvent (#81), SwimStateChangedEvent (#13), RegionStreaming.IsStalled (#88).
+    /// Sistem pendukung tersambung: ThrowableChangedEvent (#96), ActiveObjectiveChangedEvent (#81),
+    /// SwimStateChangedEvent (#13), dan RegionStreaming.IsStalled (#88).
     /// </summary>
     public class HUDManager : MonoBehaviour
     {
@@ -98,6 +98,8 @@ namespace SurvivalIsland
         private bool isFreezing;
         private bool inSnow;
 
+        private float objectiveFlashRemaining;
+
         private int lastDay = -1;
         private bool dayLimitPassed;
         private int partsInstalled = -1, partsTotal;
@@ -137,11 +139,9 @@ namespace SurvivalIsland
             EventChannel<StatusEffectChangedEvent>.Raised += HandleStatusEffect;
             EventChannel<UIFocusChangedEvent>.Raised += HandleFocus;
             EventChannel<LocaleChangedEvent>.Raised += HandleLocale;
-            // TODO(ThrowableSystem #96): EventChannel<ThrowableChangedEvent>.Raised += HandleThrowable (sticky, baca HasLast/Last).
-            // TODO(ObjectiveManager #81): EventChannel<ActiveObjectiveChangedEvent>.Raised += HandleObjective, sorotan
-            //     selama objective.hudFlashSeconds (sticky, baca HasLast/Last).
-            // TODO(SwimmingController #13): EventChannel<SwimStateChangedEvent>.Raised += HandleSwim; breathBar tampil
-            //     selama breathRatio < 1 (sticky, baca HasLast/Last).
+            EventChannel<ThrowableChangedEvent>.Raised += HandleThrowable;
+            EventChannel<ActiveObjectiveChangedEvent>.Raised += HandleObjectiveRaised;
+            EventChannel<SwimStateChangedEvent>.Raised += HandleSwim;
 
             isShipPhase = GameManager.Instance != null && GameManager.Instance.currentPhase == GamePhase.SinkingShip;
             InitialState();
@@ -170,6 +170,9 @@ namespace SurvivalIsland
             EventChannel<StatusEffectChangedEvent>.Raised -= HandleStatusEffect;
             EventChannel<UIFocusChangedEvent>.Raised -= HandleFocus;
             EventChannel<LocaleChangedEvent>.Raised -= HandleLocale;
+            EventChannel<ThrowableChangedEvent>.Raised -= HandleThrowable;
+            EventChannel<ActiveObjectiveChangedEvent>.Raised -= HandleObjectiveRaised;
+            EventChannel<SwimStateChangedEvent>.Raised -= HandleSwim;
         }
 
         /// <summary>Aktif terlambat: baca event sticky lewat HasLast dan Last.</summary>
@@ -215,6 +218,10 @@ namespace SurvivalIsland
                 if (EventChannel<RegionChangedEvent>.HasLast) inSnow = EventChannel<RegionChangedEvent>.Last.to == RegionType.Snow;
                 if (EventChannel<WarmthChangedEvent>.HasLast) HandleWarmth(EventChannel<WarmthChangedEvent>.Last);
                 else RefreshWarmth();
+                if (EventChannel<ThrowableChangedEvent>.HasLast) HandleThrowable(EventChannel<ThrowableChangedEvent>.Last);
+                // Nilai sticky hanya ditampilkan, tanpa sorotan.
+                if (EventChannel<ActiveObjectiveChangedEvent>.HasLast) HandleObjective(EventChannel<ActiveObjectiveChangedEvent>.Last);
+                if (EventChannel<SwimStateChangedEvent>.HasLast) HandleSwim(EventChannel<SwimStateChangedEvent>.Last);
             }
 
             HandleFocus(EventChannel<UIFocusChangedEvent>.HasLast ? EventChannel<UIFocusChangedEvent>.Last : default);
@@ -430,6 +437,56 @@ namespace SurvivalIsland
                 warmthFill.color = warmth <= warmthColdAt ? warmthCold : warmthNormal;
         }
 
+        // ---------------------------------------------------------------- Barang lempar (#96)
+
+        private void HandleThrowable(ThrowableChangedEvent e)
+        {
+            bool show = !isShipPhase && !string.IsNullOrEmpty(e.itemId);
+            SetActive(throwableIcon, show);
+            SetActive(throwableCount, show);
+            if (!show) return;
+            var data = ItemDatabase.Get(e.itemId);
+            if (throwableIcon != null) throwableIcon.sprite = data != null ? data.icon : null;
+            if (throwableCount != null) throwableCount.text = e.count.ToString();
+        }
+
+        // ---------------------------------------------------------------- Tujuan aktif (#81)
+
+        private void HandleObjectiveRaised(ActiveObjectiveChangedEvent e)
+        {
+            HandleObjective(e);
+            // Sorotan selama objective.hudFlashSeconds (HUDManager.md).
+            var b = GameManager.CurrentBalance;
+            if (objectiveTitle != null && objectiveTitle.gameObject.activeSelf)
+                objectiveFlashRemaining = b != null ? b.objective.hudFlashSeconds : 3f;
+        }
+
+        private void HandleObjective(ActiveObjectiveChangedEvent e)
+        {
+            if (isShipPhase) return;
+            // objectiveId kosong: tidak ada tujuan aktif maupun cadangan, judul disembunyikan.
+            string title = ObjectiveManager.Instance != null && !string.IsNullOrEmpty(e.objectiveId)
+                ? ObjectiveManager.Instance.GetTitle(e.objectiveId) : string.Empty;
+            bool showTitle = !string.IsNullOrEmpty(title);
+            SetActive(objectiveTitle, showTitle);
+            if (showTitle && objectiveTitle != null) objectiveTitle.text = title;
+            bool showProgress = showTitle && e.target > 0;
+            SetActive(objectiveProgress, showProgress);
+            if (showProgress && objectiveProgress != null)
+                objectiveProgress.text = Text("hud.objectiveProgress", "{current}/{target}", "current", e.current.ToString(), "target", e.target.ToString());
+            if (!showTitle) objectiveFlashRemaining = 0f;
+        }
+
+        // ---------------------------------------------------------------- Napas di air (#13)
+
+        private void HandleSwim(SwimStateChangedEvent e)
+        {
+            // Bar napas tampil selama breathRatio < 1 (HUDManager.md).
+            bool show = !isShipPhase && e.breathRatio < 1f;
+            SetActive(breathBar, show);
+            if (show) SetBar(breathBar, e.breathRatio, 1f);
+        }
+
         // ---------------------------------------------------------------- Lain-lain
 
         private void HandleCraftQueue(CraftQueueChangedEvent e)
@@ -456,6 +513,7 @@ namespace SurvivalIsland
             if (engineWarming) RefreshEngineText();
             luckyShownSecond = -1;
             RefreshLuckyText();
+            if (EventChannel<ActiveObjectiveChangedEvent>.HasLast) HandleObjective(EventChannel<ActiveObjectiveChangedEvent>.Last);
         }
 
         // ---------------------------------------------------------------- Waktu tampilan
@@ -468,6 +526,12 @@ namespace SurvivalIsland
             bool blinkOn = Mathf.Repeat(blinkTime * blinkHz, 1f) < 0.5f;
 
             if (ammoEmptyBlink && ammoText != null) ammoText.alpha = blinkOn ? 1f : 0.25f;
+
+            if (objectiveFlashRemaining > 0f && objectiveTitle != null)
+            {
+                objectiveFlashRemaining -= dt;
+                objectiveTitle.alpha = objectiveFlashRemaining > 0f && !blinkOn ? 0.25f : 1f;
+            }
 
             if (luckyFreeRemaining > 0f)
             {
@@ -502,7 +566,8 @@ namespace SurvivalIsland
                 var lb = LifeboatExtraction.Instance;
                 SetActive(safeZoneLine, lb != null && lb.State == ShipFlowState.Scavenge);
             }
-            // TODO(RegionStreaming #88): SetActive(loadingAreaText, RegionStreaming.Instance != null && RegionStreaming.Instance.IsStalled);
+            // Pesan "Memuat area" selama region tujuan belum siap (#88).
+            SetActive(loadingAreaText, RegionStreaming.Instance != null && RegionStreaming.Instance.IsStalled);
         }
 
         // ---------------------------------------------------------------- Bantuan

@@ -613,7 +613,7 @@ namespace SurvivalIsland
                 }
                 return n + " batu kecil diambil";
             }));
-            // TODO(DevConsole): breaktool <itemId> milik DurabilitySystem/DevConsole (#113, #56).
+            // breaktool <itemId> didaftarkan DevConsole sendiri (DevConsole.CmdBreakTool, #113, #56).
         }
 #endif
     }

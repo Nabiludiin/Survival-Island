@@ -14,10 +14,11 @@ namespace SurvivalIsland
     /// Sekoci, aturan setor, dan akibat gagal adalah usulan yang disetujui developer (#85).
     ///
     /// Belum diimplementasikan (ditandai TODO):
-    /// - SpawnShipNpcs: NPCData (#76) dan ShipInteractable.Setup(NPCData) belum ada. Daftar korban tetap dihitung dari
+    /// - SpawnShipNpcs: NPCData dan ShipInteractable.Setup(NPCData) sudah ada, tetapi sumber NPCData per npcId di ShipPhase
+    ///   belum ditetapkan (database NPC hanya ada di NPCRoster, IslandPhase). Daftar korban tetap dihitung dari
     ///   RunSeedManager.CurrentLayout.shipNpcIds.
-    /// - Sirene pra-game dan SFX setor (AudioManager), penanda sekoci di HUD dan garis area aman sejak T=15 (HUDManager).
-    /// - Teks prompt lewat LocalizationManager (#104).
+    /// - Penanda sekoci di HUD saat sirene, dan isi sekoci di HUD (HUDManager belum punya fungsi untuk itu).
+    /// Sirene pra-game dan SFX setor lewat AudioManager, teks prompt lewat LocalizationManager (#104).
     /// </summary>
     public class LifeboatExtraction : MonoBehaviour, IInteractable
     {
@@ -28,6 +29,12 @@ namespace SurvivalIsland
         [SerializeField] private Transform safePoint;
         [SerializeField] private RunSummaryPanel runSummaryPanel;
         [SerializeField] private InteractHighlight highlight;
+
+        [Header("Suara (AudioManager)")]
+        [Tooltip("Sirene pada jeda pra-game (ship.sirenAtSeconds).")]
+        [SerializeField] private AudioClip sirenClip;
+        [Tooltip("SFX saat barang disetor ke sekoci.")]
+        [SerializeField] private AudioClip depositClip;
 
         [Header("Pemain dan sistem scene")]
         [SerializeField] private ShipPlayerController playerController;
@@ -109,7 +116,8 @@ namespace SurvivalIsland
                 if (!sirenPlayed && elapsed >= ship.sirenAtSeconds)
                 {
                     sirenPlayed = true;
-                    // TODO (AudioManager, HUDManager belum ditulis): mainkan sirene dan tandai sekoci di HUD.
+                    // Sirene lewat grup Warning. TODO(HUDManager): tandai sekoci di HUD (belum ada fungsi publiknya).
+                    AudioManager.Instance?.PlayWarning(sirenClip);
                 }
                 if (RunEnding) yield break;
                 yield return null;
@@ -134,7 +142,7 @@ namespace SurvivalIsland
 
         private void SpawnShipNpcs()
         {
-            // TODO #76 (NPCData belum ditulis): untuk tiap npcId di RunSeedManager.Instance.CurrentLayout.shipNpcIds,
+            // TODO #76 (sumber NPCData di ShipPhase belum ditetapkan): untuk tiap npcId di RunSeedManager.Instance.CurrentLayout.shipNpcIds,
             //   ambil titik dari shipNpcPointByNpc, lalu
             //   ObjectPooler.Instance.SpawnFromPool<ShipInteractable>("ShipNpc_Generic", titik.position, titik.rotation)
             //   dan langsung Setup(npcData). Data tidak diisi di OnSpawned.
@@ -149,8 +157,8 @@ namespace SurvivalIsland
 
         public string GetPrompt()
         {
-            // TODO #104: kunci teks lewat LocalizationManager.
-            return HandWeight() > 0 ? "Setor Barang" : "Tahan untuk Berangkat";
+            // Kunci teks #104: "Setor Barang" / "Tahan untuk Berangkat".
+            return UIManager.Localize(HandWeight() > 0 ? "prompt.lifeboat_deposit" : "prompt.lifeboat_depart");
         }
 
         public InteractBlockReason CanInteract(in InteractContext ctx)
@@ -208,7 +216,8 @@ namespace SurvivalIsland
             }
 
             inv.ClearShipHand();
-            // TODO (AudioManager, HUDManager belum ditulis): SFX setor dan isi sekoci di HUD.
+            AudioManager.Instance?.PlaySFX(depositClip);
+            // TODO(HUDManager): isi sekoci di HUD (belum ada elemen dan fungsi publiknya).
         }
 
         private void AddDeposited(string itemId, int amount)

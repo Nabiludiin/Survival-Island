@@ -191,13 +191,13 @@ namespace SurvivalIsland
         // ---------------------------------------------------------------- Teks
 
         /// <summary>
-        /// Ambil teks dari kunci lokalisasi.
-        /// TODO (LocalizationManager #104 belum ditulis): ganti dengan LocalizationManager.Get(key).
-        /// Sampai saat itu kunci mentah dikembalikan, sesuai aturan #104 untuk kunci yang tidak ada.
+        /// Ambil teks dari kunci lokalisasi lewat LocalizationManager.Get (#104). Tanpa LocalizationManager di scene,
+        /// kunci mentah dikembalikan, sesuai aturan #104 untuk kunci yang tidak ada.
         /// </summary>
         internal static string Localize(string key)
         {
-            return key ?? string.Empty;
+            var loc = LocalizationManager.Instance;
+            return loc != null ? loc.Get(key) : (key ?? string.Empty);
         }
 
         private void HandleLocaleChanged(LocaleChangedEvent e)

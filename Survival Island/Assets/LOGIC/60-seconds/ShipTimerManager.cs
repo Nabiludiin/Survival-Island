@@ -11,8 +11,8 @@ namespace SurvivalIsland
     /// pemain boleh berangkat lebih awal dengan sekoci (LifeboatExtraction).
     ///
     /// Kelas ini tidak menyimpan inventori, tidak memuat scene, dan tidak memulai dirinya sendiri.
-    /// Belum diimplementasikan (sistemnya belum ditulis, ditandai TODO): musik dan sirene lewat AudioManager,
-    /// cameraShakeScale dari LocalizationManager (#104), dan perintah konsol shiptime (#56).
+    /// Musik dan bunyi waktu habis lewat AudioManager, cameraShakeScale dari LocalizationManager (#104), dan perintah
+    /// konsol shiptime (DevConsole, #56).
     /// </summary>
     public class ShipTimerManager : MonoBehaviour
     {
@@ -35,7 +35,7 @@ namespace SurvivalIsland
         [SerializeField] private AudioClip musicClip;
         [SerializeField] private AudioClip timeUpClip;
 
-        /// <summary>Klip untuk AudioManager saat sudah ditulis (TODO di StartCountdown dan ExecuteTimeUp).</summary>
+        /// <summary>Klip yang diputar lewat AudioManager di StartCountdown dan ExecuteTimeUp.</summary>
         public AudioClip MusicClip => musicClip;
         public AudioClip TimeUpClip => timeUpClip;
 
@@ -113,7 +113,7 @@ namespace SurvivalIsland
                 tickSource.volume = ship.tickVolume;
                 tickSource.Play();
             }
-            // TODO (AudioManager belum ditulis): AudioManager.Instance.PlayMusicClip(musicClip, ship.musicFadeInSeconds).
+            AudioManager.Instance?.PlayMusicClip(musicClip, ship.musicFadeInSeconds);
         }
 
         /// <summary>Dipanggil LifeboatExtraction.RequestDepart dan saat RunEndedEvent. Aman dipanggil berulang.</summary>
@@ -122,7 +122,7 @@ namespace SurvivalIsland
             if (!IsRunning) return;
             IsRunning = false;
             if (tickSource != null) tickSource.Stop();
-            // TODO (AudioManager belum ditulis): AudioManager.Instance.PlayMusicClip(null, Ship.musicFadeOutSeconds).
+            AudioManager.Instance?.PlayMusicClip(null, Ship.musicFadeOutSeconds);
             // SecondsLeft tidak direset: LifeboatExtraction.ResolveOutcome membacanya untuk secondsLeftOnExit.
         }
 
@@ -164,8 +164,8 @@ namespace SurvivalIsland
             if (timerText != null) timerText.color = Color.Lerp(normalColor, panicColor, panicFactor);
 
             if (timerRect == null) return;
-            // TODO #104 (LocalizationManager belum ditulis): kalikan LocalizationManager.Instance.Accessibility.cameraShakeScale.
-            const float shakeScale = 1f;
+            // Getar timer mengikuti pilihan aksesibilitas cameraShakeScale (#104). 0 berarti mati.
+            float shakeScale = LocalizationManager.Instance != null ? LocalizationManager.Instance.Accessibility.cameraShakeScale : 1f;
             float amp = panicFactor * ship.timerShakePixels * shakeScale;
             float t = Time.time * ship.timerShakeFrequency;   // Time.time berhenti saat jeda
             timerRect.anchoredPosition = timerBasePos + new Vector2(
@@ -191,8 +191,12 @@ namespace SurvivalIsland
             WriteSeconds(0);
 
             if (tickSource != null) tickSource.Stop();
-            // TODO (AudioManager belum ditulis): AudioManager.Instance.PlaySFX(timeUpClip);
-            //      AudioManager.Instance.PlayMusicClip(null, Ship.musicFadeOutSeconds).
+            var audio = AudioManager.Instance;
+            if (audio != null)
+            {
+                audio.PlaySFX(timeUpClip);
+                audio.PlayMusicClip(null, Ship.musicFadeOutSeconds);
+            }
 
             // Urutan wajib: jadwal sisa (termasuk FinalShudder T=0) dijalankan sebelum hasil,
             // karena kedua jalur hasil memanggil ShipHazardManager.StopAll().

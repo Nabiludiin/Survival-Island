@@ -9,7 +9,8 @@ namespace SurvivalIsland
     {
         MainMenu, Loading, Cinematic, Pause, Settings, ConfirmDialog, RunSummary,
         Diary, DiaryArchive, LoreReader, Inventory, Crafting, Storage, Campfire, BuildMenu,
-        LuckyMachine, GameOver, WinScreen, DevConsole, Stats
+        LuckyMachine, GameOver, WinScreen, DevConsole, Stats,
+        Sleep   // Ditambahkan untuk SleepPanel (SleepSystem.md, #67). Nilai lama tidak diubah (urutan serialisasi).
     }
 
     /// <summary>Alasan panel tertutup.</summary>

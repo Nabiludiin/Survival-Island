@@ -38,7 +38,7 @@ namespace SurvivalIsland
     /// Usulan disetujui developer: antrean sampai 5 job, bahan dipotong saat masuk antrean dan kembali penuh saat batal,
     /// job meja berhenti saat pemain menjauh, semua job berhenti 1,5 detik saat diserang.
     ///
-    /// Belum ada di Langkah 4 (TODO): notifikasi (#22) "Resep baru" dan "Inventori penuh, hasil jatuh", SFX (#16).
+    /// Notifikasi (#22) "Resep baru" dan "Inventori penuh, hasil jatuh", dan SFX selesai lewat AudioManager (#16).
     /// </summary>
     [DisallowMultipleComponent]
     public class CraftingManager : MonoBehaviour, ISaveable
@@ -47,9 +47,7 @@ namespace SurvivalIsland
 
         public static CraftingManager Instance { get; private set; }
 
-#pragma warning disable 0169 // Dipakai saat AudioManager (#16) ada
         [SerializeField] private AudioClip completeClip;
-#pragma warning restore 0169
 
         private readonly List<CraftJob> queue = new List<CraftJob>(5);
         private readonly List<CraftingStation> stations = new List<CraftingStation>(8);
@@ -270,7 +268,8 @@ namespace SurvivalIsland
             queue.RemoveAt(index);
             // 1-2. Hasil masuk inventori. Kalau penuh lagi, sisanya jatuh di dekat pemain (despawns false). Hasil tidak pernah hilang.
             if (r.result != null) GiveOrDrop(r.result, r.resultAmount);
-            // 3. TODO #16: AudioManager.PlaySFX(completeClip).
+            // 3. SFX selesai (#16).
+            AudioManager.Instance?.PlaySFX(completeClip);
             EventChannel<ItemCraftedEvent>.Publish(new ItemCraftedEvent(r.recipeId));
             PublishQueueChanged();
         }
@@ -284,7 +283,8 @@ namespace SurvivalIsland
             var player = IslandPlayerController.Instance;
             Vector3 pos = player != null ? player.transform.position + player.transform.forward + Vector3.up : Vector3.zero;
             WorldItemManager.Instance.Spawn(inv.CreateInstance(item), left, pos, false);
-            // TODO #22: notifikasi "Inventori penuh, hasil jatuh".
+            if (NotificationManager.Instance != null)
+                NotificationManager.Instance.Show("notif.craft_dropped", NotificationKind.Warning);   // "Inventori penuh, hasil jatuh"
         }
 
         private void PublishQueueChanged()
@@ -297,7 +297,18 @@ namespace SurvivalIsland
 
         private void HandleTechNodeUnlocked(TechNodeUnlockedEvent e)
         {
-            // TODO #22: NotificationManager "Resep baru" untuk resep dengan techNodeId == e.nodeId.
+            // Notifikasi "Resep baru" untuk tiap resep yang terikat node ini (#22). Load tidak memanggil UnlockNode,
+            // jadi tidak ada notifikasi saat dimuat.
+            var nm = NotificationManager.Instance;
+            if (nm == null || string.IsNullOrEmpty(e.nodeId)) return;
+            var all = RecipeDatabase.All;
+            for (int i = 0; i < all.Count; i++)
+            {
+                var r = all[i];
+                if (r == null || !string.Equals(r.techNodeId, e.nodeId, StringComparison.Ordinal)) continue;
+                string name = LocalizationManager.Instance != null ? LocalizationManager.Instance.Get(r.displayNameKey) : r.displayNameKey;
+                nm.ShowFormat("notif.recipe_new", NotificationKind.Info, "name", name);   // "Resep baru: {name}"
+            }
         }
 
         private void HandlePlayerDamaged(PlayerDamagedEvent e)

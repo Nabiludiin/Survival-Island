@@ -339,7 +339,7 @@ namespace SurvivalIsland
                 case TextureQuality.Quarter: QualitySettings.globalTextureMipmapLimit = 2; break;
             }
 
-            // TODO(LightSourceSystem): LightSourceSystem.Instance?.ApplyQuality(level.lights, level.lightShadows) (#98).
+            LightSourceSystem.Instance?.ApplyQuality(level.lights, level.lightShadows);   // Batas lampu (#98)
 
             appliedShadow = data.shadowQuality;
             appliedTexture = data.textureQuality;

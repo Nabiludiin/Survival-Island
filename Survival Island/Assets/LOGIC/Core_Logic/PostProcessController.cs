@@ -107,15 +107,16 @@ namespace SurvivalIsland
             EventChannel<WarmthChangedEvent>.Raised += HandleWarmth;
             EventChannel<InfectionStageChangedEvent>.Raised += HandleInfectionStage;
             EventChannel<DiseaseChangedEvent>.Raised += HandleDisease;
-            // TODO(SwimmingController): SwimStateChangedEvent -> underwaterTarget = isUnderwater ? 1 : 0, dan
-            //   swimBreathTarget = InverseLerp(breathStartRatio, 0, breathRatio), lalu RefreshBreathTarget() (#13).
-            // TODO(SleepSystem): SleepStateChangedEvent -> sleepTarget = isSleeping ? 1 : 0 (#67).
+            EventChannel<SwimStateChangedEvent>.Raised += HandleSwim;     // SwimmingController (#13)
+            EventChannel<SleepStateChangedEvent>.Raised += HandleSleep;   // SleepSystem (#67)
 
             // Nilai sticky: setelah load efek langsung sesuai status, tanpa fade.
             if (EventChannel<VitalsChangedEvent>.HasLast) HandleVitals(EventChannel<VitalsChangedEvent>.Last);
             if (EventChannel<VitalWarningChangedEvent>.HasLast) HandleWarning(EventChannel<VitalWarningChangedEvent>.Last);
             if (EventChannel<WarmthChangedEvent>.HasLast) HandleWarmth(EventChannel<WarmthChangedEvent>.Last);
             if (EventChannel<InfectionStageChangedEvent>.HasLast) HandleInfectionStage(EventChannel<InfectionStageChangedEvent>.Last);
+            if (EventChannel<SwimStateChangedEvent>.HasLast) HandleSwim(EventChannel<SwimStateChangedEvent>.Last);
+            if (EventChannel<SleepStateChangedEvent>.HasLast) HandleSleep(EventChannel<SleepStateChangedEvent>.Last);
             snapNextFrame = true;
         }
 
@@ -128,6 +129,8 @@ namespace SurvivalIsland
             EventChannel<WarmthChangedEvent>.Raised -= HandleWarmth;
             EventChannel<InfectionStageChangedEvent>.Raised -= HandleInfectionStage;
             EventChannel<DiseaseChangedEvent>.Raised -= HandleDisease;
+            EventChannel<SwimStateChangedEvent>.Raised -= HandleSwim;
+            EventChannel<SleepStateChangedEvent>.Raised -= HandleSleep;
         }
 
         private void OnDestroy()
@@ -153,6 +156,21 @@ namespace SurvivalIsland
             isPulsing = (e.flags & VitalWarningFlags.LowHP) != 0;
             drowningFlag = (e.flags & VitalWarningFlags.Drowning) != 0;
             RefreshBreathTarget();
+        }
+
+        private void HandleSwim(SwimStateChangedEvent e)
+        {
+            // Pandangan air dan vignette napas (#13). Napas mulai terasa di bawah breathStartRatio.
+            underwaterTarget = e.isUnderwater ? 1f : 0f;
+            var b = GameManager.CurrentBalance;
+            float start = b != null ? b.postProcess.breathStartRatio : 0.4f;
+            swimBreathTarget = Mathf.InverseLerp(start, 0f, e.breathRatio);
+            RefreshBreathTarget();
+        }
+
+        private void HandleSleep(SleepStateChangedEvent e)
+        {
+            sleepTarget = e.isSleeping ? 1f : 0f;   // Layar gelap saat tidur (#67)
         }
 
         private void RefreshBreathTarget()

@@ -7,9 +7,8 @@ namespace SurvivalIsland
     /// GDD bagian 3: lapar, haus, vaksin, dan item inti yang tidak bisa dibuang. Pemulihan bertahap, pembusukan,
     /// dan pembatalan pemakaian adalah usulan yang disetujui developer (#85).
     ///
-    /// Belum diimplementasikan di Langkah 3 (sistem pemiliknya belum ada, ditandai TODO):
-    /// InfectionSystem.CanUseMedicine/ApplyMedicine (#64, fallback ke SurvivalStats), DiseaseManager (#45),
-    /// StatusEffectManager.ApplyById (#20), NotificationManager (#22), dan panel InventoryPanel (UI #66/#83).
+    /// Tersambung: InfectionSystem.CanUseMedicine/ApplyMedicine (#64, fallback ke SurvivalStats), DiseaseManager (#45),
+    /// StatusEffectManager.ApplyById (#20), dan NotificationManager (#22). Panel InventoryPanel (UI #66/#83) di luar kelas ini.
     /// </summary>
     public class ItemUseSystem : MonoBehaviour
     {
@@ -121,13 +120,15 @@ namespace SurvivalIsland
                 bool thirstFull = data.thirstDelta <= 0f || stats.Thirst >= stats.MaxThirst;
                 if (hungerFull && thirstFull)
                 {
-                    // TODO #22: notifikasi "Sudah kenyang".
+                    if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.already_full", NotificationKind.Info);   // "Sudah kenyang" (#22)
                     return false;
                 }
             }
             // Hook Langkah 4 (#64): vaksin ditolak saat tidak terinfeksi.
             if (data.infectionDelta < 0f && InfectionSystem.Instance != null && !InfectionSystem.Instance.CanUseMedicine(data)) return false;
-            // TODO #45: if ((data.curesDiseases != DiseaseCure.None || data.healAmount > 0f) && !DiseaseManager.Instance.CanUseMedicine(data)) return false;
+            // Obat penyakit dan obat HP ditolak kalau tidak diperlukan (#45). CanUseMedicine menampilkan notifikasinya.
+            if ((data.curesDiseases != DiseaseCure.None || data.healAmount > 0f) && DiseaseManager.Instance != null
+                && !DiseaseManager.Instance.CanUseMedicine(data)) return false;
 
             useSlotIndex = slotIndex;
             useInstanceId = slot.instance.instanceId;
@@ -185,12 +186,14 @@ namespace SurvivalIsland
                 else stats.ReduceInfection(-data.infectionDelta);
             }
             else if (data.infectionDelta > 0f) stats.AddInfection(data.infectionDelta);
-            // TODO #45: DiseaseManager.Instance.OnConsumed(data, freshness) untuk peluang keracunan.
+            // Peluang keracunan, atau penyembuhan penyakit untuk obat (#45).
+            DiseaseManager.Instance?.OnConsumed(data, freshness);
 
             string itemId = inst.itemId;
             string effectId = data.appliesEffectId;
             inventory.RemoveFromSlot(useSlotIndex, 1);
-            // TODO #20: if (!string.IsNullOrEmpty(effectId)) StatusEffectManager.Instance.ApplyById(effectId, itemId);
+            // Efek status dari item (#20).
+            if (!string.IsNullOrEmpty(effectId)) StatusEffectManager.Instance?.ApplyById(effectId, itemId);
             EventChannel<ItemConsumedEvent>.Publish(new ItemConsumedEvent(itemId, freshness));
             EndUse();
         }
@@ -216,7 +219,7 @@ namespace SurvivalIsland
             var data = ItemDatabase.Get(slot.instance.itemId);
             if (data == null || !data.isDroppable || data.isCoreItem)
             {
-                // TODO #22: notifikasi "Tidak bisa dibuang".
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.cannot_drop", NotificationKind.Info);   // "Tidak bisa dibuang" (#22)
                 return false;
             }
             var manager = WorldItemManager.Instance;

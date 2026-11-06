@@ -6,14 +6,15 @@ namespace SurvivalIsland
     /// Item yang tergeletak di dunia. Satu pool generik "WorldItem_Generic", mesh dari ItemData.worldMesh.
     /// Blueprint: Core_Logic/ItemUseSystem.md bagian "WorldItem" (#66). Layer WorldItem (PhysicsLayers.md).
     ///
-    /// Catatan implementasi (Langkah 3): IInteractable dan InteractContext milik #17 (PlayerInteractor) belum ada di
-    /// branch ini. Alur ambil ditulis di TryPickUp(InventoryManager); TODO #17: implementasikan
-    /// IInteractable.Interact(in InteractContext ctx) => TryPickUp(ctx.Inventory).
+    /// IInteractable (#17): Interact memanggil TryPickUp(ctx.Inventory), tanpa tahan (IslandInteractable.md, "Item jatuh").
     /// Belum ada: sourceSpawner/sourcePointIndex (LootSpawnerSystem #89) dan homeRegion (RegionType, #88).
+    /// LootSpawnerSystem sementara mencocokkan sendiri item miliknya (SyncLiveItems).
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
-    public class WorldItem : MonoBehaviour, IPoolable
+    public class WorldItem : MonoBehaviour, IPoolable, IInteractable
     {
+        public const string PromptKey = "prompt.pickup";   // Kunci teks #104: "Ambil"
+
         public const string PoolTag = "WorldItem_Generic";
 
         [SerializeField] private MeshFilter meshFilter;
@@ -104,19 +105,46 @@ namespace SurvivalIsland
             int rest = inventory.AddItem(Instance, Amount);
             if (rest == Amount)
             {
-                // TODO #22: notifikasi "Inventori penuh".
+                // Item tetap di tanah (#22): "Inventori penuh".
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.inventory_full", NotificationKind.Warning);
                 return false;
             }
             if (rest > 0)
             {
                 Amount = rest;
-                // TODO #89: sourceSpawner?.UpdateRemaining(sourcePointIndex, rest); notifikasi "Sebagian terambil" (#22).
+                // TODO #89: sourceSpawner?.UpdateRemaining(sourcePointIndex, rest).
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.partial_pickup", NotificationKind.Info);   // "Sebagian terambil" (#22)
                 return true;
             }
             // TODO #89: sourceSpawner?.MarkTaken(sourcePointIndex);
             if (WorldItemManager.Instance != null) WorldItemManager.Instance.Despawn(this);
             else if (ObjectPooler.Instance != null) ObjectPooler.Instance.ReturnToPool(PoolTag, gameObject);
             return true;
+        }
+
+        // ---------------------------------------------------------------- IInteractable (#17)
+
+        public bool IsAvailable => isActiveAndEnabled && Instance != null && Amount > 0;
+
+        public float HoldSeconds => 0f;
+
+        public string GetPrompt()
+        {
+            var loc = LocalizationManager.Instance;
+            return loc != null ? loc.Get(PromptKey) : PromptKey;
+        }
+
+        public InteractBlockReason CanInteract(in InteractContext ctx) =>
+            IsAvailable ? InteractBlockReason.None : InteractBlockReason.Locked;
+
+        public void OnHoverEnter() { }
+
+        public void OnHoverExit() { }
+
+        public bool Interact(in InteractContext ctx)
+        {
+            var inv = ctx.Inventory != null ? ctx.Inventory : InventoryManager.Instance;
+            return TryPickUp(inv);
         }
 
         /// <summary>Item yang masuk air kehilangan kecepatan dan tenggelam, lalu dihapus setelah 1 jam game (ItemUseSystem.md).</summary>

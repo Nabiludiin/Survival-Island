@@ -37,6 +37,10 @@ namespace SurvivalIsland
             public float total;
         }
 
+        [Header("Suara (AudioManager)")]
+        [SerializeField] private AudioClip repairDoneClip;
+        [SerializeField] private AudioClip upgradeDoneClip;
+
         private Job currentJob;
         private bool stopped;
         private readonly List<RecipeIngredient> costBuffer = new List<RecipeIngredient>(4);
@@ -227,7 +231,7 @@ namespace SurvivalIsland
             // 7.
             EventChannel<DurabilityStateChangedEvent>.Publish(
                 new DurabilityStateChangedEvent(inst.instanceId, inst.itemId, DurabilitySystem.GetState(inst)));
-            // TODO(AudioManager): mainkan SFX perbaikan selesai.
+            AudioManager.Instance?.PlaySFX(repairDoneClip);   // SFX perbaikan selesai
         }
 
         private void CompleteUpgrade(ItemInstance inst, ItemUpgradeData upgrade)
@@ -258,7 +262,7 @@ namespace SurvivalIsland
             if (upgrade.kind == UpgradeKind.Durability)
                 EventChannel<DurabilityStateChangedEvent>.Publish(
                     new DurabilityStateChangedEvent(inst.instanceId, inst.itemId, DurabilitySystem.GetState(inst)));
-            // TODO(AudioManager): mainkan SFX upgrade selesai.
+            AudioManager.Instance?.PlaySFX(upgradeDoneClip);   // SFX upgrade selesai
         }
 
         // ---------------------------------------------------------------- Bantuan

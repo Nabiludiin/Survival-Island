@@ -144,11 +144,11 @@ namespace SurvivalIsland
             warningSource.PlayOneShot(clip, SfxScale);
         }
 
-        /// <summary>Dipanggil RunLifecycle saat reset. Sistem yang belum ada dilewati.</summary>
+        /// <summary>Dipanggil RunLifecycle saat reset. Sistem yang belum dipasang di scene dilewati.</summary>
         public void StopWorldAudio()
         {
-            // TODO(AmbientAudio): AmbientAudio.Instance?.StopImmediate() (#52).
-            // TODO(CombatMusicDirector): CombatMusicDirector.Instance?.StopImmediate() (#114).
+            AmbientAudio.Instance?.StopImmediate();          // Suara latar (#52)
+            CombatMusicDirector.Instance?.StopImmediate();   // Musik pertempuran dan suara musuh (#114)
             if (musicRoutine != null)
             {
                 StopCoroutine(musicRoutine);
@@ -156,7 +156,7 @@ namespace SurvivalIsland
             }
             if (bgmSource != null) { bgmSource.Stop(); bgmSource.clip = null; }
             if (warningSource != null) warningSource.Stop();
-            // TODO(PooledAudioSource): sumber 3D sekali putar (#52) dikembalikan lewat ObjectPooler.ReturnAllActive.
+            PooledAudioSource.StopAll();   // Sumber 3D sekali putar (#52) kembali ke pool
         }
 
         // ---------------------------------------------------------------- Campuran

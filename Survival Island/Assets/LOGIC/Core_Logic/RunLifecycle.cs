@@ -15,10 +15,10 @@ namespace SurvivalIsland
     /// Berada di objek akar PersistentRoot (DontDestroyOnLoad), di luar managersRoot.
     /// Fungsi publik menolak panggilan yang tidak sesuai state, jadi klik ganda tidak menjalankan alur dua kali.
     ///
-    /// Belum diimplementasikan di Langkah 1 (sistem pemiliknya belum ditulis), ditandai TODO di kode:
-    /// - NarrativeSequencer (#99): adegan intro, sekoci, dan ending. Tanpa itu scene langsung aktif (holdActivation tidak dipakai).
-    /// - RegionStreaming.LoadInitialRegions (#88). IslandArrival.Apply (#74) disambungkan Langkah 2.
-    /// - DeathCinematic (#53), LocalStatsManager.RecordRunEnd (#57), AudioManager.StopWorldAudio, NotificationManager (#22).
+    /// Sistem pendukung tersambung: NarrativeSequencer (#99) untuk adegan intro, sekoci, dan ending (tanpa NarrativeSequencer
+    /// scene langsung aktif), DeathCinematic (#53), LocalStatsManager.RecordRunEnd (#57), AudioManager.StopWorldAudio,
+    /// dan NotificationManager (#22). IslandArrival.Apply (#74) disambungkan Langkah 2.
+    /// Belum (TODO): RegionStreaming.LoadInitialRegions (#88), menunggu penyiapan scene region dan RegionStateStore di save.
     /// </summary>
     public class RunLifecycle : MonoBehaviour
     {
@@ -223,8 +223,8 @@ namespace SurvivalIsland
             // 5.
             Game.SetPhase(GamePhase.SinkingShip);
 
-            // 6. TODO #99: muat dengan holdActivation: true, lalu yield NarrativeSequencer.Instance.PlayDuringLoad("intro_ship").
-            yield return Loader.LoadSingle(ShipScene);
+            // 6. Adegan intro diputar selama ShipPhase dimuat dengan holdActivation (#99).
+            yield return LoadWithNarrative(ShipScene, NarrativeSequencer.IntroShip);
             if (!Loader.LastLoadSucceeded)
             {
                 yield return FailBackToMenu();
@@ -258,9 +258,9 @@ namespace SurvivalIsland
             // 2.
             if (!Save.ReadRunFile())
             {
-                // TODO #22: notifikasi dari #80 bahwa save tidak bisa dipakai.
+                // Notifikasi #22 bahwa save tidak bisa dipakai (#80).
                 Debug.LogError("[RunLifecycle] File save tidak bisa dibaca. Kembali ke MainMenu.");
-                yield return FailBackToMenu();
+                yield return FailBackToMenu("notif.save_unusable");
                 yield break;
             }
 
@@ -320,9 +320,9 @@ namespace SurvivalIsland
             // Tanpa NarrativeSequencer (#99), layar ditutup panel Loading selama pemuatan.
             PushPanel(loadingPanel);
 
-            // 2-4. TODO #99: holdActivation: true dan NarrativeSequencer.Instance.PlayDuringLoad("lifeboat_to_beach").
+            // 2-4. Adegan sekoci diputar selama IslandPhase dimuat dengan holdActivation (#99).
             Game.SetPhase(GamePhase.IslandSurvival);
-            yield return Loader.LoadSingle(IslandScene);
+            yield return LoadWithNarrative(IslandScene, NarrativeSequencer.LifeboatToBeach);
             if (!Loader.LastLoadSucceeded)
             {
                 yield return FailBackToMenu();
@@ -376,15 +376,18 @@ namespace SurvivalIsland
             float timeout = Balance == null ? 0f
                 : result == RunResult.Won ? Balance.run.endingTimeoutSeconds : Balance.run.endSequenceTimeoutSeconds;
             // Langkah 7 (#53): Died -> DeathCinematic.Instance.Play(reason); kalau Instance null, langkah ini dilewati.
-            // TODO #99: Won -> NarrativeSequencer.PlayEnding().
+            // Won -> NarrativeSequencer.PlayEnding() (#99); kalau Instance null, langkah ini dilewati.
             IEnumerator closing = null;
             if (result == RunResult.Died && DeathCinematic.Instance != null) closing = DeathCinematic.Instance.Play(reason);
+            else if (result == RunResult.Won && NarrativeSequencer.Instance != null) closing = NarrativeSequencer.Instance.PlayEnding();
             if (closing != null) yield return RunWithTimeout(closing, timeout);
 
             // 5.
             Save.DeleteRunSave();
 
-            // 6. TODO #57: LocalStatsManager.RecordRunEnd(result, reason, currentDay, seed).
+            // 6. Statistik lokal (#57).
+            if (LocalStatsManager.Instance != null && Game != null && Seeds != null)
+                LocalStatsManager.Instance.RecordRunEnd(result, reason, Game.currentDay, Seeds.CurrentSeed);
 
             // 7.
             Save.ClearRunEndMarker();
@@ -436,7 +439,7 @@ namespace SurvivalIsland
         {
             if (!Save.TryReadRunEndMarker(out var marker)) return;
             Save.DeleteRunSave();
-            // TODO #57: LocalStatsManager.RecordRunEnd(marker.result, marker.reason, marker.currentDay, marker.seed).
+            LocalStatsManager.Instance?.RecordRunEnd(marker.result, marker.reason, marker.currentDay, marker.seed);   // #57
             Debug.Log($"[RunLifecycle] Run yang terputus saat berakhir diselesaikan ({marker.result}, hari {marker.currentDay}).");
             Save.ClearRunEndMarker();
         }
@@ -548,7 +551,8 @@ namespace SurvivalIsland
             Focus.ClearForNewRun();
             PushPanel(loadingPanel);
 
-            // 3. TODO (AudioManager belum ditulis): AudioManager.Instance.StopWorldAudio(). AudioListener.pause mengikuti stack.
+            // 3. AudioListener.pause mengikuti stack.
+            AudioManager.Instance?.StopWorldAudio();
 
             // 4. Tiap objek menjalankan OnReturned selagi scene lama masih ada.
             Pooler.ReturnAllActive();
@@ -587,12 +591,31 @@ namespace SurvivalIsland
             GC.Collect();
         }
 
-        /// <summary>Scene gagal dimuat: kembali ke MainMenu (layar Loading sudah terbuka).</summary>
-        private IEnumerator FailBackToMenu()
+        /// <summary>
+        /// Muat scene tunggal sambil memutar adegan (NarrativeSequencer.PlayDuringLoad, #99). Tanpa NarrativeSequencer,
+        /// scene langsung dimuat seperti biasa. Hasil dibaca dari Loader.LastLoadSucceeded.
+        /// </summary>
+        private IEnumerator LoadWithNarrative(string sceneName, string narrativeId)
         {
-            // TODO #22: notifikasi kegagalan pemuatan.
+            var narrative = NarrativeSequencer.Instance;
+            if (narrative == null)
+            {
+                yield return Loader.LoadSingle(sceneName);
+                yield break;
+            }
+            // Langkah awal LoadSingle berjalan sebelum yield pertamanya, jadi AllowActivation dari PlayDuringLoad tidak tertimpa.
+            var load = StartCoroutine(Loader.LoadSingle(sceneName, holdActivation: true));
+            yield return narrative.PlayDuringLoad(narrativeId);
+            yield return load;
+        }
+
+        /// <summary>Scene gagal dimuat: kembali ke MainMenu (layar Loading sudah terbuka).</summary>
+        private IEnumerator FailBackToMenu(string notifKey = "notif.load_failed")
+        {
             Debug.LogError("[RunLifecycle] Pemuatan gagal. Kembali ke MainMenu.");
             yield return ResetRunState();
+            // Notifikasi kegagalan (#22). Dikirim setelah reset, karena ResetForNewRun mengosongkan antrean notifikasi.
+            if (NotificationManager.Instance != null) NotificationManager.Instance.Show(notifKey, NotificationKind.Danger);
             yield return GoToMainMenu();
             flowBusy = false;
         }
