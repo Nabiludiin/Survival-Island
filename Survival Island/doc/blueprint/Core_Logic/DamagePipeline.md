@@ -357,7 +357,7 @@ Target memeriksa aturan ini di `TakeDamage`, jadi senjata tidak perlu tahu jenis
 
 Kode: `Core_Logic/EnemyHealth.cs`, `DamageRouter.cs`, `DamageResistance.cs` (`DamageResistance`, `DamageResistanceTable`), `ExplosionDamage.cs`, dan `PhysicsQuery.CollectUniqueDamageables` (ditambahkan ke `Core_Logic/PhysicsQuery.cs`). Kontrak `IDamageable`, `DamageInfo`, `DamageType`, `BodyPart`, dan `DeathReasonMap` tetap dari Langkah 3 dan tidak diubah.
 
-- **`BaseHealth` belum ditulis.** Kelas ini butuh `BuildableData` (#79), milik Langkah 4. `EnemyAttack` menyerang bangunan lewat `IDamageable` biasa, jadi `BaseHealth` cukup memakai interface itu saat ditulis.
+- **`BaseHealth : MonoBehaviour, IDamageable, IStructureHealth`** (`Core_Logic/BaseHealth.cs`). `IStructureHealth` dan `BuildableData` ditulis Langkah 4, dan dipakai `BuildManager` serta `StructureRegistry`. Pengali bawaan: `Bullet` dan `Melee` 0, jenis lain 1, dikali `BuildableData.resistances` dan `SetDamageMultiplier`. Tanpa batas bawah `minDamageAfterArmor`, karena batas itu hanya untuk musuh. `EnemyAttack` menyerang bangunan lewat `IDamageable`.
 - **`DamageRouter.ApplyHit(Collider, Vector3, DamageInfo)`**: overload tambahan untuk overlap. Versi `RaycastHit` memanggilnya.
 - **`EnemyHealth.Heal(float)`**: tambahan untuk pemulihan hewan saat kembali ke teritori (`WildlifeAI.md`), karena damage negatif diabaikan.
 - **`CollectUniqueDamageables`** punya overload yang juga mengisi collider pertama tiap target, dipakai `ExplosionDamage` untuk titik terdekat.

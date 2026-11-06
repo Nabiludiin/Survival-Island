@@ -114,4 +114,4 @@
 Kode: `Island_Logic/MeleeCombatSystem.cs`.
 
 - Damage dibaca dari `ItemData.weaponDamage`, dengan cadangan 25 di prefab kalau nilainya 0. Jarak (2) dan jeda (1) berada di prefab viewmodel, karena `ItemData` belum punya field untuk itu. Pindahkan ke data senjata kalau #113 menambahkannya.
-- `ResourceNode.ReceiveHit` (#73, Langkah 4), `DurabilitySystem.ApplyWear` (#113), `AnimationController` (#12), dan Fire Axe (#97) masih TODO.
+- Panen memanggil `ResourceNode.ReceiveHit(toolClass, hitPoint, true)` milik Langkah 4, lalu berhenti tanpa damage. `DurabilitySystem.ApplyWear` (#113), `AnimationController` (#12), dan Fire Axe (#97) masih TODO.

@@ -163,15 +163,16 @@ Isi kolom **Status** dengan salah satu: `Belum dimulai`, `Sedang ditulis`, `Ditu
 
 ## 🧩 Ditambahkan Langkah 5
 
-Langkah 5 (Pilar 3 "L4D"): AI musuh `NavMeshAgent`, spawn siang dan malam, gunplay raycast, melee, `HitboxModifier`, dan implementasi `DamagePipeline`. Status: **ditulis, belum dikompilasi di Unity**. Kode hanya dicek dengan `dotnet build` (netstandard2.1, C# 9) terhadap DLL UnityEngine 6000.3.10f1 dengan stub InputSystem/TMP/UGUI: 0 error dan 0 warning di konfigurasi Editor, rilis, dan `DEVELOPMENT_BUILD`. Belum ada yang dijalankan di Play Mode.
+Langkah 5 (Pilar 3 "L4D"): AI musuh `NavMeshAgent`, spawn siang dan malam, gunplay raycast, melee, `HitboxModifier`, dan implementasi `DamagePipeline`. Status: **ditulis, belum dikompilasi di Unity**. Kode hanya dicek dengan `dotnet build` (netstandard2.1, C# 9) terhadap DLL UnityEngine 6000.3.10f1 dengan stub InputSystem/TMP/UGUI. Branch ini sendirian **tidak** terkompilasi, karena `BaseHealth` dan `MeleeCombatSystem` memakai `BuildableData`, `IStructureHealth`, `ResourceNode`, `RegionType`, `StructureDamagedEvent`, dan `StructureDestroyedEvent` milik Langkah 4 (branch `claude/eager-austin-b83a6f`). Gabungan uji kedua branch: 0 error dan 0 warning di Editor, rilis, dan `DEVELOPMENT_BUILD`. Belum ada yang dijalankan di Play Mode.
+
+**Merge dengan Langkah 4:** konflik teks hanya di bagian akhir `Core_Logic/GameEvents.cs`, `Core_Logic/GameBalanceSections.cs`, `Assets/LOGIC/README.md`, dan `doc/blueprint/Core_Logic/DamagePipeline.md`. Ambil kedua sisi. Di dua file `.cs`, git menggabungkan `}` terakhir kedua sisi, jadi tambahkan satu `    }` penutup kelas terakhir Langkah 5 sebelum komentar "Ditambahkan Langkah 4".
 
 | File | Blueprint |
 |---|---|
-| `Core_Logic/EnemyHealth.cs`, `DamageRouter.cs`, `DamageResistance.cs` (`DamageResistance`, `DamageResistanceTable`), `ExplosionDamage.cs` | `DamagePipeline.md` |
+| `Core_Logic/EnemyHealth.cs`, `BaseHealth.cs` (memakai `IStructureHealth` dan `BuildableData` dari Langkah 4), `DamageRouter.cs`, `DamageResistance.cs` (`DamageResistance`, `DamageResistanceTable`), `ExplosionDamage.cs` | `DamagePipeline.md` |
 | `Island_Logic/HitboxModifier.cs` | `HitboxModifier.md` |
 | `Island_Logic/MeleeCombatSystem.cs` | `MeleeCombatSystem.md` |
 | `Island_Logic/PlayerPinnedState.cs` (`PinReleaseReason`, `IPinAttacker`) | `PlayerPinnedState.md` |
-| `Island_Logic/RegionType.cs` | `GLOSSARY.md` (pemilik `ZoneManager`, Langkah 6) |
 | `left-4-dead/EnemyAI.cs` (`AIState`, `SpeedSource`) | `EnemyAI.md` |
 | `left-4-dead/EnemyData.cs`, `ZombieData.cs` (`SpecialZombieKind`), `SpecialZombieAI.cs`, `TribalBehavior.cs`, `TribalSnare.cs`, `MossBehavior.cs`, `MilitaryBehavior.cs`, `FrozenBehavior.cs`, `VillageBehavior.cs` | `SpecialZombieAI.md` |
 | `left-4-dead/EnemyAttack.cs` (`AttackPhase`), `AttackData.cs`, `AttackCoordinator.cs` | `EnemyAttack.md` |
@@ -188,7 +189,7 @@ Langkah 5 (Pilar 3 "L4D"): AI musuh `NavMeshAgent`, spawn siang dan malam, gunpl
 
 ### Perubahan kecil di file Langkah lain
 
-- `Core_Logic/GameEvents.cs`: bagian baru "Ditambahkan Langkah 5" di akhir file (`NoiseEmittedEvent`, `PlayerDetectionChangedEvent`, `EnemySpawnedEvent`, `EnemyHitEvent`, `EnemyKilledEvent`, `EnemyAttackTelegraphEvent`, `DirectorPhaseChangedEvent`, `AmmoChangedEvent`, `WeaponFiredEvent`, `ShotResolvedEvent`, dan `RegionChangedEvent` milik `ZoneManager`). `NightfallEvent` sengaja tidak ditulis, karena milik Langkah 4.
+- `Core_Logic/GameEvents.cs`: bagian baru "Ditambahkan Langkah 5" di akhir file (`NoiseEmittedEvent`, `PlayerDetectionChangedEvent`, `EnemySpawnedEvent`, `EnemyHitEvent`, `EnemyKilledEvent`, `EnemyAttackTelegraphEvent`, `DirectorPhaseChangedEvent`, `AmmoChangedEvent`, `WeaponFiredEvent`, `ShotResolvedEvent`, dan `RegionChangedEvent` milik `ZoneManager`). `NightfallEvent`, `StructureDamagedEvent`, dan `StructureDestroyedEvent` ditulis Langkah 4, dan `RegionType` juga ditulis Langkah 4.
 - `Core_Logic/GameBalanceSections.cs`: bagian `damage`, `gun`, `enemyAttack`, `hitReaction`, `threat`, `stealth`, `wildlife`, `spawn`, `sunlight`, `specialZombie`, `aiDirector`, `crowd`, dan `pinned` diisi di bagian baru "Ditambahkan Langkah 5" di akhir file. Baris kelas kosong lamanya (`[Serializable] public class XBalance { }` beserta komentarnya) dihapus, karena C# tidak bisa menambah field ke kelas yang sudah dideklarasikan. Saat merge dengan Langkah 4, kedua bagian akhir file diambil.
 - `Core_Logic/PhysicsQuery.cs`: `CollectUniqueDamageables` ditambahkan (dicadangkan Langkah 1 untuk Langkah 5).
 - `Core_Logic/ItemData.cs`: field `weaponData` (dicadangkan Langkah 3 untuk Langkah 5).
@@ -197,7 +198,7 @@ Langkah 5 (Pilar 3 "L4D"): AI musuh `NavMeshAgent`, spawn siang dan malam, gunpl
 
 ### Belum diimplementasikan (sistem pendukung belum ada)
 
-`BaseHealth` (butuh `BuildableData`, Langkah 4), `BaseNavigation` (#78, diganti pemeriksaan jalur sementara), `AITraversal` (#94), `ZombieLair` (#112), `VillageZombieHiding`/`HidingSpot` (#63), `BushSpawnPoint` (#25), `RegionStreaming` (#88), `HordeManager` Blood Moon (#50), `DurabilitySystem`/`WeaponStatCalculator` (#113), `VFXManager` (#15), `AnimationController` (#12), `NPCGunUser` (#76), `DetectionMeterUI`, drop `LootTable` (#103), `AmbushPerch` dan Gagak terbang (#61). Semuanya ditandai TODO di kode dan dicatat di bagian "Catatan Implementasi (Langkah 5)" pada blueprint terkait. `ShipHazardManager` (Langkah 2) belum memanggil `EnemyAI.SetTarget`/`WakeUp`, jadi zombie kapal belum mengejar.
+`BaseNavigation` (#78, diganti pemeriksaan jalur sementara), `AITraversal` (#94), `ZombieLair` (#112), `VillageZombieHiding`/`HidingSpot` (#63), `BushSpawnPoint` (#25), `RegionStreaming` (#88), `HordeManager` Blood Moon (#50), `DurabilitySystem`/`WeaponStatCalculator` (#113), `VFXManager` (#15), `AnimationController` (#12), `NPCGunUser` (#76), `DetectionMeterUI`, drop `LootTable` (#103), `AmbushPerch` dan Gagak terbang (#61). Semuanya ditandai TODO di kode dan dicatat di bagian "Catatan Implementasi (Langkah 5)" pada blueprint terkait. `ShipHazardManager` (Langkah 2) belum memanggil `EnemyAI.SetTarget`/`WakeUp`, jadi zombie kapal belum mengejar.
 
 ### Penyiapan di Unity untuk Langkah 5 (belum dilakukan)
 
