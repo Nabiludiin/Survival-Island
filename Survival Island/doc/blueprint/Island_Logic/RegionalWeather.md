@@ -209,3 +209,12 @@ public void PopOverride(WeatherOverrideHandle h);
 9. Picu `disaster TropicalStorm`. **Hasil:** tiga region menjadi `Storm`, Region 3 `Blizzard`, lalu kembali ke jadwal setelah selesai.
 10. Jeda selama 2 menit nyata. **Hasil:** cuaca tidak berganti.
 11. Simpan saat `Blizzard`, lalu load. **Hasil:** cuaca sama.
+
+## 7. Catatan Implementasi (Langkah 6)
+
+- File: `Island_Logic/RegionalWeather.cs` (`WeatherEffects`, `WeatherOverride`, `WeatherOverrideHandle`) dan `Island_Logic/RegionWeatherTable.cs` (`WeatherWeight`). `FillWeights` mengubah `WeatherWeight[]` menjadi array per `WeatherType` untuk `RandomStream.PickWeighted`. Region tanpa aset tabel memakai nilai awal dari tabel bagian 1.
+- `GameBalanceConfig.weather.effects` disimpan sebagai array `WeatherEffects` dengan urutan `WeatherType`. Field `weather` di tiap baris hanya label.
+- Hari untuk slot dihitung `floor(slot * weatherIntervalGameHours / 24) + 1`.
+- Saat `OnEnable`, cuaca semua region dihitung dan semua `WeatherChangedEvent` diterbitkan sekali (region aktif paling akhir), supaya pendengar yang sudah aktif menerima nilai awal.
+- `InteriorZoneChangedEvent` (#112) belum ada, jadi `isPlayerInside` selalu `false`.
+- `DebugForce(region, weather)` (Editor dan `DEVELOPMENT_BUILD`) untuk `DevConsole` (#56), memakai `PushOverride`.

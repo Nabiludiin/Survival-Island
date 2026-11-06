@@ -536,4 +536,35 @@ namespace SurvivalIsland
         public RegionType to;
         public RegionChangedEvent(RegionType from, RegionType to) { this.from = from; this.to = to; }
     }
+
+    // =====================================================================================
+    // Ditambahkan Langkah 6 (region, cuaca, gerbang, jembatan).
+    // Sumber: tabel "Daftar event global" di GameEventBus.md. RegionChangedEvent (Langkah 5), WarmthChangedEvent dan
+    // HeavyItemChangedEvent (Langkah 3) sudah ada di atas dan TIDAK dideklarasikan ulang.
+    // =====================================================================================
+
+    /// <summary>Cuaca satu region berubah. Pengirim: RegionalWeather (#115). Last berisi region aktif (diterbitkan paling akhir).</summary>
+    [StickyEvent]
+    public struct WeatherChangedEvent
+    {
+        public RegionType region;
+        public WeatherType weather;
+        public WeatherChangedEvent(RegionType region, WeatherType weather) { this.region = region; this.weather = weather; }
+    }
+
+    /// <summary>Region baru bisa dimasuki. Pengirim: RegionGateSystem.Unlock (#68), sekali per region.</summary>
+    public struct RegionUnlockedEvent
+    {
+        public RegionType region;
+        public RegionUnlockedEvent(RegionType region) { this.region = region; }
+    }
+
+    /// <summary>Progres kayu jembatan berubah. Pengirim: RegionGateSystem (#68). Didengar BridgeSite.</summary>
+    [StickyEvent]
+    public struct BridgeProgressChangedEvent
+    {
+        public int deposited;
+        public int required;
+        public BridgeProgressChangedEvent(int deposited, int required) { this.deposited = deposited; this.required = required; }
+    }
 }

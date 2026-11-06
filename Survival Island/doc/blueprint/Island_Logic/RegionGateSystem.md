@@ -204,3 +204,13 @@ Jembatan berada di layer `Structure` supaya bisa dipijak, tetapi tidak punya `Ba
 11. Masuk Region 2, sehingga Bab 3 terbuka. **Hasil:** `GateBlocker` hilang, `S2` dan `S3` terbuka di data, dan Region 4 dimuat saat pemain mendekat.
 12. Selesaikan jembatan dengan `eventlog 1` aktif. **Hasil:** `RegionUnlockedEvent(Amazon)` tercatat sekali, dan notifikasi `Akses baru terbuka` tampil sekali.
 13. Dari stamina penuh, berenang memutari ujung `GateBarrier` di sisi laut tanpa berhenti. **Hasil:** pemain tenggelam sebelum mencapai pantai Region 2.
+
+## 7. Catatan Implementasi (Langkah 6)
+
+- File: `Island_Logic/RegionGateSystem.cs` (`GateKind`, `GateRule`), `BridgeSite.cs`, `GateBlocker.cs`, dan `RavineRecoveryVolume.cs`. `GateBarrier` cukup `BoxCollider` di layer `Obstacle`, tanpa skrip. `RegionUnlockedEvent` dan `BridgeProgressChangedEvent` ditambahkan di bagian "Ditambahkan Langkah 6" pada `GameEvents.cs`.
+- `CompleteBridge` tidak memanggil `BridgeSite.SetComplete` langsung. `BridgeSite` mendengar `BridgeProgressChangedEvent` dan `RegionUnlockedEvent`, lalu menyegarkan visualnya sendiri, supaya sistem dasar tidak menyimpan referensi ke objek region.
+- `TryCompleteBridge` dipanggil saat `Interact` dan tiap `gateVerifySeconds`, untuk kasus `bridgeWoodCost` diturunkan di bawah `woodDeposited`.
+- `RegionStreaming.GetRegionAt` dan `RegionBoundaryGuard.LastSafePosition` (#88) belum ada. Sementara `VerifyPlayerRegion` memakai `ZoneTracker.Active`, dan posisi aman dicatat sendiri (`LastSafePosition`) saat pemain berdiri di region terbuka. `RavineRecoveryVolume` memakai posisi itu.
+- `DiaryChapterUnlockedEvent` (#81) belum ada di kode (Langkah 7). Bab Diary diteruskan lewat `HandleDiaryChapter(int chapter)`, dan langganan event ditandai TODO.
+- Kalau `rules` kosong di Inspector, `Awake` mengisi tabel nilai awal (`S1`, `S2`, `S3`) tanpa barrier.
+- `NavMeshLink` seam `S1` (#88), debu kayu `VFXManager` (#15), alat Editor lebar jurang, dan perintah `DevConsole` belum ada. `DebugDeposit(int)` tersedia di Editor dan `DEVELOPMENT_BUILD`.

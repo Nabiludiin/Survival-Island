@@ -1,0 +1,576 @@
+using System;
+using UnityEngine;
+using UnityEngine.AI;
+
+namespace SurvivalIsland
+{
+    public enum PartState { Lying, Carried, Installed }
+
+    public enum DropReason { Manual, HeavyHit, Pinned, Water, Death, Installed, Unstuck }
+
+    /// <summary>Status satu suku cadang. Tetap ada walaupun region dilepas.</summary>
+    [Serializable]
+    public class PartRecord
+    {
+        public string partId;
+        public PartState state;
+        public Vector3 position;
+        public Quaternion rotation = Quaternion.identity;
+        public Vector3 lastValidPosition;
+        public RegionType region = RegionType.Logistic;
+        public bool isDiscovered;
+        public int spawnPointIndex = -1;   // Titik asal di PartSpawnPointTable, cadangan ReturnToValid
+    }
+
+    /// <summary>
+    /// Mengatur suku cadang helikopter sejak tersebar di Region 4, diangkut dan dijatuhkan, sampai tiba di titik pemasangan.
+    /// Blueprint: Island_Logic/HeavyItemSystem.md (#69). GDD bagian 1 dan 5, Region 4: suku cadang tersebar, tidak bisa
+    /// dibawa sekaligus, dan bolak-balik ke Region 3. Claude.md Tahap 4: saat digenggam kecepatan setengah, Sprint dan Jump mati.
+    ///
+    /// Pembagian efek saat membawa: kecepatan lewat SpeedModifierId.HeavyItem (di sini), Sprint dan Jump dimatikan
+    /// IslandPlayerController, regenerasi stamina oleh SurvivalStats, kunci senjata dan obor oleh EquipmentManager.
+    /// Ketiganya mendengar HeavyItemChangedEvent (Langkah 3), jadi file mereka tidak diubah.
+    ///
+    /// Penyimpangan sementara (Catatan Implementasi Langkah 6 di blueprint):
+    /// - RunSeedManager.BuildLayout masih kosong (#89). Kalau CurrentLayout.partPointByPart kurang, titik dipilih di sini
+    ///   dengan aturan yang sama (Fork PartLocation 0, Shuffle, minPartPointSpacing).
+    /// - RegionStreaming (#88) belum ada: semua barang aktif sejak awal, tanpa RegionLoadStateChangedEvent dan batas bawah region.
+    /// - Belum ada (TODO): SwimStateChangedEvent (#13, sementara PlayerTraversal.Mode), CompassSystem (#30),
+    ///   LoreHintGrantedEvent (#100), notifikasi (#22), VFXManager (#15).
+    /// </summary>
+    public class HeavyItemSystem : MonoBehaviour, ISaveable
+    {
+        public const string SaveIdConst = "world_parts";
+
+        public static HeavyItemSystem Instance { get; private set; }
+
+        [SerializeField] private HeavyItemData[] parts = Array.Empty<HeavyItemData>();
+        [SerializeField] private PartSpawnPointTable spawnPoints;
+        [Tooltip("Titik pegang di depan kamera pemain. Diisi dari prefab pemain Fase 2.")]
+        [SerializeField] private Transform carryAnchor;
+        [Tooltip("Induk barang yang tergeletak. Kosong = objek ini.")]
+        [SerializeField] private Transform partsRoot;
+
+        private PartRecord[] records = Array.Empty<PartRecord>();
+        private HeavyItem[] instances = Array.Empty<HeavyItem>();
+        private bool built;
+        private bool runEnded;
+        private bool registeredForSave;
+        private float validSampleTimer;
+        private float recoveryTimer;
+        private PlayerTraversal playerTraversal;
+
+        public int CarriedIndex { get; private set; } = -1;
+        public bool IsCarrying => CarriedIndex >= 0;
+        public int PartCount => records.Length;
+        public PartRecord GetRecord(int i) => i >= 0 && i < records.Length ? records[i] : null;
+        public PartState GetState(int i) => i >= 0 && i < records.Length ? records[i].state : PartState.Installed;
+
+        public int InstalledCount
+        {
+            get
+            {
+                int n = 0;
+                for (int i = 0; i < records.Length; i++) if (records[i].state == PartState.Installed) n++;
+                return n;
+            }
+        }
+
+        private static GameBalanceConfig Balance => GameManager.CurrentBalance;
+        private Transform Root => partsRoot != null ? partsRoot : transform;
+
+        // ---------------------------------------------------------------- Siklus hidup
+
+        private void Awake()
+        {
+            Instance = this;
+        }
+
+        private void OnEnable()
+        {
+            EventChannel<RunStartedEvent>.Raised += HandleRunStarted;
+            EventChannel<PlayerDamagedEvent>.Raised += HandleDamaged;
+            EventChannel<PlayerPinnedEvent>.Raised += HandlePinned;
+            EventChannel<PlayerDiedEvent>.Raised += HandleDied;
+            EventChannel<RunEndedEvent>.Raised += HandleRunEnded;
+            // TODO #13 SwimStateChangedEvent, #88 RegionLoadStateChangedEvent, #100 LoreHintGrantedEvent.
+            if (WorldStateSave.Instance != null)
+            {
+                WorldStateSave.Instance.Register(this);
+                registeredForSave = true;
+            }
+        }
+
+        private void Start()
+        {
+            // RunStartedEvent sticky: scene bisa dimuat setelah event terkirim.
+            if (!built && EventChannel<RunStartedEvent>.HasLast && EventChannel<RunStartedEvent>.Last.isNewRun) BuildRecords();
+        }
+
+        private void OnDisable()
+        {
+            EventChannel<RunStartedEvent>.Raised -= HandleRunStarted;
+            EventChannel<PlayerDamagedEvent>.Raised -= HandleDamaged;
+            EventChannel<PlayerPinnedEvent>.Raised -= HandlePinned;
+            EventChannel<PlayerDiedEvent>.Raised -= HandleDied;
+            EventChannel<RunEndedEvent>.Raised -= HandleRunEnded;
+            if (registeredForSave && WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
+            registeredForSave = false;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
+        /// <summary>Titik pegang dari prefab pemain (dipanggil saat pemain muncul, atau diisi di Inspector).</summary>
+        public void SetCarryAnchor(Transform anchor) => carryAnchor = anchor;
+
+        // ---------------------------------------------------------------- Penyebaran di Region 4
+
+        private void HandleRunStarted(RunStartedEvent e)
+        {
+            if (e.isNewRun && !built) BuildRecords();
+        }
+
+        private void BuildRecords()
+        {
+            built = true;
+            int count = parts != null ? parts.Length : 0;
+            records = new PartRecord[count];
+            int[] pointByPart = ResolvePoints(count);
+            for (int i = 0; i < count; i++)
+            {
+                // 2.
+                int p = pointByPart[i];
+                var pt = spawnPoints != null && p >= 0 && p < spawnPoints.Count ? spawnPoints.points[p] : default;
+                records[i] = new PartRecord
+                {
+                    partId = parts[i] != null ? parts[i].partId : $"part_{i}",
+                    state = PartState.Lying,
+                    position = pt.position,
+                    rotation = Quaternion.Euler(pt.eulerRotation),
+                    lastValidPosition = pt.position,
+                    region = RegionType.Logistic,
+                    spawnPointIndex = p,
+                };
+            }
+            // 3. Dibuat sekali lewat Instantiate. Barang bukan objek pool, karena jumlahnya tetap dan tidak pernah dibuang.
+            CreateInstances();
+        }
+
+        /// <summary>Indeks titik per barang. Utamakan RunSeedManager.CurrentLayout; kalau kosong, pilih dengan aturan RunSeedManager.md.</summary>
+        private int[] ResolvePoints(int count)
+        {
+            var result = new int[count];
+            var layout = RunSeedManager.Instance != null ? RunSeedManager.Instance.CurrentLayout : null;
+            bool layoutOk = layout != null && layout.partPointByPart != null && layout.partPointByPart.Length >= count;
+            if (layoutOk)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    int p = layout.partPointByPart[i];
+                    if (spawnPoints == null || !spawnPoints.IsValidIndex(p)) { layoutOk = false; break; }
+                    result[i] = p;
+                }
+                if (layoutOk) return result;
+            }
+
+            // Cadangan sementara (#89 belum mengisi BuildLayout): Fork(PartLocation, 0), Shuffle, jarak minimal.
+            int n = spawnPoints != null ? spawnPoints.Count : 0;
+            var order = new int[n];
+            for (int i = 0; i < n; i++) order[i] = i;
+            if (RunSeedManager.Instance != null && n > 1)
+            {
+                var s = RunSeedManager.Instance.Fork(RandomStreamId.PartLocation, 0);
+                s.Shuffle(order);
+            }
+            float minSpacing = Balance != null ? Balance.runSeed.minPartPointSpacing : 30f;
+            int filled = 0;
+            for (int k = 0; k < n && filled < count; k++)
+            {
+                int p = order[k];
+                if (!spawnPoints.IsValidIndex(p)) continue;
+                bool farEnough = true;
+                for (int j = 0; j < filled; j++)
+                    if ((spawnPoints.points[result[j]].position - spawnPoints.points[p].position).sqrMagnitude < minSpacing * minSpacing)
+                    {
+                        farEnough = false;
+                        break;
+                    }
+                if (farEnough) result[filled++] = p;
+            }
+            if (filled < count)
+            {
+                Debug.LogError($"[HeavyItemSystem] Titik suku cadang tidak cukup ({filled} / {count}). Sisa barang memakai titik pertama yang sah.");
+                for (int i = filled; i < count; i++) result[i] = FirstValidPoint();
+            }
+            return result;
+        }
+
+        private int FirstValidPoint()
+        {
+            if (spawnPoints == null) return -1;
+            for (int i = 0; i < spawnPoints.Count; i++) if (spawnPoints.IsValidIndex(i)) return i;
+            return spawnPoints.Count > 0 ? 0 : -1;
+        }
+
+        private void CreateInstances()
+        {
+            DestroyInstances();
+            instances = new HeavyItem[records.Length];
+            for (int i = 0; i < records.Length; i++)
+            {
+                var data = i < parts.Length ? parts[i] : null;
+                if (data == null || data.prefab == null)
+                {
+                    Debug.LogError($"[HeavyItemSystem] Prefab suku cadang indeks {i} kosong.");
+                    continue;
+                }
+                var r = records[i];
+                var go = Instantiate(data.prefab, r.position, r.rotation, Root);
+                go.name = $"part_{i}_{r.partId}";
+                var item = go.GetComponent<HeavyItem>();
+                if (item == null) item = go.AddComponent<HeavyItem>();
+                item.Bind(i);
+                instances[i] = item;
+                // TODO #88: matikan sampai Region4_Village berstatus Loaded.
+                go.SetActive(r.state != PartState.Installed);
+            }
+        }
+
+        private void DestroyInstances()
+        {
+            for (int i = 0; i < instances.Length; i++)
+                if (instances[i] != null) Destroy(instances[i].gameObject);
+            instances = Array.Empty<HeavyItem>();
+        }
+
+        // ---------------------------------------------------------------- Mengambil
+
+        public bool PickUp(int index)
+        {
+            if (IsCarrying || index < 0 || index >= records.Length || records[index].state != PartState.Lying) return false;
+            var item = instances[index];
+            var player = IslandPlayerController.Instance;
+            if (item == null || player == null) return false;
+
+            // 1. Hanya satu CarriedIndex, jadi pemain hanya bisa membawa satu barang.
+            CarriedIndex = index;
+            records[index].state = PartState.Carried;
+            // 2. Trigger supaya titik pasang (#14) tetap mendeteksi tag HeavyItem, dan barang tidak mendorong apa pun.
+            AttachToAnchor(item, player.transform);
+            // 3. GDD bagian 5, Region 4: kecepatan setengah. Pengali, bukan speed /= 2, jadi tidak berkurang berulang.
+            player.SetSpeedModifier(SpeedModifierId.HeavyItem, ResolveMultiplier(index));
+            validSampleTimer = 0f;
+            // 4.
+            EventChannel<HeavyItemChangedEvent>.Publish(new HeavyItemChangedEvent(records[index].partId, true));
+            return true;
+        }
+
+        private void AttachToAnchor(HeavyItem item, Transform player)
+        {
+            var anchor = carryAnchor != null ? carryAnchor : player;
+            item.transform.SetParent(anchor, false);
+            item.transform.localPosition = Vector3.zero;
+            item.transform.localRotation = Quaternion.identity;
+            if (item.Body != null)
+            {
+                item.Body.linearVelocity = Vector3.zero;
+                item.Body.angularVelocity = Vector3.zero;
+                item.Body.isKinematic = true;
+            }
+            if (item.MainCollider != null) item.MainCollider.isTrigger = true;
+        }
+
+        private float ResolveMultiplier(int index)
+        {
+            var data = index < parts.Length ? parts[index] : null;
+            // Usulan 2 (disetujui): semua 0,5 pada versi awal. Override tersedia kalau Mesin ingin lebih lambat.
+            if (data != null && data.speedMultiplierOverride > 0f) return data.speedMultiplierOverride;
+            return Balance != null ? Balance.region.heavyItemSpeedMultiplier : 0.5f;
+        }
+
+        // ---------------------------------------------------------------- Melepas dan menjatuhkan
+
+        public void Drop(DropReason reason)
+        {
+            // 1.
+            if (!IsCarrying) return;
+            int index = CarriedIndex;
+            var item = instances[index];
+            var player = IslandPlayerController.Instance;
+
+            // 2-3.
+            if (item != null)
+            {
+                item.transform.SetParent(Root, true);
+                if (item.MainCollider != null) item.MainCollider.isTrigger = false;
+                bool physics = reason != DropReason.Installed;
+                if (item.Body != null) item.Body.isKinematic = !physics;
+                if (player != null && physics)
+                {
+                    Vector3 pos = DropPosition(player.transform, reason);
+                    item.transform.SetPositionAndRotation(pos, Quaternion.Euler(0f, player.transform.eulerAngles.y, 0f));
+                }
+                records[index].position = item.transform.position;
+                records[index].rotation = item.transform.rotation;
+            }
+
+            // 4.
+            if (player != null) player.ClearSpeedModifier(SpeedModifierId.HeavyItem);
+            records[index].state = PartState.Lying;
+            CarriedIndex = -1;
+
+            // 5.
+            EventChannel<HeavyItemChangedEvent>.Publish(new HeavyItemChangedEvent(records[index].partId, false));
+
+            // Berenang: barang langsung kembali ke posisi valid (usulan 4).
+            if (reason == DropReason.Water) ReturnToValid(index);
+        }
+
+        private Vector3 DropPosition(Transform player, DropReason reason)
+        {
+            var bal = Balance;
+            float dist = bal != null ? bal.heavyItem.dropForwardDistance : 1.2f;
+            Vector3 feet = player.position;
+            if (reason == DropReason.Pinned) return feet;
+            Vector3 chest = feet + Vector3.up * 1f;
+            Vector3 fwd = Vector3.ProjectOnPlane(player.forward, Vector3.up).normalized;
+            if (PhysicsQuery.Raycast(new Ray(chest, fwd), out _, dist, PhysicsMasks.InteractBlock)) return feet;
+            return feet + fwd * dist;
+        }
+
+        private void HandleDamaged(PlayerDamagedEvent e)
+        {
+            var bal = Balance;
+            if (!IsCarrying || bal == null) return;
+            // Usulan 3 (disetujui): damage 25 ke atas atau ledakan. Zombie biasa tidak menjatuhkan barang.
+            if (e.info.amount >= bal.heavyItem.dropDamageThreshold || e.info.type == DamageType.Explosion) Drop(DropReason.HeavyHit);
+        }
+
+        private void HandlePinned(PlayerPinnedEvent e)
+        {
+            if (e.isPinned) Drop(DropReason.Pinned);
+        }
+
+        private void HandleDied(PlayerDiedEvent e)
+        {
+            // Supaya barang tidak terlihat melayang di DeathCinematic (#53).
+            Drop(DropReason.Death);
+        }
+
+        private void HandleRunEnded(RunEndedEvent e) => runEnded = true;
+
+        // ---------------------------------------------------------------- Update: tombol Q dan pengaman
+
+        private void Update()
+        {
+            var bal = Balance;
+            if (bal == null || runEnded) return;
+            var player = IslandPlayerController.Instance;
+
+            if (IsCarrying)
+            {
+                // Tombol Q. Terkunci saat jeda dan menu (UIFocusStack.IsGameplayInputBlocked).
+                var input = InputManager.Instance;
+                bool blocked = UIFocusStack.Instance != null && UIFocusStack.Instance.IsGameplayInputBlocked;
+                if (!blocked && input != null && input.DropHeavyItemPressed)
+                {
+                    Drop(DropReason.Manual);
+                    return;
+                }
+
+                // TODO #13: SwimStateChangedEvent.isSwimming. Air dangkal yang masih bisa dilewati tidak menjatuhkan barang.
+                var trav = Traversal(player);
+                if (trav != null && trav.Mode == TraversalMode.Swimming)
+                {
+                    Drop(DropReason.Water);
+                    return;
+                }
+
+                validSampleTimer += Time.deltaTime;
+                if (validSampleTimer >= bal.heavyItem.validSampleSeconds)
+                {
+                    validSampleTimer = 0f;
+                    SampleValidPosition(player, trav, bal.heavyItem);
+                }
+            }
+
+            recoveryTimer += Time.deltaTime;
+            if (recoveryTimer >= bal.heavyItem.recoveryCheckSeconds)
+            {
+                recoveryTimer = 0f;
+                RecoveryTick(player, bal.heavyItem);
+            }
+        }
+
+        private PlayerTraversal Traversal(IslandPlayerController player)
+        {
+            if (playerTraversal == null && player != null) playerTraversal = player.GetComponent<PlayerTraversal>();
+            return playerTraversal;
+        }
+
+        private void SampleValidPosition(IslandPlayerController player, PlayerTraversal trav, HeavyItemBalance hb)
+        {
+            if (player == null || !IsCarrying) return;
+            // 1-3. Di tanah, mode Ground, ada NavMesh, dan tidak di air.
+            if (!player.IsGrounded || (trav != null && trav.Mode != TraversalMode.Ground)) return;
+            if (!NavMesh.SamplePosition(player.transform.position, out var hit, hb.navSampleRadius, NavMesh.AllAreas)) return;
+            records[CarriedIndex].lastValidPosition = hit.position;
+        }
+
+        private void RecoveryTick(IslandPlayerController player, HeavyItemBalance hb)
+        {
+            Vector3 playerPos = player != null ? player.transform.position : Vector3.zero;
+            float discoverSqr = hb.discoverRadius * hb.discoverRadius;
+            for (int i = 0; i < records.Length; i++)
+            {
+                var r = records[i];
+                var item = i < instances.Length ? instances[i] : null;
+                if (r.state != PartState.Lying || item == null || !item.gameObject.activeInHierarchy) continue;
+
+                // 1. Barang yang masih bergerak dilewati. TODO #88: kecuali di bawah RegionRecord.bounds.min.y.
+                if (item.Body != null && !item.Body.isKinematic && !item.Body.IsSleeping()) continue;
+
+                // 2-3.
+                Vector3 pos = item.transform.position;
+                if (!NavMesh.SamplePosition(pos, out _, hb.navSampleRadius, NavMesh.AllAreas))
+                {
+                    ReturnToValid(i);
+                    continue;
+                }
+                r.position = pos;
+                r.rotation = item.transform.rotation;
+                r.lastValidPosition = pos;
+
+                // Penemuan: barang dalam discoverRadius ditandai (usulan 5). TODO #30: CompassSystem.SetMarker("part_" + partId).
+                if (player != null && !r.isDiscovered && (pos - playerPos).sqrMagnitude <= discoverSqr) r.isDiscovered = true;
+            }
+        }
+
+        /// <summary>Kembalikan barang ke posisi valid terakhir. Barang tidak pernah bisa hilang (#116 hanya membaca status).</summary>
+        public void ReturnToValid(int index)
+        {
+            if (index < 0 || index >= records.Length) return;
+            var r = records[index];
+            var item = index < instances.Length ? instances[index] : null;
+            Vector3 target = r.lastValidPosition;
+            var hb = Balance != null ? Balance.heavyItem : null;
+            float radius = hb != null ? hb.navSampleRadius : 2f;
+            // Titik itu juga tidak valid: pakai titik asal dari PartSpawnPointTable.
+            if (!NavMesh.SamplePosition(target, out _, radius, NavMesh.AllAreas) && spawnPoints != null && spawnPoints.IsValidIndex(r.spawnPointIndex))
+                target = spawnPoints.points[r.spawnPointIndex].position;
+
+            target += Vector3.up * 0.5f;
+            if (item != null)
+            {
+                if (item.Body != null)
+                {
+                    item.Body.linearVelocity = Vector3.zero;
+                    item.Body.angularVelocity = Vector3.zero;
+                }
+                item.transform.position = target;
+                if (item.Body != null) item.Body.position = target;
+            }
+            r.position = target;
+            // TODO #22: notifikasi "Suku cadang dikembalikan".
+        }
+
+        // ---------------------------------------------------------------- Titik pasang dan penanda
+
+        /// <summary>Dipanggil RescueEventManager (#14, Langkah 7) saat trigger titik pasang menerima barang.</summary>
+        public void MarkInstalled(string partId)
+        {
+            int i = IndexOf(partId);
+            if (i < 0 || records[i].state == PartState.Installed) return;
+            // 1. Menang saat membawa barang: lepas dulu, jadi pengali kecepatan tidak tertinggal.
+            if (CarriedIndex == i) Drop(DropReason.Installed);
+            // 2. TODO #30: CompassSystem.RemoveMarker.
+            records[i].state = PartState.Installed;
+            if (i < instances.Length && instances[i] != null) instances[i].gameObject.SetActive(false);
+            // 3. Perakitan dan kemenangan milik #14 (HelicopterPartInstalledEvent).
+        }
+
+        public int IndexOf(string partId)
+        {
+            for (int i = 0; i < records.Length; i++) if (records[i].partId == partId) return i;
+            return -1;
+        }
+
+        /// <summary>Barang terdekat yang sudah ditemukan, tergeletak, dan belum dipasang (#81). Tetap bekerja saat region tidak dimuat.</summary>
+        public bool TryGetNearestPart(Vector3 position, out Vector3 partPosition)
+        {
+            partPosition = default;
+            float best = float.MaxValue;
+            bool found = false;
+            for (int i = 0; i < records.Length; i++)
+            {
+                var r = records[i];
+                if (!r.isDiscovered || r.state != PartState.Lying) continue;
+                float d = (r.position - position).sqrMagnitude;
+                if (d >= best) continue;
+                best = d;
+                partPosition = r.position;
+                found = true;
+            }
+            return found;
+        }
+
+        // ---------------------------------------------------------------- Save (#80)
+
+        [Serializable]
+        private struct PartsSaveData
+        {
+            public PartRecord[] records;
+            public int carriedIndex;
+        }
+
+        public string SaveId => SaveIdConst;
+        public int LoadOrder => 100;
+
+        public string CaptureState()
+        {
+            // Salin posisi barang yang tergeletak sebelum disimpan.
+            for (int i = 0; i < records.Length; i++)
+            {
+                var item = i < instances.Length ? instances[i] : null;
+                if (item == null || records[i].state != PartState.Lying) continue;
+                records[i].position = item.transform.position;
+                records[i].rotation = item.transform.rotation;
+            }
+            return JsonUtility.ToJson(new PartsSaveData { records = records, carriedIndex = CarriedIndex });
+        }
+
+        public void RestoreState(string json)
+        {
+            // Tidak mengirim event.
+            if (string.IsNullOrEmpty(json)) return;
+            var d = JsonUtility.FromJson<PartsSaveData>(json);
+            records = d.records ?? Array.Empty<PartRecord>();
+            CarriedIndex = d.carriedIndex >= 0 && d.carriedIndex < records.Length && records[d.carriedIndex].state == PartState.Carried
+                ? d.carriedIndex : -1;
+            built = true;
+            CreateInstances();
+        }
+
+        public void OnRestoreFinished()
+        {
+            // Barang Carried dipasang kembali ke carryAnchor setelah pemain dipulihkan (player_transform LoadOrder 80).
+            var player = IslandPlayerController.Instance;
+            if (IsCarrying && player != null && instances[CarriedIndex] != null)
+            {
+                AttachToAnchor(instances[CarriedIndex], player.transform);
+                player.SetSpeedModifier(SpeedModifierId.HeavyItem, ResolveMultiplier(CarriedIndex));
+                EventChannel<HeavyItemChangedEvent>.Publish(new HeavyItemChangedEvent(records[CarriedIndex].partId, true));
+            }
+            else
+            {
+                CarriedIndex = -1;
+                for (int i = 0; i < records.Length; i++)
+                    if (records[i].state == PartState.Carried) records[i].state = PartState.Lying;
+                EventChannel<HeavyItemChangedEvent>.Publish(new HeavyItemChangedEvent(string.Empty, false));
+            }
+        }
+    }
+}

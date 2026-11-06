@@ -12,7 +12,7 @@ namespace SurvivalIsland
     /// - LocalizationManager kunci prompt.format. Sementara format "[{tombol}] {aksi}" ditulis di FormatPrompt.
     /// - NotificationManager (#22) dan suara tolak saat CanInteract menolak.
     /// - Batal tahan saat PlayerDamagedEvent (event milik Langkah 3/5 belum ada).
-    /// - IsCarryingHeavyItem dari HeavyItemSystem (#69, Langkah 6). Sementara selalu false.
+    /// IsCarryingHeavyItem dibaca dari HeavyItemSystem.IsCarrying (disambungkan Langkah 6, #69).
     /// </summary>
     public class PlayerInteractor : MonoBehaviour
     {
@@ -208,8 +208,9 @@ namespace SurvivalIsland
 
         private InteractContext BuildContext()
         {
-            // TODO #69 (Langkah 6): isCarryingHeavyItem dari HeavyItemSystem.
-            return new InteractContext(InventoryManager.Instance, transform, false);
+            // Langkah 6 (#69): isCarryingHeavyItem dari HeavyItemSystem.
+            bool carrying = HeavyItemSystem.Instance != null && HeavyItemSystem.Instance.IsCarrying;
+            return new InteractContext(InventoryManager.Instance, transform, carrying);
         }
 
         private static string GetTargetId(IInteractable target)

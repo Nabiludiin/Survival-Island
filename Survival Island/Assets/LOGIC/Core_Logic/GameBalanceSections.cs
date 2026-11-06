@@ -74,7 +74,7 @@ namespace SurvivalIsland
 
     /// <summary>Region (angka inti #84). Tambahan #68 diisi Langkah 6.</summary>
     [Serializable]
-    public class RegionBalance
+    public partial class RegionBalance
     {
         public int bridgeWoodCost = 500;                 // GDD bagian 5: nilai awal 500, bisa disetel
         public float heavyItemSpeedMultiplier = 0.5f;    // Claude.md Tahap 4, Region 4
@@ -84,7 +84,7 @@ namespace SurvivalIsland
 
     /// <summary>Cuaca (angka inti #84). Tambahan #115 diisi Langkah 6.</summary>
     [Serializable]
-    public class WeatherBalance
+    public partial class WeatherBalance
     {
         public float weatherIntervalGameHours = 8f;   // Waktu game, bukan waktu nyata
         // TODO Langkah 6: tambahan #115 (effects, minSevereDay, presentBlendSeconds, audio).
@@ -435,10 +435,10 @@ namespace SurvivalIsland
     [Serializable] public class LairBalance { }
 
     /// <summary>Bagian warmth (#65). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class WarmthBalance { }
+    [Serializable] public partial class WarmthBalance { }
 
     /// <summary>Bagian heavyItem (#69). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class HeavyItemBalance { }
+    [Serializable] public partial class HeavyItemBalance { }
 
     /// <summary>Bagian swimming (#13). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class SwimmingBalance { }
@@ -447,7 +447,7 @@ namespace SurvivalIsland
     [Serializable] public class TideBalance { }
 
     /// <summary>Bagian environment (#92). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class EnvironmentBalance { }
+    [Serializable] public partial class EnvironmentBalance { }
 
     /// <summary>Bagian disaster (#70). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class DisasterBalance { }
@@ -1033,5 +1033,112 @@ namespace SurvivalIsland
         public float repinImmuneSeconds = 4f;
         public float releasePushDistance = 1f;
         public bool holdToStruggle = false;         // Pilihan aksesibilitas #19. Dibaca dari sini sampai SettingsManager ada
+    }
+
+    // =====================================================================================
+    // Ditambahkan Langkah 6 (region, cuaca, suasana, kehangatan, barang berat).
+    // Lima deklarasi kelas di atas (RegionBalance, WeatherBalance, WarmthBalance, HeavyItemBalance, EnvironmentBalance)
+    // hanya ditambah kata partial, supaya field-nya bisa diisi di bagian ini. Nilai awal dari blueprint pemilik.
+    // =====================================================================================
+
+    /// <summary>Tambahan #68 (RegionGateSystem.md).</summary>
+    public partial class RegionBalance
+    {
+        public float bridgeDepositHoldSeconds = 1f;     // Lama tahan E di BridgeSite (IslandInteractable.md)
+        public float ravineMinWidth = 30f;              // Diperiksa alat Editor. Lompatan lari terjauh sekitar 7,5 m
+        public float gateVerifySeconds = 2f;            // Jeda VerifyPlayerRegion
+        public float ravineFallDamage = 20f;            // Damage Fall saat dikembalikan dari jurang
+    }
+
+    /// <summary>Tambahan #115 (RegionalWeather.md) dan WeatherManager.md.</summary>
+    public partial class WeatherBalance
+    {
+        // Satu baris per WeatherType, urutan Clear, Rain, Fog, Storm, Snow, Blizzard (usulan disetujui developer).
+        public WeatherEffects[] effects =
+        {
+            new WeatherEffects(WeatherType.Clear,    1f,    1f,    1f,    0f),
+            new WeatherEffects(WeatherType.Rain,     1f,    0.9f,  0.85f, 0.3f),
+            new WeatherEffects(WeatherType.Fog,      1f,    0.6f,  1f,    0f),
+            new WeatherEffects(WeatherType.Storm,    0.9f,  0.7f,  0.6f,  0.5f),
+            new WeatherEffects(WeatherType.Snow,     0.95f, 0.85f, 0.9f,  0.5f),
+            new WeatherEffects(WeatherType.Blizzard, 0.75f, 0.45f, 0.6f,  2f),
+        };
+        public int minSevereDay = 2;                    // Hari pertama tanpa Storm dan Blizzard
+        public float presentBlendSeconds = 6f;          // Transisi partikel dan audio
+        public float audioVolume = 0.8f;                // WeatherManager.md (usulan disetujui developer)
+        public float insideVolumeMultiplier = 0.3f;     // Hujan tetap terdengar dari dalam base
+        public float insideBlendSeconds = 1.5f;         // Sama dengan environment.interiorBlendSeconds
+    }
+
+    /// <summary>Kehangatan (#65, WarmthSystem.md). Per detik kecuali disebut lain.</summary>
+    public partial class WarmthBalance
+    {
+        public float tickSeconds = 0.5f;
+        public float freezeEnterThreshold = 20f;
+        public float freezeExitThreshold = 30f;
+        public float ambientHeat = 5f;
+        public float regionSnowCold = 20f;              // GDD bagian 5, Region 3: sekitar 4 detik sampai membeku
+        public float blizzardCold = 2f;
+        public float rainCold = 8f;
+        public float rainFloor = 40f;
+        public float stormCold = 12f;
+        public float stormFloor = 30f;
+        public float waterCold = 15f;
+        public float waterFloor = 30f;
+        public float snowWaterCold = 30f;
+        public float clothesHeat = 20f;
+        public float torchHeat = 20f;
+        public float protectedFloor = 30f;              // Usulan 8, disetujui developer
+        public float campfireHeat = 40f;
+        public float indoorHeat = 25f;
+        public float shelterCheckSeconds = 2f;
+        public float shelterProbeDistance = 6f;
+        public float torchBurnSeconds = 300f;           // Sekitar 8 jam game
+        public float torchRainExtinguishSeconds = 20f;
+    }
+
+    /// <summary>Barang berat (#69, HeavyItemSystem.md).</summary>
+    public partial class HeavyItemBalance
+    {
+        public float pickupHoldSeconds = 0.5f;
+        public float dropDamageThreshold = 25f;         // Zombie biasa 15 tidak menjatuhkan, serangan berat 30 menjatuhkan
+        public float dropForwardDistance = 1.2f;
+        public float validSampleSeconds = 1f;
+        public float navSampleRadius = 2f;
+        public float recoveryCheckSeconds = 5f;
+        public float discoverRadius = 40f;
+    }
+
+    /// <summary>Suasana region (#92, EnvironmentProfile.md).</summary>
+    public partial class EnvironmentBalance
+    {
+        // Satu baris per WeatherType, urutan Clear, Rain, Fog, Storm, Snow, Blizzard (usulan disetujui developer).
+        public WeatherEnvironmentLayer[] weatherLayers =
+        {
+            new WeatherEnvironmentLayer(WeatherType.Clear,    0f,     1f,    1f,    new UnityEngine.Color32(0xFF, 0xFF, 0xFF, 0xFF), 0f),
+            new WeatherEnvironmentLayer(WeatherType.Rain,     0.006f, 0.7f,  0.8f,  new UnityEngine.Color32(0x6B, 0x77, 0x80, 0xFF), 0.4f),
+            new WeatherEnvironmentLayer(WeatherType.Fog,      0.03f,  0.75f, 0.85f, new UnityEngine.Color32(0x9A, 0xA3, 0xA8, 0xFF), 0.6f),
+            new WeatherEnvironmentLayer(WeatherType.Storm,    0.012f, 0.35f, 0.6f,  new UnityEngine.Color32(0x3C, 0x43, 0x48, 0xFF), 0.6f),
+            new WeatherEnvironmentLayer(WeatherType.Snow,     0.01f,  0.8f,  0.95f, new UnityEngine.Color32(0xD9, 0xE4, 0xEC, 0xFF), 0.5f),
+            new WeatherEnvironmentLayer(WeatherType.Blizzard, 0.07f,  0.3f,  0.65f, new UnityEngine.Color32(0xE4, 0xEC, 0xF2, 0xFF), 0.9f),
+        };
+
+        // Lapisan event (tabel "Lapisan event"). Blood Moon: langit merah GDD bagian 3, warna dan transisi usulan #50.
+        public EnvironmentEventLayer[] eventLayers =
+        {
+            new EnvironmentEventLayer(EnvEventId.BloodMoon, 30, new UnityEngine.Color32(0x6B, 0x0F, 0x12, 0xFF), 0.01f, 0.8f,
+                new UnityEngine.Color32(0xFF, 0x50, 0x40, 0xFF), 20f, 10f),
+            new EnvironmentEventLayer(EnvEventId.Eruption, 20, new UnityEngine.Color32(0xA5, 0x39, 0x1F, 0xFF), 0.008f, 0.6f,
+                new UnityEngine.Color32(0xFF, 0x9A, 0x50, 0xFF), -1f, -1f),   // -1 = pakai eventBlendSeconds
+        };
+
+        public float regionBlendSeconds = 8f;
+        public float weatherBlendSeconds = 12f;
+        public float eventBlendSeconds = 4f;
+        public float interiorBlendSeconds = 1.5f;
+        public float applyIntervalSeconds = 0.1f;
+        public float maxFogDensity = 0.1f;              // Sekitar 20 m
+        public float defaultMinAmbientLuminance = 0.035f;
+        public float eruptionRemoteWeight = 0.35f;      // Bobot langit merah di luar Region 1
     }
 }

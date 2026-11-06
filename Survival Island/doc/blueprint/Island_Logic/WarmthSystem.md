@@ -218,3 +218,13 @@ Ini menggantikan cek saat masuk zona di `ZoneManager`, sehingga memakai atau mel
 13. Simpan dengan pakaian dan `Warmth` 60, lalu muat. **Hasil:** nilai sama. Mati dan mulai run baru. **Hasil:** `Warmth` 100, tanpa pakaian.
 14. Pegang obor menyala. **Hasil:** `LightSource` terdaftar dengan `isHeld = true`, dan tidak menambah peluang tarikan zombie.
 15. Paksa `Blizzard` di Region 3 dengan pakaian dari `Warmth` 100. **Hasil:** `Warmth` turun 2 per detik, berhenti di 30, dan tidak ada frostbite.
+
+## 7. Catatan Implementasi (Langkah 6)
+
+- File: `Island_Logic/WarmthSystem.cs` dan `Island_Logic/TorchController.cs`. `WarmthChangedEvent` ditulis Langkah 3. `SurvivalStats` sudah menghitung frostbite (Stamina dulu, lalu HP) dari `isFreezing`, jadi `SurvivalStats.cs` tidak diubah.
+- Fungsi `Tick` diberi nama `FrostbiteTick`, mengikuti `Claude.md` Tahap 4. Fungsi ini dipanggil dari akumulator `Time.deltaTime`, bukan coroutine, supaya ikut berhenti saat jeda.
+- `SwimStateChangedEvent` (#13) belum ada. `isInWater` sementara dibaca dari `PlayerTraversal.Mode == Swimming`.
+- `CampfireManager.ActiveLit` (#44) dan `InteriorZoneChangedEvent` (#112) belum ada, jadi panas api unggun dan interior belum berlaku (TODO).
+- Pakaian disimpan sebagai salinan `ItemInstance` di `WarmthSystem` (`WornClothing`), dan ikut disimpan di `player_warmth` (`LoadOrder` 70). Aksi `Pakai` di UI inventori belum ada, jadi `WearClothing` belum punya pemanggil.
+- Obor: `EquipmentManager` mematikan objek obor saat obor disimpan otomatis, sehingga `Update` obor berhenti. Durasi yang lewat saat disimpan dihitung dari `Time.time` saat obor dipegang lagi. Obor yang habis saat disimpan baru dihapus ketika dipegang lagi. `LightSource` (#98), partikel lewat `VFXManager` (#15), dan notifikasi (#22) belum ada.
+- `ApplyColdBurst` dipanggil `FrozenBehavior` (Langkah 5) untuk pemain dalam `frozenBurstRadius` dengan garis pandang bebas (raycast `PhysicsMasks.Explosion`).
