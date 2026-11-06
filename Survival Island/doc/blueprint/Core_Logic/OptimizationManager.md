@@ -138,3 +138,13 @@ Musuh ini tetap dihitung hidup, sehingga batas `MaxAlive` tidak terlewati.
 11. Buka Pause selama 5 detik dengan zombie di 60 m. **Hasil:** status tidak berubah selama jeda.
 12. Jalankan uji stres 50 zombie dari #93, dengan separuh di atas 50 m. **Hasil:** penanda `Optimization.Cull` di bawah 0,1 ms, tanpa alokasi GC.
 13. Mati, lalu mulai run baru. **Hasil:** tidak ada musuh yang muncul dengan Animator mati.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Core_Logic/OptimizationManager.cs`. Belum diuji di Unity.
+
+- **Beda dengan teks blueprint:** `EnemyAI.SetTier` saat ini hanya mengatur `cullingMode`, belum `animator.enabled`. Karena itu `Uncull` mengembalikan `animator.enabled = culledAnimatorWasEnabled` untuk semua musuh, lalu memanggil `HordeCrowdManager.SetCulled(agent, false)` (tingkatan `Mid`, diperbaiki putaran tingkatan berikutnya). `HordeCrowdManager.UpdateTiers` bersifat privat, jadi tidak dipanggil langsung.
+- **Tafsiran:** `Cull` dan `Uncull` memanggil `HordeCrowdManager.SetCulled`, yang sudah ada dan memanggil `SetTier(Culled)`.
+- **Tafsiran:** pemain dicari lewat `IslandPlayerController.Instance`, dan dicari ulang tiap putaran kalau belum ada saat `OnEnable`.
+- **Angka tambahan di config:** `optimization.uncullSampleRadius` 2, radius `NavMesh.SamplePosition` saat agen dinyalakan kembali.
+- Pengecualian `WatchdogLoop` untuk musuh `IsCulled` sudah ada di `SpawnManager.cs`.

@@ -183,3 +183,14 @@ Klip mengikuti timer `GunController`, bukan sebaliknya. Kalau batas kecepatan me
 8. Tunggu fajar sampai zombie terbakar, kembalikan ke pool, lalu pakai ulang 20 kali. **Hasil:** zombie baru mulai dari `Idle`, tanpa pose terbakar atau `Dormant`.
 9. Jeda game saat klip reload berjalan. **Hasil:** klip berhenti dan lanjut dari frame yang sama.
 10. Spawn 50 zombie sambil membuka Profiler. **Hasil:** tidak ada alokasi GC dari `SetLocomotion`.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Core_Logic/AnimationController.cs` (beserta `AnimIds`), `PlayerAnimDriver.cs` (beserta `ViewmodelAnimSet`), `EnemyAnimDriver.cs`. Belum diuji di Unity.
+
+- **Tambahan:** `SetLocomotion(speed, dt)` untuk `EnemyAnimDriver`, karena Speed musuh diisi setiap `enemySpeedSampleSeconds`, sehingga peredam memakai jeda sejak isian terakhir, bukan `Time.deltaTime` satu frame.
+- **Tambahan:** `SetBool(hash, value)` dan hash `Attack`, `Bite`, `HeavyAttack` di `AnimIds`.
+- **Tafsiran:** `PlayerAnimDriver.Instance` dan `Arms` dipakai `GunController`, `MeleeCombatSystem`, dan `PlayerShove` untuk memanggil animasi tangan.
+- **Tafsiran:** `EnemyAnimDriver` juga menulis bool `Alert` untuk hewan (`Alert` dan `TargetUnreachable`), karena tabel `AnimalState` tidak menyebut pemanggil lain. Trigger serangan, `Stagger`, `Knockback`, `Burn`, `Dormant`, dan `Emerge` tetap dikirim sistem pemiliknya.
+- **Tafsiran:** `referenceSpeed` diisi pada sampel pertama setelah keluar dari pool, karena urutan `OnSpawned` antar komponen tidak dijamin.
+- **Belum dikerjakan:** animasi dorong (`PlayerShove`, #12) belum punya trigger di blueprint ini. `PlayReload` butuh panjang klip reload; `GunController` belum punya data itu.
