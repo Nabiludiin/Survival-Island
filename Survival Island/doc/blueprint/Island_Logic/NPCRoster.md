@@ -264,3 +264,13 @@ Sesuai `RegionStreaming.md`:
 20. Lempar Molotov di jalur NPC. **Hasil:** NPC menghindari `FireArea`.
 21. Panggil `GetAliveNpcIds` dengan satu NPC mati. **Hasil:** ID NPC itu tidak ada di daftar.
 22. Aktifkan dan hentikan `Work` tukang. **Hasil:** `CraftingManager.SetNpcSpeedMultiplier` menerima 1,5, lalu 1.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Island_Logic/NPCRoster.cs` (beserta `NPCRecord`), `NPCData.cs` (beserta `NPCSkill`, `NPCCommand`), dan `NPCCompanion.cs`. Belum diuji di Unity.
+
+- **Pengali tukang dipisah:** `GetSkillMultiplier(NPCSkill.Crafter)` mengembalikan pengali crafting (`crafting.npcCrafterSpeedMultiplier`, syarat `Work`). Pengali perbaikan (`npc.builderRepairMultiplier`, syarat di base) memakai fungsi baru `GetBuilderRepairMultiplier()`, karena satu fungsi tidak bisa mengembalikan dua angka untuk skill yang sama. `BuildingIntegrity` sebaiknya memanggil fungsi ini.
+- **Status "di base"** untuk skill dan penjaga dibaca dari `NPCRecord.state` (`StayAtBase`, `Work`, `TakeCover`), lewat `NPCCompanion.IsBaseState`.
+- **`SpawnRescued`** menyusun NPC di `origin + Vector3.right * indeks * ship.arrivalNpcSpacing`. Objek dipindah ke scene milik `NPCRoster` (`IslandPhase`).
+- **Load:** objek NPC dibuat di `OnRestoreFinished`, bukan `RestoreState`, supaya `RestoreState` hanya mengisi data.
+- **Belum ada (TODO di kode):** penanganan region dilepas (event Unloading `RegionStreaming` belum dipakai sistem ini).

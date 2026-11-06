@@ -303,3 +303,14 @@ Langkah 2 menulis `IInteractable`, `InteractContext`, `InteractBlockReason` (`As
 - Warna highlight disimpan di `GameBalanceConfig.interact.availableColor` dan `blockedColor` (nama field usulan).
 - Setelah interaksi berhasil, tombol `E` harus dilepas dulu sebelum interaksi berikutnya. Ini menjalankan aturan "tahan sekali lagi untuk berangkat, karena `holdTimer` direset" di `LifeboatExtraction.md`.
 - Belum ada (TODO di kode): `HUDManager` (prompt dibaca lewat `PlayerInteractor.CurrentPrompt` dan `HoldProgress`), `LocalizationManager` untuk `prompt.format`, notifikasi penolakan (#22), batal tahan saat `PlayerDamagedEvent`, dan `IsCarryingHeavyItem` (#69).
+
+## 8. Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Island_Logic/IslandInteractable.cs` (kelas dasar, beserta `IslandInteractableSaveData`), `PickupInteractable.cs`, dan `LootContainerInteractable.cs`. `DiaryBook.cs` ditulis bersama `ObjectiveManager`, dan `LorePoint.cs` bersama `LoreCollectibles`. Kontrak Langkah 2 (`IInteractable`, `PlayerInteractor`, `InteractHighlight`) tidak diubah. Belum diuji di Unity.
+
+- **Save:** `RegionStateStore` (#88) belum dipakai. Objek dengan `saveId` mendaftar ke `WorldStateSave` sebagai jalur cadangan (pola `LootSpawnerSystem`). Pendaftaran dilakukan di `Awake` dan dilepas di `OnDestroy`, supaya objek yang sudah dimatikan tetap tersimpan sebagai `isConsumed`. `saveId` kosong berarti tidak disimpan.
+- **Membawa Heavy Item:** `PlayerInteractor` belum mengisi `InteractContext.IsCarryingHeavyItem`, jadi kelas dasar juga membaca `HeavyItemSystem.IsCarrying`.
+- **Highlight** dihitung saat hover dan setelah interaksi, memakai konteks dari `InventoryManager.Instance` dan `IslandPlayerController.Instance`.
+- **`PickupInteractable`:** `CanInteract` mengembalikan `InventoryFull` kalau satu pun tidak muat (`CanFitAfterRemoval`). `Regrow()` disediakan untuk #73 dan #116.
+- **`LootContainerInteractable`:** radius suara dari `interact.containerNoiseRadius`. Nama dan nilai awal 8 adalah usulan (sama dengan `stealth.noiseWalk`), karena blueprint hanya menyebut "radius kecil". Peti terbuka dipulihkan lewat `Animator.Play(openedStateName)`.
+- **Belum dipindah ke kelas dasar:** objek lama yang menerapkan `IInteractable` langsung (`CraftingStation`, `CampfireManager`, `StorageChest`, `LuckyMachine`, `ClimbableSurface`, dan lainnya), karena kode lama tidak diedit pada tahap ini.

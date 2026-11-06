@@ -247,3 +247,16 @@ Semua memakai `DevConsole` (#56).
 15. Mati, lalu run baru. **Hasil:** `softlockcheck` kembali bersih.
 16. `setday 61`, tanpa jembatan, lalu `softlockcheck`. **Hasil:** `time_budget` `Ok`, peringatan tidak tampil, dan pemeriksaan jalur menang tetap berjalan.
 17. Temukan buku tanpa membangun dan tanpa membuka menu, lalu tunggu `chapter2TriggerDay`. **Hasil:** Blueprint didapat, dan jembatan bisa dikerjakan. Selesaikan jembatan dan masuk Region 2. **Hasil:** Bab 3 terbuka, dan `gates_diary` `Ok`.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Core_Logic/ProgressionSafety.cs` (beserta `SafetySeverity`, `UnstuckResult`, `SafetyFinding`, dan `RegionSafePoint`). Belum diuji di Unity.
+
+- **Batu kecil:** `ResourceRespawn.ForceRegrowStones` dan jumlah batu aktif (#73) belum ada. Sementara, batu dihitung dari `PickupInteractable` `Mat_Stone` di Region 1, dan ditumbuhkan lagi lewat `PickupInteractable.Regrow()`.
+- **`parts_reachable`** memanggil `HeavyItemSystem.ReturnToValid` untuk barang yang tidak lolos `NavMesh.SamplePosition`.
+- **`path_blocked`** memeriksa posisi struktur terhadap `NoBuildVolume.IsBlocked`.
+- **Panjang hari** untuk `time_budget` dihitung dari `time.timeMultiplier` (24 x 3600 dibagi pengali).
+- **Petunjuk tersangkut:** ambang gerak `safety.stuckHintMoveThreshold` 0,5 (nama usulan, angka dari teks blueprint). Input maju dibaca dari `InputManager.MoveInput.y`.
+- **DevConsole:** `softlockcheck`, `unstuck`, dan `clearstones` didaftarkan lewat `DevConsole.Register`. `breaktool` milik `DurabilitySystem` atau `DevConsole`.
+- **Pesan:** `notif.safety_problem`, `notif.zombies_stronger` (`{days}`), `notif.unstuck_countdown` (`{seconds}`), `notif.unstuck_cancelled`, dan `notif.stuck_hint`.
+- **Belum ada:** tombol `Keluar dari Tersangkut` di `PausePanel` (kode lama).

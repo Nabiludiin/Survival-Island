@@ -259,3 +259,15 @@ Tombol `OpenDiary` (`J`) membuka `DiaryArchivePanel` lewat `UIFocusStack.Push`. 
 20. Selesaikan jembatan tanpa masuk Region 2. **Hasil:** HUD menampilkan `Seberangi jembatan ke Region 2`, kalau tujuan lain sudah selesai.
 21. Buka Bab 3 lewat masuk Region 2, dengan `obj_vaccine` sudah selesai. **Hasil:** tujuan aktif adalah `Capai Region 4`, bukan `Capai Region 3`.
 22. Saat `obj_parts` aktif, belum ada suku cadang yang ditemukan. **Hasil:** tidak ada penanda tujuan. Temukan satu barang. **Hasil:** penanda tujuan menunjuk barang itu.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Island_Logic/ObjectiveManager.cs`, `ObjectiveData.cs` (beserta `ObjectiveCondition`), dan `DiaryBook.cs`. `DiaryEntry.cs` dari Langkah 7 dipakai tanpa diubah. Belum diuji di Unity.
+
+- **Jumlah dinding dan pintu:** `StructureRegistry` tidak punya daftar publik. Jumlah dihitung dari `StructureBuiltEvent`, dan dihitung ulang lewat `FindObjectsByType<StructureNode>` saat load dan setelah struktur hancur (selama `obj_base` belum selesai). Awalan dinding dibaca dari `targetId` tujuan `BuildCount` (nilai awal `Wall_`). Pintu memakai `Door_`.
+- **Blueprint Jembatan:** `RegionGateSystem` belum mendengar `DiaryChapterUnlockedEvent`, jadi `UnlockChapter` juga memanggil `RegionGateSystem.HandleDiaryChapter` langsung. Fungsi itu idempoten, jadi tetap aman setelah pendengar event ditambahkan.
+- **Tujuan cadangan:** `ActiveObjectiveChangedEvent` memakai `objectiveId` `obj_fallback_book` atau `obj_fallback_bridge`. HUD membaca judul lewat `ObjectiveManager.GetTitle(objectiveId)`. `ObjectiveData.title` berupa kunci teks #104.
+- **Progres:** `BuildCount` melaporkan `current = min(dinding, n) + min(pintu, 1)` dan `target = n + 1`. `ItemTotal` dengan `targetAmount` 0 memakai `region.bridgeWoodCost`. Penyegaran progres kayu dibatasi 2 kali per detik di `Update`.
+- **Hadiah yang tidak muat** menjadi `WorldItem` tanpa kedaluwarsa (`despawns: false`), sesuai aturan #116.
+- **Notifikasi tujuan selesai:** `notif.objective_done` dengan `{title}`. Notifikasi bab baru tetap milik `NotificationManager` (TODO di kode lama).
+- **Belum ada:** tab `Arsip` (lore) dan daftar tujuan selesai di `DiaryArchivePanel` (kode lama). Datanya tersedia lewat `ObjectiveManager.IsCompleted` dan `LoreCollectibles.GetKnownEntries`.
