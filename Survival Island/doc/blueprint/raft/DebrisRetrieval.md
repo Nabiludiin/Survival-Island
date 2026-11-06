@@ -217,3 +217,12 @@ Semua tes memakai nilai awal `debris.enabled = true`, kecuali tes 1.
 16. Jeda game. **Hasil:** semua barang berhenti.
 17. Save, lalu load. **Hasil:** `nextSpawnGameHour` sama, dan barang lama tidak muncul.
 18. Tarik semua barang satu hari game dan catat hasilnya di lembar playtest. **Hasil:** kayu sekitar 13.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- File: `Assets/LOGIC/raft/DebrisRetrieval.cs`, `DebrisItem.cs`, `DebrisLane.cs`. Event `DebrisCollectedEvent` di `GameEvents.GrupG.cs`.
+- `TideManager` (#91) belum ada, jadi `tideIsHigh` tetap `false` (TODO di kode).
+- Isi barang memakai `RegionLootTable.TryRoll(table, LootPointKind.Any, hari, ref Gameplay, ...)`.
+- Config tambahan (usulan teknis): `debris.bobAmplitude` 0,08 dan `bobFrequency` 1,2 untuk efek mengapung.
+- `nextSpawnGameHour` awal diisi saat pemeriksaan pertama (sekarang + interval), karena jam game belum tentu siap saat `Awake`.
+- `DebrisLane.points` adalah titik dunia.

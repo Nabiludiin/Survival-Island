@@ -256,3 +256,11 @@ public class StorageChestSaveData
 ## 7. Catatan Implementasi (Langkah 3)
 
 `SlotArrayOps` ditulis Langkah 3 (`Survival Island/Assets/LOGIC/raft/SlotArrayOps.cs`), karena `InventoryManager` memakainya. Parameter memakai `IList<InventorySlot>`, jadi array peti dan `List` inventori sama-sama diterima. Parameter opsional `Func<int> allocateId` memberi `instanceId` baru saat tumpukan terbagi ke beberapa slot. `IsUnique(ItemInstance, ItemData)` publik.
+
+## 8. Catatan Implementasi (Sistem pendukung)
+
+- File: `Assets/LOGIC/raft/StorageChest.cs` (`ChestSlotRecord`, `StorageChestSaveData`, `StorageChest`), `StoragePanel.cs` (dengan `SlotSide`), `SlotGridView.cs`, dan `SlotGridViewCell.cs` (komponen sel, file sendiri karena aturan nama file komponen Unity).
+- `SpillContents` dipanggil dari `StructureDestroyedEvent` milik peti ini. Jalur hancur (`TakeDamage`) dan bongkar (`BaseHealth.Remove`) sama-sama menerbitkan event itu, jadi TODO #46 di `StructureRegistry.TryDemolish` sudah tercakup.
+- Peti nonaktif di region yang dilepas tidak mendengar event, jadi tumpahan ke `RegionStateStore` (#88, #90) masih TODO.
+- `InventoryManager` tidak punya fungsi mengisi slot tertentu. Pindah ke slot inventori tertentu dan tukar antar-sisi memakai `AddItem` lalu `MoveSlot`.
+- `IslandInteractable` (#17) belum ada, jadi menerapkan `IInteractable` langsung.
