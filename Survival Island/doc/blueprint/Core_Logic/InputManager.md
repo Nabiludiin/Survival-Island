@@ -290,3 +290,13 @@ Kunci yang berasal dari kondisi gameplay ada pada sistem pemilik kondisinya, buk
 12. Buat build rilis lalu tekan `~`. **Hasil:** tidak terjadi apa-apa.
 13. Rusak isi kunci `settings.input.bindings` secara manual. **Hasil:** game memakai tombol awal tanpa error fatal.
 14. Buka Profiler dan gerakkan pemain selama 60 detik. **Hasil:** pembacaan properti `InputManager` tidak menghasilkan alokasi GC.
+
+## 7. Catatan Implementasi (Langkah 3)
+
+Kode: `Survival Island/Assets/LOGIC/Core_Logic/InputManager.cs` dan `GameInputActions.cs`. Penyimpangan kecil, tanpa mengubah aturan:
+
+- **`GameInputActions` dibuat tangan.** Aset `GameInput.inputactions` dan kelas hasil generate belum bisa dibuat tanpa membuka Unity. `GameInputActions.cs` membangun `InputActionAsset` lewat kode dengan bentuk akses yang sama (`actions.Gameplay.Move`, `actions.UI.Cancel`, `actions.Debug.ToggleConsole`) dan tombol awal sesuai tabel Action Map. Kalau nanti aset dibuat dan kelasnya di-generate dengan nama yang sama, file itu dihapus.
+- **`HotbarSelect`:** tombol `1` sampai `8` memakai processor `scale(factor=n)`, lalu dibaca lewat properti `int HotbarSelectPressed` (0 kalau tidak ditekan). `float HotbarScroll` membaca scroll mouse tanpa dikali waktu.
+- Properti tambahan dengan pola yang sama: `BuildRotatePressed`, `ThrowPressed`, `StrugglePressed`, `ShovePressed`, `OpenInventoryPressed`, `OpenCraftingPressed`, `OpenBuildMenuPressed`. `GetAction(GameInputAction)` dan `Actions` publik untuk menu #19.
+- `GameInputAction` memuat juga `Cancel`, `Submit`, `Point`, `Click`, `Skip`, dan `ToggleConsole`, supaya daftar tombol tetap bisa diperiksa lewat enum.
+- Belum diuji di Unity. Pengaturan proyek (`Active Input Handling`, `updateMode`, `backgroundBehavior`) dan `InputSystemUIInputModule` di `EventSystem` persisten masih harus dipasang manual.

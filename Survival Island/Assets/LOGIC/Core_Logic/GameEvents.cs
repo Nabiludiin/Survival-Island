@@ -154,4 +154,119 @@ namespace SurvivalIsland
         public string localeId;
         public LocaleChangedEvent(string localeId) { this.localeId = localeId; }
     }
+
+    // =====================================================================================
+    // Ditambah Langkah 3 (pemain, status tubuh, inventori, input, kamera, equipment).
+    // Sumber: tabel "Daftar event global" di GameEventBus.md. Event yang dikirim sistem Langkah lain
+    // (HourChangedEvent, WarmthChangedEvent, HeavyItemChangedEvent) ditulis di sini karena sudah didengar
+    // sistem Langkah 3. Langkah pemiliknya memakai struct ini dan tidak mendeklarasikannya ulang.
+    // =====================================================================================
+
+    // ---------------------------------------------------------------- Waktu (dikirim Langkah 4)
+
+    /// <summary>Jam game berganti. Pengirim: DayNightDirector (Langkah 4). hour = jam dalam hari (0-23).</summary>
+    [StickyEvent]
+    public struct HourChangedEvent
+    {
+        public int hour;
+        public HourChangedEvent(int hour) { this.hour = hour; }
+    }
+
+    // ---------------------------------------------------------------- Pemain (Langkah 3)
+
+    /// <summary>
+    /// Pemain menerima damage dari luar. Pengirim: SurvivalStats.TakeDamage (Langkah 3).
+    /// Damage kondisi (lapar, haus, frostbite, tenggelam, infeksi) TIDAK mengirim event ini (DamagePipeline.md).
+    /// </summary>
+    public struct PlayerDamagedEvent
+    {
+        public DamageInfo info;
+        public float remainingHP;
+        public PlayerDamagedEvent(in DamageInfo info, float remainingHP) { this.info = info; this.remainingHP = remainingHP; }
+    }
+
+    /// <summary>Kombinasi tanda peringatan status berubah. Pengirim: SurvivalStats (VitalsRules.md).</summary>
+    [StickyEvent]
+    public struct VitalWarningChangedEvent
+    {
+        public VitalWarningFlags flags;
+        public VitalWarningChangedEvent(VitalWarningFlags flags) { this.flags = flags; }
+    }
+
+    /// <summary>Kehangatan berubah. Pengirim: WarmthSystem (Langkah 6). Didengar SurvivalStats (isFreezing).</summary>
+    [StickyEvent]
+    public struct WarmthChangedEvent
+    {
+        public float warmth;
+        public bool isFreezing;
+        public WarmthChangedEvent(float warmth, bool isFreezing) { this.warmth = warmth; this.isFreezing = isFreezing; }
+    }
+
+    // ---------------------------------------------------------------- Inventori (Langkah 3)
+
+    /// <summary>Isi inventori berubah. Pengirim: InventoryManager. total = jumlah itemId itu setelah berubah.</summary>
+    public struct InventoryChangedEvent
+    {
+        public string itemId;
+        public int delta;
+        public int total;
+        public InventoryChangedEvent(string itemId, int delta, int total) { this.itemId = itemId; this.delta = delta; this.total = total; }
+    }
+
+    /// <summary>Item di tangan selesai berganti. itemId kosong = tangan kosong. Pengirim: EquipmentManager.</summary>
+    [StickyEvent]
+    public struct EquippedItemChangedEvent
+    {
+        public string itemId;
+        public EquippedItemChangedEvent(string itemId) { this.itemId = itemId; }
+    }
+
+    /// <summary>Barang berat diangkat atau dilepas. Pengirim: HeavyItemSystem (Langkah 6).</summary>
+    [StickyEvent]
+    public struct HeavyItemChangedEvent
+    {
+        public string partId;
+        public bool isCarried;
+        public HeavyItemChangedEvent(string partId, bool isCarried) { this.partId = partId; this.isCarried = isCarried; }
+    }
+
+    /// <summary>Isi satu slot hotbar berubah. itemId kosong = slot kosong. Pengirim: EquipmentManager.</summary>
+    public struct HotbarChangedEvent
+    {
+        public int hotbarIndex;
+        public string itemId;
+        public HotbarChangedEvent(int hotbarIndex, string itemId) { this.hotbarIndex = hotbarIndex; this.itemId = itemId; }
+    }
+
+    /// <summary>Item selesai dipakai. Pengirim: ItemUseSystem.</summary>
+    public struct ItemConsumedEvent
+    {
+        public string itemId;
+        public Freshness freshness;
+        public ItemConsumedEvent(string itemId, Freshness freshness) { this.itemId = itemId; this.freshness = freshness; }
+    }
+
+    /// <summary>Jumlah slot inventori berubah. Pengirim: CarryCapacity.</summary>
+    [StickyEvent]
+    public struct InventoryCapacityChangedEvent
+    {
+        public int capacity;
+        public InventoryCapacityChangedEvent(int capacity) { this.capacity = capacity; }
+    }
+
+    // ---------------------------------------------------------------- Fase 1 (dikirim InventoryManager, Langkah 3)
+
+    /// <summary>Isi tangan di kapal berubah. Pengirim: InventoryManager (instance ShipPhase). Didengar HUD dan ShipInteractable.</summary>
+    [StickyEvent]
+    public struct ShipHandChangedEvent
+    {
+        public int weight;
+        public int capacity;
+        public ShipHandChangedEvent(int weight, int capacity) { this.weight = weight; this.capacity = capacity; }
+    }
+
+    // ---------------------------------------------------------------- UI (Langkah 3)
+
+    /// <summary>Tombol diganti atau direset. Pengirim: InputManager. Teks tombol di layar membuang cache-nya.</summary>
+    public struct InputBindingsChangedEvent { }
 }

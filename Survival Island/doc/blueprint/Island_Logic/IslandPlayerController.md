@@ -98,3 +98,13 @@ Komponen di pemain Fase 2, bersama `CharacterController` dan `PlayerTraversal`. 
 7. Panjat tangga. **Hasil:** skrip ini tidak menggerakkan pemain.
 8. Panggil `Teleport`. **Hasil:** pemain pindah tanpa damage jatuh.
 9. Baca `IsSprinting` saat lari dan jalan. **Hasil:** `true`, lalu `false`.
+
+## 7. Catatan Implementasi (Langkah 3)
+
+Kode: `Survival Island/Assets/LOGIC/Island_Logic/IslandPlayerController.cs`.
+
+- **Heavy Item:** `HeavyItemSystem.Instance.IsCarrying` (Langkah 6) dibaca lewat `HeavyItemChangedEvent` sticky, supaya tidak bergantung pada kelas yang belum ada.
+- `walkSpeed`, `sprintSpeed`, dan `gravity` dipindah ke `GameBalanceConfig.traversal` (rekomendasi bagian 5). Angka tambahan `traversal.groundCheckDistance` 0,2 (usulan Langkah 3).
+- Pemeriksaan tanah memakai `PhysicsQuery.SphereCast` pendek ke `PhysicsMasks.Ground`, ditambah `CharacterController.isGrounded`.
+- **Save posisi** (`player_transform`, `LoadOrder` 80, tabel `WorldStateSave.md`) ditulis di kelas ini: `GetSafeSavePosition()`, `yaw`, dan `pitch`.
+- Fungsi tambahan: `AddImpulse(Vector3)` (lepas dari tangga), `Velocity`, `Controller`. `Teleport` belum memanggil `ZoneManager.ResyncAll` (TODO Langkah 6).

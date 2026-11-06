@@ -359,3 +359,12 @@ Tidak ada vault atau memanjat tepian di versi awal. Lihat bagian 5.
 14. Simpan saat di tangga, keluar, lalu lanjutkan. **Hasil:** pemain berdiri di titik bawah tangga, tanpa damage.
 15. Buka Pause di tangga selama 10 detik. **Hasil:** pemain tidak bergerak dan tidak kehilangan stamina.
 16. Lihat `IsCrouching` bersama #49. **Hasil:** radius suara langkah lebih kecil saat jongkok.
+
+## 7. Catatan Implementasi (Langkah 3)
+
+Kode: `Survival Island/Assets/LOGIC/Island_Logic/PlayerTraversal.cs` (`TraversalMode`, `SpeedModifierId`), `ClimbableSurface.cs` (`ClimbKind`).
+
+- **`ClimbableSurface`** belum mewarisi `IslandInteractable` (#17), karena kelas itu belum ada di branch ini. Alur masuk ada di `TryBeginClimb(PlayerTraversal)`. `BeginClimb` mengembalikan `bool`.
+- **Permukaan:** `SurfaceDetection` (#86, Langkah 4) belum ada, jadi permukaan tetap `Tanah` sampai Langkah 4 mengisi `UpdateSurface`. `SurfaceType` ditulis di `Core_Logic/SurfaceType.cs`, dan `surfaceProfiles` di `GameBalanceConfig.traversal`.
+- `NoiseEmitter.EmitLanding` (#49) masih TODO.
+- Mode disimpan sebagai mode dasar ditambah penanda `Swimming` dan `Locked`, sehingga prioritas mode berlaku otomatis. `TryStandForJump()` dipakai `IslandPlayerController` untuk melompat dari jongkok.

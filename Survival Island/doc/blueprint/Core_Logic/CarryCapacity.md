@@ -249,3 +249,11 @@ public struct CarryCapacitySaveData
 12. Setor kayu ke `BridgeSite` tiga kali. **Hasil:** progres 500 tercapai tanpa pernah membawa 500 kayu.
 13. Berjalan dengan inventori penuh dan kosong. **Hasil:** kecepatan sama.
 14. Mati, lalu mulai run baru. **Hasil:** 15 slot, tanpa tas.
+
+## 7. Catatan Implementasi (Langkah 3)
+
+Kode: `Survival Island/Assets/LOGIC/Core_Logic/CarryCapacity.cs`.
+
+- **`ApplyShipLoot` mengembalikan daftar sisa** (`List<SavedItemData>`) dan juga menyimpannya di `LastOverflow`, supaya `IslandArrival` bisa memunculkan sisa di pantai. Pemanggilan sebagai pernyataan biasa tetap sah. ID berawalan `npc_` dilewati.
+- `SetBag(ItemInstance)` mengembalikan `bool`. `ForceRemoveBag()` dipakai `DevConsole` dan pemuatan tas yang hilang.
+- Notifikasi `Kosongkan tas dulu` menunggu #22.

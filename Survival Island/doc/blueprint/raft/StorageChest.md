@@ -252,3 +252,7 @@ public class StorageChestSaveData
 15. Hancurkan peti saat panel terbuka. **Hasil:** panel tertutup tanpa error.
 16. Buka peti saat membawa Heavy Item. **Hasil:** ditolak dengan `Tangan penuh`.
 17. Mati, lalu mulai run baru. **Hasil:** peti dan isinya tidak ada.
+
+## 7. Catatan Implementasi (Langkah 3)
+
+`SlotArrayOps` ditulis Langkah 3 (`Survival Island/Assets/LOGIC/raft/SlotArrayOps.cs`), karena `InventoryManager` memakainya. Parameter memakai `IList<InventorySlot>`, jadi array peti dan `List` inventori sama-sama diterima. Parameter opsional `Func<int> allocateId` memberi `instanceId` baru saat tumpukan terbagi ke beberapa slot. `IsUnique(ItemInstance, ItemData)` publik.

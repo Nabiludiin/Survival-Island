@@ -108,3 +108,14 @@ Daftar lengkap ada di `VitalsRules.md`.
 8. Mati, lalu periksa pengaturan. **Hasil:** pengaturan pemain tetap ada.
 
 Belum diuji di Unity, karena blueprint ini baru rancangan.
+
+## 7. Catatan Implementasi (Langkah 3)
+
+Kode: `Survival Island/Assets/LOGIC/raft/SurvivalStats.cs` (`StaminaUse`, `VitalPenaltySource`, `VitalWarningFlags`, `SurvivalStatsSaveData`). Kontrak `IDamageable`, `DamageInfo`, `DamageType`, `BodyPart`, dan `DeathReasonMap` ditulis di `Core_Logic/DamagePipelineContracts.cs` (pemiliknya tetap #59, Langkah 5).
+
+- **`ApplyArrivalState(float hp, float infection)`** (nama usulan): dipakai `IslandArrival.Apply` langkah 3. HP dan infeksi dari kapal, status lain penuh. `ResetToFull()` mengisi status awal run.
+- **Profil kesulitan:** aturan memilih profil aktif belum ada, jadi `difficulties[0]` dipakai.
+- `TakeDamage` menganggap `Melee`, `Bullet`, dan `Structural` yang bukan dari pemain sebagai serangan musuh untuk `enemyDamageMultiplier`. Aturan friendly fire (#59) dan pengali `PlayerPinnedState` (#110) masih TODO.
+- `TriggerDeath` mengunci `PlayerTraversal` dan mematikan `IslandPlayerController`. `DeathCinematic` (#53) masih TODO.
+- Penanda lari dan berenang dari `SpendStamina` berlaku pada frame itu dan frame berikutnya, karena urutan `Update` antar-komponen tidak dijamin.
+- `Instance` per scene. Hanya instance `IslandPhase` yang mendaftar ke `WorldStateSave`.
