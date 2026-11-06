@@ -228,3 +228,14 @@ Trigger layer `ZoneTrigger` di `Region3_Snow`, sekaligus `ISaveable` lewat `Regi
 14. Mulai adegan saat musik tempur berjalan. **Hasil:** musik tempur turun, dan kembali normal setelah adegan.
 15. Kosongkan `voice` dan `seconds`. **Hasil:** adegan tidak macet.
 16. Ending yang berjalan 60 detik. **Hasil:** `RunEndSequence` menunggu sampai selesai, tidak terpotong batas 15 detik.
+
+## Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Core_Logic/NarrativeSequencer.cs` (berisi `EndingContext`), `NarrativeScene.cs` (berisi `NarrativeBeat`), dan `HelipadFoundVolume.cs`. Event `NarrativeStateChangedEvent` di `GameEvents.GrupC2.cs`. Belum diuji di Unity. Aset `NarrativeScene` belum dibuat.
+
+- Kelas menerapkan `IBootstrapService` (`Initialize` dan `ResetForNewRun` dari bagian 4), walaupun tabel urutan bootstrap di `RunLifecycle.md` tidak memuatnya. Session induk perlu menentukan apakah dimasukkan ke `orderedServices` (setelah urutan 18).
+- Gambar beat memakai `Image` dan `CanvasGroup` sendiri di atas lapisan hitam `CinematicPanel`. `Begin` mengatur `SetBlack(1)`. Teks layar memakai `CinematicPanel.ShowCaption`.
+- Pembersihan ada di `finally`. Kalau coroutine pemanggil dihentikan dari luar (`RunWithTimeout`), Unity tidak menjalankan `finally`; batas waktu pengaman di dalam `Play` dan `ResetForNewRun` menjadi jaring pengamannya.
+- `freezeWorld` mengembalikan `SetGameplayTimeScale(1)` saat selesai.
+- Belum ada: menyebut nama korban `lostNpcIds` pada `lifeboat_to_beach` (butuh nama NPC dari #76).
+- `HelipadFoundVolume` memeriksa tag `Player`, dan hanya berjalan saat `RunLifecycle.State == OnIsland`. Coroutine dijalankan di objek `NarrativeSequencer`.

@@ -156,3 +156,14 @@ Kill Marker selalu mengalahkan Hit Marker yang sedang tampil.
 10. NPC membunuh zombie, atau zombie mati di jebakan di belakang pemain. **Hasil:** tidak ada marker.
 11. Buka menu Pause saat busur tampil. **Hasil:** busur membeku, lalu berlanjut setelah menu ditutup.
 12. Mati saat busur tampil, lalu mulai run baru. **Hasil:** tidak ada busur tersisa, dan jumlah pendengar tidak bertambah.
+
+## Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Core_Logic/CombatFeedbackUI.cs` dan `DamageIndicator.cs` (komponen prefab pool `UI_DamageIndicator`). Belum diuji di Unity.
+
+- `playerCamera` kosong diisi dari `FirstPersonCamera.Instance.WorldCamera`. Posisi pemain untuk arah memakai posisi kamera.
+- Penanda serangan (`EnemyAttackTelegraphEvent`) hanya memakai slot kosong. Kalau `active` penuh, penanda tidak tampil, supaya tidak menggantikan busur damage. Penggabungan sudut hanya berlaku antar-busur damage.
+- Alpha memudar pada setengah akhir lama tampil masing-masing indikator (`indicatorSeconds` atau `telegraphSeconds`).
+- `OnDisable` mengembalikan semua indikator ke pool, karena indikator adalah anak canvas HUD milik scene (aturan `IPoolable`: objek pool tidak boleh tertinggal sebagai anak objek scene).
+- Setelah `PlayerDiedEvent` atau `RunEndedEvent`, `CinematicStateChangedEvent { isPlaying = false }` tidak menyalakan umpan balik lagi sampai scene diganti.
+- Belum ada: `SettingsManager.showHitMarkers` (usulan 4). `SettingsManager` sudah ditulis tanpa field itu, jadi marker selalu aktif.

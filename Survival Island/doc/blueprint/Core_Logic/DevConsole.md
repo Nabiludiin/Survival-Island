@@ -274,3 +274,15 @@ Sistem gameplay tidak boleh bergantung pada `DevConsole`. Fungsi bernama `Debug*
 14. Mati, lalu mulai run baru. **Hasil:** godmode mati, `[CHEAT]` hilang, dan riwayat perintah tetap ada.
 15. Buka komputer dengan format angka Indonesia, lalu ketik `settime 17.5`. **Hasil:** jam menjadi 17:30.
 16. Buat build rilis. **Hasil:** tombol `~` tidak bereaksi, dan tidak ada kelas `DevConsole` di build.
+
+## Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Core_Logic/DevConsole.cs`, seluruhnya di dalam `#if UNITY_EDITOR || DEVELOPMENT_BUILD`. Belum diuji di Unity.
+
+- Panel tampil lewat anak `panelRoot`, supaya komponen tetap aktif dan `Update` tetap membaca tombol `~`.
+- `ConsoleCommand` mendapat field `taints`. Perintah dengan `taints = true` memanggil `MarkTainted()` setelah berjalan, yang juga memanggil `GameManager.MarkTainted()` (penanda `wasTainted` di save).
+- `setday`, `setvital`, dan `kill` ditolak saat `RunLifecycle.State` bukan `InShip` atau `OnIsland`.
+- Perintah tambahan: `heli status|install <partId>|warmup <detik>|liftoff` (`RescueEventManager.md`), `stats`, dan `statsreset` (#57).
+- `streamstat` dan `streamdelay` memakai `RegionStreaming.GetState`, `IsStalled`, dan `DebugExtraDelaySeconds`.
+- Masih TODO (sistemnya belum punya fungsi yang dibutuhkan): `tpregion` (titik uji region, #88), `savecorrupt` dan `savedelay` (#80), `settide` (#91), `postfx` (#23), rincian `spawnstat` (#62), dan `heli install all` (#69).
+- `loadlast` memanggil `RunLifecycle.ReturnToMainMenu()`, menunggu `State == InMenu`, lalu `ContinueRun()`.
