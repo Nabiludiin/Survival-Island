@@ -2,7 +2,7 @@
 
 Folder ini adalah tempat **kode gabungan C#** Survival Island. Semua *script* yang ditulis dari blueprint di `Survival Island/doc/blueprint/` disimpan di sini, sesuai `README.md` di root (TAHAP 6).
 
-**Status:** Langkah 1 (fondasi inti), Langkah 2 (Fase 1 kapal), dan Langkah 3 (pemain, status tubuh, inventori) sudah ditulis dan digabung. Proyek Unity 6 LTS di `Survival Island/` sudah dibuka di Unity; kompilasi gabungan Langkah 1-3 sedang diperiksa, dan belum ada yang dijalankan di Play Mode.
+**Status:** Langkah 1 (fondasi inti), Langkah 2 (Fase 1 kapal), dan Langkah 3 (pemain, status tubuh, inventori) sudah ditulis dan digabung. Proyek Unity 6 LTS di `Survival Island/` sudah dibuka di Unity; kode gabungan Langkah 1-3 terkompilasi tanpa error di Unity 6000.3.10f1 (6 November 2026), tetapi belum ada yang dijalankan di Play Mode.
 
 > Jangan tertukar dengan `LOGIC/` di root repo. Folder itu hanya bahan analisis dari game referensi (60 Seconds!, Raft, dan Zombie). Kode dari sana tidak boleh disalin ke folder ini.
 
@@ -123,9 +123,9 @@ Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Lan
 
 | Langkah | Isi | Folder utama | Status |
 |---|---|---|---|
-| **1** | Kerangka `GameManager`, `UIManager`, `ObjectPooler`, `SaveSystem`, dan pola *State Management* inti | `Core_Logic/` | Ditulis, belum diuji di Unity |
-| **2** | Fase 1: `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | `60-seconds/` | Ditulis, belum diuji di Unity |
-| **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Ditulis, belum diuji di Unity |
+| **1** | Kerangka `GameManager`, `UIManager`, `ObjectPooler`, `SaveSystem`, dan pola *State Management* inti | `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
+| **2** | Fase 1: `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | `60-seconds/` | Terkompilasi, belum diuji di Play Mode |
+| **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Belum dimulai |
 | **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/` | Belum dimulai |
 | **6** | `ZoneManager`, frostbite, jembatan kayu, barang berat, `WeatherManager` | `Island_Logic/` | Belum dimulai |

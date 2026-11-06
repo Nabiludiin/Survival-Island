@@ -1,0 +1,4 @@
+﻿<Solution>
+  <Project Path="SurvivalIsland.csproj" />
+  <Project Path="SurvivalIsland.Editor.csproj" />
+</Solution>

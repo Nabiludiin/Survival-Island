@@ -187,7 +187,7 @@ Damage hewan, termasuk serudukan babi hutan, ikut jalur `PlayerHit` ini.
 - **Tidur saat gempa:** getaran tetap diputar. Tidur dibatalkan oleh #67, kalau aturannya berlaku.
 - **`Cinematic` memakai kamera lain:** offset tetap dihitung, tetapi tidak terlihat.
 - **Sumber atau preset hilang:** `Play` keluar tanpa error, dan Editor mencatat peringatan.
-- **Versi paket:** nama kelas di bagian ini mengikuti Cinemachine 2.x. Versi 3.x memakai namespace dan nama properti yang sedikit berbeda, jadi harus dicek saat proyek Unity dibuat.
+- **Versi paket:** nama kelas di bagian ini mengikuti Cinemachine 2.x. Proyek memakai Cinemachine 3.1.6, dengan namespace `Unity.Cinemachine` dan sebagian nama properti berbeda. Periksa API yang benar lewat `unity_reflect` di Unity, sesuaikan kode saat Langkah yang memuat `CameraShake` ditulis, lalu perbarui bagian ini.
 
 ## 5. Keputusan Desain
 

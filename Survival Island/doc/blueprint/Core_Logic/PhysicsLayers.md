@@ -21,11 +21,11 @@
 | 16 | `Structure` | Bangunan pemain dan jembatan | Tag `BaseWall` atau `BaseDoor` |
 | 17 | `StructureGhost` | Hologram bangunan | Tidak bertabrakan dengan apa pun |
 | 18 | `Obstacle` | Pohon, batu, dan benda statis | Node panen juga di sini |
-| 19 | `Water` | Permukaan laut, sungai, dan danau | Trigger. Dibaca lewat #13 dan #55 |
-| 20 | `ZoneTrigger` | Zona region, trigger audio, kandang Lucky Machine | Selalu trigger |
-| 21 | `Projectile` | Fireball dan barang lempar | Peluru pistol memakai raycast |
-| 22 | `Ragdoll` | Tulang ragdoll pemain dan musuh | Hanya menyentuh `Terrain`, `Structure`, dan `Obstacle` |
-| 23 | `HeavyItem` | Suku cadang helikopter | Bisa diinteraksi, tidak mendorong pemain |
+| 4 | `Water` | Permukaan laut, sungai, dan danau | Trigger. Dibaca lewat #13 dan #55. Memakai layer bawaan Unity di slot 4, karena nama `Water` sudah dipakai Unity |
+| 19 | `ZoneTrigger` | Zona region, trigger audio, kandang Lucky Machine | Selalu trigger |
+| 20 | `Projectile` | Fireball dan barang lempar | Peluru pistol memakai raycast |
+| 21 | `Ragdoll` | Tulang ragdoll pemain dan musuh | Hanya menyentuh `Terrain`, `Structure`, dan `Obstacle` |
+| 22 | `HeavyItem` | Suku cadang helikopter | Bisa diinteraksi, tidak mendorong pemain |
 
 **Layer `Sand/Beach` dihapus.** Satu Terrain hanya punya satu layer, jadi pantai dibedakan lewat `SurfaceDetection` (#86).
 
@@ -158,7 +158,7 @@ Karena collider tubuh bukan trigger, raycast dengan `QueryTriggerInteraction.Ign
 **Keputusan yang dibuat di blueprint ini (usulan teknis, dicatat di #85):**
 
 - NPC menahan peluru tanpa menerima damage. Aturan friendly fire final ada di #59.
-- Nomor layer 8 sampai 23 memakai slot layer buatan Unity.
+- Layer buatan proyek memakai slot 8 sampai 22, dan slot 23 kosong. `Water` memakai layer bawaan Unity di slot 4. Kode selalu mencari layer lewat nama (`LayerMask.NameToLayer`), bukan nomor slot.
 
 **Menunggu developer:** tidak ada yang menghalangi.
 
