@@ -338,3 +338,8 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 - `sleep` baru berisi `maxGameHoursPerStep`. Field tidur lain diisi Langkah pemilik `SleepSystem` (#67).
 - Angka baru usulan Langkah 4: `resource.dropImpulse` 1,5 (dorongan item jatuh dari node).
 - `resource.minNodesPerRegion` memakai struct `RegionNodeMinimum { region, trees, rocks, mushrooms, sapTrees }`.
+
+## 8. Catatan Implementasi (Sistem pendukung)
+
+- Field baru dari keputusan developer (7 November 2026): `resource.knifeDecayPerCombatHit` = 1 dan `equipment.fistDamage` = 5.
+- Angka usulan teknis dari penulisan sistem pendukung yang tidak ada di tabel blueprint disetujui sebagai nilai awal (lihat `USULAN_TERBUKA.md`). Semua kelas bagian config dan `GameBalanceConfig` sendiri sekarang `partial`.

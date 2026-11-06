@@ -172,6 +172,7 @@ namespace SurvivalIsland
         public float lowerSeconds = 0.15f;
         public float raiseSeconds = 0.2f;                   // Total jeda ganti 0,35 detik (disetujui developer)
         public bool offHandAllowedWhileCarrying = false;    // Final di #65
+        public float fistDamage = 5f;                       // Keputusan developer (sistem pendukung): pukulan tangan kosong
     }
 
     /// <summary>Bagian items (#66). Diisi Langkah 3 (ItemUseSystem.md).</summary>
@@ -561,6 +562,7 @@ namespace SurvivalIsland
         public int rockDropMax = 6;
         public float pickaxeDecayPerUse = 1f;
         public float knifeDecayPerHarvest = 0.5f;
+        public float knifeDecayPerCombatHit = 1f;       // Keputusan developer (sistem pendukung): tusukan Pisau yang kena musuh
         public float coconutRespawnDays = 3f;
         public float stoneRespawnDays = 2f;
         public float regrowJitterHours = 6f;

@@ -38,7 +38,9 @@ namespace SurvivalIsland
                 return;
             }
             nextShoveTime = Time.time + b.shoveCooldownSeconds;
-            // 3. TODO #12: animasi dorong viewmodel.
+            // 3. Animasi dorong tangan (#12, trigger Shove disetujui developer).
+            var anim = PlayerAnimDriver.Instance;
+            if (anim != null && anim.Arms != null) anim.Arms.Play(AnimIds.Shove);
             // 4.
             var cam = FirstPersonCamera.Instance != null ? FirstPersonCamera.Instance.WorldCamera : null;
             Vector3 forward = cam != null ? cam.transform.forward : transform.forward;

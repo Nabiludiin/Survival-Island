@@ -17,9 +17,11 @@ namespace SurvivalIsland
     /// ke pool saat mati (EnemyHitReaction lewat SpawnManager.Despawn).
     ///
     /// Catatan Langkah 5 (penyimpangan sementara, dicatat di EnemyAI.md "Catatan Implementasi"):
-    /// - Pemeriksaan terhalang masih memakai NavMeshAgent.pathStatus milik agen sendiri, dan sasaran bangunan dicari dengan
-    ///   OverlapSphere di layer Structure bertag BaseWall/BaseDoor (Claude.md Pilar 3). TODO #78/#94: ganti dengan
-    ///   BaseNavigation.PollChase/PollAttacking dan TraversalAgent.TickUnreachable (respons Surround/Retreat/RockThrow).
+    /// - Pemeriksaan terhalang memakai BaseNavigation.PollChase/PollAttacking (#78) dan TraversalAgent.TickUnreachable
+    ///   (#94, respons Surround/Retreat/RockThrow). Keputusan developer (sistem pendukung): selama BaseNavigation memberi
+    ///   posisi tunggu atau respons traversal, Chase tidak menimpanya dengan MoveTo ke pemain, dan ReportUnreachable baru
+    ///   dikirim setelah threat.unreachableSeconds. Tanpa BaseNavigation di scene (misalnya ShipPhase), cadangan lama
+    ///   dipakai: NavMeshAgent.pathStatus milik agen sendiri dan OverlapSphere di layer Structure bertag BaseWall/BaseDoor.
     /// - TraversalAgent.Tick (#94) dipanggil dari CrowdTick. Sarang zombie (#112) dicatat di LairRegistry, bukan di EnemyAI.
     /// - Tanpa HordeCrowdManager di scene, EnemyAI men-tick dirinya sendiri tiap 0,2 detik (cadangan, misalnya ShipPhase).
     /// </summary>
@@ -60,6 +62,13 @@ namespace SurvivalIsland
 
         private IDamageable currentBreach;
         private float blockedTimer;
+        // Status dari BaseNavigation.PollChase (#78). Hasil hanya dikirim sekali per pemeriksaan, jadi disimpan di sini.
+        private enum NavHold : byte { None, WaitSlot, Unreachable }
+        private NavHold navHold;
+        private Vector3 navHoldPosition;
+        private bool hasBreachSlot;
+        private Vector3 breachSlotPosition;
+        private float unreachableTimer;
         private float pathCheckTimer;
         private float spawnGraceTimer;
         private float huntTimer;
@@ -170,6 +179,8 @@ namespace SurvivalIsland
             }
 
             if (CurrentState == AIState.Chase || CurrentState == AIState.AttackPlayer) CurrentState = AIState.Idle;
+            navHold = NavHold.None;
+            unreachableTimer = 0f;
             if (level == AwarenessLevel.Suspicious && sensory != null) MoveTo(sensory.LastStimulusPosition);
             else if (DayPhaseTracker.IsNight && AISensoryHub.Instance != null) MoveTo(AISensoryHub.Instance.HuntHint);   // Unaware saat malam
         }
@@ -218,16 +229,68 @@ namespace SurvivalIsland
                     dest = huntPoint;
                 }
             }
-            MoveTo(dest);
+            // Keputusan developer: posisi tunggu dan respons traversal tidak ditimpa MoveTo ke pemain.
+            if (navHold == NavHold.WaitSlot) MoveTo(navHoldPosition);
+            else if (navHold == NavHold.Unreachable && traversal != null && traversal.TickUnreachable(t)) { }
+            else MoveTo(dest);
 
-            // 4. Pemeriksaan terhalang (jalur sementara, lihat catatan kelas).
+            // 4. Pemeriksaan terhalang.
             CheckBlocked(dt);
+            if (CurrentState != AIState.Chase) return;
+            TickUnreachableTimer(dt);
         }
 
         private void CheckBlocked(float dt)
         {
             var b = Bal;
-            if (b == null || Data == null || !Data.canAttackBuildings || spawnGraceTimer > 0f || IsShipPhase) return;
+            if (b == null || Data == null || !Data.canAttackBuildings || IsShipPhase) return;
+            var nav = BaseNavigation.Instance;
+            if (nav != null)
+            {
+                // BaseNavigation mengatur jeda spawn, interval pemeriksaan, dan pembagian posisi serangan (#78).
+                switch (nav.PollChase(this, out var bt))
+                {
+                    case BlockedCheck.Clear:
+                        navHold = NavHold.None;
+                        unreachableTimer = 0f;
+                        break;
+                    case BlockedCheck.Breach:
+                        navHold = NavHold.None;
+                        unreachableTimer = 0f;
+                        currentBreach = bt.target;
+                        hasBreachSlot = true;
+                        breachSlotPosition = bt.slotPosition;
+                        CurrentState = AIState.AttackBuilding;
+                        break;
+                    case BlockedCheck.Wait:
+                        navHold = NavHold.WaitSlot;
+                        navHoldPosition = bt.slotPosition;
+                        break;
+                    case BlockedCheck.NoStructure:
+                        navHold = NavHold.Unreachable;
+                        break;
+                }
+                return;
+            }
+            CheckBlockedFallback(dt, b);
+        }
+
+        /// <summary>Terhalang tanpa struktur: target dicoret sementara setelah unreachableSeconds (#108).</summary>
+        private void TickUnreachableTimer(float dt)
+        {
+            if (navHold != NavHold.Unreachable) { unreachableTimer = 0f; return; }
+            var b = Bal;
+            unreachableTimer += dt;
+            if (b == null || unreachableTimer < b.threat.unreachableSeconds) return;
+            unreachableTimer = 0f;
+            navHold = NavHold.None;
+            if (ThreatSystem.Instance != null) ThreatSystem.Instance.ReportUnreachable(this);
+        }
+
+        /// <summary>Cadangan tanpa BaseNavigation di scene: pemeriksaan jalur Langkah 5.</summary>
+        private void CheckBlockedFallback(float dt, GameBalanceConfig b)
+        {
+            if (spawnGraceTimer > 0f) return;
             pathCheckTimer -= dt;
             if (pathCheckTimer > 0f) return;
             float interval = b.crowd.fallbackPathCheckIntervalSeconds;
@@ -242,7 +305,7 @@ namespace SurvivalIsland
                 CurrentState = AIState.AttackBuilding;
                 return;
             }
-            // Tanpa struktur: target dicoret sementara setelah unreachableSeconds (#108). TODO #94: AITraversal.GetResponse.
+            // Tanpa struktur: target dicoret sementara setelah unreachableSeconds (#108).
             if (blockedTimer >= b.threat.unreachableSeconds && ThreatSystem.Instance != null)
             {
                 blockedTimer = 0f;
@@ -274,11 +337,18 @@ namespace SurvivalIsland
 
         private void TickAttackBuilding(float dt)
         {
+            var nav = BaseNavigation.Instance;
             if (currentBreach == null || !currentBreach.IsAlive)
             {
-                currentBreach = null;
-                CurrentState = AIState.Chase;
+                if (nav != null) nav.ReleaseSlot(this);
+                ExitAttackBuilding();
                 return;
+            }
+            // BaseNavigation (#78): kembali ke Chase saat struktur hilang, pintu terbuka, atau jalur ke target sudah lengkap.
+            if (nav != null && hasBreachSlot)
+            {
+                var tgt = CurrentTarget;
+                if (nav.PollAttacking(this, tgt != null ? tgt.Position : transform.position)) { ExitAttackBuilding(); return; }
             }
             var c = currentBreach as Component;
             Vector3 p = c != null ? c.transform.position : transform.position;
@@ -289,7 +359,15 @@ namespace SurvivalIsland
             {
                 if (attack != null) attack.TryStartStructureAttack(currentBreach);
             }
-            else MoveTo(closest);
+            else MoveTo(hasBreachSlot ? breachSlotPosition : closest);   // Posisi serangan dari BaseNavigation kalau ada
+        }
+
+        private void ExitAttackBuilding()
+        {
+            currentBreach = null;
+            hasBreachSlot = false;
+            navHold = NavHold.None;
+            CurrentState = AIState.Chase;
         }
 
         private void MoveTo(Vector3 target)
@@ -514,6 +592,9 @@ namespace SurvivalIsland
             waveModifiers = WaveModifiers.One;
             currentBreach = null;
             blockedTimer = 0f;
+            navHold = NavHold.None;
+            hasBreachSlot = false;
+            unreachableTimer = 0f;
             pathCheckTimer = (GetInstanceID() & 7) * 0.125f;
             huntTimer = 0f;
             tokenRetryTimer = 0f;
@@ -532,6 +613,8 @@ namespace SurvivalIsland
             agent.enabled = true;
             agent.Warp(hit.position);
             if (!agent.isOnNavMesh) { ReturnSelf(DespawnReason.OffNavMesh); return; }
+            // Mulai jeda spawn BaseNavigation dari awal (#78).
+            if (BaseNavigation.Instance != null) BaseNavigation.Instance.NotifySpawned(this);
             agent.isStopped = false;
             agent.updateRotation = true;
             // 3.
@@ -567,6 +650,9 @@ namespace SurvivalIsland
             if (BaseNavigation.Instance != null) BaseNavigation.Instance.Forget(this);
             currentBreach = null;
             blockedTimer = 0f;
+            navHold = NavHold.None;
+            hasBreachSlot = false;
+            unreachableTimer = 0f;
             agent.areaMask = defaultAreaMask;
             IsBurning = false;
             CurrentTarget = null;

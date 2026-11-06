@@ -228,3 +228,8 @@ Kode: `left-4-dead/EnemyAI.cs` (`AIState`, `SpeedSource`).
 - **Tanpa `HordeCrowdManager`**, `EnemyAI` men-tick dirinya sendiri setiap 0,2 detik lewat `Update`. Ini cadangan untuk `ShipPhase` dan scene tes.
 - `SetHidingState(AIState)` ditambahkan untuk `VillageZombieHiding` (#63), yang belum ditulis.
 - Di Fase 1, `ApplySpeed` tidak menulis `agent.speed`, karena `ShipHazardManager` yang mengaturnya. `ShipHazardManager` belum memanggil `SetTarget`/`WakeUp` (TODO Langkah 2), jadi zombie kapal belum mengejar.
+
+## 8. Catatan Implementasi (Sistem pendukung)
+
+- **Keputusan developer (7 November 2026):** pemeriksaan terhalang memakai `BaseNavigation.PollChase`/`PollAttacking` (#78) dan `TraversalAgent.TickUnreachable` (#94). Hasil `Wait` membuat zombie berjalan ke posisi tunggu, `Breach` masuk `AttackBuilding` menuju posisi serangan, dan `NoStructure` menjalankan respons traversal. Chase tidak menimpa keduanya dengan `MoveTo` ke pemain. `ThreatSystem.ReportUnreachable` dikirim setelah `threat.unreachableSeconds` sejak `NoStructure`. `NotifySpawned` dipanggil setelah `agent.Warp` di `OnSpawned`, dan `Forget` di `OnReturned`.
+- Tanpa `BaseNavigation` di scene (ShipPhase atau scene uji), pemeriksaan jalur cadangan Langkah 5 tetap dipakai.

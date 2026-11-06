@@ -193,4 +193,5 @@ Kode: `Assets/LOGIC/Core_Logic/AnimationController.cs` (beserta `AnimIds`), `Pla
 - **Tafsiran:** `PlayerAnimDriver.Instance` dan `Arms` dipakai `GunController`, `MeleeCombatSystem`, dan `PlayerShove` untuk memanggil animasi tangan.
 - **Tafsiran:** `EnemyAnimDriver` juga menulis bool `Alert` untuk hewan (`Alert` dan `TargetUnreachable`), karena tabel `AnimalState` tidak menyebut pemanggil lain. Trigger serangan, `Stagger`, `Knockback`, `Burn`, `Dormant`, dan `Emerge` tetap dikirim sistem pemiliknya.
 - **Tafsiran:** `referenceSpeed` diisi pada sampel pertama setelah keluar dari pool, karena urutan `OnSpawned` antar komponen tidak dijamin.
-- **Belum dikerjakan:** animasi dorong (`PlayerShove`, #12) belum punya trigger di blueprint ini. `PlayReload` butuh panjang klip reload; `GunController` belum punya data itu.
+- **Keputusan developer:** trigger `Shove` ditambahkan untuk animasi dorong tangan. `PlayerShove` memanggil `Arms.Play(AnimIds.Shove)` saat dorongan dimulai. Animator controller `AC_PlayerArms` perlu parameter trigger `Shove`.
+- **Belum dikerjakan:** `PlayReload` butuh panjang klip reload; `GunController` belum punya data itu.

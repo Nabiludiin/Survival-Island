@@ -439,3 +439,16 @@ Juga di bawah `PersistentRoot`, tetapi bukan service: `SubtitlePresenter`, canva
 7. **Data:** `LootTable` (Loot_Ship, Loot_Region1-4, Loot_Lair_*, Drop_Zombie_*, Debris_Default, kargo pantai), `StatusEffectData` + `StatusEffectDatabase`, `ItemUpgradeData` (`Resources/ItemUpgrades`), `CookingRecipe` (`Resources/Recipes`), `DiseaseEffectTable`, `ThrowableData` x4, `TrapData` x3, `LairData`, `FlammableProfile` x6, `LightFixtureData` x2, `NPCData` x3, `BarkSet`, `ObjectiveData` x8, `DiaryEntry` x3, `LoreEntry`, `TutorialHint` (`Resources/TutorialHints`), dan `NarrativeScene` x7.
 8. **Prefab:** NPC (`NavMeshAgent`, `NPCCompanion`, `NPCGunUser`, layer `NPC`), musuh (`TraversalAgent`, `ThreatAudioEmitter`, `AnimationController`, `EnemyAnimDriver`, `Flammable`, tag `Zombie` atau `Animal`), struktur (`StructureIntegrityInfo`, `StructureVisual`, `BaseDoor`, `BaseTrap`, `CampfireManager`, `StorageChest`, `RainwaterCollector`, `LightFixture`, `BedInteractable`), Tong Merah (`EnvironmentalHazard`), viewmodel `Base_Kail` (`FishingSystem`) dan senter (`FlashlightController`), serta rig tangan (`PlayerAnimDriver`).
 9. **UI:** semua panel di atas memakai `UIPanel` dengan setelan dari blueprint masing-masing (jeda, kursor, blok input, Esc).
+
+### Keputusan developer setelah sistem pendukung (7 November 2026)
+
+Dicatat di `doc/USULAN_TERBUKA.md` (Keputusan utama) dan blueprint terkait.
+
+- `EnemyAI` memakai `BaseNavigation.PollChase`/`PollAttacking`, `NotifySpawned`, dan `TraversalAgent.TickUnreachable`. Tanpa `BaseNavigation` di scene, pemeriksaan jalur Langkah 5 tetap dipakai.
+- Pusat base: rata-rata posisi struktur (sudah begitu di kode).
+- Obor Dinding: tekan `E` menambah 1 kayu (sudah begitu di kode).
+- Trigger `Shove` (`AnimIds.Shove`) dipakai `PlayerShove`. Tambahkan parameter trigger `Shove` di `AC_PlayerArms`.
+- `resource.knifeDecayPerCombatHit` = 1 (`MeleeCombatSystem`), dan `equipment.fistDamage` = 5 (`FistBehaviour` sekarang turunan `MeleeCombatSystem`).
+- `LifeboatExtraction`: isi `npcDatabase` (aset `NPCData` yang sama dengan `NPCRoster`) dan `shipNpcPoints`, serta pool `ShipNpc_Generic`. `NarrativeSequencer`: isi `npcDatabase`; beat dengan `textKey` `narrative.lifeboat.lost` (teks tabel memakai `{names}`) menyebut korban kapal.
+- `NarrativeSequencer` masuk `orderedServices` urutan 19.
+- `ItemData.OnValidate` (Editor) mencatat error untuk item non-inti dengan durabilitas yang tidak bisa diperbaiki, kecuali `Tool_Torch` dan `Tool_Flashlight`.

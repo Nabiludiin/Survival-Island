@@ -65,7 +65,7 @@ Manager hanya mengisi `Instance` di `Awake`. Pekerjaan yang bergantung pada mana
 | 16 | `WorldStateSave` (#80) | Menentukan lokasi save dan memeriksa penanda akhir run |
 | 17 | `LocalStatsManager` (#57) | Membaca `stats.json` |
 | 18 | `DevConsole` (#56) | Hanya di build pengembangan |
-| 19 | `NarrativeSequencer` (#99) | Usulan teknis (sistem pendukung): persisten menurut tabel masa hidup, dan punya `ResetForNewRun` |
+| 19 | `NarrativeSequencer` (#99) | Persisten menurut tabel masa hidup, dan punya `ResetForNewRun` (disetujui developer 7 November 2026) |
 
 `AmbientAudio`, `CombatMusicDirector`, `TutorialManager`, dan `VFXManager` masuk `orderedServices`, dan berada di bawah `PersistentRoot`.
 

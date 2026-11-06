@@ -237,5 +237,6 @@ Kode: `Assets/LOGIC/Core_Logic/NarrativeSequencer.cs` (berisi `EndingContext`), 
 - Gambar beat memakai `Image` dan `CanvasGroup` sendiri di atas lapisan hitam `CinematicPanel`. `Begin` mengatur `SetBlack(1)`. Teks layar memakai `CinematicPanel.ShowCaption`.
 - Pembersihan ada di `finally`. Kalau coroutine pemanggil dihentikan dari luar (`RunWithTimeout`), Unity tidak menjalankan `finally`; batas waktu pengaman di dalam `Play` dan `ResetForNewRun` menjadi jaring pengamannya.
 - `freezeWorld` mengembalikan `SetGameplayTimeScale(1)` saat selesai.
-- Belum ada: menyebut nama korban `lostNpcIds` pada `lifeboat_to_beach` (butuh nama NPC dari #76).
+- **Keputusan developer (7 November 2026):** nama korban `lostNpcIds` pada `lifeboat_to_beach` diambil dari daftar `npcDatabase` (aset `NPCData` yang sama dengan `NPCRoster`) di Inspector `NarrativeSequencer`. Beat dengan `textKey = narrative.lifeboat.lost` menampilkan teks itu dengan token `{names}`. Tanpa korban, beat itu tanpa teks. `CinematicPanel` mendapat `ShowCaptionText(string)`.
+- **Keputusan developer (7 November 2026):** `NarrativeSequencer` masuk `orderedServices` urutan 19, setelah `DevConsole`.
 - `HelipadFoundVolume` memeriksa tag `Player`, dan hanya berjalan saat `RunLifecycle.State == OnIsland`. Coroutine dijalankan di objek `NarrativeSequencer`.

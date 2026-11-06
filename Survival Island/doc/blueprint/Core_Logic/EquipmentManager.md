@@ -293,3 +293,7 @@ Kode: `Survival Island/Assets/LOGIC/Core_Logic/EquipmentManager.cs`, `Equippable
 - **Konsumsi di hotbar:** makanan tanpa `equipPrefab` memakai satu komponen `consumableBehaviour` bersama (field Inspector).
 - `RequestSlot(-1)` berarti tangan kosong. Properti baca tambahan: `ActiveInstanceId`, `ActiveInstance`, `ActiveHotbarIndex`, `GetHotbarInstanceId`, `OffHandInstanceId`, `OffHandActive`, `State`, `Locks`.
 - Belum ada: cek `DurabilitySystem.GetState == Broken` (#113), notifikasi `Item rusak` (#22), dan suara klik slot kosong. Pukulan `FistBehaviour` menunggu `MeleeCombatSystem` (Langkah 5).
+
+## 8. Catatan Implementasi (Sistem pendukung)
+
+- **Keputusan developer (7 November 2026):** tangan kosong (`FistBehaviour`) memukul lewat jalur `MeleeCombatSystem` dengan damage `equipment.fistDamage` (nilai awal 5).

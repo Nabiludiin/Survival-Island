@@ -10,6 +10,8 @@ namespace SurvivalIsland
         public static readonly int ReloadSpeed = Animator.StringToHash("ReloadSpeed");
         public static readonly int Fire = Animator.StringToHash("Fire");
         public static readonly int Swing = Animator.StringToHash("Swing");
+        // Keputusan developer (sistem pendukung): trigger dorong tangan untuk PlayerShove.
+        public static readonly int Shove = Animator.StringToHash("Shove");
         public static readonly int Equip = Animator.StringToHash("Equip");
         public static readonly int CancelAction = Animator.StringToHash("CancelAction");
         public static readonly int Carry = Animator.StringToHash("Carry");

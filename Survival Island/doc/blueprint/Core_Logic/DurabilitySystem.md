@@ -124,7 +124,7 @@ Durabilitas 0 berarti `Broken`, bukan langsung hilang. Status selalu dihitung da
 - Event dikirim sebelum `RemoveInstance`.
 - `GetState` mengambil `ItemData` sendiri lewat `ItemDatabase`, supaya pemanggil cukup mengirim `ItemInstance`.
 
-**Menunggu developer:**
+**Disetujui developer (7 November 2026):**
 
 1. **Item non-inti yang tidak bisa diperbaiki dan memakai `ApplyWear`:** saat ini tidak ada item seperti itu di daftar biaya `ToolRepairSystem.md`. Usulan: validasi Editor menolak item dengan `maxDurability > 0`, `isRepairable = false`, dan `isCoreItem = false`, kecuali obor dan senter yang memakai durabilitas sebagai bahan bakar.
 2. **`GetRatio`:** nama fungsi baru. Kalau disetujui, `EquipmentManager.md` memakainya untuk bar hotbar.
@@ -148,5 +148,6 @@ Durabilitas 0 berarti `Broken`, bukan langsung hilang. Status selalu dihitung da
 
 - Kode: `Assets/LOGIC/Core_Logic/DurabilitySystem.cs` (enum `DurabilityState` dan kelas statis). Event di `GameEvents.FondasiB.cs`.
 - `GetEffectiveMax` membaca upgrade dan modifier lewat `WeaponStatCalculator.HasUpgrade` dan `WeaponStatCalculator.FindModifier` (lihat catatan `ToolRepairSystem.md`).
-- `GetRatio` ditulis dengan nama usulan (masih "Menunggu developer" nomor 2). `HotbarView` memakainya.
-- Validasi Editor untuk item non-inti yang tidak bisa diperbaiki (Menunggu developer nomor 1) belum ditulis.
+- `GetRatio` disetujui developer. `HotbarView` memakainya.
+- Validasi Editor nomor 1 ada di `ItemData.OnValidate` (hanya Editor): mencatat error untuk item dengan `maxDurability > 0`, `isRepairable = false`, dan `isCoreItem = false`, kecuali `Tool_Torch` dan `Tool_Flashlight`.
+- **Keputusan developer (7 November 2026):** tusukan Pisau yang kena musuh mengurangi durabilitas sebesar `resource.knifeDecayPerCombatHit` (nilai awal 1). Memanen dengan Pisau tetap memakai `resource.knifeDecayPerHarvest`.

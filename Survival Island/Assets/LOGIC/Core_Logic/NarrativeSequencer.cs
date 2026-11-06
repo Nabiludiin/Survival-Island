@@ -19,7 +19,8 @@ namespace SurvivalIsland
     /// Pemutar memakai waktu nyata (Time.unscaledDeltaTime), jadi tetap maju saat freezeWorld.
     /// Tidak mengubah Time.timeScale atau kursor langsung: panel Cinematic (#83) dan SetGameplayTimeScale yang mengaturnya.
     ///
-    /// Belum ada (TODO): nama korban dari lostNpcIds pada lifeboat_to_beach (butuh nama NPC dari NPCRoster/NPCData, #76).
+    /// Nama korban pada lifeboat_to_beach: keputusan developer (sistem pendukung), NPCData dari daftar npcDatabase di Inspector.
+    /// Beat dengan textKey LostNamesKey menampilkan teks itu dengan {names} = nama korban dari GameManager.shipOutcome.lostNpcIds.
     /// </summary>
     public class NarrativeSequencer : MonoBehaviour, IBootstrapService
     {
@@ -44,6 +45,8 @@ namespace SurvivalIsland
         [Header("Tampilan (canvas persisten, di atas lapisan hitam CinematicPanel)")]
         [Tooltip("Kosong = UIManager.Instance.cinematicPanel.")]
         [SerializeField] private CinematicPanel cinematicPanel;
+        [Tooltip("Keputusan developer: aset NPCData yang sama dengan NPCRoster.database, untuk nama korban.")]
+        [SerializeField] private NPCData[] npcDatabase = new NPCData[0];
         [SerializeField] private Image beatImage;
         [SerializeField] private CanvasGroup beatImageGroup;
         [Tooltip("Petunjuk 'Space untuk lewati'. Teks memakai token {input:Skip} lewat LocalizedText.")]
@@ -286,7 +289,33 @@ namespace SurvivalIsland
             EventChannel<NarrativeStateChangedEvent>.Publish(new NarrativeStateChangedEvent(s.sceneId, true));
             EventChannel<CinematicStateChangedEvent>.Publish(new CinematicStateChangedEvent(true, s.music == null));
 
-            // TODO(NPCRoster): lifeboat_to_beach menyebut nama korban dari GameManager.shipOutcome.lostNpcIds (#76).
+        }
+
+        /// <summary>Kunci teks beat yang menyebut nama korban kapal. Isi tabel memakai token {names}.</summary>
+        public const string LostNamesKey = "narrative.lifeboat.lost";
+
+        /// <summary>Nama korban dari GameManager.shipOutcome.lostNpcIds, dipisah koma. Kosong kalau tidak ada korban.</summary>
+        private string BuildLostNames()
+        {
+            var gm = GameManager.Instance;
+            var lost = gm != null && gm.shipOutcome != null ? gm.shipOutcome.lostNpcIds : null;
+            if (lost == null || lost.Count == 0) return string.Empty;
+            var loc = LocalizationManager.Instance;
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < lost.Count; i++)
+            {
+                string name = lost[i];
+                for (int j = 0; j < npcDatabase.Length; j++)
+                {
+                    var d = npcDatabase[j];
+                    if (d == null || d.npcId != lost[i]) continue;
+                    if (!string.IsNullOrEmpty(d.displayNameKey)) name = loc != null ? loc.Get(d.displayNameKey) : d.displayNameKey;
+                    break;
+                }
+                if (sb.Length > 0) sb.Append(", ");
+                sb.Append(name);
+            }
+            return sb.ToString();
         }
 
         private void StartBeat(NarrativeBeat beat)
@@ -304,6 +333,14 @@ namespace SurvivalIsland
             if (panel != null)
             {
                 if (string.IsNullOrEmpty(beat.textKey)) panel.ClearCaption();
+                else if (beat.textKey == LostNamesKey)
+                {
+                    // lifeboat_to_beach: korban disebut namanya. Tanpa korban, beat ini tanpa teks.
+                    string names = BuildLostNames();
+                    var loc = LocalizationManager.Instance;
+                    if (names.Length == 0) panel.ClearCaption();
+                    else panel.ShowCaptionText(loc != null ? loc.Format(LostNamesKey, "names", names) : names);
+                }
                 else panel.ShowCaption(beat.textKey);
             }
 

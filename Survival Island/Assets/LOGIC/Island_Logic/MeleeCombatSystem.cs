@@ -10,7 +10,7 @@ namespace SurvivalIsland
     ///
     /// Panen memanggil ResourceNode.ReceiveHit milik Langkah 4, jadi file ini terkompilasi setelah branch Langkah 4 digabung.
     /// DurabilitySystem.ApplyWear dan WeaponStatCalculator (#113) serta animasi ayun lewat PlayerAnimDriver (#12) sudah dipakai.
-    /// Belum ada (TODO): Fire Axe (#97), keausan pisau saat bertarung (angkanya belum ada di DurabilitySystem.md).
+    /// Belum ada (TODO): Fire Axe (#97). Keausan Pisau saat bertarung memakai resource.knifeDecayPerCombatHit (keputusan developer).
     /// </summary>
     public class MeleeCombatSystem : EquippableBehaviour
     {
@@ -35,7 +35,13 @@ namespace SurvivalIsland
             itemId = instance != null ? instance.itemId : null;
             var item = itemId != null ? ItemDatabase.Get(itemId) : null;
             // Damage akhir setelah upgrade dan modifier Lucky Machine (#113).
-            meleeDamage = WeaponStatCalculator.GetMeleeDamage(item != null && item.weaponDamage > 0f ? item.weaponDamage : fallbackDamage, instance);
+            meleeDamage = WeaponStatCalculator.GetMeleeDamage(GetBaseDamage(item), instance);
+        }
+
+        /// <summary>Damage dasar sebelum upgrade. FistBehaviour menimpanya dengan equipment.fistDamage.</summary>
+        protected virtual float GetBaseDamage(ItemData item)
+        {
+            return item != null && item.weaponDamage > 0f ? item.weaponDamage : fallbackDamage;
         }
 
         public override void OnUnequip()
@@ -105,7 +111,8 @@ namespace SurvivalIsland
 
         /// <summary>
         /// DurabilitySystem.md tabel keausan (#113): ayunan Kapak dan Beliung yang kena memakai resource.axeDecayPerUse /
-        /// pickaxeDecayPerUse; memanen dengan Pisau memakai resource.knifeDecayPerHarvest. Pisau saat bertarung belum punya angka.
+        /// pickaxeDecayPerUse; memanen dengan Pisau memakai resource.knifeDecayPerHarvest, dan tusukan yang kena musuh memakai
+        /// resource.knifeDecayPerCombatHit (keputusan developer, sistem pendukung).
         /// </summary>
         private void ApplyToolWear(ToolClass tool, bool harvest)
         {
@@ -116,7 +123,7 @@ namespace SurvivalIsland
             {
                 case ToolClass.Axe: amount = res.axeDecayPerUse; break;
                 case ToolClass.Pickaxe: amount = res.pickaxeDecayPerUse; break;
-                case ToolClass.Knife: amount = harvest ? res.knifeDecayPerHarvest : 0f; break;
+                case ToolClass.Knife: amount = harvest ? res.knifeDecayPerHarvest : res.knifeDecayPerCombatHit; break;
             }
             if (amount > 0f) DurabilitySystem.ApplyWear(instance, amount);
         }

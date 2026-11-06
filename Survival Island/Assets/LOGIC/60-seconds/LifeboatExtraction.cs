@@ -14,9 +14,8 @@ namespace SurvivalIsland
     /// Sekoci, aturan setor, dan akibat gagal adalah usulan yang disetujui developer (#85).
     ///
     /// Belum diimplementasikan (ditandai TODO):
-    /// - SpawnShipNpcs: NPCData dan ShipInteractable.Setup(NPCData) sudah ada, tetapi sumber NPCData per npcId di ShipPhase
-    ///   belum ditetapkan (database NPC hanya ada di NPCRoster, IslandPhase). Daftar korban tetap dihitung dari
-    ///   RunSeedManager.CurrentLayout.shipNpcIds.
+    /// - SpawnShipNpcs: keputusan developer (sistem pendukung): NPCData di ShipPhase diambil dari daftar npcDatabase di
+    ///   Inspector (aset yang sama dengan NPCRoster), dan titik dari shipNpcPoints sesuai RunLayout.shipNpcPointByNpc.
     /// - Penanda sekoci di HUD saat sirene, dan isi sekoci di HUD (HUDManager belum punya fungsi untuk itu).
     /// Sirene pra-game dan SFX setor lewat AudioManager, teks prompt lewat LocalizationManager (#104).
     /// </summary>
@@ -27,6 +26,10 @@ namespace SurvivalIsland
         public static LifeboatExtraction Instance { get; private set; }
 
         [SerializeField] private Transform safePoint;
+        [Tooltip("Keputusan developer: aset NPCData yang sama dengan NPCRoster.database, dicari lewat npcId.")]
+        [SerializeField] private NPCData[] npcDatabase = new NPCData[0];
+        [Tooltip("Titik NPC di kapal. Indeks dari RunLayout.shipNpcPointByNpc (#89).")]
+        [SerializeField] private Transform[] shipNpcPoints = new Transform[0];
         [SerializeField] private RunSummaryPanel runSummaryPanel;
         [SerializeField] private InteractHighlight highlight;
 
@@ -142,10 +145,37 @@ namespace SurvivalIsland
 
         private void SpawnShipNpcs()
         {
-            // TODO #76 (sumber NPCData di ShipPhase belum ditetapkan): untuk tiap npcId di RunSeedManager.Instance.CurrentLayout.shipNpcIds,
-            //   ambil titik dari shipNpcPointByNpc, lalu
-            //   ObjectPooler.Instance.SpawnFromPool<ShipInteractable>("ShipNpc_Generic", titik.position, titik.rotation)
-            //   dan langsung Setup(npcData). Data tidak diisi di OnSpawned.
+            // LifeboatExtraction.md "Penempatan": NPC dari RunSeedManager.CurrentLayout.shipNpcIds di titik shipNpcPointByNpc.
+            // Data langsung diisi lewat Setup(npcData), bukan di OnSpawned.
+            var layout = RunSeedManager.Instance != null ? RunSeedManager.Instance.CurrentLayout : null;
+            var pooler = ObjectPooler.Instance;
+            if (layout == null || layout.shipNpcIds == null || pooler == null) return;
+            for (int i = 0; i < layout.shipNpcIds.Length; i++)
+            {
+                var data = FindNpcData(layout.shipNpcIds[i]);
+                if (data == null)
+                {
+                    Debug.LogWarning($"[LifeboatExtraction] NPCData '{layout.shipNpcIds[i]}' tidak ada di npcDatabase.", this);
+                    continue;
+                }
+                int point = layout.shipNpcPointByNpc != null && i < layout.shipNpcPointByNpc.Length ? layout.shipNpcPointByNpc[i] : i;
+                if (point < 0 || point >= shipNpcPoints.Length || shipNpcPoints[point] == null)
+                {
+                    Debug.LogWarning($"[LifeboatExtraction] Titik NPC {point} untuk '{data.npcId}' tidak ada di shipNpcPoints.", this);
+                    continue;
+                }
+                var t = shipNpcPoints[point];
+                var npc = pooler.SpawnFromPool<ShipInteractable>("ShipNpc_Generic", t.position, t.rotation);
+                if (npc != null) npc.Setup(data);
+            }
+        }
+
+        private NPCData FindNpcData(string npcId)
+        {
+            if (string.IsNullOrEmpty(npcId) || npcDatabase == null) return null;
+            for (int i = 0; i < npcDatabase.Length; i++)
+                if (npcDatabase[i] != null && npcDatabase[i].npcId == npcId) return npcDatabase[i];
+            return null;
         }
 
         // ---------------------------------------------------------------- IInteractable (sekoci)

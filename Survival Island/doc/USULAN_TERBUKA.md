@@ -35,6 +35,16 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Fitur tambahan yang dipakai | #96, #106, dan #112 |
 | Fitur yang tidak dipakai | #48, #54, #105, dan #117 |
 | Angka inti | Hari 15 menit, 8 sampai 12 kayu per pohon, 5 suku cadang, dan frostbite 1 HP per detik |
+| Pusat base (Blood Moon, `BaseNavigation.md` usulan 7) | Rata-rata posisi semua struktur, dihitung ulang saat jumlah struktur berubah |
+| Zombie terhalang base | `EnemyAI` memakai `BaseNavigation.PollChase`. Posisi tunggu dan respons traversal tidak ditimpa kejaran, dan target dicoret setelah `threat.unreachableSeconds` |
+| Bahan bakar Obor Dinding | Tekan `E` pada obor mati yang belum penuh menambah 1 kayu lalu menyala. Tidak ada tahan `E` 0,6 detik |
+| Animasi dorong | Trigger `Shove` di rig tangan, dipakai `PlayerShove` (`AnimationController.md`) |
+| Keausan Pisau saat bertarung | 1 per tusukan yang kena musuh (`resource.knifeDecayPerCombatHit`) |
+| Pukulan tangan kosong | 5 damage (`equipment.fistDamage`) |
+| NPC di kapal | `NPCData` dari daftar di Inspector `LifeboatExtraction` dan `NarrativeSequencer`, aset yang sama dengan `NPCRoster` |
+| Urutan bootstrap `NarrativeSequencer` | Urutan 19, setelah `DevConsole` |
+| Validasi durabilitas | Validasi Editor `ItemData` untuk item non-inti yang tidak bisa diperbaiki (kecuali obor dan senter), dan nama `DurabilitySystem.GetRatio`, disetujui |
+| Angka usulan teknis sistem pendukung | Disetujui sebagai nilai awal, boleh diubah saat playtest: `traversal.rockDamage` 10, `rockWindupSeconds` 1, `rockSpeed` 16, `retreatDistance` 15, `rockLifetimeSeconds` 6, `linkAvoidCost` 1000; `throwable.fireTickSeconds` 1; `lair.nestHP` 300, `registryTickSeconds` 1; `interact.containerNoiseRadius` 8; `npc.doorKeepAwayRadius`, `commandBlockEnemyRadius`, `fireAvoidMargin`; `safety.stuckHintMoveThreshold`; `campfire.skyCheckDistance`, `structureRecheckRadius`, `cookedNotifyDistance`; `debris.bobAmplitude`, `bobFrequency`; volume musik Calm saat Alert 0,5; volume kerumunan jumlah musuh dibagi 24 |
 
 ## Usulan yang menjadi nilai awal, per issue
 

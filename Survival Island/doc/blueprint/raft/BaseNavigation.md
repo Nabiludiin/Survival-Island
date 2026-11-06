@@ -348,7 +348,7 @@ public class BreachSlots
 4. **Definisi di dalam base:** minimal 3 dari 4 arah terhalang dinding atau pintu dalam 6 meter. Atap tidak wajib.
 5. **Jumlah penyerang:** 4 per dinding dan 3 per pintu. Sisanya menunggu.
 6. **Zombie di lantai atas:** tidak bisa naik. Bangunan bertingkat aman dari gigitan langsung, tetapi bisa runtuh kalau penopangnya hancur.
-7. **Cara menghitung pusat base:** belum ditentukan di dokumen mana pun. Keputusan ini menunggu developer.
+7. **Cara menghitung pusat base:** diputuskan developer (7 November 2026): rata-rata posisi semua struktur, dihitung ulang saat jumlah struktur berubah.
 
 ## 6. Skenario Tes
 
@@ -375,9 +375,10 @@ public class BreachSlots
 - Kode: `BaseNavigation.cs`, `BaseDoor.cs`, `BaseDoorLatch.cs`, dan `BaseAnchor.cs` di `Assets/LOGIC/raft/`. Config `baseNav` ada di `Core_Logic/GameBalance.GrupF.cs`. Event `DoorStateChangedEvent` dan `PlayerBaseStateChangedEvent` ada di `Core_Logic/GameEvents.GrupF.cs`.
 - Status jalur per zombie (`blockedTimer`, posisi serangan, dan `currentBreach`) disimpan di `BaseNavigation`, bukan di `EnemyAI`. Dengan begitu, `EnemyAI` cukup memanggil `NotifySpawned`, `PollChase`, `PollAttacking`, dan `Forget`. `PollChase` mengembalikan `BlockedCheck` (`Clear`, `Breach`, `Wait`, atau `NoStructure`).
 - Ujung jalur dibaca dari `agent.pathEndPosition`, bukan `agent.path.corners`, supaya tanpa alokasi.
-- **Cara menghitung pusat base belum diputuskan developer (bagian 5, usulan 7).** Untuk sementara, pusat base adalah rata-rata posisi semua struktur, yang dihitung ulang saat jumlah struktur berubah.
+- Pusat base adalah rata-rata posisi semua struktur, dihitung ulang saat jumlah struktur berubah (bagian 5, usulan 7, diputuskan developer 7 November 2026).
 - `StructureRegistry` tidak membuka daftar struktur. Karena itu, pusat base dan pengaturan `NavMeshObstacle` memakai `FindObjectsByType<StructureNode>`, hanya saat jumlah struktur berubah.
 - `BaseDoor` memakai `ISaveable` hanya sebagai bentuk `extraJson` yang dipanggil `StructureRegistry`. `BaseDoor` tidak mendaftar ke `WorldStateSave`.
 - Volume pemeriksaan busur dan lubang pintu diatur lewat field Inspector (`doorwayCenter`, `swingCenter`, dan ukurannya).
 - `RegionStreaming` (#88) dan `RegionLoadStateChangedEvent` belum dipakai. Region dianggap sudah dimuat.
 - `BaseAnchor` sudah terdaftar di `ThreatSystem` sebagai kandidat. Override 3 di `ThreatSystem` masih TODO di kode lama.
+- **Keputusan developer (7 November 2026):** `EnemyAI` sekarang memakai `NotifySpawned`, `PollChase`, `PollAttacking`, dan `Forget`. Selama `PollChase` memberi posisi tunggu (`Wait`) atau `NoStructure`, Chase tidak menimpanya dengan `MoveTo` ke pemain. `NoStructure` menjalankan `TraversalAgent.TickUnreachable`, dan `ThreatSystem.ReportUnreachable` baru dikirim setelah `threat.unreachableSeconds`. Tanpa `BaseNavigation` di scene, `EnemyAI` memakai pemeriksaan jalur cadangan Langkah 5.

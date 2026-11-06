@@ -80,7 +80,7 @@ Keduanya berkategori `Furniture`, `navMode = None` untuk Obor Dinding dan `Avoid
 | Tanpa bahan bakar, pemain punya bahan | Kurangi 1 item, isi `fuelSeconds`, lalu nyalakan |
 | Tanpa bahan bakar, pemain tidak punya | Prompt `Butuh Kayu` atau `Butuh Baterai` |
 
-Tahan `E` selama 0,6 detik menambah 1 bahan bakar kalau belum melewati kapasitas. Baterai yang masih terisi tidak dikembalikan.
+Menekan `E` pada Obor Dinding yang mati dan belum penuh menambah 1 kayu, lalu obor menyala (keputusan developer 7 November 2026, menggantikan tahan `E` 0,6 detik, karena `PlayerInteractor` hanya punya satu waktu tahan per target). Baterai yang masih terisi tidak dikembalikan.
 
 ### Waktu dan bahan bakar
 
@@ -236,6 +236,6 @@ Sumber di atas `maxRegisteredSources` tetap tampil lewat `emissive`, tetapi tida
 - `AISensoryHub.SetLightAttraction` belum ada. Titik dan peluang disimpan di `LightAttractionPoint` dan `LightAttractionChance`, dan panggilannya TODO.
 - Baterai: `LightSourceSystem.TryUseBattery(inv, out failKey)` memilih senter, memanggil `FlashlightController.Recharge`, lalu mengurangi `Item_Battery`. Dipanggil `ItemUseSystem` (kode lama, belum disambungkan).
 - `LightFixture` memakai `IInteractable` langsung, dan menyimpan data lewat `StructureRecord.extraJson` (pola `CampfireManager`).
-- Belum ditulis: tahan `E` 0,6 detik untuk menambah bahan bakar, karena `PlayerInteractor` hanya mengenal satu `HoldSeconds` per target. Sementara, `E` saat Obor Dinding mati dan belum penuh juga menambah 1 kayu sebelum menyala.
+- Tahan `E` 0,6 detik tidak dipakai (keputusan developer): `E` saat Obor Dinding mati dan belum penuh menambah 1 kayu sebelum menyala.
 - `StructureDestroyedEvent` diurus `LightFixture` (bahan bakar hilang). `LightSource` keluar dari daftar lewat `OnDisable`.
 - Belum diuji di Unity.
