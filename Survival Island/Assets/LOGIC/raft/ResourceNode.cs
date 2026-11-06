@@ -13,8 +13,8 @@ namespace SurvivalIsland
     /// Catatan implementasi (Langkah 4):
     /// - RegionStreaming dan RegionStateStore (#88) belum ada, jadi region node diisi lewat field region di Inspector,
     ///   dan node mendaftar langsung ke WorldStateSave (LoadOrder 0). TODO #88: pindah ke RegionStateStore.
-    /// - Belum ada (TODO): VFXManager.Play (#15), AudioManager (#16, sementara AudioSource opsional di node),
-    ///   NotificationManager "Butuh alat lain" (#22), NoiseEmitter.Emit(harvestNoiseRadius, NoiseSourceKind.Tool) (#49, Langkah 5),
+    /// - VFXManager.Play (#15), NotificationManager "Butuh alat lain" (#22), dan NoiseEmitter (#49) sudah disambung.
+    ///   Belum ada (TODO): suara 3D lewat AudioManager (#16, sementara AudioSource opsional di node),
     ///   Flammable (#97).
     /// </summary>
     [DisallowMultipleComponent]
@@ -105,13 +105,19 @@ namespace SurvivalIsland
             if (damage <= 0)
             {
                 PlaySound(rejectSound);
-                // TODO #22: NotificationManager "Butuh alat lain" ("Butuh Pisau" untuk Node_SapTree).
+                // Notifikasi "Butuh alat lain" (#22).
+                if (byPlayer && NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.need_tool", NotificationKind.Warning);
                 return HitResult.Rejected;
             }
 
             // 3. Kurangi pukulan, lalu efek, suara, dan goyangan.
             currentHits -= damage;
-            // TODO #15: VFXManager.Instance.Play(data.HitVfxTag, hitPoint, Quaternion.LookRotation(hitPoint - transform.position)).
+            // Efek pukulan lewat VFXManager (#15).
+            if (VFXManager.Instance != null && !string.IsNullOrEmpty(data.HitVfxTag))
+            {
+                Vector3 away = hitPoint - transform.position;
+                VFXManager.Instance.Play(data.HitVfxTag, hitPoint, away.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(away) : Quaternion.identity);
+            }
             PlaySound(hitSound);
             shakeTimer = shakeSeconds;
 
@@ -120,7 +126,8 @@ namespace SurvivalIsland
             EventChannel<ResourceNodeHitEvent>.Publish(new ResourceNodeHitEvent(data.nodeType, willDeplete, byPlayer));
             if (byPlayer)
             {
-                // TODO #49 (Langkah 5): NoiseEmitter.Emit(Balance.resource.harvestNoiseRadius, NoiseSourceKind.Tool).
+                // Suara panen memancing hewan penjaga (#49, #61).
+                NoiseEmitter.Emit(hitPoint, Balance != null ? Balance.resource.harvestNoiseRadius : 10f, NoiseSourceKind.Tool);
             }
 
             // 5. Habis.

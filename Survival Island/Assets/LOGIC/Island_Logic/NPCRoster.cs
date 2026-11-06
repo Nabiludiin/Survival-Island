@@ -32,7 +32,7 @@ namespace SurvivalIsland
     /// Catatan implementasi (sistem pendukung, juga di blueprint):
     /// - GetSkillMultiplier(Crafter) adalah pengali crafting (butuh Work). Pengali perbaikan tukang (1,25 di base) memakai
     ///   GetBuilderRepairMultiplier(), karena satu fungsi tidak bisa mengembalikan dua angka berbeda untuk skill yang sama.
-    /// - RegionStreaming (#88) belum ada: NPC base tidak dimatikan saat region dilepas (TODO di HandleRegionUnloading).
+    /// - RegionLoadStateChangedEvent (#88): NPC base dimatikan saat region dilepas dan dinyalakan saat dimuat lagi.
     /// </summary>
     public class NPCRoster : MonoBehaviour, ISaveable
     {
@@ -72,7 +72,7 @@ namespace SurvivalIsland
             EventChannel<DaybreakEvent>.Raised += HandleDaybreak;
             EventChannel<PlayerBaseStateChangedEvent>.Raised += HandlePlayerBaseState;
             EventChannel<StructureDestroyedEvent>.Raised += HandleStructureDestroyed;
-            // TODO(RegionStreaming): EventChannel<RegionLoadStateChangedEvent>.Raised += HandleRegionUnloading (#88).
+            EventChannel<RegionLoadStateChangedEvent>.Raised += HandleRegionLoadState;   // #88
             if (EventChannel<PlayerBaseStateChangedEvent>.HasLast) IsPlayerInsideBase = EventChannel<PlayerBaseStateChangedEvent>.Last.isInside;
             if (WorldStateSave.Instance != null)
             {
@@ -87,6 +87,7 @@ namespace SurvivalIsland
             EventChannel<DaybreakEvent>.Raised -= HandleDaybreak;
             EventChannel<PlayerBaseStateChangedEvent>.Raised -= HandlePlayerBaseState;
             EventChannel<StructureDestroyedEvent>.Raised -= HandleStructureDestroyed;
+            EventChannel<RegionLoadStateChangedEvent>.Raised -= HandleRegionLoadState;
             if (registeredForSave && WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
             registeredForSave = false;
         }
@@ -276,10 +277,46 @@ namespace SurvivalIsland
             for (int i = 0; i < members.Count; i++) if (members[i].companion != null) members[i].companion.HandleStructureDestroyed();
         }
 
-        // TODO(RegionStreaming): HandleRegionUnloading (#88, RegionStreaming.md):
-        //   - Follow: Warp ke titik NavMesh valid di belakang pemain.
-        //   - StayAtBase/Work/TakeCover di region yang dilepas: companion.WriteRecord(), lalu gameObject.SetActive(false).
-        //     Saat region kembali: SetActive(true); OnEnable memanggil Warp ke record.position.
+        /// <summary>
+        /// RegionStreaming.md "Musuh dan NPC saat region dilepas" (#88):
+        /// - Follow yang tertinggal di region yang dilepas: Warp ke belakang pemain (followDistance).
+        /// - StayAtBase/Work/TakeCover di region itu: WriteRecord lalu dimatikan. Saat region Loaded lagi: dinyalakan,
+        ///   dan OnEnable memanggil Warp ke record.position.
+        /// </summary>
+        private void HandleRegionLoadState(RegionLoadStateChangedEvent e)
+        {
+            if (e.state == RegionLoadState.Unloading)
+            {
+                var player = IslandPlayerController.Instance;
+                float back = Balance != null ? Balance.npc.followDistance : 5f;
+                for (int i = 0; i < members.Count; i++)
+                {
+                    var r = members[i];
+                    var c = r.companion;
+                    if (!r.isAlive || c == null || !c.gameObject.activeSelf) continue;
+                    if (RegionStreaming.RegionOf(c.transform.position) != e.region) continue;
+                    if (NPCCompanion.IsBaseState(c.State))
+                    {
+                        c.WriteRecord();
+                        c.gameObject.SetActive(false);
+                    }
+                    else if (player != null)
+                    {
+                        c.WarpTo(player.transform.position - player.transform.forward * back);
+                    }
+                }
+            }
+            else if (e.state == RegionLoadState.Loaded)
+            {
+                for (int i = 0; i < members.Count; i++)
+                {
+                    var r = members[i];
+                    var c = r.companion;
+                    if (!r.isAlive || c == null || c.gameObject.activeSelf) continue;
+                    if (RegionStreaming.RegionOf(r.position) == e.region) c.gameObject.SetActive(true);
+                }
+            }
+        }
 
         // ---------------------------------------------------------------- Save (#80)
 

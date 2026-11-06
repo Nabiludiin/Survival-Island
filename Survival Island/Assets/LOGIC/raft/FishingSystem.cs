@@ -279,8 +279,8 @@ namespace SurvivalIsland
             bool target = ok && interceptor != null && interceptor.IsTargetAt(point);
             if (landingLabel != null)
             {
-                // TODO(LocalizationManager #104): kunci teks.
-                landingLabel.text = target ? "Tarik" : ok ? "Pancing" : "Tidak ada air";
+                // Teks dari LocalizationManager (#104).
+                landingLabel.text = target ? Text("fishing.marker.reel", "Tarik") : ok ? Text("fishing.marker.cast", "Pancing") : Text("fishing.marker.no_water", "Tidak ada air");
                 landingLabel.color = target ? targetColor : ok ? validColor : invalidColor;
             }
         }
@@ -374,8 +374,8 @@ namespace SurvivalIsland
             }
             else delay = Random.Range(min, max);
             delay *= lureWater != null ? lureWater.biteDelayMultiplier : 1f;
-            // TODO(RegionStreaming #88): lureRegion = RegionStreaming.GetRegionAt(lureLanding).
-            RegionType lureRegion = ZoneTracker.Active;
+            // Region titik kail dari RegionStreaming (#88), cadangan ZoneTracker.Active.
+            RegionType lureRegion = RegionStreaming.RegionOf(lureLanding);
             if (RegionalWeather.Instance != null && RegionalWeather.Instance.GetWeather(lureRegion) == WeatherType.Rain)
                 delay *= b != null ? b.rainBiteMultiplier : 0.85f;
             biteTimer = delay;
@@ -550,6 +550,13 @@ namespace SurvivalIsland
         private static void Notify(string key)
         {
             if (NotificationManager.Instance != null) NotificationManager.Instance.Show(key, NotificationKind.Info);
+        }
+
+        /// <summary>Teks dari LocalizationManager (#104); teks bawaan kalau kunci belum ada di tabel.</summary>
+        private static string Text(string key, string fallback)
+        {
+            var loc = LocalizationManager.Instance;
+            return loc != null && loc.Has(key) ? loc.Get(key) : fallback;
         }
     }
 }

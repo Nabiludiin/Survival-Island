@@ -124,7 +124,7 @@ namespace SurvivalIsland
 
         public bool IsAvailable => isActiveAndEnabled && item != null;
         public float HoldSeconds => 0f;
-        public string GetPrompt() => "Ambil";   // TODO(LocalizationManager #104): kunci teks
+        public string GetPrompt() { var loc = LocalizationManager.Instance; return loc != null && loc.Has("prompt.pickup") ? loc.Get("prompt.pickup") : "Ambil"; }   // #104
 
         public InteractBlockReason CanInteract(in InteractContext ctx)
         {

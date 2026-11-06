@@ -249,22 +249,29 @@ namespace SurvivalIsland
         private void ShowReject(CampfireReject r)
         {
             if (r == CampfireReject.None || r == CampfireReject.Empty || rejectText == null) return;
-            // TODO(LocalizationManager #104): kunci teks.
+            // Teks dari LocalizationManager (#104).
             string text;
             switch (r)
             {
-                case CampfireReject.CannotCook: text = "Tidak bisa dimasak"; break;
-                case CampfireReject.Rotten: text = "Sudah busuk"; break;
-                case CampfireReject.NoEmptyRow: text = "Baris masak penuh"; break;
-                case CampfireReject.FuelFull: text = "Bahan bakar penuh"; break;
-                case CampfireReject.NotFuel: text = "Tidak ada bahan bakar"; break;
-                case CampfireReject.NoSpace: text = "Inventori penuh"; break;
-                case CampfireReject.TooWindy: text = "Terlalu berangin"; break;
+                case CampfireReject.CannotCook: text = Text("campfire.reject.CannotCook", "Tidak bisa dimasak"); break;
+                case CampfireReject.Rotten: text = Text("campfire.reject.Rotten", "Sudah busuk"); break;
+                case CampfireReject.NoEmptyRow: text = Text("campfire.reject.NoEmptyRow", "Baris masak penuh"); break;
+                case CampfireReject.FuelFull: text = Text("campfire.reject.FuelFull", "Bahan bakar penuh"); break;
+                case CampfireReject.NotFuel: text = Text("campfire.reject.NotFuel", "Tidak ada bahan bakar"); break;
+                case CampfireReject.NoSpace: text = Text("campfire.reject.NoSpace", "Inventori penuh"); break;
+                case CampfireReject.TooWindy: text = Text("campfire.reject.TooWindy", "Terlalu berangin"); break;
                 default: text = string.Empty; break;
             }
             rejectText.text = text;
             rejectText.gameObject.SetActive(true);
             rejectHideAt = Time.unscaledTime + rejectShowSeconds;
+        }
+
+        /// <summary>Teks dari LocalizationManager (#104); teks bawaan kalau kunci belum ada di tabel.</summary>
+        private static string Text(string key, string fallback)
+        {
+            var loc = LocalizationManager.Instance;
+            return loc != null && loc.Has(key) ? loc.Get(key) : fallback;
         }
     }
 }

@@ -146,7 +146,7 @@ namespace SurvivalIsland
 
         public bool IsAvailable => isActiveAndEnabled && !spilled;
         public float HoldSeconds => 0f;
-        public string GetPrompt() => "Buka peti";   // TODO(LocalizationManager #104): kunci teks
+        public string GetPrompt() { var loc = LocalizationManager.Instance; return loc != null && loc.Has("prompt.storage_open") ? loc.Get("prompt.storage_open") : "Buka peti"; }   // #104
 
         public InteractBlockReason CanInteract(in InteractContext ctx)
         {

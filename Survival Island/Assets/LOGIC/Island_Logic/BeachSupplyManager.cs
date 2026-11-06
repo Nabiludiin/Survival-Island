@@ -29,7 +29,7 @@ namespace SurvivalIsland
     /// Kaleng, Peluru, Resource langka). Jumlah, isi per hari, batas waktu, dan risiko adalah usulan disetujui developer (#85).
     ///
     /// Catatan implementasi (sistem pendukung):
-    /// - CompassSystem (#30) belum ada: penanda kompas ditandai TODO(CompassSystem).
+    /// - Penanda kompas memakai ID tetap "supply" lewat CompassSystem.SetMarker (#30), jadi tidak perlu disimpan di sini.
     /// - Isi kargo dihitung ulang dari seed dan hari (BuildDelivery murni), jadi save cukup menyimpan kargo yang dibuka.
     /// </summary>
     public class BeachSupplyManager : MonoBehaviour, ISaveable
@@ -237,7 +237,8 @@ namespace SurvivalIsland
             // 3-4.
             EventChannel<BeachSupplyArrivedEvent>.Publish(new BeachSupplyArrivedEvent(day, count));
             if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.beach_supply_arrived", NotificationKind.Objective);   // "Kargo kapal terdampar di pantai selatan"
-            // 5. TODO(CompassSystem #30): compassMarkerId = CompassSystem.Instance.AddMarker(titik tengah kargo, MarkerIcon.Supply).
+            // 5. Penanda kompas di titik tengah kargo (#30).
+            UpdateCompassMarker();
         }
 
         private void SpawnCrates()
@@ -344,7 +345,8 @@ namespace SurvivalIsland
             // 5.
             if (AllOpened())
             {
-                // TODO(CompassSystem #30): CompassSystem.Instance.RemoveMarker(compassMarkerId).
+                // Semua kargo terbuka: penanda kompas dihapus (#30).
+                if (CompassSystem.Instance != null) CompassSystem.Instance.RemoveMarker(CompassMarkerId);
             }
             return true;
         }
@@ -367,7 +369,8 @@ namespace SurvivalIsland
             bool inRegion1 = IslandPlayerController.Instance != null && RegionStreaming.RegionOf(IslandPlayerController.Instance.transform.position) == RegionType.Volcano;
             if (anyClosed && inRegion1 && NotificationManager.Instance != null)
                 NotificationManager.Instance.Show("notif.beach_supply_expired", NotificationKind.Info);   // "Kargo terseret air pasang"
-            // 4. TODO(CompassSystem #30): hapus penanda kompas.
+            // 4. Hapus penanda kompas (#30).
+            if (CompassSystem.Instance != null) CompassSystem.Instance.RemoveMarker(CompassMarkerId);
             state = new BeachDeliveryState();
             contentDay = -1;
         }
@@ -405,6 +408,17 @@ namespace SurvivalIsland
                     else spawn.RequestBurst(beachNightTable, zombies, center, b.ambushSpawnRadius);
                 }
             }
+        }
+
+        private const string CompassMarkerId = "supply";
+
+        /// <summary>Penanda kompas kargo (#30): ada selama masih ada kargo tertutup.</summary>
+        private void UpdateCompassMarker()
+        {
+            var cs = CompassSystem.Instance;
+            if (cs == null) return;
+            if (!HasDelivery || AllOpened()) cs.RemoveMarker(CompassMarkerId);
+            else cs.SetMarker(CompassMarkerId, CrateCenter(), MarkerIcon.Supply);
         }
 
         private Vector3 CrateCenter()
@@ -445,7 +459,8 @@ namespace SurvivalIsland
         {
             if (!HasDelivery) return;
             if (RegionStreaming.IsRegionLoaded(RegionType.Volcano)) SpawnCrates();
-            // TODO(CompassSystem #30): pasang lagi penanda kompas kalau masih ada kargo tertutup.
+            // Pasang lagi penanda kompas kalau masih ada kargo tertutup (#30).
+            UpdateCompassMarker();
         }
     }
 }

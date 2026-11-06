@@ -11,7 +11,7 @@ namespace SurvivalIsland
     /// Isi, laju, dan pengaruh cuaca/pasang adalah usulan yang disetujui developer sebagai nilai awal.
     ///
     /// Catatan implementasi (sistem pendukung):
-    /// - TideManager (#91) belum ada: tideIsHigh tetap false (TODO di HandleTide).
+    /// - tideIsHigh dari TideChangedEvent (#91).
     /// - Isi barang memakai RegionLootTable.TryRoll dengan LootPointKind.Any, sesuai RegionLootTable.md.
     /// </summary>
     [DisallowMultipleComponent]
@@ -51,7 +51,9 @@ namespace SurvivalIsland
         private void OnEnable()
         {
             if (WorldStateSave.Instance != null) WorldStateSave.Instance.Register(this);
-            // TODO(TideManager #91): EventChannel<TideChangedEvent>.Raised += HandleTide; lalu baca Last (sticky).
+            // Pasang dari TideManager (#91). Event sticky: nilai terakhir dibaca saat aktif.
+            EventChannel<TideChangedEvent>.Raised += HandleTide;
+            if (EventChannel<TideChangedEvent>.HasLast) tideIsHigh = EventChannel<TideChangedEvent>.Last.isHigh;
             // Sakelar uji: tidak mendaftar ke FishingSystem dan tidak memunculkan barang.
             if (!Enabled) return;
             FishingSystem.RegisterInterceptor(this);
@@ -61,6 +63,7 @@ namespace SurvivalIsland
         private void OnDisable()
         {
             if (WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
+            EventChannel<TideChangedEvent>.Raised -= HandleTide;
             if (interceptorRegistered) FishingSystem.UnregisterInterceptor(this);
             interceptorRegistered = false;
             StopWaitingForSpace();
@@ -185,8 +188,8 @@ namespace SurvivalIsland
             return rw.GetWeather(region);
         }
 
-        // TODO(TideManager #91): pasang dari TideChangedEvent.isHigh.
-        // private void HandleTide(TideChangedEvent e) => tideIsHigh = e.isHigh;
+        // Pasang dari TideChangedEvent.isHigh (#91).
+        private void HandleTide(TideChangedEvent e) => tideIsHigh = e.isHigh;
 
         // ---------------------------------------------------------------- IKailCastInterceptor
 

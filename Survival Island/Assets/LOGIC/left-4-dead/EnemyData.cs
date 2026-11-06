@@ -33,7 +33,8 @@ namespace SurvivalIsland
         public bool canBeKnockedBack = true;
         public float knockbackMultiplier = 1f;
         public bool leavesCarcass;
-        // TODO #103: field LootTable dropTable setelah RegionLootTable ditulis. Sampai itu, drop tidak dijatuhkan.
+        [Tooltip("Tabel drop saat mati (#103). Kosong = tanpa drop.")]
+        public LootTable dropTable;
         [Range(0f, 1f)] public float dropChance;
 
         /// <summary>Profil ancaman, atau null kalau belum diisi (ThreatSystem memakai nilai bawaan).</summary>

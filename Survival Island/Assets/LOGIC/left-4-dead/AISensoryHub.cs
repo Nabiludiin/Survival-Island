@@ -6,8 +6,8 @@ namespace SurvivalIsland
     /// <summary>
     /// Pembagi tick AISensory, nilai UI Detection Meter, dan titik perburuan malam. Blueprint: left-4-dead/AISensory.md (#49).
     /// Singleton per scene IslandPhase.
-    /// Belum diimplementasikan (TODO): IgnoreStealth dari BloodMoonStartedEvent (#50), tarikan cahaya SetLightAttraction (#98)
-    /// memakai aliran Gameplay, DetectionMeterUI (HUD).
+    /// IgnoreStealth saat Blood Moon diisi HordeManager (#50). Tarikan cahaya SetLightAttraction (#98) diisi LightSourceSystem.
+    /// Belum diimplementasikan (TODO): DetectionMeterUI (HUD).
     /// </summary>
     public class AISensoryHub : MonoBehaviour
     {
@@ -16,6 +16,8 @@ namespace SurvivalIsland
         private readonly List<AISensory> sensors = new List<AISensory>(64);
         private int cursor;
         private float externalVisibility = 1f;
+        private Vector3 lightAttractionPoint;
+        private float lightAttractionChance;
         private float huntTimer;
         private float uiTimer;
         private float lastSentLevel = -1f;
@@ -89,6 +91,13 @@ namespace SurvivalIsland
         public void SetVisibilityModifier(float value) => externalVisibility = Mathf.Max(0f, value);
         public void SetWeatherModifiers(float sight, float hearing) { WeatherSight = Mathf.Max(0f, sight); WeatherHearing = Mathf.Max(0f, hearing); }
 
+        /// <summary>Titik tarikan cahaya base dan peluangnya untuk HuntHint (#98). Peluang 0 mematikan tarikan.</summary>
+        public void SetLightAttraction(Vector3 point, float chance)
+        {
+            lightAttractionPoint = point;
+            lightAttractionChance = Mathf.Clamp01(chance);
+        }
+
         private void Update()
         {
             if (Time.deltaTime <= 0f) return;
@@ -105,6 +114,13 @@ namespace SurvivalIsland
                 // Geseran perburuan tidak memengaruhi isi dunia yang disimpan, jadi memakai UnityEngine.Random.
                 Vector2 off = Random.insideUnitCircle * s.huntHintRadius;
                 HuntHint = PlayerTargetable.Instance.Position + new Vector3(off.x, 0f, off.y);
+                // AISensory.md (#98): tarikan cahaya aktif, lempar peluang dengan aliran Gameplay; kena = titik tarikan.
+                if (lightAttractionChance > 0f)
+                {
+                    var seeds = RunSeedManager.Instance;
+                    float roll = seeds != null ? seeds.GetStream(RandomStreamId.Gameplay).NextFloat01() : Random.value;
+                    if (roll < lightAttractionChance) HuntHint = lightAttractionPoint;
+                }
             }
 
             int count = sensors.Count;

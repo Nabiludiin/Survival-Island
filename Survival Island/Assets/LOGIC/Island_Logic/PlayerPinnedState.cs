@@ -19,8 +19,8 @@ namespace SurvivalIsland
     /// Pemain tertahan musuh dan cara lepas sendiri. Blueprint: Island_Logic/PlayerPinnedState.md (#110).
     /// GDD bagian 3 (Diterkam): Jaguar dan Zombie Tribal bisa menahan pemain, dan pemain harus melepaskan diri sendiri,
     /// misalnya dengan Pisau. Tanpa bantuan NPC (keputusan developer). Claude.md Pilar 3: PlayerPinnedState.
-    /// Belum diimplementasikan (TODO): mode tahan tombol (#19, butuh StruggleHeld di InputManager), keausan Pisau lewat
-    /// DurabilitySystem (#113), CameraShake Pinned (#24), animasi tusuk.
+    /// Keausan Pisau lewat DurabilitySystem (#113) sudah dipakai. Belum diimplementasikan (TODO): mode tahan tombol
+    /// (#19, butuh StruggleHeld di InputManager), CameraShake Pinned (#24), animasi tusuk.
     /// </summary>
     public class PlayerPinnedState : MonoBehaviour
     {
@@ -72,7 +72,9 @@ namespace SurvivalIsland
             if (b == null || !b.enabled || attacker == null || IsPinned || Time.time < repinImmuneUntil) return false;
             if (stats != null && !stats.IsAlive) return false;
             if (traversal != null && traversal.Mode == TraversalMode.Swimming) return false;
-            // TODO #99: tolak saat panel Cinematic aktif.
+            // Tolak saat panel Cinematic aktif (#99).
+            var ui = UIManager.Instance;
+            if (ui != null && ui.cinematicPanel != null && UIFocusStack.Instance != null && UIFocusStack.Instance.Contains(ui.cinematicPanel)) return false;
             // 2.
             Attacker = attacker;
             IsPinned = true;
@@ -134,7 +136,9 @@ namespace SurvivalIsland
             if (knifeCooldownTimer > 0f) return;
             var inv = InventoryManager.Instance;
             if (inv == null || !inv.HasItem(KnifeItemId, 1)) return;
-            // TODO #113: tolak kalau DurabilitySystem.GetState(pisau) == Broken.
+            // Pisau Broken tidak bisa dipakai menusuk (#113).
+            var knife = inv.FindFirstInstance(KnifeItemId);
+            if (DurabilitySystem.GetState(knife) == DurabilityState.Broken) return;
             var target = Attacker.DamageTarget;
             if (target != null)
             {
@@ -150,7 +154,8 @@ namespace SurvivalIsland
                 target.TakeDamage(info);
             }
             knifeCooldownTimer = b.knifeCooldownSeconds;
-            // TODO #113: DurabilitySystem.ApplyWear(pisau, knifeDurabilityCost).
+            // Keausan pisau per tusukan (#113).
+            DurabilitySystem.ApplyWear(knife, b.knifeDurabilityCost);
             if (!IsPinned) return;   // Penyerang sudah melepas lewat ReleaseByAttacker
             EscapeProgress += b.knifeProgress * mult;
             if (EscapeProgress >= 1f) Release(PinReleaseReason.EscapedWithKnife);

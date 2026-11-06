@@ -52,7 +52,7 @@ namespace SurvivalIsland
             }
         }
 
-        public string GetPrompt() => "Buka Kargo";   // TODO(LocalizationManager #104): kunci teks
+        public string GetPrompt() { var loc = LocalizationManager.Instance; return loc != null && loc.Has("prompt.beach_crate") ? loc.Get("prompt.beach_crate") : "Buka Kargo"; }   // #104
         public InteractBlockReason CanInteract(in InteractContext ctx) => ctx.IsCarryingHeavyItem ? InteractBlockReason.CarryingHeavyItem : InteractBlockReason.None;
         public void OnHoverEnter() { if (highlight != null) highlight.SetState(HighlightState.Available); }
         public void OnHoverExit() { if (highlight != null) highlight.SetState(HighlightState.Off); }

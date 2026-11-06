@@ -57,7 +57,7 @@ namespace SurvivalIsland
     /// Blueprint: Island_Logic/RegionalWeather.md (#115). GDD bagian 5 (Region 3 bersalju) dan bagian 6 (Badai Tropis).
     /// Cuaca adalah fungsi murni dari seed, region, dan slot jam game, jadi tidak disimpan.
     ///
-    /// Belum ada (TODO): InteriorZoneChangedEvent (#112) untuk isPlayerInside, sehingga efek pada pemain selalu dari luar ruangan.
+    /// isPlayerInside dari InteriorZoneChangedEvent (#112): di dalam ruangan efek cuaca pada pemain netral.
     /// </summary>
     public class RegionalWeather : MonoBehaviour
     {
@@ -110,7 +110,8 @@ namespace SurvivalIsland
         {
             EventChannel<HourChangedEvent>.Raised += HandleHour;
             EventChannel<RegionChangedEvent>.Raised += HandleRegionChanged;
-            // TODO #112: EventChannel<InteriorZoneChangedEvent>.Raised += HandleInterior (isPlayerInside).
+            EventChannel<InteriorZoneChangedEvent>.Raised += HandleInterior;   // #112, sticky
+            if (EventChannel<InteriorZoneChangedEvent>.HasLast) isPlayerInside = EventChannel<InteriorZoneChangedEvent>.Last.isInside;
             if (EventChannel<RegionChangedEvent>.HasLast) activeRegion = EventChannel<RegionChangedEvent>.Last.to;
             Recompute(force: true);
         }
@@ -119,6 +120,7 @@ namespace SurvivalIsland
         {
             EventChannel<HourChangedEvent>.Raised -= HandleHour;
             EventChannel<RegionChangedEvent>.Raised -= HandleRegionChanged;
+            EventChannel<InteriorZoneChangedEvent>.Raised -= HandleInterior;
         }
 
         private void OnDestroy()
@@ -249,6 +251,13 @@ namespace SurvivalIsland
             }
             var a = GetWeather(activeRegion);
             if (all || a != before[(int)activeRegion]) EventChannel<WeatherChangedEvent>.Publish(new WeatherChangedEvent(activeRegion, a));
+        }
+
+        private void HandleInterior(InteriorZoneChangedEvent e)
+        {
+            if (isPlayerInside == e.isInside) return;
+            isPlayerInside = e.isInside;
+            ApplyActive();
         }
 
         private void HandleRegionChanged(RegionChangedEvent e)

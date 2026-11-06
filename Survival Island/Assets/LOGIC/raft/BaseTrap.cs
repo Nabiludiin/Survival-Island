@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SurvivalIsland
@@ -17,7 +18,7 @@ namespace SurvivalIsland
     /// developer (#85). Jebakan adalah struktur biasa (BuildMenu, category Defense); komponen ini hanya mengatur efek saat
     /// diinjak. Trigger ada di anak TriggerZone (BaseTrapZone meneruskan pesannya). Tanpa target, Update dimatikan.
     ///
-    /// Catatan implementasi (sistem pendukung): Flammable.TryIgnite (#97) belum ada (TODO).
+    /// Catatan implementasi (sistem pendukung): jebakan api unggun memanggil Flammable.TryIgnite pada musuh (#97).
     /// </summary>
     [RequireComponent(typeof(BaseHealth))]
     public class BaseTrap : MonoBehaviour
@@ -35,8 +36,28 @@ namespace SurvivalIsland
 
         private static TrapBalance Bal => GameManager.CurrentBalance != null ? GameManager.CurrentBalance.trap : null;
 
+        /// <summary>Semua jebakan di scene, untuk batas maxTrapsPerRegion di BuildManager (BaseDefense.md).</summary>
+        private static readonly List<BaseTrap> all = new List<BaseTrap>(32);
+
+        public TrapKind Kind => data != null ? data.kind : TrapKind.Spike;
+
+        /// <summary>Jumlah jebakan (selain api unggun) di region ini. Api unggun tidak dihitung (BaseDefense.md).</summary>
+        public static int CountInRegion(RegionType region)
+        {
+            int n = 0;
+            for (int i = 0; i < all.Count; i++)
+            {
+                var t = all[i];
+                if (t != null && t.Kind != TrapKind.Campfire && RegionStreaming.RegionOf(t.transform.position) == region) n++;
+            }
+            return n;
+        }
+
+        private void OnDestroy() => all.Remove(this);
+
         private void Awake()
         {
+            all.Add(this);
             selfHealth = GetComponent<BaseHealth>();
             if (campfire == null) campfire = GetComponent<CampfireManager>();
             if (noiseEmitter == null) noiseEmitter = GetComponentInChildren<NoiseEmitter>();
@@ -158,7 +179,13 @@ namespace SurvivalIsland
                 if (noiseEmitter != null) noiseEmitter.Emit(stats.noiseRadius, NoiseSourceKind.Structure);
                 else NoiseEmitter.Emit(transform.position, stats.noiseRadius, NoiseSourceKind.Structure);
             }
-            // 7. TODO(FireSystem): Flammable.TryIgnite(fire.campfireTrapIgniteChancePerTick, byPlayer) pada musuh di zona (#97).
+            // 7. Jebakan api unggun bisa menyalakan musuh di zona (#97).
+            var fireBal = GameManager.CurrentBalance != null ? GameManager.CurrentBalance.fire : null;
+            if (data.kind == TrapKind.Campfire && fireBal != null)
+            {
+                var flammable = v.collider.GetComponentInParent<Flammable>();
+                if (flammable != null) flammable.TryIgnite(fireBal.campfireTrapIgniteChancePerTick, true);
+            }
             // 6. Keausan lewat HP struktur (usulan 6). Dipanggil terakhir karena bisa menghancurkan jebakan.
             if (stats.selfDamagePerHit > 0f && selfHealth != null)
             {

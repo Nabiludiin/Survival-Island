@@ -19,7 +19,7 @@ namespace SurvivalIsland
         protected override void Show()
         {
             base.Show();
-            if (hintText != null) hintText.text = "Esc: bangun";   // TODO(LocalizationManager #104): kunci teks
+            if (hintText != null) hintText.text = Text("ui.sleep.hint", "Esc: bangun");   // Kunci teks #104
             Refresh();
         }
 
@@ -38,6 +38,13 @@ namespace SurvivalIsland
         {
             base.OnClosed(reason);
             if (SleepSystem.Instance != null) SleepSystem.Instance.HandlePanelClosed(reason);
+        }
+
+        /// <summary>Teks dari LocalizationManager (#104); teks bawaan kalau kunci belum ada di tabel.</summary>
+        private static string Text(string key, string fallback)
+        {
+            var loc = LocalizationManager.Instance;
+            return loc != null && loc.Has(key) ? loc.Get(key) : fallback;
         }
     }
 }

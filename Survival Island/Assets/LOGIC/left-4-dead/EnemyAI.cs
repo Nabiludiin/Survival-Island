@@ -17,9 +17,10 @@ namespace SurvivalIsland
     /// ke pool saat mati (EnemyHitReaction lewat SpawnManager.Despawn).
     ///
     /// Catatan Langkah 5 (penyimpangan sementara, dicatat di EnemyAI.md "Catatan Implementasi"):
-    /// - BaseNavigation (#78) belum ada. Pemeriksaan terhalang memakai NavMeshAgent.pathStatus milik agen sendiri, dan sasaran
-    ///   bangunan dicari dengan OverlapSphere di layer Structure bertag BaseWall/BaseDoor (Claude.md Pilar 3).
-    /// - AITraversal (#94) dan ZombieLair (#112) belum ada: respons Surround/Retreat/RockThrow dan lair dilewati (TODO).
+    /// - Pemeriksaan terhalang masih memakai NavMeshAgent.pathStatus milik agen sendiri, dan sasaran bangunan dicari dengan
+    ///   OverlapSphere di layer Structure bertag BaseWall/BaseDoor (Claude.md Pilar 3). TODO #78/#94: ganti dengan
+    ///   BaseNavigation.PollChase/PollAttacking dan TraversalAgent.TickUnreachable (respons Surround/Retreat/RockThrow).
+    /// - TraversalAgent.Tick (#94) dipanggil dari CrowdTick. Sarang zombie (#112) dicatat di LairRegistry, bukan di EnemyAI.
     /// - Tanpa HordeCrowdManager di scene, EnemyAI men-tick dirinya sendiri tiap 0,2 detik (cadangan, misalnya ShipPhase).
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent), typeof(EnemyHealth))]
@@ -47,6 +48,7 @@ namespace SurvivalIsland
         private EnemyAttack attack;
         private AISensory sensory;
         private SpecialZombieAI special;
+        private TraversalAgent traversal;
         private EnemyInstance instance;
         private Animator animator;
         private readonly ThreatState threat = new ThreatState();
@@ -89,6 +91,7 @@ namespace SurvivalIsland
             attack = GetComponent<EnemyAttack>();
             sensory = GetComponent<AISensory>();
             special = GetComponent<SpecialZombieAI>();
+            traversal = GetComponent<TraversalAgent>();
             instance = GetComponent<EnemyInstance>();
             animator = GetComponentInChildren<Animator>();
             defaultAreaMask = agent.areaMask;
@@ -133,7 +136,8 @@ namespace SurvivalIsland
 
             TickSpeedModifiers();
             if (spawnGraceTimer > 0f) spawnGraceTimer -= dt;
-            // 2. TODO #94: TraversalAgent.Tick(dt).
+            // 2. Lintasan NavMeshLink (#94).
+            if (traversal != null) traversal.Tick(dt);
             // 3. Kemampuan varian (#25).
             if (special != null && special.TickSpecial(dt)) { UpdateEngaged(); return; }
             if (CurrentState == AIState.Dormant) return;
@@ -410,8 +414,14 @@ namespace SurvivalIsland
 
         private void HandleDamaged(DamageInfo info)
         {
-            if (!info.byPlayer) return;
-            // EnemyAI.md: damage dari pemain memanggil ThreatSystem.ReportAttacker. TODO #76: penyerang NPC.
+            if (!info.byPlayer)
+            {
+                // Penyerang NPC (#76): tembakan NPCGunUser membawa source = objek NPC.
+                var npc = info.source != null ? info.source.GetComponentInParent<NPCCompanion>() : null;
+                if (npc != null && ThreatSystem.Instance != null) ThreatSystem.Instance.ReportAttacker(this, npc);
+                return;
+            }
+            // EnemyAI.md: damage dari pemain memanggil ThreatSystem.ReportAttacker.
             if (sensory != null) sensory.ForceAware(info.hitPoint - info.hitDirection * 2f);
             if (ThreatSystem.Instance != null && PlayerTargetable.Instance != null)
                 ThreatSystem.Instance.ReportAttacker(this, PlayerTargetable.Instance);
@@ -553,7 +563,8 @@ namespace SurvivalIsland
             if (ThreatSystem.Instance != null) ThreatSystem.Instance.Unregister(this);
             if (HordeCrowdManager.Instance != null) HordeCrowdManager.Instance.Unregister(this);
             registeredCrowd = false;
-            // TODO #78: BaseNavigation.ReleaseSlot.
+            // Lepas posisi serangan dan status jalur di BaseNavigation (#78).
+            if (BaseNavigation.Instance != null) BaseNavigation.Instance.Forget(this);
             currentBreach = null;
             blockedTimer = 0f;
             agent.areaMask = defaultAreaMask;

@@ -10,8 +10,7 @@ namespace SurvivalIsland
     /// Tidak mengacak cuaca, tidak menulis RenderSettings atau Light, dan tidak memadamkan sumber cahaya.
     /// Satu-satunya pemanggil Present adalah RegionalWeather.
     ///
-    /// Belum ada (TODO): SwimStateChangedEvent (#13) untuk isUnderwater, dan VFXManager.densityMultiplier (#15) yang
-    /// sementara dianggap 1.
+    /// isUnderwater dari SwimStateChangedEvent (#13), dan kepadatan partikel dikali VFXManager.densityMultiplier (#15).
     /// </summary>
     public class WeatherManager : MonoBehaviour
     {
@@ -82,11 +81,13 @@ namespace SurvivalIsland
 
         private void OnEnable()
         {
-            // TODO #13: EventChannel<SwimStateChangedEvent>.Raised += HandleSwim, lalu baca Last (isUnderwater).
+            EventChannel<SwimStateChangedEvent>.Raised += HandleSwim;   // #13, sticky
+            if (EventChannel<SwimStateChangedEvent>.HasLast) SetUnderwater(EventChannel<SwimStateChangedEvent>.Last.isUnderwater);
         }
 
         private void OnDisable()
         {
+            EventChannel<SwimStateChangedEvent>.Raised -= HandleSwim;
             // Partikel pool yang masih menjadi anak kamera ikut hancur saat IslandPhase dilepas. Kembalikan dulu ke pool.
             for (int i = 0; i < ChannelCount; i++) ReleasePooled(i);
             if (deckA != null) deckA.Stop();
@@ -202,7 +203,7 @@ namespace SurvivalIsland
             if (idle) return;
             // Time.deltaTime: crossfade berhenti saat game dijeda.
             float step = Time.deltaTime / Mathf.Max(0.01f, blendSeconds);
-            float density = 1f; // TODO #15: VFXManager.Instance.densityMultiplier
+            float density = VFXManager.Instance != null ? VFXManager.Instance.densityMultiplier : 1f;   // #15
             bool settled = true;
 
             // 1-4. Partikel.
@@ -312,7 +313,10 @@ namespace SurvivalIsland
 
         // ---------------------------------------------------------------- Di bawah air
 
-        /// <summary>Dipanggil saat SwimStateChangedEvent ada (#13). Audio tidak diubah, low-pass milik AmbientAudio.</summary>
+        // Di bawah air (#13): partikel cuaca disembunyikan. Audio tidak diubah, low-pass milik AmbientAudio.
+        private void HandleSwim(SwimStateChangedEvent e) => SetUnderwater(e.isUnderwater);
+
+        /// <summary>Juga bisa dipanggil langsung (DevConsole, scene uji).</summary>
         public void SetUnderwater(bool value)
         {
             if (isUnderwater == value) return;

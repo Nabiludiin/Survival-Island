@@ -18,8 +18,8 @@ namespace SurvivalIsland
     /// Catatan implementasi (sistem pendukung, juga di blueprint):
     /// - StructureRegistry tidak punya daftar publik. Jumlah dinding/pintu dihitung dari StructureBuiltEvent, dan dihitung ulang
     ///   lewat FindObjectsByType&lt;StructureNode&gt; saat load (pola BaseNavigation.RescanStructures).
-    /// - RegionGateSystem belum mendengar DiaryChapterUnlockedEvent (TODO lama), jadi HandleDiaryChapter juga dipanggil langsung.
-    ///   Fungsi itu idempoten, jadi aman setelah pendengar event ditambahkan.
+    /// - RegionGateSystem mendengar DiaryChapterUnlockedEvent sendiri (#81), jadi tidak dipanggil langsung lagi.
+    ///   HandleDiaryChapter tetap idempoten.
     /// - Tujuan cadangan memakai objectiveId "obj_fallback_book" dan "obj_fallback_bridge" pada ActiveObjectiveChangedEvent.
     ///   Judul HUD dibaca lewat GetTitle(objectiveId).
     /// </summary>
@@ -228,8 +228,6 @@ namespace SurvivalIsland
             GrantRewards(chapter);
             // 3. NotificationManager menampilkan "Halaman baru di Diary". RegionGateSystem mengisi Blueprint Jembatan (Bab 2).
             EventChannel<DiaryChapterUnlockedEvent>.Publish(new DiaryChapterUnlockedEvent(chapter));
-            // TODO(RegionGateSystem): hapus panggilan langsung ini setelah RegionGateSystem mendengar DiaryChapterUnlockedEvent.
-            if (RegionGateSystem.Instance != null) RegionGateSystem.Instance.HandleDiaryChapter(chapter);
         }
 
         private void GrantRewards(int chapter)

@@ -74,7 +74,7 @@ namespace SurvivalIsland
             if (fwd.sqrMagnitude > 0.0001f && flat.sqrMagnitude > 0.0001f && Vector3.Angle(fwd, flat) > maxAngle) return false;
 
             // 2-3. Ray dari laras ke AimPoint, byPlayer = false.
-            if (!core.Fire(new Ray(origin, dir), gameObject, weapon.name, false)) return false;
+            if (!core.Fire(new Ray(origin, dir), gameObject, weapon.name, false, weapon.impactTag)) return false;
 
             // Efek NPC tetap di layer dunia (GunController.md).
             if (VFXManager.Instance != null && !string.IsNullOrEmpty(weapon.muzzleFlashTag))

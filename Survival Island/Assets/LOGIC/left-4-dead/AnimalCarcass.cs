@@ -60,7 +60,7 @@ namespace SurvivalIsland
 
         public bool IsAvailable => active && !harvested && data != null && data.harvest != null && data.harvest.Length > 0;
         public float HoldSeconds => GameManager.CurrentBalance != null ? GameManager.CurrentBalance.wildlife.skinHoldSeconds : 3f;
-        public string GetPrompt() => "Kuliti";   // TODO #104: kunci LocalizationManager
+        public string GetPrompt() { var loc = LocalizationManager.Instance; return loc != null && loc.Has("prompt.skin") ? loc.Get("prompt.skin") : "Kuliti"; }   // #104
 
         public InteractBlockReason CanInteract(in InteractContext ctx)
         {

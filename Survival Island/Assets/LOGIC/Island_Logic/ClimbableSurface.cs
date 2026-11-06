@@ -42,7 +42,12 @@ namespace SurvivalIsland
         {
             if (traversal == null) return false;
             bool heavy = EventChannel<HeavyItemChangedEvent>.HasLast && EventChannel<HeavyItemChangedEvent>.Last.isCarried;
-            if (heavy) return false;   // TODO #22: notifikasi "Tangan penuh"
+            if (heavy)
+            {
+                // Notifikasi "Tangan penuh" (#22).
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.hands_full", NotificationKind.Warning);
+                return false;
+            }
             return traversal.BeginClimb(this);
         }
     }

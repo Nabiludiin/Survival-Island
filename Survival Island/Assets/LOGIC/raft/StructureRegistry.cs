@@ -36,8 +36,8 @@ namespace SurvivalIsland
     ///
     /// Catatan implementasi (Langkah 4):
     /// - Struktur ukuran lebih dari satu sel (gridSize > 1) belum didukung; semua struktur awal berukuran 1 sel.
-    /// - Isi peti yang ikut keluar saat bongkar (#46) dan RemoteBaseSimulation (#90) belum ada (TODO).
-    /// - Durabilitas palu saat bongkar menunggu DurabilitySystem (#113, TODO).
+    /// - Isi peti saat bongkar ditangani StorageChest lewat StructureDestroyedEvent (#46). RemoteBaseSimulation (#90): TODO.
+    /// - Durabilitas palu saat bongkar dikurangi HammerEquippable setelah TryDemolish berhasil (#113).
     /// </summary>
     [DisallowMultipleComponent]
     public class StructureRegistry : MonoBehaviour, ISaveable
@@ -326,7 +326,7 @@ namespace SurvivalIsland
                     }
                 }
             }
-            // 4. TODO #46: isi peti ikut keluar.
+            // 4. Isi peti ikut keluar lewat StorageChest yang mendengar StructureDestroyedEvent dari BaseHealth.Remove (#46).
             // 5. BaseHealth.Remove menerbitkan StructureDestroyedEvent, lalu OnStructureRemoved memeriksa tetangga.
             health.Remove();
             return true;

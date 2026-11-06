@@ -6,7 +6,7 @@ namespace SurvivalIsland
     /// Trigger di dasar jurang S1 (layer ZoneTrigger), 5 meter di atas dasar, sehingga damage mendarat (#101) tidak ikut.
     /// Pemain yang jatuh dikembalikan ke posisi aman terakhir dan menerima damage Fall sebesar region.ravineFallDamage.
     /// Blueprint: Island_Logic/RegionGateSystem.md bagian "Mencegah melewati jurang" lapis 5 (#68).
-    /// TODO #88: posisi aman dari RegionBoundaryGuard.LastSafePosition. Sementara dari RegionGateSystem.LastSafePosition.
+    /// Posisi aman dari RegionBoundaryGuard.LastSafePosition (#88), cadangan RegionGateSystem.LastSafePosition.
     /// </summary>
     [RequireComponent(typeof(Collider))]
     public class RavineRecoveryVolume : MonoBehaviour
@@ -22,9 +22,15 @@ namespace SurvivalIsland
             var gates = RegionGateSystem.Instance;
             var player = IslandPlayerController.Instance;
             var bal = GameManager.CurrentBalance;
-            if (gates == null || player == null || !gates.HasSafePosition) return;
+            if (player == null) return;
+            // RegionBoundaryGuard (#88) lebih dulu, lalu RegionGateSystem sebagai cadangan.
+            var guard = RegionBoundaryGuard.Instance;
+            Vector3 safe;
+            if (guard != null && guard.HasSafePosition) safe = guard.LastSafePosition;
+            else if (gates != null && gates.HasSafePosition) safe = gates.LastSafePosition;
+            else return;
 
-            player.Teleport(gates.LastSafePosition);
+            player.Teleport(safe);
             var stats = SurvivalStats.Instance;
             if (stats != null && bal != null)
             {

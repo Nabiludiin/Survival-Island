@@ -112,7 +112,8 @@ namespace SurvivalIsland
             // 6.
             inv.RemoveItem(itemId, cost);
             // 7. Usulan 1: 15 persen HP maksimum per ayunan, dibatasi maxHP oleh BaseHealth.Repair.
-            float crafter = 1f;   // TODO(NPCRoster): NPCRoster.GetSkillMultiplier(NPCSkill.Crafter) (#76).
+            // Usulan disetujui (#47, #76): Tukang hidup di base membuat perbaikan lebih cepat.
+            float crafter = NPCRoster.Instance != null ? NPCRoster.Instance.GetBuilderRepairMultiplier() : 1f;
             float maxHp = node.Data != null ? node.Data.maxHP : 100f;
             if (damageable != null) damageable.Repair(maxHp * b.repairHpRatioPerSwing * crafter);
             // 8.

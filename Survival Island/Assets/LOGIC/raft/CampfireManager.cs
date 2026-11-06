@@ -43,8 +43,8 @@ namespace SurvivalIsland
     ///
     /// Catatan implementasi (sistem pendukung):
     /// - IslandInteractable (#17) belum ada, jadi kelas ini menerapkan IInteractable langsung.
-    /// - homeRegion: RegionStreaming (#88) belum ada, diisi ZoneTracker.Active saat dibangun dan disimpan.
-    /// - LightSource (#98), NPCRoster (#76), BaseTrap (#26), dan FireSystem (#97) belum ada: TODO di titik panggilnya.
+    /// - homeRegion: diisi RegionStreaming.RegionOf (#88) saat dibangun dan disimpan.
+    /// - LightSource (#98), NPCRoster (#76), dan BaseTrap (#26) sudah disambung. FireSystem (#97): TODO di titik panggilnya.
     /// </summary>
     public class CampfireManager : MonoBehaviour, IInteractable, ISaveable
     {
@@ -71,6 +71,8 @@ namespace SurvivalIsland
         [SerializeField] private string fireVfxTag = "VFX_Campfire";
         [SerializeField] private GameObject fireVisual;             // Cadangan tampilan kalau VFXManager belum ada
         [SerializeField] private Light fireLight;
+        [Tooltip("LightSource api unggun (#98), countsForAttraction = false. Kosong = dicari di anak.")]
+        [SerializeField] private LightSource lightSource;
         [SerializeField] private AudioSource loopAudio;             // Suara api (loop)
         [SerializeField] private AudioSource oneShotAudio;
         [SerializeField] private AudioClip igniteClip;
@@ -103,6 +105,7 @@ namespace SurvivalIsland
         private void Awake()
         {
             EnsureRows();
+            if (lightSource == null) lightSource = GetComponentInChildren<LightSource>(true);
         }
 
         private void Start()
@@ -151,8 +154,8 @@ namespace SurvivalIsland
         private void EnsureHomeRegion()
         {
             if (homeRegionSet) return;
-            // TODO(RegionStreaming #88): homeRegion = RegionStreaming.GetRegionAt(transform.position).
-            homeRegion = ZoneTracker.Active;
+            // Region rumah dari RegionStreaming (#88), cadangan ZoneTracker.Active.
+            homeRegion = RegionStreaming.RegionOf(transform.position);
             homeRegionSet = true;
         }
 
@@ -231,8 +234,8 @@ namespace SurvivalIsland
                     case CookRowState.Cooking:
                         // Api mati: progres ditahan, tidak hilang.
                         if (!IsLit || recipe == null) break;
-                        // TODO(NPCRoster #76): progressSeconds += sim * NPCRoster.GetSkillMultiplier(NPCSkill.Cook).
-                        row.progressSeconds += sim;
+                        // Usulan disetujui 3 (#76): Koki yang Work mempercepat masak.
+                        row.progressSeconds += sim * (NPCRoster.Instance != null ? NPCRoster.Instance.GetSkillMultiplier(NPCSkill.Cook) : 1f);
                         changed = true;
                         if (row.progressSeconds >= recipe.EffectiveCookSeconds) CompleteRow(row, recipe);
                         break;
@@ -444,8 +447,9 @@ namespace SurvivalIsland
                 if (on && !loopAudio.isPlaying) loopAudio.Play();
                 else if (!on && loopAudio.isPlaying) loopAudio.Stop();
             }
-            // TODO(LightSourceSystem #98): LightSource.SetLit(on). Api unggun tidak dihitung dalam tarikan cahaya.
-            // TODO(BaseDefense #26): BaseTrap TrapKind.Campfire aktif hanya saat IsLit.
+            // LightSource ikut menyala (#98). Api unggun tidak dihitung dalam tarikan cahaya (countsForAttraction = false).
+            if (lightSource != null) lightSource.SetLit(on);
+            // BaseTrap TrapKind.Campfire sendiri memeriksa IsLit (#26).
             if (on) StartFireVfx(); else StopFireVfx();
         }
 
@@ -519,7 +523,7 @@ namespace SurvivalIsland
 
         public bool IsAvailable => isActiveAndEnabled;
         public float HoldSeconds => 0f;
-        public string GetPrompt() => "Api unggun";   // TODO(LocalizationManager #104): kunci teks
+        public string GetPrompt() { var loc = LocalizationManager.Instance; return loc != null && loc.Has("prompt.campfire") ? loc.Get("prompt.campfire") : "Api unggun"; }   // #104
 
         public InteractBlockReason CanInteract(in InteractContext ctx)
         {

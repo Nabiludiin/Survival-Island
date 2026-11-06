@@ -20,7 +20,7 @@ namespace SurvivalIsland
     /// Catatan implementasi (sistem pendukung, juga di blueprint):
     /// - Musuh tidak memasang ITargetable, jadi target NPC adalah EnemyHealth, dengan titik bidik dari collider musuh.
     /// - Pendaftaran ThreatSystem memakai RegisterCandidate/UnregisterCandidate (API ThreatSystem untuk ITargetable).
-    /// - FireSystem (#97) dan RegionStreaming (#88) belum ada: TODO di titik panggilnya.
+    /// - FireSystem.IsNearFire (#97) belum dipakai: API belum memberi titik api untuk menghindar (TODO di Think).
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
     public class NPCCompanion : MonoBehaviour, IInteractable, ITargetable, IDamageable

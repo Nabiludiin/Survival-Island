@@ -44,12 +44,12 @@ namespace SurvivalIsland
     /// Manager per scene IslandPhase. Pemeriksaan jalur diantre dengan batas maxPathChecksPerFrame.
     ///
     /// Catatan implementasi (sistem pendukung):
-    /// - EnemyAI (kode Langkah 5) belum memanggil PollChase/PollAttacking/Forget. Status jalur per zombie disimpan di sini,
+    /// - EnemyAI (kode Langkah 5) baru memanggil Forget; PollChase/PollAttacking/NotifySpawned belum (TODO di EnemyAI). Status jalur per zombie disimpan di sini,
     ///   bukan di EnemyAI, supaya integrasinya cukup beberapa baris (lihat laporan Grup F).
     /// - StructureRegistry tidak membuka daftar struktur, jadi pusat base dan pengaturan obstacle memakai pemindaian
     ///   FindObjectsByType yang hanya berjalan saat jumlah struktur berubah.
     /// - Cara menghitung pusat base belum diputuskan developer (bagian 5 usulan 7). Sementara: rata-rata posisi struktur.
-    /// - RegionStreaming (#88) dan RegionLoadStateChangedEvent belum ada: region dianggap selalu dimuat.
+    /// - RegionStreaming (#88): region anchor wajib dimuat, dan RegionLoadStateChangedEvent Unloading mengosongkan posisi serangan.
     /// </summary>
     public class BaseNavigation : MonoBehaviour
     {
@@ -137,7 +137,7 @@ namespace SurvivalIsland
             EventChannel<StructureBuiltEvent>.Raised += HandleStructureBuilt;
             EventChannel<StructureUpgradedEvent>.Raised += HandleStructureUpgraded;
             EventChannel<DoorStateChangedEvent>.Raised += HandleDoorState;
-            // TODO(RegionStreaming): EventChannel<RegionLoadStateChangedEvent>.Raised += kosongkan BreachSlots region yang dilepas (#88).
+            EventChannel<RegionLoadStateChangedEvent>.Raised += HandleRegionLoadState;   // #88
             insideLoop = StartCoroutine(InsideLoop());
         }
 
@@ -147,6 +147,7 @@ namespace SurvivalIsland
             EventChannel<StructureBuiltEvent>.Raised -= HandleStructureBuilt;
             EventChannel<StructureUpgradedEvent>.Raised -= HandleStructureUpgraded;
             EventChannel<DoorStateChangedEvent>.Raised -= HandleDoorState;
+            EventChannel<RegionLoadStateChangedEvent>.Raised -= HandleRegionLoadState;
             if (insideLoop != null) StopCoroutine(insideLoop);
             insideLoop = null;
         }
@@ -550,6 +551,27 @@ namespace SurvivalIsland
             spareSlots.Push(s);
         }
 
+        private readonly List<string> regionSlotKeys = new List<string>(16);
+
+        /// <summary>Region dilepas (#88): posisi serangan struktur di region itu dikosongkan, penyerangnya kembali Chase.</summary>
+        private void HandleRegionLoadState(RegionLoadStateChangedEvent e)
+        {
+            if (e.state != RegionLoadState.Unloading) return;
+            anchorDirty = true;
+            regionSlotKeys.Clear();
+            foreach (var kv in slotsByStructure)
+                if (kv.Value != null && RegionStreaming.RegionOf(kv.Value.center) == e.region) regionSlotKeys.Add(kv.Key);
+            for (int i = 0; i < regionSlotKeys.Count; i++)
+            {
+                var s = slotsByStructure[regionSlotKeys[i]];
+                InvalidateOccupants(s);
+                slotsByStructure.Remove(regionSlotKeys[i]);
+                s.target = null;
+                spareSlots.Push(s);
+            }
+            regionSlotKeys.Clear();
+        }
+
         private void HandleDoorState(DoorStateChangedEvent e)
         {
             // Pintu terbuka: penyerangnya kembali Chase dan masuk lewat lubang pintu.
@@ -666,7 +688,8 @@ namespace SurvivalIsland
         public bool IsAnchorEngaged(out Vector3 anchor)
         {
             if (!TryGetBaseAnchor(out anchor)) return false;
-            // TODO(RegionStreaming): RegionStreaming.IsLoaded(RegionStreaming.GetRegionAt(anchor)) (#88).
+            // Region anchor harus dimuat (#88). Tanpa RegionStreaming selalu dianggap dimuat.
+            if (!RegionStreaming.IsRegionLoaded(RegionStreaming.RegionOf(anchor))) return false;
             var bal = GameManager.CurrentBalance;
             var player = PlayerTargetable.Instance;
             if (bal == null || player == null) return false;

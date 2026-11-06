@@ -28,7 +28,7 @@ namespace SurvivalIsland
             }
         }
 
-        public string GetPrompt() => "Ambil air kotor";   // TODO(LocalizationManager #104): kunci teks
+        public string GetPrompt() { var loc = LocalizationManager.Instance; return loc != null && loc.Has("prompt.water_dirty") ? loc.Get("prompt.water_dirty") : "Ambil air kotor"; }   // #104
 
         public InteractBlockReason CanInteract(in InteractContext ctx)
         {

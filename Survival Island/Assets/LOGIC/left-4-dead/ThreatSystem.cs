@@ -44,8 +44,8 @@ namespace SurvivalIsland
     /// Satu-satunya penulis target musuh di Fase 2. Blueprint: left-4-dead/ThreatSystem.md (#108).
     /// GDD bagian 3: hewan menjaga teritori, zombie memburu MC dan menyerang base. Rumus dan bobot adalah usulan disetujui developer.
     /// Tidak ada di ShipPhase; zombie kapal memakai EnemyAI.SetTarget langsung.
-    /// Belum diimplementasikan (TODO): override Lure (#96), override BaseAnchor saat Blood Moon (#50), batas pengincar NPC
-    /// dipakai setelah NPCCompanion (#76) ada.
+    /// Override Lure (#96) memakai SenseRange sebagai radius umpan. Override BaseAnchor saat Blood Moon (#50) membaca
+    /// HordeManager.IsBloodMoonActive. Batas pengincar NPC (maxChasersPerNpc) dipakai di Score.
     /// </summary>
     public class ThreatSystem : MonoBehaviour
     {
@@ -208,7 +208,47 @@ namespace SurvivalIsland
                 if (s.current != s.aggroTarget) SetCurrent(a, s.aggroTarget);
                 return;
             }
-            // TODO #96: override 2 Lure. TODO #50: override 3 BaseAnchor saat Blood Moon.
+            // Override 2: umpan Suar terdekat dalam SenseRange, untuk profil reactsToLure (#96).
+            var lureProfile = a.Profile;
+            if (lureProfile == null || lureProfile.reactsToLure)
+            {
+                ITargetable lure = null;
+                float lureSqr = a.SenseRange * a.SenseRange;
+                for (int i = 0; i < candidates.Count; i++)
+                {
+                    var t = candidates[i];
+                    if (t == null || t.Kind != TargetKind.Lure || !t.IsTargetable) continue;
+                    float sqr = (t.Position - a.Position).sqrMagnitude;
+                    if (sqr <= lureSqr) { lureSqr = sqr; lure = t; }
+                }
+                if (lure != null)
+                {
+                    if (s.current != lure) SetCurrent(a, lure);
+                    return;
+                }
+            }
+            // Override 3: Blood Moon, zombie menuju BaseAnchor (#50). Pemain/NPC terlihat dalam bloodMoonPlayerRange tetap
+            // diserang lewat skor biasa. Tanpa base, BaseAnchor tidak sah dan zombie memburu pemain.
+            if (a is EnemyAI && HordeManager.Instance != null && HordeManager.Instance.IsBloodMoonActive)
+            {
+                ITargetable anchor = null;
+                bool closeVisible = false;
+                float closeSqr = b.bloodMoonPlayerRange * b.bloodMoonPlayerRange;
+                for (int i = 0; i < candidates.Count; i++)
+                {
+                    var t = candidates[i];
+                    if (t == null || !t.IsTargetable) continue;
+                    if (t.Kind == TargetKind.BaseAnchor) anchor = t;
+                    else if ((t.Kind == TargetKind.Player || t.Kind == TargetKind.NPC)
+                             && (t.Position - a.Position).sqrMagnitude <= closeSqr && sensory != null && sensory.CanSee(t))
+                        closeVisible = true;
+                }
+                if (anchor != null && !closeVisible)
+                {
+                    if (s.current != anchor) SetCurrent(a, anchor);
+                    return;
+                }
+            }
 
             // 4. Skor biasa.
             var profile = a.Profile;

@@ -7,9 +7,9 @@ namespace SurvivalIsland
     /// Proyektil barang lempar dari ObjectPooler (layer Projectile, Rigidbody, Collider). Blueprint: left-4-dead/
     /// ThrowableSystem.md bagian "Proyektil" (#96). GDD bagian 3: Molotov, Bom Rakitan, Batu, dan Suar.
     ///
-    /// Catatan implementasi (sistem pendukung): FireSystem (#97) belum ada. Sesuai Kasus Khusus "#97 belum tersedia",
-    /// Molotov memakai DamagePipeline langsung: tick damage Fire setiap throwable.fireTickSeconds (1 detik) lewat
-    /// OverlapSphere sampai durationSeconds habis.
+    /// Catatan implementasi (sistem pendukung): Molotov memakai FireSystem.SpawnFireArea (#97). Kalau FireSystem tidak ada
+    /// di scene (Kasus Khusus "#97 belum tersedia"), Molotov memakai DamagePipeline langsung: tick damage Fire setiap
+    /// throwable.fireTickSeconds (1 detik) lewat OverlapSphere sampai durationSeconds habis.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class ThrowableProjectile : MonoBehaviour, IPoolable
@@ -150,8 +150,14 @@ namespace SurvivalIsland
                 case ThrowEffect.Fire:
                     if (inWater) { ReturnSelf(); return; }
                     EmitNoise(data.noiseRadius);
-                    // TODO(FireSystem): FireSystem.Instance.SpawnFireArea(pos, radius, durationSeconds, damage, byPlayer: true) (#97),
-                    // lalu kembali ke pool. Sementara: area api cadangan di proyektil ini.
+                    // Area api Molotov lewat FireSystem (#97), lalu proyektil kembali ke pool.
+                    if (FireSystem.Instance != null
+                        && FireSystem.Instance.SpawnFireArea(pos, data.radius, data.durationSeconds, data.damage, true) != null)
+                    {
+                        ReturnSelf();
+                        return;
+                    }
+                    // Cadangan tanpa FireSystem (scene uji): area api di proyektil ini.
                     StartStationary(Phase.Burning);
                     if (fireParticles != null) fireParticles.Play(true);
                     tickTimer = 0f;   // Tick pertama langsung

@@ -30,9 +30,13 @@ namespace SurvivalIsland
             // 1.
             if (Time.time < nextShoveTime) return;
             if (EquipmentManager.Instance != null && EquipmentManager.Instance.Locks != EquipLock.None) return;
-            // 2. TODO #22: notifikasi lelah saat stamina tidak cukup.
+            // 2. Stamina tidak cukup: notifikasi lelah (#22).
             var stats = SurvivalStats.Instance;
-            if (stats != null && !stats.SpendStamina(b.shoveStaminaCost, StaminaUse.Melee)) return;
+            if (stats != null && !stats.SpendStamina(b.shoveStaminaCost, StaminaUse.Melee))
+            {
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.no_stamina", NotificationKind.Warning);   // "Terlalu lelah"
+                return;
+            }
             nextShoveTime = Time.time + b.shoveCooldownSeconds;
             // 3. TODO #12: animasi dorong viewmodel.
             // 4.

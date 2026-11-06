@@ -35,8 +35,8 @@ namespace SurvivalIsland
     /// - RunSeedManager.BuildLayout masih kosong (#89). Kalau CurrentLayout.partPointByPart kurang, titik dipilih di sini
     ///   dengan aturan yang sama (Fork PartLocation 0, Shuffle, minPartPointSpacing).
     /// - RegionStreaming (#88) belum ada: semua barang aktif sejak awal, tanpa RegionLoadStateChangedEvent dan batas bawah region.
-    /// - Belum ada (TODO): SwimStateChangedEvent (#13, sementara PlayerTraversal.Mode), CompassSystem (#30),
-    ///   LoreHintGrantedEvent (#100), notifikasi (#22), VFXManager (#15).
+    /// - SwimStateChangedEvent (#13, cadangan PlayerTraversal.Mode), CompassSystem (#30), LoreHintGrantedEvent (#100), dan
+    ///   notifikasi (#22) sudah disambung. Belum ada (TODO): VFXManager (#15).
     /// </summary>
     public class HeavyItemSystem : MonoBehaviour, ISaveable
     {
@@ -93,7 +93,8 @@ namespace SurvivalIsland
             EventChannel<PlayerPinnedEvent>.Raised += HandlePinned;
             EventChannel<PlayerDiedEvent>.Raised += HandleDied;
             EventChannel<RunEndedEvent>.Raised += HandleRunEnded;
-            // TODO #13 SwimStateChangedEvent, #88 RegionLoadStateChangedEvent, #100 LoreHintGrantedEvent.
+            EventChannel<LoreHintGrantedEvent>.Raised += HandleLoreHint;   // #100
+            // SwimStateChangedEvent (#13) dibaca dari nilai sticky saat membawa barang. TODO #88: RegionLoadStateChangedEvent.
             if (WorldStateSave.Instance != null)
             {
                 WorldStateSave.Instance.Register(this);
@@ -114,6 +115,7 @@ namespace SurvivalIsland
             EventChannel<PlayerPinnedEvent>.Raised -= HandlePinned;
             EventChannel<PlayerDiedEvent>.Raised -= HandleDied;
             EventChannel<RunEndedEvent>.Raised -= HandleRunEnded;
+            EventChannel<LoreHintGrantedEvent>.Raised -= HandleLoreHint;
             if (registeredForSave && WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
             registeredForSave = false;
         }
@@ -362,6 +364,29 @@ namespace SurvivalIsland
 
         private void HandleRunEnded(RunEndedEvent e) => runEnded = true;
 
+        /// <summary>
+        /// Petunjuk lore PartLocation (#100): barang Lying dengan indeks terkecil yang belum ditemukan menjadi ditemukan dan
+        /// mendapat penanda kompas. Diabaikan kalau semua sudah ditemukan.
+        /// </summary>
+        private void HandleLoreHint(LoreHintGrantedEvent e)
+        {
+            if (e.hintKind != LoreHintKind.PartLocation || records == null) return;
+            for (int i = 0; i < records.Length; i++)
+            {
+                var r = records[i];
+                if (r == null || r.state != PartState.Lying || r.isDiscovered) continue;
+                r.isDiscovered = true;
+                SetPartMarker(r);
+                return;
+            }
+        }
+
+        /// <summary>Penanda kompas part_&lt;partId&gt; (#30).</summary>
+        private static void SetPartMarker(PartRecord r)
+        {
+            if (CompassSystem.Instance != null && r != null) CompassSystem.Instance.SetMarker("part_" + r.partId, r.position);
+        }
+
         // ---------------------------------------------------------------- Update: tombol Q dan pengaman
 
         private void Update()
@@ -381,9 +406,13 @@ namespace SurvivalIsland
                     return;
                 }
 
-                // TODO #13: SwimStateChangedEvent.isSwimming. Air dangkal yang masih bisa dilewati tidak menjatuhkan barang.
+                // SwimStateChangedEvent.isSwimming (#13). Air dangkal yang masih bisa dilewati tidak menjatuhkan barang.
+                // Cadangan tanpa SwimmingController: PlayerTraversal.Mode.
                 var trav = Traversal(player);
-                if (trav != null && trav.Mode == TraversalMode.Swimming)
+                bool swimming = EventChannel<SwimStateChangedEvent>.HasLast
+                    ? EventChannel<SwimStateChangedEvent>.Last.isSwimming
+                    : trav != null && trav.Mode == TraversalMode.Swimming;
+                if (swimming)
                 {
                     Drop(DropReason.Water);
                     return;
@@ -444,8 +473,9 @@ namespace SurvivalIsland
                 r.rotation = item.transform.rotation;
                 r.lastValidPosition = pos;
 
-                // Penemuan: barang dalam discoverRadius ditandai (usulan 5). TODO #30: CompassSystem.SetMarker("part_" + partId).
+                // Penemuan: barang dalam discoverRadius ditandai (usulan 5), dan penanda kompas mengikuti posisinya (#30).
                 if (player != null && !r.isDiscovered && (pos - playerPos).sqrMagnitude <= discoverSqr) r.isDiscovered = true;
+                if (r.isDiscovered) SetPartMarker(r);
             }
         }
 
@@ -474,7 +504,8 @@ namespace SurvivalIsland
                 if (item.Body != null) item.Body.position = target;
             }
             r.position = target;
-            // TODO #22: notifikasi "Suku cadang dikembalikan".
+            // Notifikasi "Suku cadang dikembalikan" (#22).
+            if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.part_returned", NotificationKind.Info);
         }
 
         // ---------------------------------------------------------------- Titik pasang dan penanda
@@ -486,7 +517,8 @@ namespace SurvivalIsland
             if (i < 0 || records[i].state == PartState.Installed) return;
             // 1. Menang saat membawa barang: lepas dulu, jadi pengali kecepatan tidak tertinggal.
             if (CarriedIndex == i) Drop(DropReason.Installed);
-            // 2. TODO #30: CompassSystem.RemoveMarker.
+            // 2. Penanda kompas dihapus (#30).
+            if (CompassSystem.Instance != null) CompassSystem.Instance.RemoveMarker("part_" + partId);
             records[i].state = PartState.Installed;
             if (i < instances.Length && instances[i] != null) instances[i].gameObject.SetActive(false);
             // 3. Perakitan dan kemenangan milik #14 (HelicopterPartInstalledEvent).

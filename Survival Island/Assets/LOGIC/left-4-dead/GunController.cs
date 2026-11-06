@@ -8,8 +8,8 @@ namespace SurvivalIsland
     /// headshot 2x. Input datang dari EquipmentManager (PrimaryAction), reload dari InputManager.ReloadPressed.
     /// Isi magazine di ItemInstance.magazineAmmo; cadangan = jumlah ammoItemId di InventoryManager.
     ///
-    /// Catatan Langkah 5 (TODO): DurabilitySystem (#113) belum ada, jadi status Broken dan keausan dilewati;
-    /// WeaponStatCalculator (#113) belum ada (statistik dari WeaponData); VFXManager (#15) belum ada, jadi muzzle flash
+    /// Status Broken, keausan, dan statistik akhir memakai DurabilitySystem dan WeaponStatCalculator (#113).
+    /// Catatan Langkah 5 (TODO): VFXManager (#15) belum dipakai, jadi muzzle flash
     /// memakai ParticleSystem di viewmodel (tanpa Instantiate); AnimationController (#12) dan SFX belum ada;
     /// NPCGunUser (#76) belum ditulis. Radius suara memakai WeaponData.noiseRadius (lihat GunController.md Catatan Implementasi).
     /// </summary>
@@ -70,10 +70,10 @@ namespace SurvivalIsland
             base.OnUnequip();
         }
 
-        /// <summary>Statistik dari WeaponData. TODO #113: WeaponStatCalculator.Get (upgrade dan modifier Lucky Machine).</summary>
+        /// <summary>Statistik dari WeaponData, ditambah upgrade dan modifier Lucky Machine lewat WeaponStatCalculator (#113).</summary>
         public void RecalculateStats()
         {
-            if (weapon != null) core.SetStats(WeaponStats.From(weapon));
+            if (weapon != null) core.SetStats(WeaponStatCalculator.Get(WeaponStats.From(weapon), instance));
         }
 
         public override void PrimaryAction(ActionPhase phase)
@@ -82,7 +82,8 @@ namespace SurvivalIsland
             // 1. SemiAuto hanya Pressed; Auto juga Held.
             if (phase == ActionPhase.Released) return;
             if (weapon.fireMode == FireMode.SemiAuto && phase != ActionPhase.Pressed) return;
-            // 2. TODO #113: DurabilitySystem.GetState(instance) == Broken -> klik kosong + notifikasi "Pistol rusak" (#22).
+            // 2. Senjata Broken (#113): klik kosong. Notifikasi "Item rusak" dikirim EquipmentManager.RejectBroken.
+            if (DurabilitySystem.GetState(instance) == DurabilityState.Broken) { DryClick(); return; }
             // 3.
             if (isReloading) return;
             // 4. Klik kosong tidak mengirim Noise Sphere.
@@ -94,8 +95,8 @@ namespace SurvivalIsland
             Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
             // 6.
             GameObject shooter = IslandPlayerController.Instance != null ? IslandPlayerController.Instance.gameObject : gameObject;
-            if (!core.Fire(in ray, shooter, instance.itemId, true)) return;
-            // 7. TODO #113: DurabilitySystem.ApplyWear(instance, wearPerShot).
+            if (!core.Fire(in ray, shooter, instance.itemId, true, weapon.impactTag)) return;
+            // 7. Keausan per tembakan (#113) diterapkan di akhir fungsi, karena senjata Destroyed langsung dilepas.
             instance.magazineAmmo--;
             // 8. Muzzle flash dari partikel viewmodel (Claude.md Pilar 3).
             if (muzzleFlash != null) muzzleFlash.Play(true);
@@ -110,6 +111,8 @@ namespace SurvivalIsland
             EventChannel<WeaponFiredEvent>.Publish(new WeaponFiredEvent(instance.itemId, cam.transform.position, true));
             // 12. Reload otomatis.
             if (instance.magazineAmmo == 0 && GetReserve() > 0) ScheduleAutoReload();
+            // 7. Keausan (#113). Kalau Destroyed, DurabilitySystem menghapus item dan EquipmentManager melepasnya.
+            DurabilitySystem.ApplyWear(instance, weapon.wearPerShot);
         }
 
         private void DryClick()

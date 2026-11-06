@@ -25,7 +25,7 @@ namespace SurvivalIsland
     /// Penyimpangan sementara (dicatat di blueprint, Catatan Implementasi Langkah 6):
     /// - RegionStreaming.GetRegionAt dan RegionBoundaryGuard.LastSafePosition (#88) belum ada. Region pemain dibaca dari
     ///   ZoneTracker.Active, dan posisi aman dicatat sendiri di sini (LastSafePosition).
-    /// - DiaryChapterUnlockedEvent (#81, Langkah 7) belum ada. Pemanggil memakai HandleDiaryChapter(int).
+    /// - DiaryChapterUnlockedEvent (#81) didengar dan diteruskan ke HandleDiaryChapter(int).
     /// - NavMeshLink seam (#88) dan DevConsole (#56) belum ada.
     /// </summary>
     public class RegionGateSystem : MonoBehaviour, ISaveable
@@ -70,7 +70,7 @@ namespace SurvivalIsland
         private void OnEnable()
         {
             EventChannel<RunEndedEvent>.Raised += HandleRunEnded;
-            // TODO #81 (Langkah 7): EventChannel<DiaryChapterUnlockedEvent>.Raised += e => HandleDiaryChapter(e.chapter).
+            EventChannel<DiaryChapterUnlockedEvent>.Raised += HandleDiaryUnlocked;   // #81
             if (WorldStateSave.Instance != null)
             {
                 WorldStateSave.Instance.Register(this);
@@ -87,6 +87,7 @@ namespace SurvivalIsland
         private void OnDisable()
         {
             EventChannel<RunEndedEvent>.Raised -= HandleRunEnded;
+            EventChannel<DiaryChapterUnlockedEvent>.Raised -= HandleDiaryUnlocked;
             if (registeredForSave && WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
             registeredForSave = false;
         }
@@ -155,8 +156,10 @@ namespace SurvivalIsland
 
         /// <summary>
         /// Bab Diary terbuka. Bab 2 = Blueprint Jembatan (GDD bagian 4). Bab 3 membuka S2, lalu S3 ikut terbuka (usulan #85).
-        /// Sementara dipanggil langsung sampai DiaryChapterUnlockedEvent (#81, Langkah 7) ada.
+        /// Dipanggil lewat DiaryChapterUnlockedEvent (#81). Idempoten, jadi aman dipanggil langsung juga.
         /// </summary>
+        private void HandleDiaryUnlocked(DiaryChapterUnlockedEvent e) => HandleDiaryChapter(e.chapter);
+
         public void HandleDiaryChapter(int chapter)
         {
             // 1. Usulan 4: Blueprint Jembatan berupa penanda, bukan item, supaya tidak bisa hilang.
@@ -204,10 +207,10 @@ namespace SurvivalIsland
         private void VerifyPlayerRegion()
         {
             var player = IslandPlayerController.Instance;
-            if (player == null || !ZoneTracker.HasActive) return;
+            if (player == null || (RegionStreaming.Instance == null && !ZoneTracker.HasActive)) return;
 
-            // TODO #88: RegionStreaming.GetRegionAt(pemain) menggantikan ZoneTracker.Active.
-            RegionType here = ZoneTracker.Active;
+            // Region pemain dari RegionStreaming (#88), cadangan ZoneTracker.Active.
+            RegionType here = RegionStreaming.RegionOf(player.transform.position);
             if (IsUnlocked(here))
             {
                 if (player.IsGrounded)

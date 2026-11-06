@@ -126,9 +126,7 @@ namespace SurvivalIsland
             };
             float radius = b != null ? b.barrelRadius : 5f;
             ExplosionDamage.Apply(pos, radius, info);
-            // 8. Selama ExplosionDamage belum memanggil NotifyExplosion (TODO lama di ExplosionDamage.cs), tong
-            // memanggilnya sendiri supaya rantai tetap jalan. Tong yang sudah bersumbu diabaikan, jadi aman dipanggil dua kali.
-            NotifyExplosion(pos, radius, armedByPlayer);
+            // 8. Rantai ledakan: ExplosionDamage.Apply memanggil NotifyExplosion untuk tong lain di dalam radius.
 
             // 6. Usulan 6: belum ada NoiseSourceKind khusus ledakan.
             float noise = b != null ? b.noiseRadius : 40f;

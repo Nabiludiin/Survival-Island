@@ -26,11 +26,11 @@ namespace SurvivalIsland
     /// Claude.md Tahap 6: semua musuh dari ObjectPooler, satu jalur kembali (Despawn).
     /// Jumlah zombie malam ditentukan AIDirector (#27) lewat RequestWave; hewan siang diisi TickSpawn.
     ///
-    /// Catatan Langkah 5 (sistem pendukung belum ada, ditandai TODO):
-    /// - RegionStreaming (#88): syarat GetRegionAt/IsLoaded dan RegionLoadStateChangedEvent dilewati.
-    /// - BaseNavigation.IsInsideBase (#78) dan InteriorZone (#112): syarat base/sarang dilewati.
+    /// Catatan Langkah 5 (sistem pendukung; yang belum disambung ditandai TODO):
+    /// - RegionStreaming (#88): syarat GetRegionAt/IsLoaded dipakai; RegionLoadStateChangedEvent belum didengar.
+    /// - BaseNavigation.IsInsideBase (#78), InteriorZone (#112), dan LairRegistry (#112) sudah dipakai.
     /// - HidingSpot/VillageZombieHiding (#63) dan BushSpawnPoint (#25): Zombie Desa dan Lumut memakai FindSpawnPoint biasa.
-    /// - SleepStateChangedEvent (#67), LairClearedEvent (#112), PopulateHidingSpots: belum ada pengirimnya.
+    /// - Tidur dari SleepStateChangedEvent (#67). LairClearedEvent (#112) dan PopulateHidingSpots belum dipakai.
     /// - Malam dibaca dari HourChangedEvent (DayPhaseTracker), bukan NightfallEvent (Langkah 4).
     /// </summary>
     public class SpawnManager : MonoBehaviour
@@ -173,6 +173,7 @@ namespace SurvivalIsland
             EventChannel<HourChangedEvent>.Raised += HandleHour;
             EventChannel<RegionChangedEvent>.Raised += HandleRegion;
             EventChannel<RunEndedEvent>.Raised += HandleRunEnded;
+            EventChannel<SleepStateChangedEvent>.Raised += HandleSleep;   // #67
             // Event sticky: setelah load, mulai dari kosong dengan region dan waktu terakhir.
             if (EventChannel<RegionChangedEvent>.HasLast) activeRegion = EventChannel<RegionChangedEvent>.Last.to;
             isNight = DayPhaseTracker.IsNight;
@@ -185,6 +186,7 @@ namespace SurvivalIsland
             EventChannel<HourChangedEvent>.Raised -= HandleHour;
             EventChannel<RegionChangedEvent>.Raised -= HandleRegion;
             EventChannel<RunEndedEvent>.Raised -= HandleRunEnded;
+            EventChannel<SleepStateChangedEvent>.Raised -= HandleSleep;
             StopAllCoroutines();
             spawnLoop = watchdogLoop = sweepRoutine = null;
         }
@@ -218,6 +220,7 @@ namespace SurvivalIsland
 
         /// <summary>SleepSystem (#67): tick tidak memunculkan musuh baru selama tidur. RequestAmbush tetap jalan.</summary>
         public void SetSleeping(bool value) => isSleeping = value;
+        private void HandleSleep(SleepStateChangedEvent e) => isSleeping = e.isSleeping;
 
         private void ScheduleSweep()
         {
@@ -241,7 +244,8 @@ namespace SurvivalIsland
             {
                 var e = activeEnemies[i];
                 if (e == null || e.IsDormantCounted || e.IsCarcass || e.IsFromOverride || !e.Health.IsAlive) continue;
-                // TODO #112: lewati zombie sarang di dalam InteriorZone (EnemyAI.lair).
+                // Zombie sarang di dalam InteriorZone tidak dikembalikan saat siang (#112).
+                if (e.AI != null && LairRegistry.IsShelteredLairZombie(e.AI)) continue;
                 if (e.AI != null && e.AI.IsBurning) continue;
                 bool wrong = isNight ? e.IsAnimal : e.IsZombie;
                 if (wrong && !IsVisible(e.transform.position)) Despawn(e.gameObject, DespawnReason.Debug);
@@ -363,8 +367,9 @@ namespace SurvivalIsland
             if (isSleeping) return 0;
             var b = Bal;
             if (b == null) return 0;
-            // TODO #112: kalikan (1 - regionBudgetReduction[activeRegion]) setelah ZombieLair ada.
-            int count = Mathf.Min(r.count, CurrentZombieCap - AliveZombies - queue.Count);
+            // Sarang yang hancur mengurangi anggaran horde region ini (#112, usulan 3).
+            int wanted = Mathf.RoundToInt(r.count * (1f - LairRegistry.GetBudgetReduction(activeRegion)));
+            int count = Mathf.Min(wanted, CurrentZombieCap - AliveZombies - queue.Count);
             if (count <= 0) return 0;
             specialsThisWave = 0;
             largeThisWave = AliveLarge;
@@ -532,10 +537,15 @@ namespace SurvivalIsland
                 // 4. Jarak ulang.
                 float d2 = Vector3.Distance(hit.position, center);
                 if (d2 < minD * 0.9f || d2 > maxD * 1.1f) { failedPoints++; continue; }
-                // 5. TODO #88: RegionStreaming.GetRegionAt(hit.position) == activeRegion dan IsLoaded.
+                // 5. Titik harus di region aktif yang sudah dimuat (#88). Tanpa RegionStreaming syarat ini lolos.
+                if (RegionStreaming.Instance != null
+                    && (RegionStreaming.Instance.GetRegionAt(hit.position) != activeRegion || !RegionStreaming.Instance.IsLoaded(activeRegion)))
+                { failedPoints++; continue; }
                 // 6. Pandangan: syarat tidak pernah dilonggarkan.
                 if (!ignoreView && IsVisible(hit.position)) { failedPoints++; continue; }
-                // 7. TODO #78/#112: tolak di dalam base dan InteriorZone.
+                // 7. Tolak di dalam InteriorZone (#112) dan di dalam base (#78).
+                if (InteriorZone.Contains(hit.position) || (BaseNavigation.Instance != null && BaseNavigation.Instance.IsInsideBase(hit.position)))
+                { failedPoints++; continue; }
                 // 8. Sesak.
                 if (PhysicsQuery.OverlapSphere(hit.position + Vector3.up, 1f, PhysicsMasks.BuildOverlap, crowdBuffer) > 0) { failedPoints++; continue; }
                 point = hit.position;

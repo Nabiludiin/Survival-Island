@@ -9,6 +9,8 @@ namespace SurvivalIsland
     /// </summary>
     public class GunCore
     {
+        public const string DefaultImpactTag = "VFX_Impact";
+
         public WeaponStats stats;
         public float CurrentSpread { get; private set; }
         private float nextShotTime;
@@ -21,8 +23,8 @@ namespace SurvivalIsland
 
         public bool CanFire => Time.time >= nextShotTime;
 
-        /// <summary>Satu tembakan. false kalau masih dalam jeda tembak.</summary>
-        public bool Fire(in Ray ray, GameObject shooter, string itemId, bool byPlayer)
+        /// <summary>Satu tembakan. false kalau masih dalam jeda tembak. impactTag = WeaponData.impactTag (#15).</summary>
+        public bool Fire(in Ray ray, GameObject shooter, string itemId, bool byPlayer, string impactTag = null)
         {
             // 1-2.
             if (Time.time < nextShotTime) return false;
@@ -55,7 +57,9 @@ namespace SurvivalIsland
                     hitEnemy = true;
                     headshot = hit.collider.TryGetComponent(out HitboxModifier hb) && hb.bodyPart == BodyPart.Head;
                 }
-                // 6. TODO #15: VFXManager.Instance.PlayImpact(hit, overrideTag).
+                // 6. Efek impact (#15). Tag VFX_Impact bawaan = null, supaya efek mengikuti permukaan.
+                if (VFXManager.Instance != null)
+                    VFXManager.Instance.PlayImpact(hit, string.IsNullOrEmpty(impactTag) || impactTag == DefaultImpactTag ? null : impactTag);
             }
             // 7.
             CurrentSpread = Mathf.Min(CurrentSpread + stats.spreadPerShot, stats.spreadMax);

@@ -19,6 +19,8 @@ namespace SurvivalIsland
 
         [Tooltip("Ruas jembatan, aktif berurutan sesuai progres (20 ruas).")]
         [SerializeField] private Transform[] segments = Array.Empty<Transform>();
+        private const string WoodDustTag = "VFX_WoodDust";
+        private int lastVisible = -1;
         [Tooltip("Collider lantai. Aktif hanya saat jembatan selesai, jadi ruas setengah jadi tidak bisa dipijak.")]
         [SerializeField] private Collider deckCollider;
         [SerializeField] private TMP_Text progressLabel;
@@ -106,7 +108,11 @@ namespace SurvivalIsland
             // 1. Rasio dibatasi 1.
             float ratio = complete ? 1f : (required > 0 ? Mathf.Clamp01(deposited / (float)required) : 1f);
             int visible = Mathf.FloorToInt(ratio * segments.Length);
-            // 2. TODO #15: debu kayu lewat VFXManager untuk ruas baru.
+            // 2. Ruas baru muncul dengan debu kayu lewat VFXManager (#15). Refresh pertama (load) tanpa debu.
+            if (lastVisible >= 0 && visible > lastVisible && VFXManager.Instance != null)
+                for (int i = lastVisible; i < visible && i < segments.Length; i++)
+                    if (segments[i] != null) VFXManager.Instance.Play(WoodDustTag, segments[i].position, Quaternion.identity);
+            lastVisible = visible;
             for (int i = 0; i < segments.Length; i++)
                 if (segments[i] != null) segments[i].gameObject.SetActive(i < visible);
             // 3. Papan di dunia game, bukan HUD.

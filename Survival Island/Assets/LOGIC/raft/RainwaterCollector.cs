@@ -71,8 +71,8 @@ namespace SurvivalIsland
         private void EnsureHomeRegion()
         {
             if (homeRegionSet) return;
-            // TODO(RegionStreaming #88): homeRegion = RegionStreaming.GetRegionAt(transform.position).
-            homeRegion = ZoneTracker.Active;
+            // Region rumah dari RegionStreaming (#88), cadangan ZoneTracker.Active.
+            homeRegion = RegionStreaming.RegionOf(transform.position);
             homeRegionSet = true;
         }
 
@@ -119,9 +119,10 @@ namespace SurvivalIsland
         public string GetPrompt()
         {
             int n = Mathf.FloorToInt(storedPortions);
-            // TODO(LocalizationManager #104): kunci teks.
-            if (n <= 0 && !isExposedToSky) return "Tertutup atap";
-            return "Ambil Air (" + n + ")";
+            // Teks dari LocalizationManager (#104).
+            if (n <= 0 && !isExposedToSky) return Text("prompt.rain_collector_covered", "Tertutup atap");
+            var loc = LocalizationManager.Instance;
+            return loc != null && loc.Has("prompt.rain_collector") ? loc.Format("prompt.rain_collector", "count", loc.FormatNumber(n)) : "Ambil Air (" + n + ")";
         }
 
         public InteractBlockReason CanInteract(in InteractContext ctx)
@@ -210,6 +211,13 @@ namespace SurvivalIsland
             RegisterSelf();
             RefreshSkyExposure();
             UpdateVisual();
+        }
+
+        /// <summary>Teks dari LocalizationManager (#104); teks bawaan kalau kunci belum ada di tabel.</summary>
+        private static string Text(string key, string fallback)
+        {
+            var loc = LocalizationManager.Instance;
+            return loc != null && loc.Has(key) ? loc.Get(key) : fallback;
         }
     }
 }

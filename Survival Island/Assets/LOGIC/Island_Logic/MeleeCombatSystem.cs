@@ -9,8 +9,8 @@ namespace SurvivalIsland
     /// Damage awal dari ItemData.weaponDamage; jarak dan jeda di prefab viewmodel (data, bukan logika, #84).
     ///
     /// Panen memanggil ResourceNode.ReceiveHit milik Langkah 4, jadi file ini terkompilasi setelah branch Langkah 4 digabung.
-    /// Catatan Langkah 5 (TODO): DurabilitySystem.ApplyWear (#113), WeaponStatCalculator (#113), AnimationController (#12),
-    /// Fire Axe (#97) belum ada.
+    /// DurabilitySystem.ApplyWear dan WeaponStatCalculator (#113) serta animasi ayun lewat PlayerAnimDriver (#12) sudah dipakai.
+    /// Belum ada (TODO): Fire Axe (#97), keausan pisau saat bertarung (angkanya belum ada di DurabilitySystem.md).
     /// </summary>
     public class MeleeCombatSystem : EquippableBehaviour
     {
@@ -24,15 +24,18 @@ namespace SurvivalIsland
         private bool isInDamageMoment;
         private float meleeDamage;
         private string itemId;
+        private ItemInstance instance;
 
         public override bool CanSwitchNow => !isInDamageMoment;
 
         public override void OnEquip(ItemInstance instance)
         {
             base.OnEquip(instance);
+            this.instance = instance;
             itemId = instance != null ? instance.itemId : null;
             var item = itemId != null ? ItemDatabase.Get(itemId) : null;
-            meleeDamage = item != null && item.weaponDamage > 0f ? item.weaponDamage : fallbackDamage;
+            // Damage akhir setelah upgrade dan modifier Lucky Machine (#113).
+            meleeDamage = WeaponStatCalculator.GetMeleeDamage(item != null && item.weaponDamage > 0f ? item.weaponDamage : fallbackDamage, instance);
         }
 
         public override void OnUnequip()
@@ -62,7 +65,9 @@ namespace SurvivalIsland
             }
             // 3.
             nextAttackTime = Time.time + cooldown;
-            // 4. TODO #12: armsAnim.Play(AnimIds.Swing).
+            // 4. Animasi ayun viewmodel (#12).
+            var driver = PlayerAnimDriver.Instance;
+            if (driver != null && driver.Arms != null) driver.Arms.Play(AnimIds.Swing);
             if (audioSource != null && swingClip != null) audioSource.PlayOneShot(swingClip);
             // 5.
             var cam = FirstPersonCamera.Instance != null ? FirstPersonCamera.Instance.WorldCamera : null;
@@ -73,12 +78,13 @@ namespace SurvivalIsland
             isInDamageMoment = true;
             if (PhysicsQuery.Raycast(new Ray(camT.position, camT.forward), out var hit, attackRange, PhysicsMasks.Melee))
             {
-                // ResourceNode (#73, ditulis Langkah 4): panen. Keausan hanya kalau hasilnya Hit (TODO #113: ApplyWear).
+                // ResourceNode (#73, ditulis Langkah 4): panen. Keausan hanya kalau hasilnya Hit (#113).
                 var node = hit.collider.GetComponentInParent<ResourceNode>();
                 if (node != null)
                 {
                     var item = itemId != null ? ItemDatabase.Get(itemId) : null;
-                    node.ReceiveHit(item != null ? item.toolClass : ToolClass.None, hit.point, true);
+                    var tool = item != null ? item.toolClass : ToolClass.None;
+                    if (node.ReceiveHit(tool, hit.point, true) == HitResult.Hit) ApplyToolWear(tool, true);
                     isInDamageMoment = false;
                     return;
                 }
@@ -90,10 +96,29 @@ namespace SurvivalIsland
                 };
                 bool applied = DamageRouter.ApplyHit(hit, info);
                 if (!applied && audioSource != null && surfaceHitClip != null) audioSource.PlayOneShot(surfaceHitClip);
-                // TODO #113: DurabilitySystem.ApplyWear setelah damage.
+                // Keausan setelah damage (#113).
+                if (applied) { var weaponItem = itemId != null ? ItemDatabase.Get(itemId) : null; ApplyToolWear(weaponItem != null ? weaponItem.toolClass : ToolClass.None, false); }
             }
             // 7.
             isInDamageMoment = false;
+        }
+
+        /// <summary>
+        /// DurabilitySystem.md tabel keausan (#113): ayunan Kapak dan Beliung yang kena memakai resource.axeDecayPerUse /
+        /// pickaxeDecayPerUse; memanen dengan Pisau memakai resource.knifeDecayPerHarvest. Pisau saat bertarung belum punya angka.
+        /// </summary>
+        private void ApplyToolWear(ToolClass tool, bool harvest)
+        {
+            var res = GameManager.CurrentBalance != null ? GameManager.CurrentBalance.resource : null;
+            if (res == null || instance == null) return;
+            float amount = 0f;
+            switch (tool)
+            {
+                case ToolClass.Axe: amount = res.axeDecayPerUse; break;
+                case ToolClass.Pickaxe: amount = res.pickaxeDecayPerUse; break;
+                case ToolClass.Knife: amount = harvest ? res.knifeDecayPerHarvest : 0f; break;
+            }
+            if (amount > 0f) DurabilitySystem.ApplyWear(instance, amount);
         }
     }
 }

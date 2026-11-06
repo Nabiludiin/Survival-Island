@@ -29,7 +29,7 @@ namespace SurvivalIsland
     /// - EnemyAI belum punya field lair dan EnterDormant(lair): rujukan disimpan LairRegistry, dan areaMask diatur di sini.
     /// - SpawnManager belum bisa mengambil alih zombie dari luar: zombie yang dilepas saat malam tetap dari pool sarang dan
     ///   tidak masuk daftar SpawnManager; bagian yang belum muncul diminta lewat SpawnManager.RequestBurst di pintu keluar.
-    /// - FlashlightController dan LightSourceSystem (#98) belum ada: cahaya dibaca dari TorchController yang menyala.
+    /// - Cahaya pemain dibaca dari TorchController yang menyala atau FlashlightController.IsActiveLit (#98).
     /// </summary>
     [RequireComponent(typeof(InteriorZone))]
     public class ZombieLair : MonoBehaviour, ISaveable
@@ -333,7 +333,8 @@ namespace SurvivalIsland
             bool crouching = playerTraversal != null && playerTraversal.IsCrouching;
             float prox = crouching ? b.crouchProximityWakeRadius : b.proximityWakeRadius;
             var torch = EquipmentManager.Instance != null ? EquipmentManager.Instance.Active as TorchController : null;
-            bool lightOn = torch != null && torch.IsLit;   // TODO(FlashlightController): senter (#98)
+            // Obor menyala atau senter menyala (#98).
+            bool lightOn = (torch != null && torch.IsLit) || FlashlightController.IsActiveLit;
             Vector3 eye = AISensoryHub.Instance != null ? AISensoryHub.Instance.PlayerEyePosition : (player != null ? player.AimPoint : Vector3.zero);
 
             for (int i = 0; i < members.Length; i++)

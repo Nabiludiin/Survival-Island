@@ -35,7 +35,7 @@ namespace SurvivalIsland
 
         public bool IsAvailable => isActiveAndEnabled && !harvestedToday && TideManager.Instance != null && TideManager.Instance.IsLow;
         public float HoldSeconds => 0f;
-        public string GetPrompt() => "Ambil hasil karang";   // TODO(LocalizationManager #104): kunci teks
+        public string GetPrompt() { var loc = LocalizationManager.Instance; return loc != null && loc.Has("prompt.low_tide") ? loc.Get("prompt.low_tide") : "Ambil hasil karang"; }   // #104
         public InteractBlockReason CanInteract(in InteractContext ctx) => ctx.IsCarryingHeavyItem ? InteractBlockReason.CarryingHeavyItem : InteractBlockReason.None;
         public void OnHoverEnter() { if (highlight != null) highlight.SetState(HighlightState.Available); }
         public void OnHoverExit() { if (highlight != null) highlight.SetState(HighlightState.Off); }

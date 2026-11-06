@@ -10,8 +10,8 @@ namespace SurvivalIsland
     /// Struktur lampu, baterai, dan tarikan cahaya adalah usulan yang disetujui developer (#85).
     ///
     /// Catatan implementasi (sistem pendukung):
-    /// - AISensoryHub.SetLightAttraction belum ada (TODO di AISensoryHub.cs): titik dan peluang dihitung dan disimpan di
-    ///   LightAttractionPoint / LightAttractionChance, pemanggilannya ditandai TODO.
+    /// - Titik dan peluang tarikan disimpan di LightAttractionPoint / LightAttractionChance, lalu dikirim ke
+    ///   AISensoryHub.SetLightAttraction (#98).
     /// - Pengurangan Item_Battery dilakukan lewat TryUseBattery, untuk dipanggil ItemUseSystem (#66, kode lama).
     /// </summary>
     public class LightSourceSystem : MonoBehaviour
@@ -94,7 +94,7 @@ namespace SurvivalIsland
             if (AISensoryHub.Instance != null) AISensoryHub.Instance.SetVisibilityModifier(1f);
             LightAttractionPoint = Vector3.zero;
             LightAttractionChance = 0f;
-            // TODO(AISensoryHub #98): AISensoryHub.Instance.SetLightAttraction(Vector3.zero, 0f);
+            if (AISensoryHub.Instance != null) AISensoryHub.Instance.SetLightAttraction(Vector3.zero, 0f);
         }
 
         // ---------------------------------------------------------------- Daftar sumber
@@ -294,7 +294,7 @@ namespace SurvivalIsland
                 // Usulan 1 disetujui: tarikan ringan, maksimum 0,35, hanya zombie Unaware yang terpengaruh (diatur AISensoryHub).
                 LightAttractionChance = Mathf.Min(count * (b != null ? b.attractionChancePerLight : 0.05f), b != null ? b.attractionChanceMax : 0.35f);
             }
-            // TODO(AISensoryHub #98): AISensoryHub.Instance.SetLightAttraction(LightAttractionPoint, LightAttractionChance);
+            if (AISensoryHub.Instance != null) AISensoryHub.Instance.SetLightAttraction(LightAttractionPoint, LightAttractionChance);
         }
 
         // ---------------------------------------------------------------- Baterai senter (dipanggil ItemUseSystem #66)

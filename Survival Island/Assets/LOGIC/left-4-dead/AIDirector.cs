@@ -47,8 +47,8 @@ namespace SurvivalIsland
     /// Siklus empat tahap dan angka kurva adalah usulan disetujui developer (#85). Director menentukan berapa banyak dan
     /// seberapa beringas; SpawnManager menentukan jenis dan tempat.
     /// Catatan Langkah 5: malam dibaca dari HourChangedEvent (DayPhaseTracker), bukan NightfallEvent (Langkah 4).
-    /// Belum diimplementasikan (TODO): isHeld saat tidur (#67), isOverridden saat Blood Moon (#50), RequestCampCounter (#94),
-    /// pengali jumlah dari DifficultyProfile (field belum diberi nama).
+    /// isHeld mengikuti SleepStateChangedEvent (#67). isOverridden diatur HordeManager lewat SetOverridden saat Blood Moon (#50).
+    /// Belum diimplementasikan (TODO): RequestCampCounter (#94), pengali jumlah dari DifficultyProfile (field belum diberi nama).
     /// </summary>
     public class AIDirector : MonoBehaviour, ISaveable
     {
@@ -89,6 +89,7 @@ namespace SurvivalIsland
             EventChannel<PlayerDamagedEvent>.Raised += HandlePlayerDamaged;
             EventChannel<PlayerPinnedEvent>.Raised += HandlePinned;
             EventChannel<EnemyKilledEvent>.Raised += HandleEnemyKilled;
+            EventChannel<SleepStateChangedEvent>.Raised += HandleSleep;
             if (WorldStateSave.Instance != null) WorldStateSave.Instance.Register(this);
             wasNight = false;
             if (DayPhaseTracker.IsNight) HandleNightfall();
@@ -100,8 +101,12 @@ namespace SurvivalIsland
             EventChannel<PlayerDamagedEvent>.Raised -= HandlePlayerDamaged;
             EventChannel<PlayerPinnedEvent>.Raised -= HandlePinned;
             EventChannel<EnemyKilledEvent>.Raised -= HandleEnemyKilled;
+            EventChannel<SleepStateChangedEvent>.Raised -= HandleSleep;
             if (WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
         }
+
+        // AIDirector.md: selama tidur anggaran dan tahap ditahan (#67).
+        private void HandleSleep(SleepStateChangedEvent e) => isHeld = e.isSleeping;
 
         private void HandleHour(HourChangedEvent e)
         {

@@ -16,7 +16,7 @@ namespace SurvivalIsland
     /// Catatan implementasi (sistem pendukung):
     /// - AIDirector.RequestCampCounter (#27) belum ada: pembalas diminta lewat SpawnManager.RequestWave dengan forcedEnemyId
     ///   dari RegionSpawnTable.campCounterEnemyId (reason "CampCounter").
-    /// - SleepStateChangedEvent (#67) dan status berenang (#13) belum ada: campTimer tidak berhenti saat tidur (TODO).
+    /// - Tidur (#67) dan berenang (#13) dibaca dari nilai sticky SleepStateChangedEvent / SwimStateChangedEvent.
     /// - EnemyAI (kode Langkah 5) belum membaca GetResponse; TraversalAgent.TickUnreachable sudah menjalankan responsnya.
     /// </summary>
     public class AITraversal : MonoBehaviour
@@ -300,11 +300,14 @@ namespace SurvivalIsland
             bool night = DayPhaseTracker.IsNight;
             bool inside = BaseNavigation.Instance != null && BaseNavigation.Instance.IsPlayerInsideBase;
             bool pinned = PlayerPinnedState.Instance != null && PlayerPinnedState.Instance.IsPinned;
-            // TODO(SleepSystem): berhenti selama SleepStateChangedEvent.isSleeping (#67). TODO(SwimmingSystem): tidak saat berenang (#13).
+            // Tidur (#67): campTimer berhenti (tidak direset). Dibaca dari nilai sticky terakhir.
+            if (EventChannel<SleepStateChangedEvent>.HasLast && EventChannel<SleepStateChangedEvent>.Last.isSleeping) return;
+            // Berenang (#13) tidak dihitung berkemah, sama seperti tertahan.
+            bool swimming = EventChannel<SwimStateChangedEvent>.HasLast && EventChannel<SwimStateChangedEvent>.Last.isSwimming;
             float unreach = standardMask != int.MinValue ? GetUnreachableSeconds(standardMask) : 0f;
-            // Siang, terjangkau, di dalam base, atau tertahan: timer 0.
+            // Siang, terjangkau, di dalam base, tertahan, atau berenang: timer 0.
             // Berpindah ke titik terjangkau juga membuat unreach 0, jadi ikut di sini.
-            if (player == null || !night || inside || pinned || unreach <= 0f) { ResetCamp(player); return; }
+            if (player == null || !night || inside || pinned || swimming || unreach <= 0f) { ResetCamp(player); return; }
             float mult = Time.time < shotWindowUntil ? b.campShotMultiplier : 1f;
             campTimer += dt * mult;
 
@@ -325,7 +328,8 @@ namespace SurvivalIsland
         /// <summary>Tier 2: varian pembalas per region (tabel "Hukuman berkemah").</summary>
         private void RequestCampCounter(TraversalBalance b)
         {
-            int r = (int)ZoneTracker.Active;   // TODO(RegionStreaming): GetRegionAt(pemain) (#88)
+            // Region pemain dari RegionStreaming (#88); cadangan ZoneTracker.Active di scene uji.
+            int r = PlayerTargetable.Instance != null ? (int)RegionStreaming.RegionOf(PlayerTargetable.Instance.Position) : (int)ZoneTracker.Active;
             var table = tablesByRegion != null && r >= 0 && r < tablesByRegion.Length ? tablesByRegion[r] : null;
             string id = table != null && !string.IsNullOrEmpty(table.campCounterEnemyId) ? table.campCounterEnemyId : StandardZombieId;
             // TODO(AIDirector): AIDirector.Instance.RequestCampCounter(id, campCounterCount) (#27).

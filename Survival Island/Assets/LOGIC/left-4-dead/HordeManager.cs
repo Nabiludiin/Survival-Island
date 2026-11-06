@@ -24,8 +24,8 @@ namespace SurvivalIsland
     /// Catatan implementasi (sistem pendukung):
     /// - AIDirector dan AISensoryHub belum mendengar BloodMoonStartedEvent, jadi HordeManager memanggil SetOverridden dan
     ///   IgnoreStealth langsung (API publik yang memang disiapkan untuk #50). Kalau pendengarnya ditambah, nilainya tetap sama.
-    /// - RegionStreaming (#88) belum ada: region dianggap selalu dimuat dan region pusat dibaca dari ZoneTracker.Active.
-    /// - SleepStateChangedEvent (#67) belum ada: pengecekan tidur dilewati (TODO).
+    /// - Region pusat dibaca dari RegionStreaming.RegionOf (#88; cadangan ZoneTracker.Active).
+    /// - Tidur dibaca dari SleepStateChangedEvent (#67).
     /// </summary>
     public class HordeManager : MonoBehaviour, ISaveable
     {
@@ -71,7 +71,7 @@ namespace SurvivalIsland
             EventChannel<DaybreakEvent>.Raised += HandleDaybreak;
             EventChannel<HourChangedEvent>.Raised += HandleHour;
             EventChannel<RunEndedEvent>.Raised += HandleRunEnded;
-            // TODO(SleepSystem): EventChannel<SleepStateChangedEvent>.Raised += e => isSleeping = e.isSleeping (#67).
+            EventChannel<SleepStateChangedEvent>.Raised += HandleSleep;   // #67
             if (WorldStateSave.Instance != null) WorldStateSave.Instance.Register(this);
         }
 
@@ -81,6 +81,7 @@ namespace SurvivalIsland
             EventChannel<DaybreakEvent>.Raised -= HandleDaybreak;
             EventChannel<HourChangedEvent>.Raised -= HandleHour;
             EventChannel<RunEndedEvent>.Raised -= HandleRunEnded;
+            EventChannel<SleepStateChangedEvent>.Raised -= HandleSleep;
             if (WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
         }
 
@@ -224,8 +225,8 @@ namespace SurvivalIsland
 
         private RegionSpawnTable TableAt(Vector3 center)
         {
-            // TODO(RegionStreaming): tablesByRegion[(int)RegionStreaming.GetRegionAt(center)] (#88).
-            int r = (int)ZoneTracker.Active;
+            // Region di titik pusat dari RegionStreaming (#88), cadangan ZoneTracker.Active.
+            int r = (int)RegionStreaming.RegionOf(center);
             return tablesByRegion != null && r >= 0 && r < tablesByRegion.Length ? tablesByRegion[r] : null;
         }
 
@@ -253,6 +254,7 @@ namespace SurvivalIsland
 
         /// <summary>Dipanggil SleepSystem (#67) sampai SleepStateChangedEvent ada. Tidur tidak memicu gelombang baru.</summary>
         public void SetSleeping(bool value) => isSleeping = value;
+        private void HandleSleep(SleepStateChangedEvent e) => isSleeping = e.isSleeping;
 
         // ---------------------------------------------------------------- DevConsole (#56)
 

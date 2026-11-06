@@ -29,8 +29,8 @@ namespace SurvivalIsland
     /// GDD bagian 3: lapar, haus, infeksi, dan Game Over saat HP habis. GDD bagian 5: frostbite menguras stamina dulu, lalu HP.
     /// Angka laju dan urutan prioritas adalah usulan yang disetujui developer (#85), dibaca dari GameBalanceConfig.vitals.
     ///
-    /// Belum ada di Langkah 3 (TODO): aturan friendly fire (#59), grace dan pengali PlayerPinnedState (#110),
-    /// DeathCinematic (#53). Pemilik penalti Infection dan StatusEffect (InfectionSystem #64, StatusEffectManager #20)
+    /// Friendly fire (#59) dan grace PlayerPinnedState (#110) sudah dipakai di TakeDamage. Adegan mati milik
+    /// DeathCinematic (#53, dijalankan RunLifecycle). Pemilik penalti Infection dan StatusEffect (InfectionSystem #64, StatusEffectManager #20)
     /// mengisi lewat SetPenalty.
     /// </summary>
     public class SurvivalStats : MonoBehaviour, IDamageable, ISaveable
@@ -231,7 +231,9 @@ namespace SurvivalIsland
         {
             Set(VitalPenaltySource.Hunger, Hunger < b.lowVitalThreshold ? b.lowHungerMaxStaminaMultiplier : 1f, 1f);
             // Haus: regenerasi setengah saat rendah, 0 saat habis (#43).
-            float thirstRegen = Thirst <= 0f ? 0f : (Thirst < b.lowVitalThreshold ? b.lowThirstRegenMultiplier : 1f);
+            // Nilai saat habis dari hydration.dehydratedStaminaRegenMultiplier (HydrationSystem.md, nilai awal 0).
+            float dehydratedRegen = Balance != null ? Balance.hydration.dehydratedStaminaRegenMultiplier : 0f;
+            float thirstRegen = Thirst <= 0f ? dehydratedRegen : (Thirst < b.lowVitalThreshold ? b.lowThirstRegenMultiplier : 1f);
             Set(VitalPenaltySource.Thirst, 1f, thirstRegen);
             Set(VitalPenaltySource.Cold, 1f, isFreezing ? 0f : 1f);
             Set(VitalPenaltySource.Heavy, 1f, carryingHeavy ? b.heavyStaminaRegenMultiplier : 1f);
@@ -325,7 +327,12 @@ namespace SurvivalIsland
             // 1. SurvivalStats.md: abaikan setelah mati atau setelah run berakhir (#82).
             if (isDead || isRunEnded) return;
             float amount = info.amount;
-            // 2. TODO #59: aturan friendly fire (pemain tidak bisa melukai diri dengan peluru/melee; ledakan pemain x0,5).
+            // 2. Friendly fire (DamagePipeline.md, usulan #59): peluru (pemain atau NPC) dan melee pemain tidak melukai pemain;
+            //    ledakan dan api buatan pemain dikali playerExplosionSelfMultiplier.
+            if (info.type == DamageType.Bullet && (info.byPlayer || (info.source != null && info.source.GetComponentInParent<NPCCompanion>() != null))) amount = 0f;
+            else if (info.type == DamageType.Melee && info.byPlayer) amount = 0f;
+            else if ((info.type == DamageType.Explosion || info.type == DamageType.Fire) && info.byPlayer)
+                amount *= Balance != null ? Balance.damage.playerExplosionSelfMultiplier : 0.5f;
             // 3. Hook Langkah 5 (#110): grace dan pengali musuh lain saat tertahan.
             amount = PlayerPinnedState.ModifyIncomingEnemyDamage(in info, amount);
             // 4. Serangan musuh dikali DifficultyProfile.enemyDamageMultiplier.
@@ -368,7 +375,7 @@ namespace SurvivalIsland
         {
             if (isDead) return;
             isDead = true;
-            // Matikan gerak. TODO #53: DeathCinematic menjalankan urutan jatuh.
+            // Matikan gerak. Urutan jatuh dijalankan DeathCinematic lewat RunLifecycle setelah PlayerDiedEvent (#53).
             var traversal = GetComponent<PlayerTraversal>();
             if (traversal != null) traversal.SetLocked(true);
             var controller = GetComponent<IslandPlayerController>();

@@ -13,7 +13,7 @@ namespace SurvivalIsland
     /// - DayNightDirector.SunDirection (Langkah 4) belum ada. Arah matahari dibaca dari RenderSettings.sun (Directional Light
     ///   yang diatur DayNightDirector), dengan elevasi minimal minSunElevationDeg. Tanpa sun, dipakai arah tegak ke atas.
     /// - Siang/malam dari HourChangedEvent (DayPhaseTracker), bukan DaybreakEvent/NightfallEvent.
-    /// - Zombie sarang di InteriorZone (#112) dan VillageZombieHiding/HidingSpot (Zombie Desa) belum ditulis (TODO #112, #63).
+    /// - Zombie sarang di InteriorZone dibaca dari LairRegistry (#112). VillageZombieHiding/HidingSpot (Zombie Desa) belum ditulis (TODO #63).
     /// </summary>
     public class SunlightExposure : MonoBehaviour, IPoolable
     {
@@ -96,7 +96,8 @@ namespace SurvivalIsland
         {
             var b = Bal;
             if (b == null) return;
-            // 1. TODO #112: zombie sarang di dalam InteriorZone terlindungi.
+            // 1. Zombie sarang di dalam InteriorZone terlindungi (#112).
+            if (ai != null && LairRegistry.IsShelteredLairZombie(ai)) return;
             if (IsProtected) return;
             // 2. Arah matahari, elevasi dinaikkan ke minimal minSunElevationDeg.
             Vector3 dir = SunDirection(b.minSunElevationDeg);

@@ -216,7 +216,8 @@ namespace SurvivalIsland
             {
                 quotaProgress[v.quotaIndex] = 0;
                 storedSpins++;
-                // TODO #22: notifikasi "Lucky Machine siap diputar".
+                // Notifikasi "Lucky Machine siap diputar" (#22).
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.lucky_ready", NotificationKind.Objective);
             }
 
             // 5. Tabungan penuh: gerbang tertutup sampai pemain memutar (keputusan 5).
@@ -395,8 +396,8 @@ namespace SurvivalIsland
                 case LuckyRewardKind.WeaponModifier: granted = GrantModifier(r); break;
                 case LuckyRewardKind.Skin: GrantSkin(r); break;
                 case LuckyRewardKind.PermanentBuff:
-                    // TODO #20: StatusEffectManager.Instance.Apply(r.buff, "lucky_machine"), Permanent, Intensify, maxStacks 3.
-                    Debug.LogWarning($"[LuckyMachine] Buff {r.rewardId} belum diterapkan: StatusEffectManager (#20) belum ditulis.");
+                    // Buff permanen lewat StatusEffectManager (#20). Permanent, Intensify, dan maxStacks diatur di aset StatusEffectData.
+                    granted = StatusEffectManager.Instance != null && StatusEffectManager.Instance.Apply(r.buff, "lucky_machine");
                     break;
             }
             if (!granted) return;
@@ -504,7 +505,7 @@ namespace SurvivalIsland
 
         public bool IsAvailable => isActiveAndEnabled;
         public float HoldSeconds => 0f;
-        public string GetPrompt() => "Lucky Machine";   // TODO #104: kunci teks LocalizationManager
+        public string GetPrompt() { var loc = LocalizationManager.Instance; return loc != null && loc.Has("prompt.lucky_machine") ? loc.Get("prompt.lucky_machine") : "Lucky Machine"; }   // #104
 
         public InteractBlockReason CanInteract(in InteractContext ctx)
         {

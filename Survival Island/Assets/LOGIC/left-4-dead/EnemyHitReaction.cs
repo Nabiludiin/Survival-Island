@@ -19,7 +19,7 @@ namespace SurvivalIsland
     /// Blueprint: left-4-dead/EnemyHitReaction.md (#95). Satu-satunya pemilik pengembalian musuh yang mati ke pool
     /// (SpawnManager.Despawn(Killed)), kecuali bangkai hewan (AnimalCarcass) dan zombie terbakar (SunlightExposure).
     /// GDD bagian 5: Zombie Militer berarmor tidak terhuyung kalau badannya ditembak (armorNoFlinchBelow).
-    /// Belum diimplementasikan (TODO): drop dari LootTable (#103) dan percikan logam lewat VFXManager (#15).
+    /// Belum diimplementasikan (TODO): percikan logam lewat VFXManager (#15).
     /// </summary>
     public class EnemyHitReaction : MonoBehaviour, IPoolable
     {
@@ -223,7 +223,8 @@ namespace SurvivalIsland
             if (bodyCapsule != null) bodyCapsule.enabled = false;
             if (instance != null && instance.IsAnimal) instance.IsCarcass = true;
 
-            // 2. TODO #103: SpawnDrop(info) memakai RegionLootTable.TryRoll dan aliran Gameplay.
+            // 2. Drop dari LootTable (#103).
+            SpawnDrop(info);
 
             // 3. Ragdoll untuk ledakan atau melee kuat, kalau izin tersedia. Selain itu animasi mati.
             bool wantsRagdoll = info.type == DamageType.Explosion || info.type == DamageType.Melee;
@@ -237,6 +238,31 @@ namespace SurvivalIsland
             // 4-5.
             CorpseBudget.Register(this);
             corpseRoutine = StartCoroutine(CorpseRoutine());
+        }
+
+        /// <summary>Jumlah drop malam ini. Direset saat DaybreakEvent lewat CorpseBudget.FadeAllZombies dan saat Clear.</summary>
+        internal static int dropsThisNight;
+
+        /// <summary>EnemyHitReaction.md "Drop" (usulan): drop zombie dari LootTable, dibatasi maxDropsPerNight.</summary>
+        private void SpawnDrop(DamageInfo info)
+        {
+            var data = Data;
+            var b = Bal;
+            // 1.
+            if (data == null || data.dropTable == null || (b != null && dropsThisNight >= b.maxDropsPerNight)) return;
+            // 2. Hanya kematian oleh pemain atau NPC (bukan matahari, Lucky Machine, atau bencana).
+            if (!info.byPlayer && (info.source == null || !info.source.CompareTag("NPC"))) return;
+            var seeds = RunSeedManager.Instance;
+            var inv = InventoryManager.Instance;
+            if (seeds == null || inv == null || WorldItemManager.Instance == null) return;
+            // 3. Peluang dropChance dengan aliran Gameplay (#89).
+            ref var stream = ref seeds.GetStream(RandomStreamId.Gameplay);
+            if (stream.NextFloat01() >= data.dropChance) return;
+            // 4.
+            int day = GameManager.Instance != null ? GameManager.Instance.currentDay : 1;
+            if (!RegionLootTable.TryRoll(data.dropTable, LootPointKind.Any, day, ref stream, out var item, out int amount)) return;
+            WorldItemManager.Instance.Spawn(inv.CreateInstance(item), amount, transform.position + Vector3.up * 0.3f, true);
+            dropsThisNight++;
         }
 
         private void EnableRagdoll(DamageInfo info)
