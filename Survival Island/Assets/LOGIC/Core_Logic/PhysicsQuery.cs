@@ -7,7 +7,7 @@ namespace SurvivalIsland
     /// supaya trigger raksasa ZoneManager tidak menghentikan raycast.
     /// Blueprint: Core_Logic/PhysicsLayers.md bagian 2 "Aturan query fisika" (#87). Claude.md Tahap 6 poin 7.
     ///
-    /// Belum ditulis di Langkah 1: CollectUniqueDamageables, karena butuh IDamageable milik DamagePipeline (#59, Langkah 5).
+    /// CollectUniqueDamageables ditambahkan Langkah 5, karena butuh IDamageable milik DamagePipeline (#59).
     /// </summary>
     public static class PhysicsQuery
     {
@@ -39,6 +39,34 @@ namespace SurvivalIsland
         public static int OverlapBox(Vector3 center, Vector3 halfExtents, Quaternion rotation, int mask, Collider[] buffer)
         {
             return Physics.OverlapBoxNonAlloc(center, halfExtents, buffer, rotation, mask, QueryTriggerInteraction.Ignore);
+        }
+
+        // ---------------------------------------------------------------- Ditambahkan Langkah 5 (#59, #87)
+
+        /// <summary>
+        /// Saring hasil overlap menjadi IDamageable unik lewat parent, supaya musuh dengan banyak collider
+        /// hanya kena sekali (PhysicsLayers.md, DamagePipeline.md). Tanpa alokasi selain kapasitas list.
+        /// </summary>
+        public static void CollectUniqueDamageables(Collider[] buffer, int count, System.Collections.Generic.List<IDamageable> results)
+        {
+            CollectUniqueDamageables(buffer, count, results, null);
+        }
+
+        /// <summary>Sama, ditambah collider pertama tiap target (dipakai ExplosionDamage untuk titik terdekat).</summary>
+        public static void CollectUniqueDamageables(Collider[] buffer, int count, System.Collections.Generic.List<IDamageable> results,
+            System.Collections.Generic.List<Collider> firstColliders)
+        {
+            results.Clear();
+            firstColliders?.Clear();
+            for (int i = 0; i < count; i++)
+            {
+                var col = buffer[i];
+                if (col == null) continue;
+                var d = col.GetComponentInParent<IDamageable>();
+                if (d == null || results.Contains(d)) continue;
+                results.Add(d);
+                firstColliders?.Add(col);
+            }
         }
 
         // ---------------------------------------------------------------- Pengecualian tertulis untuk air

@@ -216,3 +216,11 @@ Saat `stealth.enabled = false`, objek ini mematikan dirinya.
 10. Kembalikan zombie `Aware` ke pool, lalu munculkan lagi. **Hasil:** `Detection01 = 0`.
 11. Buka 50 zombie di Profiler. **Hasil:** paling banyak 6 sensor per frame, dan `Publish` tidak menghasilkan GC.
 12. Setel `stealth.enabled = false`. **Hasil:** zombie langsung mengejar, dan ikon mata mati.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `left-4-dead/AISensory.cs` (`AwarenessLevel`, `NoiseSourceKind`), `AISensoryHub.cs`, `NoiseEmitter.cs`.
+
+- `HuntHint` memakai `UnityEngine.Random`, karena tidak memengaruhi isi dunia yang disimpan. Tarikan cahaya (#98) yang memakai aliran `Gameplay` masih TODO.
+- `IgnoreStealth` berupa properti yang diisi `HordeManager` (#50) nanti. `DetectionMeterUI` belum ditulis, tetapi `PlayerDetectionChangedEvent` sudah dikirim.
+- `NoiseEmitter.Player` (statis) dan `NoiseEmitter.Emit(Vector3, float, NoiseSourceKind)` ditambahkan untuk sumber suara tanpa komponen sendiri.

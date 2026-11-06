@@ -352,3 +352,14 @@ Target memeriksa aturan ini di `TakeDamage`, jadi senjata tidak perlu tahu jenis
 14. Buka Profiler dan tembak 100 kali. **Hasil:** jalur `DamageRouter` tanpa alokasi GC selain `GetComponentInParent` yang tidak mengalokasi di build.
 15. Ledakkan tong di tengah 4 zombie. **Hasil:** tiap zombie terdorong atau jatuh menjauhi pusat ledakan, dengan `hitDirection` berbeda per target.
 16. Pakai profil kesulitan uji dengan `enemyDamageMultiplier` 2 pada hari 1. **Hasil:** pukulan zombie standar 30, karena pengali hanya diterapkan di langkah 4 `SurvivalStats`.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `Core_Logic/EnemyHealth.cs`, `DamageRouter.cs`, `DamageResistance.cs` (`DamageResistance`, `DamageResistanceTable`), `ExplosionDamage.cs`, dan `PhysicsQuery.CollectUniqueDamageables` (ditambahkan ke `Core_Logic/PhysicsQuery.cs`). Kontrak `IDamageable`, `DamageInfo`, `DamageType`, `BodyPart`, dan `DeathReasonMap` tetap dari Langkah 3 dan tidak diubah.
+
+- **`BaseHealth` belum ditulis.** Kelas ini butuh `BuildableData` (#79), milik Langkah 4. `EnemyAttack` menyerang bangunan lewat `IDamageable` biasa, jadi `BaseHealth` cukup memakai interface itu saat ditulis.
+- **`DamageRouter.ApplyHit(Collider, Vector3, DamageInfo)`**: overload tambahan untuk overlap. Versi `RaycastHit` memanggilnya.
+- **`EnemyHealth.Heal(float)`**: tambahan untuk pemulihan hewan saat kembali ke teritori (`WildlifeAI.md`), karena damage negatif diabaikan.
+- **`CollectUniqueDamageables`** punya overload yang juga mengisi collider pertama tiap target, dipakai `ExplosionDamage` untuk titik terdekat.
+- **`SurvivalStats.TakeDamage` langkah 3** sekarang memanggil `PlayerPinnedState.ModifyIncomingEnemyDamage` (hook satu baris di file Langkah 3). Langkah 2 (friendly fire ledakan pemain x0,5) masih TODO, karena belum ada sumber ledakan pemain.
+- `EnvironmentalHazard.NotifyExplosion` (#96) dan drop `LootTable` (#103) masih TODO.

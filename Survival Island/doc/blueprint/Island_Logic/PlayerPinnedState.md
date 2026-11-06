@@ -199,3 +199,11 @@ Dengan 6 tekanan per detik:
 10. Bunuh penyerang lewat `DevConsole` saat menahan. **Hasil:** pemain langsung lepas. Ulangi dengan mengirim penyerang kembali ke pool, dan pastikan hasilnya sama.
 11. Jeda game saat tertahan selama 10 detik. **Hasil:** `pinTimer` dan `EscapeProgress` tidak berubah.
 12. Mati saat tertahan. **Hasil:** `PlayerDiedEvent` satu kali, `Attacker` kosong, dan run berikutnya mulai tanpa kunci.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `Island_Logic/PlayerPinnedState.cs` (`PinReleaseReason`, `IPinAttacker`).
+
+- **Hook damage:** `public static float ModifyIncomingEnemyDamage(in DamageInfo info, float amount)` dipanggil `SurvivalStats.TakeDamage` langkah 3. Serangan "dari musuh" dikenali dari `info.source` yang punya `EnemyHealth`.
+- Mode tahan tombol (#19) belum ada, karena `InputManager` belum punya `StruggleHeld`. Saklarnya disiapkan di `pinned.holdToStruggle`.
+- Tusukan Pisau berlaku kalau `Base_Pisau` ada di inventori. Status `Broken` dan keausan menunggu `DurabilitySystem` (#113). `CameraShake` (#24) dan cek panel `Cinematic` masih TODO.

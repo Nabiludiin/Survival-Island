@@ -248,3 +248,11 @@ Saat `Submerged`, zombie tidak terlihat dan tidak bisa diserang, karena `Rendere
 15. Dorong zombie sarang keluar dari zona saat siang. **Hasil:** `IsProtected = false`, dan terbakar saat pengecekan berikutnya.
 16. Taruh zombie horde di dalam `InteriorZone` saat fajar. **Hasil:** tidak terlindungi, dan terbakar paling lama setelah 60 detik.
 17. `setday 60` di Region 4, lalu majukan jam ke 18:00 dan tembak kaki Zombie Desa yang baru naik. **Hasil:** kecepatan = `Min(moveSpeed x pengali gelombang x legSlowMultiplier, maxZombieSpeed)` x `emergeBoostMultiplier`. Boost tidak ikut dipotong `maxZombieSpeed`. Setelah `emergeBoostSeconds`, hanya boost yang hilang.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `left-4-dead/SunlightExposure.cs`.
+
+- **Arah matahari** dibaca dari `RenderSettings.sun` (Directional Light), karena `DayNightDirector.SunDirection` (Langkah 4) belum ada. Elevasinya tetap dinaikkan ke `minSunElevationDeg`.
+- Siang dibaca dari `HourChangedEvent` (`DayPhaseTracker`).
+- `VillageZombieHiding`, `HidingSpot`, dan pengecualian zombie sarang di `InteriorZone` (#112) belum ditulis. `IsProtected` bisa diisi dari luar.

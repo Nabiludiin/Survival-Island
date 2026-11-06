@@ -249,3 +249,12 @@ Statistik dibaca lewat `WeaponStatCalculator.Get` saat senjata dipasang (`OnEqui
 14. Simpan dengan magazine 7, keluar, lalu lanjutkan. **Hasil:** magazine 7. Mati, lalu mulai run baru. **Hasil:** magazine kembali 12.
 15. Jeda game saat reload selama 10 detik. **Hasil:** sisa waktu reload tetap sama.
 16. Tembak 100 kali dengan Profiler terbuka. **Hasil:** ukuran pool efek tidak bertambah setelah awal, dan tidak ada `Instantiate`.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `left-4-dead/GunController.cs`, `GunCore.cs`, `WeaponData.cs` (`FireMode`, `WeaponStats`), dan field `ItemData.weaponData`.
+
+- **Radius suara tembakan:** blueprint memakai `stealth.noiseGunshot` (40) di langkah 10, tetapi tabel senjata punya `noiseRadius` 35 dan skenario tes 10 menyebut 35 m. Kode memakai `WeaponData.noiseRadius`, dan `noiseGunshot` hanya cadangan kalau nilainya 0. Dicatat di "Masih terbuka" (`USULAN_TERBUKA.md`).
+- `WeaponStatCalculator` dan `DurabilitySystem` (#113) belum ada. Statistik disalin dari `WeaponData`, dan status `Broken` serta keausan dilewati.
+- `VFXManager` (#15) belum ada. Muzzle flash memakai `ParticleSystem` di prefab viewmodel (tanpa `Instantiate`), dan efek impact masih TODO. Peluru tetap raycast tanpa objek, jadi tidak ada peluru yang di-pool.
+- `NPCGunUser` (#76) belum ditulis. `AmmoChangedEvent.reserve` bernilai -1 untuk cadangan tak terbatas (Laser Pistol).

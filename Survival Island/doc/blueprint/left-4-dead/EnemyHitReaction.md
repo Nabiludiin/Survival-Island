@@ -272,3 +272,11 @@ Hasil paling banyak pada zombie standar: 0,08 × 2 = 0,16 peluru per mayat, kala
 16. Tembak kaki Serigala, lalu tembak badannya sampai `poise` tercapai. **Hasil:** Serigala melambat dan terhuyung lewat `WildlifeAI` sebagai `IHitReactive`, tanpa error `EnemyAI`, lalu melanjutkan `Chase`.
 17. Bunuh Beruang Kutub dan menjauh di luar pandangan. **Hasil:** `IsCarcass = true`, bangkai tidak dikembalikan sebagai `OffNavMesh`.
 18. Pukul zombie dengan Pisau sampai `poise` tercapai. **Hasil:** zombie terdorong menjauhi pemain, bukan diam di tempat.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `left-4-dead/EnemyHitReaction.cs` (`HitReactionKind`, `IHitReactive`), `CorpseBudget.cs`, `PlayerShove.cs`.
+
+- **`CorpseBudget` berupa kelas statis**, bukan manager scene, karena isinya hanya antrean. `SpawnManager.Awake` mengosongkannya, dan `SpawnManager` memanggil `FadeAllZombies()` saat siang tiba.
+- Drop (`SpawnDrop`, #103) dan percikan logam (#15) masih TODO. Animasi memakai trigger Animator `Stagger`, `Knockback`, dan `Die` sampai `AnimIds` (#12) ada.
+- Pudar memakai `MaterialPropertyBlock` dengan properti `_Fade` dan `_BaseColor`. Shader zombie perlu mendukung salah satunya.

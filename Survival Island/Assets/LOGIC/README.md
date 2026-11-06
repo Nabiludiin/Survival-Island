@@ -127,7 +127,7 @@ Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Lan
 | **2** | Fase 1: `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | `60-seconds/` | Terkompilasi, belum diuji di Play Mode |
 | **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Belum dimulai |
-| **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/` | Belum dimulai |
+| **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/`, `Core_Logic/` | Ditulis, belum dikompilasi |
 | **6** | `ZoneManager`, frostbite, jembatan kayu, barang berat, `WeatherManager` | `Island_Logic/` | Belum dimulai |
 | **7** | *Sudden Event*, `LuckyMachine`, `DiaryManager`, alur menang dan kalah | `Island_Logic/`, `Core_Logic/` | Belum dimulai |
 
@@ -160,3 +160,51 @@ Isi kolom **Status** dengan salah satu: `Belum dimulai`, `Sedang ditulis`, `Ditu
 1. Baca `Survival Island/Claude.md` untuk aturan menulis kode.
 2. Pastikan blueprint utama dan prasyarat Langkah itu sudah ada di `Survival Island/doc/blueprint/`.
 3. Setelah menulis, perbarui tabel **Status Langkah** di atas.
+
+## 🧩 Ditambahkan Langkah 5
+
+Langkah 5 (Pilar 3 "L4D"): AI musuh `NavMeshAgent`, spawn siang dan malam, gunplay raycast, melee, `HitboxModifier`, dan implementasi `DamagePipeline`. Status: **ditulis, belum dikompilasi di Unity**. Kode hanya dicek dengan `dotnet build` (netstandard2.1, C# 9) terhadap DLL UnityEngine 6000.3.10f1 dengan stub InputSystem/TMP/UGUI: 0 error dan 0 warning di konfigurasi Editor, rilis, dan `DEVELOPMENT_BUILD`. Belum ada yang dijalankan di Play Mode.
+
+| File | Blueprint |
+|---|---|
+| `Core_Logic/EnemyHealth.cs`, `DamageRouter.cs`, `DamageResistance.cs` (`DamageResistance`, `DamageResistanceTable`), `ExplosionDamage.cs` | `DamagePipeline.md` |
+| `Island_Logic/HitboxModifier.cs` | `HitboxModifier.md` |
+| `Island_Logic/MeleeCombatSystem.cs` | `MeleeCombatSystem.md` |
+| `Island_Logic/PlayerPinnedState.cs` (`PinReleaseReason`, `IPinAttacker`) | `PlayerPinnedState.md` |
+| `Island_Logic/RegionType.cs` | `GLOSSARY.md` (pemilik `ZoneManager`, Langkah 6) |
+| `left-4-dead/EnemyAI.cs` (`AIState`, `SpeedSource`) | `EnemyAI.md` |
+| `left-4-dead/EnemyData.cs`, `ZombieData.cs` (`SpecialZombieKind`), `SpecialZombieAI.cs`, `TribalBehavior.cs`, `TribalSnare.cs`, `MossBehavior.cs`, `MilitaryBehavior.cs`, `FrozenBehavior.cs`, `VillageBehavior.cs` | `SpecialZombieAI.md` |
+| `left-4-dead/EnemyAttack.cs` (`AttackPhase`), `AttackData.cs`, `AttackCoordinator.cs` | `EnemyAttack.md` |
+| `left-4-dead/EnemyHitReaction.cs` (`HitReactionKind`, `IHitReactive`), `CorpseBudget.cs`, `PlayerShove.cs` | `EnemyHitReaction.md` |
+| `left-4-dead/AISensory.cs` (`AwarenessLevel`, `NoiseSourceKind`), `AISensoryHub.cs`, `NoiseEmitter.cs` | `AISensory.md` |
+| `left-4-dead/ThreatSystem.cs` (`ThreatState`, `IThreatAgent`), `ITargetable.cs` (`TargetKind`), `ThreatProfile.cs`, `PlayerTargetable.cs` | `ThreatSystem.md` |
+| `left-4-dead/HordeCrowdManager.cs` (`CrowdTier`, `ICrowdAgent`) | `HordeCrowdManager.md` |
+| `left-4-dead/SpawnManager.cs` (`DespawnReason`, `SpawnOverride`), `RegionSpawnTable.cs` (`SpawnEntry`), `EnemyInstance.cs`, `AnimalTerritory.cs`, `DenPoint.cs` | `SpawnManager.md` |
+| `left-4-dead/AIDirector.cs` (`DirectorPhase`, `ThreatKey`, `WaveModifiers`, `WaveRequest`) | `AIDirector.md` |
+| `left-4-dead/SunlightExposure.cs` | `SunlightExposure.md` |
+| `left-4-dead/WildlifeAI.cs` (`AnimalState`), `AnimalData.cs`, `AnimalCarcass.cs` | `WildlifeAI.md` |
+| `left-4-dead/GunController.cs`, `GunCore.cs`, `WeaponData.cs` (`FireMode`, `WeaponStats`) | `GunController.md` |
+| `left-4-dead/DayPhaseTracker.cs` | Pembaca siang/malam sementara dari `HourChangedEvent` (jam di `DayNightDirector.md`) |
+
+### Perubahan kecil di file Langkah lain
+
+- `Core_Logic/GameEvents.cs`: bagian baru "Ditambahkan Langkah 5" di akhir file (`NoiseEmittedEvent`, `PlayerDetectionChangedEvent`, `EnemySpawnedEvent`, `EnemyHitEvent`, `EnemyKilledEvent`, `EnemyAttackTelegraphEvent`, `DirectorPhaseChangedEvent`, `AmmoChangedEvent`, `WeaponFiredEvent`, `ShotResolvedEvent`, dan `RegionChangedEvent` milik `ZoneManager`). `NightfallEvent` sengaja tidak ditulis, karena milik Langkah 4.
+- `Core_Logic/GameBalanceSections.cs`: bagian `damage`, `gun`, `enemyAttack`, `hitReaction`, `threat`, `stealth`, `wildlife`, `spawn`, `sunlight`, `specialZombie`, `aiDirector`, `crowd`, dan `pinned` diisi di bagian baru "Ditambahkan Langkah 5" di akhir file. Baris kelas kosong lamanya (`[Serializable] public class XBalance { }` beserta komentarnya) dihapus, karena C# tidak bisa menambah field ke kelas yang sudah dideklarasikan. Saat merge dengan Langkah 4, kedua bagian akhir file diambil.
+- `Core_Logic/PhysicsQuery.cs`: `CollectUniqueDamageables` ditambahkan (dicadangkan Langkah 1 untuk Langkah 5).
+- `Core_Logic/ItemData.cs`: field `weaponData` (dicadangkan Langkah 3 untuk Langkah 5).
+- `raft/SurvivalStats.cs`: satu baris hook di `TakeDamage` langkah 3, memanggil `PlayerPinnedState.ModifyIncomingEnemyDamage`.
+- Kolom **Status** Langkah 5 di tabel "Status Langkah" diubah menjadi `Ditulis, belum dikompilasi`.
+
+### Belum diimplementasikan (sistem pendukung belum ada)
+
+`BaseHealth` (butuh `BuildableData`, Langkah 4), `BaseNavigation` (#78, diganti pemeriksaan jalur sementara), `AITraversal` (#94), `ZombieLair` (#112), `VillageZombieHiding`/`HidingSpot` (#63), `BushSpawnPoint` (#25), `RegionStreaming` (#88), `HordeManager` Blood Moon (#50), `DurabilitySystem`/`WeaponStatCalculator` (#113), `VFXManager` (#15), `AnimationController` (#12), `NPCGunUser` (#76), `DetectionMeterUI`, drop `LootTable` (#103), `AmbushPerch` dan Gagak terbang (#61). Semuanya ditandai TODO di kode dan dicatat di bagian "Catatan Implementasi (Langkah 5)" pada blueprint terkait. `ShipHazardManager` (Langkah 2) belum memanggil `EnemyAI.SetTarget`/`WakeUp`, jadi zombie kapal belum mengejar.
+
+### Penyiapan di Unity untuk Langkah 5 (belum dilakukan)
+
+1. Scene `IslandPhase`: satu objek manager berisi `SpawnManager` (isi 4 aset **Create > Survival > Region Spawn Table** sesuai tabel GDD bagian 5), `AIDirector`, `ThreatSystem`, `AISensoryHub`, `HordeCrowdManager`, dan `AttackCoordinator`. `NavMeshSurface` di-bake untuk pulau. `ShipPhase` cukup `HordeCrowdManager` dan `AttackCoordinator`.
+2. Prefab pemain Fase 2: tambahkan `PlayerTargetable`, `PlayerPinnedState`, `PlayerShove`, dan `NoiseEmitter` (`isPlayerMovement = true`). Prefab pemain kapal: `PlayerTargetable`.
+3. Prefab zombie (tag `Zombie`, kapsul di layer `Enemy`): `NavMeshAgent`, `EnemyHealth` (aset **Survival > Zombie Data**), `EnemyInstance`, `EnemyAI`, `EnemyAttack` (aset **Survival > Attack Data**), `EnemyHitReaction`, `AISensory`, `SunlightExposure`, dan turunan `SpecialZombieAI` sesuai varian. Collider tulang di layer `EnemyHitbox` (bukan trigger) dengan `HitboxModifier` Head/Torso/Leg, dan `Rigidbody` kinematik untuk ragdoll.
+4. Prefab hewan (tag `Animal`): sama, tetapi `WildlifeAI` (aset **Survival > Animal Data**) menggantikan `EnemyAI`, tanpa `AISensory` dan `SunlightExposure`. Hewan yang dikuliti memakai `AnimalCarcass` dengan collider anak di layer `Interactable`.
+5. Pool di `ObjectPooler`, tag = `enemyId`: `zombie_standar` 50, `zombie_desa` 30, varian zombie lain 12, `hewan_serigala` dan `hewan_anjing` 8, `hewan_gagak` 16, hewan lain 4, serta `Tribal_Snare` (layer `Projectile`, komponen `TribalSnare`).
+6. Aset **Survival > Weapon Data** untuk `Base_Pistol` (nilai di `GunController.md`), diisi ke `ItemData.weaponData`. `equipPrefab` Pistol memakai `GunController` dengan `ParticleSystem` muzzle flash, dan `equipPrefab` Pisau/Kapak/Beliung memakai `MeleeCombatSystem`.
+7. Aset **Survival > Threat Profile**: `Threat_Zombie` dan `Threat_Animal` (nilai di `ThreatSystem.md`). Letakkan `DenPoint` dan `AnimalTerritory` di scene region.

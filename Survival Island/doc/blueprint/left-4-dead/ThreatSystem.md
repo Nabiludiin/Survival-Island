@@ -246,3 +246,11 @@ Saat Blood Moon tanpa base, `BaseAnchor` tidak sah, dan zombie memburu pemain.
 14. Bunyikan tembakan di dekat zombie tanpa target. **Hasil:** zombie menuju sumber suara.
 15. Jalankan uji 50 zombie (#56) dengan Profiler. **Hasil:** `ThreatSystem` tanpa alokasi GC, paling banyak 8 penilaian per frame.
 16. Pakai ulang zombie dari pool. **Hasil:** target lama tidak terbawa, dan `chaserCounts` tetap benar.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `left-4-dead/ThreatSystem.cs` (`ThreatState`, `IThreatAgent`), `ITargetable.cs` (`TargetKind`), `ThreatProfile.cs`, `PlayerTargetable.cs`.
+
+- **`ThreatState` berupa class**, bukan struct. Satu objek dibuat per musuh di `Awake`, lalu dibagi lewat interface `IThreatAgent` (dipakai `EnemyAI` dan `WildlifeAI`) tanpa `ref`. Tidak ada alokasi per tick.
+- `ThreatProfile.allowedKinds` ditulis sebagai empat `bool` supaya mudah di Inspector.
+- Override `Lure` (#96) dan `BaseAnchor` saat Blood Moon (#50) masih TODO.

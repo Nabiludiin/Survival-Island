@@ -307,3 +307,12 @@ Beberapa override boleh aktif. Yang terakhir didorong menang untuk `table`, nila
 17. Saat malam, bunuh 3 zombie, lalu kembalikan 1 zombie lewat `ReturnStuck`. **Hasil:** `spawnedTonight` hanya berkurang 1.
 18. Malam di Region 4, panggil `RequestWave` dengan `count = 4`. **Hasil:** semua Zombie Desa naik dari titik `HidingSpot` lewat `SpawnEmerging`, dan `TickSpawn` tidak memunculkan zombie.
 19. Saat malam, panggil `RequestAmbush` dengan 5 zombie, lalu menjauh sampai semuanya `Despawn(TooFar)`. **Hasil:** `spawnedTonight` tidak berkurang, karena `UsesNightBudget` bernilai `false`. Ulangi dengan zombie dari `RequestWave`. **Hasil:** anggaran dikembalikan satu per zombie.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `left-4-dead/SpawnManager.cs` (`DespawnReason`, `SpawnOverride`, `SpawnOverrideHandle`), `RegionSpawnTable.cs` (`SpawnEntry`), `EnemyInstance.cs`, `AnimalTerritory.cs`, `DenPoint.cs`.
+
+- **Siang dan malam** dibaca dari `HourChangedEvent` lewat `DayPhaseTracker` (`spawn.nightStartHour` 18 dan `spawn.dayStartHour` 6), karena `NightfallEvent` milik `DayNightDirector` (Langkah 4) belum digabung.
+- `RegionStreaming` (#88), `BaseNavigation.IsInsideBase` (#78), `InteriorZone`/`LairClearedEvent` (#112), `SleepStateChangedEvent` (#67), dan `PopulateHidingSpots` belum ada. Syarat itu dilewati dan ditandai TODO. `SetSleeping(bool)` disiapkan untuk #67.
+- **Zombie Desa dan Lumut** memakai `FindSpawnPoint` biasa, karena `HidingSpot` (#63) dan `BushSpawnPoint` (#25) belum ditulis. Lumut tetap mulai `Dormant` lewat `MossBehavior`.
+- `SweepWrongPhase` memakai `DespawnReason.Debug`, karena tabel alasan tidak punya alasan khusus untuk sapu bersih.

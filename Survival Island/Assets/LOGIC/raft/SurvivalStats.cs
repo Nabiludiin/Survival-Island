@@ -325,7 +325,9 @@ namespace SurvivalIsland
             // 1. SurvivalStats.md: abaikan setelah mati atau setelah run berakhir (#82).
             if (isDead || isRunEnded) return;
             float amount = info.amount;
-            // 2. TODO #59: aturan friendly fire. 3. TODO #110: grace dan pengali PlayerPinnedState.
+            // 2. TODO #59: aturan friendly fire (pemain tidak bisa melukai diri dengan peluru/melee; ledakan pemain x0,5).
+            // 3. Hook Langkah 5 (#110): grace dan pengali musuh lain saat tertahan.
+            amount = PlayerPinnedState.ModifyIncomingEnemyDamage(in info, amount);
             // 4. Serangan musuh dikali DifficultyProfile.enemyDamageMultiplier.
             bool fromEnemy = !info.byPlayer && (info.type == DamageType.Melee || info.type == DamageType.Bullet || info.type == DamageType.Structural);
             if (fromEnemy && Difficulty != null) amount *= Difficulty.enemyDamageMultiplier;

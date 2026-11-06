@@ -286,3 +286,13 @@ Pemeriksaan tidak berjalan saat `AttackBuilding` atau di dalam kandang Lucky Mac
 15. Saat terjerat Tribal, tusuk dengan Pisau satu kali. **Hasil:** jerat belum lepas (25 dari 40, kemajuan 0,6). Tusukan kedua melepas pemain, satu kali saja, dengan alasan `AttackerDamaged`, karena damage dikirim sebelum kemajuan ditambah (`PlayerPinnedState.md`, Tusukan Pisau langkah 2), sehingga `EscapedWithKnife` tidak terpanggil.
 16. `setday 60`, tembak Militer dari 3 meter, lalu tembak kakinya. **Hasil:** kecepatan = `moveSpeed` x pengali gelombang x pengali `MilitarySlow` x `legSlowMultiplier`, dan kembali ke pengali gelombang setelah efek habis.
 17. Spawn ulang `zombie_militer` dari pool. **Hasil:** `SpawnFromPool("zombie_militer", ...)` berhasil, tanpa field `poolTag` terpisah.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `left-4-dead/ZombieData.cs` (`SpecialZombieKind`), `EnemyData.cs`, `SpecialZombieAI.cs`, `TribalBehavior.cs`, `TribalSnare.cs`, `MossBehavior.cs`, `MilitaryBehavior.cs`, `FrozenBehavior.cs`, `VillageBehavior.cs`.
+
+- `EnemyData.dropTable` belum ada, karena `LootTable` (#103) belum ditulis.
+- **Tribal:** tarikan pemain memakai `IslandPlayerController.Teleport` bertahap, karena controller belum punya API dorongan luar. Jerat memakai pool `Tribal_Snare`.
+- **Lumut:** sorotan senter dan tingkat cahaya (#98) masih TODO.
+- **Beku:** `WarmthSystem.ApplyColdBurst` (#65, Langkah 6) masih TODO.
+- Pengaman macet varian besar ada di kelas dasar (`TickLargeStuck`), dipanggil `MilitaryBehavior`.

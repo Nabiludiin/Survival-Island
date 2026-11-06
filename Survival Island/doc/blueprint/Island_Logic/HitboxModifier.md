@@ -137,3 +137,7 @@ Pemeriksaan yang sama dijalankan alat audit layer di `PhysicsLayers.md` sebelum 
 10. Tembak kepala Serigala, lalu tembak Gagak di bagian mana pun. **Hasil:** Serigala 2x, dan Gagak selalu 1x.
 11. Pasang `HitboxModifier` di objek dengan layer `Default`. **Hasil:** peringatan muncul di Console Editor.
 12. Atur `legMultiplier` ke -1 lewat konsol, lalu tembak kaki. **Hasil:** damage 0, dan HP musuh tidak naik.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `Island_Logic/HitboxModifier.cs`. Sesuai blueprint. `GetMultiplier` memakai nilai bawaan 2 / 1 / 0,5 kalau `GameBalanceConfig` belum dimuat (scene tes).

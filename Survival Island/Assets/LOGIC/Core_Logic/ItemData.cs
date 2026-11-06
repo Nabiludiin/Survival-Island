@@ -15,8 +15,8 @@ namespace SurvivalIsland
     /// Cetakan data satu jenis item, tanpa logika. Blueprint: Core_Logic/ItemData.md (#66, #58, #60, #65, #73, #104, #118).
     /// GDD bagian 3: item inti Base_Kail, Base_Pistol, Base_Pisau, makanan, dan obat. Field tambahan adalah usulan teknis.
     ///
-    /// Belum ada di Langkah 3: field weaponData (WeaponData milik GunController #58, Langkah 5). Langkah 5 menambahkannya
-    /// di sini; slot save dan aset lama tetap aman karena ScriptableObject menerima field baru.
+    /// Field weaponData (WeaponData milik GunController #58) ditambahkan Langkah 5; aset lama tetap aman karena
+    /// ScriptableObject menerima field baru.
     /// </summary>
     [CreateAssetMenu(fileName = "New Item", menuName = "Survival/Item Data")]
     public class ItemData : ScriptableObject
@@ -32,6 +32,7 @@ namespace SurvivalIsland
         [Header("Pakai (#66)")]
         public float healAmount;
         public float weaponDamage;                 // Hanya senjata melee. Senjata api memakai weaponData (#58)
+        public WeaponData weaponData;              // Ditambahkan Langkah 5 (GunController.md, #58). null = bukan senjata api
         public int maxStack = 1;
         public float hungerDelta;
         public float thirstDelta;

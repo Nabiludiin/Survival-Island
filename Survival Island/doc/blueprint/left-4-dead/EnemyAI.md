@@ -218,3 +218,13 @@ Langganan `DaybreakEvent` dan `TriggerDaybreakDeath` dihapus. Keputusan terbakar
 15. Biarkan Zombie Desa naik dari air dengan pengali gelombang 1. **Hasil:** `agent.speed` 9 (7,5 x 1,2) selama `emergeBoostSeconds`, tidak terpotong `maxZombieSpeed` 7,8, lalu kembali ke 7,5.
 
 Belum diuji di Unity, karena blueprint ini baru rancangan.
+
+## 7. Catatan Implementasi (Langkah 5)
+
+Kode: `left-4-dead/EnemyAI.cs` (`AIState`, `SpeedSource`).
+
+- **Pemeriksaan terhalang sementara:** `BaseNavigation` (#78) belum digabung. `EnemyAI` membaca `NavMeshAgent.pathStatus` milik agennya sendiri setiap `crowd.fallbackPathCheckIntervalSeconds`. Setelah `fallbackBlockedConfirmSeconds`, sasaran dicari lewat `OverlapSphere` di layer `Structure` dengan tag `BaseWall` atau `BaseDoor` (Claude.md Pilar 3). Tanpa struktur, setelah `threat.unreachableSeconds` dipanggil `ThreatSystem.ReportUnreachable`. Angka sementara berada di `GameBalanceConfig.crowd.fallback*` dan harus diganti `baseNav` saat #78 digabung. `currentBreach` bertipe `IDamageable`, belum `BreachTarget`.
+- `AITraversal` (#94) dan `ZombieLair` (#112) belum ada. Respons `Surround`/`Retreat`/`RockThrow` dan field `lair` dilewati. `EnterDormant()` tidak menerima argumen sarang.
+- **Tanpa `HordeCrowdManager`**, `EnemyAI` men-tick dirinya sendiri setiap 0,2 detik lewat `Update`. Ini cadangan untuk `ShipPhase` dan scene tes.
+- `SetHidingState(AIState)` ditambahkan untuk `VillageZombieHiding` (#63), yang belum ditulis.
+- Di Fase 1, `ApplySpeed` tidak menulis `agent.speed`, karena `ShipHazardManager` yang mengaturnya. `ShipHazardManager` belum memanggil `SetTarget`/`WakeUp` (TODO Langkah 2), jadi zombie kapal belum mengejar.
