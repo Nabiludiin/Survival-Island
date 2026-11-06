@@ -2,7 +2,7 @@
 
 Folder ini adalah tempat **kode gabungan C#** Survival Island. Semua *script* yang ditulis dari blueprint di `Survival Island/doc/blueprint/` disimpan di sini, sesuai `README.md` di root (TAHAP 6).
 
-**Status:** Langkah 1 (fondasi inti) sudah ditulis, tetapi belum pernah dikompilasi atau dijalankan di Unity. Folder `Survival Island/` adalah proyek Unity 6 LTS (keputusan developer) yang belum pernah dibuka di Unity.
+**Status:** Langkah 1 (fondasi inti) dan Langkah 2 (Fase 1 kapal) sudah ditulis, tetapi belum pernah dikompilasi atau dijalankan di Unity. Folder `Survival Island/` adalah proyek Unity 6 LTS (keputusan developer) yang belum pernah dibuka di Unity.
 
 > Jangan tertukar dengan `LOGIC/` di root repo. Folder itu hanya bahan analisis dari game referensi (60 Seconds!, Raft, dan Zombie). Kode dari sana tidak boleh disalin ke folder ini.
 
@@ -65,6 +65,28 @@ Penyimpangan kecil dari blueprint dicatat di bagian "Catatan Implementasi (Langk
 3. Buat prefab `PersistentRoot`: objek akar dengan `RunLifecycle`, anak `Managers` (`managersRoot`) berisi `GameManager`, `UIFocusStack`, `UIManager`, `ObjectPooler`, `AsyncSceneLoader`, `RunSeedManager`, `WorldStateSave`, canvas persisten, dan `EventSystem`. Isi `RunLifecycle.orderedServices` sesuai urutan bootstrap di `RunLifecycle.md` (GameManager pertama).
 4. Buat scene `Bootstrap` (kamera hitam dan `BootstrapEntry`), `MainMenu` (`MainMenuController`), `ShipPhase`, dan `IslandPhase`, lalu masukkan ke **Build Settings** dengan `Bootstrap` di indeks 0.
 
+## 🧩 Isi Langkah 2
+
+| File | Blueprint |
+|---|---|
+| `60-seconds/ShipTimerManager.cs` | `ShipTimerManager.md` |
+| `60-seconds/ShipInteractable.cs` (`ShipInteractableKind`) | `ShipInteractable.md` |
+| `60-seconds/ShipPlayerController.cs` (`ShipControlLevel`) | `ShipPlayerController.md` |
+| `60-seconds/ShipHazardManager.cs`, `ShipHazardSchedule.cs` (`ShipHazardKind`, `ShipHazardEntry`, `WaterKeyframe`), `ShipCorridor.cs`, `ShipSwaySource.cs`, `ShipShove.cs`, `ShipZombiePoint.cs` | `ShipHazardManager.md` |
+| `60-seconds/LifeboatExtraction.cs` (`ShipFlowState`), `RunSummaryPanel.cs`, `IslandArrival.cs` | `LifeboatExtraction.md` |
+| `Island_Logic/IInteractable.cs` (`InteractContext`, `InteractBlockReason`), `PlayerInteractor.cs`, `InteractHighlight.cs` (`HighlightState`) | `IslandInteractable.md` (bagian interaksi yang dipakai Fase 1) |
+
+Tambahan kecil di file Langkah 1: event `InteractedEvent`, `ShipHandChangedEvent`, `ShipHazardStageChangedEvent`, `NPCRescuedEvent` di `GameEvents.cs`; bagian `ship`, `shipHazard`, `interact`, dan `infection.startingVaccineDoses` di `GameBalanceSections.cs`; dan pemanggilan `IslandArrival.Apply()` di `RunLifecycle.EnterIslandPhaseRoutine`.
+
+Langkah 2 memanggil kelas Langkah 3 (`InventoryManager`, `ItemData`, `ItemDatabase`, `InputManager`, `FirstPersonCamera`, `ICameraOffsetSource`, `SurvivalStats`, `CarryCapacity`) dengan nama dan signature dari blueprint. Kode Langkah 2 baru bisa dikompilasi setelah kode Langkah 3 digabung. Bagian yang belum diimplementasikan dicatat di "Catatan Implementasi (Langkah 2)" pada blueprint terkait dan ditandai TODO di kode.
+
+### Penyiapan di Unity untuk Langkah 2 (belum dilakukan)
+
+1. Scene `ShipPhase`: `ShipTimerManager` (teks timer TMP, `Image` vignette, `AudioSource` detak), `ShipHazardManager` (aset **Create > Survival > Ship Hazard Schedule**, isi lewat menu konteks "Isi jadwal awal"; koridor, titik zombie, bidang air, `lowerDeckBarrier`, `ShipSwaySource`), dan objek Sekoci (layer `Interactable`, collider bukan trigger) dengan `LifeboatExtraction`, `InteractHighlight`, dan `RunSummaryPanel` (id `RunSummary`, `pausesTime`, `releasesCursor`, `blocksGameplayInput`, `isLocked`).
+2. Prefab `Player_Ship` (layer dan tag `Player`): `CharacterController` (height 1,8, radius 0,35, stepOffset 0,3, slopeLimit 45, skinWidth 0,08), `ShipPlayerController`, `PlayerInteractor` (isi `cameraTransform` dengan `WorldCamera`), `ShipShove`, `SurvivalStats`, dan rig `FirstPersonCamera`.
+3. Pool di `ObjectPooler`: `ShipLoot_Generic` (prefab barang dengan `ShipInteractable`, `InteractHighlight`, `BoxCollider` bukan trigger, layer `Interactable`), `ShipNpc_Generic` (ukuran 3), dan `zombie_standar`.
+4. Scene `IslandPhase`: objek `IslandArrival` di pantai selatan Region 1 dengan `landingPoint`, `lookTarget`, `npcOrigin`, dan `overflowOrigin`.
+
 ## 🚀 Status Langkah
 
 Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Langkah [X]".
@@ -72,7 +94,7 @@ Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Lan
 | Langkah | Isi | Folder utama | Status |
 |---|---|---|---|
 | **1** | Kerangka `GameManager`, `UIManager`, `ObjectPooler`, `SaveSystem`, dan pola *State Management* inti | `Core_Logic/` | Ditulis, belum diuji di Unity |
-| **2** | Fase 1: `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | `60-seconds/` | Belum dimulai |
+| **2** | Fase 1: `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | `60-seconds/` | Ditulis, belum diuji di Unity |
 | **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Belum dimulai |
 | **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Belum dimulai |
 | **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/` | Belum dimulai |

@@ -294,3 +294,13 @@ Fungsi `GameManager.SaveFase1Loot(List<Item>)` diganti `SaveShipOutcome`. `ShipT
 16. Mati di kapal, lalu mulai lagi lima kali. **Hasil:** `savedShipLoot` kosong tiap kali, dan barang di kapal muncul lagi lewat pool tanpa sisa status.
 17. Turunkan HP ke 0 pada `T=0,1`. **Hasil:** alur mati berjalan sekali, tanpa ringkasan.
 18. Setor satu `Med_Vaccine` dari kapal, lalu tiba di pulau. **Hasil:** item inti masing-masing tepat 1, `Med_Vaccine` berjumlah 3 (2 awal ditambah 1 dari kapal), dan `GameManager.savedShipLoot` kosong setelah `Apply`.
+
+## 7. Catatan Implementasi (Langkah 2)
+
+- `SpawnShipNpcs()` dan `NPCRoster.SpawnRescued` belum ditulis, karena `NPCData` dan `NPCRoster` (#76) belum ada. Daftar korban tetap dihitung dari `RunSeedManager.CurrentLayout.shipNpcIds`.
+- Jalur "tidak aman" saat waktu habis juga memanggil `ShipHazardManager.StopAll()` sebelum `TriggerGameOver`, sesuai `ShipTimerManager.md` ("kedua jalur hasil memanggil `StopAll`").
+- `RunSummaryPanel` menampilkan ID item dan NPC apa adanya sampai `LocalizationManager` (#104) dan `NPCData` ada. Tombol `Lanjut` memanggil `LifeboatExtraction.ContinueToIsland()`.
+- `IslandArrival`: `RunLifecycle.EnterIslandPhase` langkah 6 sekarang memanggil `IslandArrival.Instance.Apply()`. `GameManager.MarkArrivedOnIsland()` (Langkah 1) mengosongkan `savedShipLoot` dan mengisi `hasArrivedOnIsland`.
+- `GameBalanceConfig.infection.startingVaccineDoses` (2) ditambahkan lebih dulu oleh Langkah 2. Field `infection` lain tetap milik Langkah 4.
+- **Celah kontrak:** `SurvivalStats` (#111) tidak punya fungsi untuk mengisi HP langsung, jadi `HP = shipOutcome.hpOnExit` belum bisa dijalankan. `FirstPersonCamera` (#102) juga belum punya fungsi publik untuk menyamakan yaw dan pitch ke `lookTarget`. Keduanya ditandai TODO dan perlu diputuskan saat Langkah 3 digabung.
+- Sirene pra-game, SFX setor, penanda sekoci, dan garis area aman di HUD belum ditulis (TODO).

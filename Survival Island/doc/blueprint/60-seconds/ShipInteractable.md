@@ -282,3 +282,10 @@ Objek pool berada di bawah `PersistentRoot`, jadi kelas ini **tidak** menyimpan 
 16. Jalankan `ShipLootAudit` dengan `shipWeight` 5. **Hasil:** terlapor sebagai barang yang tidak bisa diambil.
 17. Buka Profiler sambil membidik barang bergantian selama 10 detik. **Hasil:** tidak ada alokasi GC dari `GetPrompt` atau `RefreshHighlight`.
 18. Tekan `Esc` saat membidik barang. **Hasil:** prompt dan highlight hilang. Tutup panel. **Hasil:** keduanya kembali.
+
+## 7. Catatan Implementasi (Langkah 2)
+
+- `Setup(NPCData)` belum ditulis, karena `NPCData` (#76) belum ada dan bergantung pada `NPCSkill`, `WeaponData`, serta `BarkSet`. Jalur NPC lain (`IsSubmergedNpc`, berat dari data) sudah ada.
+- Teks prompt sementara memakai teks bawaan (`Ambil {displayNameKey}`, `Tangan penuh. Setor ke Sekoci`) sampai `LocalizationManager` (#104) ditulis.
+- Ditambahkan penanda `isSetUp`: objek yang belum di-`Setup` tidak tersedia, supaya objek pool kosong tidak bisa diambil.
+- Efek `VFX_ShipPickup`, suara ambil, dan `ShipLootAudit` belum ditulis (TODO).

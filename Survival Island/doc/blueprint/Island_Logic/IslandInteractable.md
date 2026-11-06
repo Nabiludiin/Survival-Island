@@ -293,3 +293,13 @@ Barang dilepas dengan tombol `DropHeavyItem`, bukan `E` (#69).
 18. Geledah mayat tentara. **Hasil:** perlu tahan 1 detik, dengan 1 sampai 2 tumpukan.
 19. Bidik peti saat inventori penuh. **Hasil:** outline putus-putus, ikon gembok, dan teks alasan muncul.
 20. Ganti bahasa dan tombol interaksi. **Hasil:** prompt mengikuti `prompt.format`.
+
+## 7. Catatan Implementasi (Langkah 2)
+
+Langkah 2 menulis `IInteractable`, `InteractContext`, `InteractBlockReason` (`Assets/LOGIC/Island_Logic/IInteractable.cs`), `PlayerInteractor`, dan `InteractHighlight`, karena Fase 1 adalah pemakai pertama. `IslandInteractable` (kelas dasar abstrak) dan objek pulau belum ditulis.
+
+- `InteractContext` mendapat konstruktor `(inventory, player, isCarryingHeavyItem)`, karena field `readonly` perlu diisi.
+- Status highlight menjadi enum `HighlightState { Off, Available, Blocked }` dengan `InteractHighlight.SetState`. Nama enum adalah usulan, karena blueprint hanya menyebut tiga statusnya.
+- Warna highlight disimpan di `GameBalanceConfig.interact.availableColor` dan `blockedColor` (nama field usulan).
+- Setelah interaksi berhasil, tombol `E` harus dilepas dulu sebelum interaksi berikutnya. Ini menjalankan aturan "tahan sekali lagi untuk berangkat, karena `holdTimer` direset" di `LifeboatExtraction.md`.
+- Belum ada (TODO di kode): `HUDManager` (prompt dibaca lewat `PlayerInteractor.CurrentPrompt` dan `HoldProgress`), `LocalizationManager` untuk `prompt.format`, notifikasi penolakan (#22), batal tahan saat `PlayerDamagedEvent`, dan `IsCarryingHeavyItem` (#69).

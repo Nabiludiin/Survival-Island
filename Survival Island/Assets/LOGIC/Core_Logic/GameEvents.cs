@@ -154,4 +154,37 @@ namespace SurvivalIsland
         public string localeId;
         public LocaleChangedEvent(string localeId) { this.localeId = localeId; }
     }
+
+    // ---------------------------------------------------------------- Ditambahkan Langkah 2 (Fase 1 dan interaksi)
+
+    /// <summary>Pemain berhasil berinteraksi dengan target. Pengirim: PlayerInteractor (#17). Didengar #16 dan #57.</summary>
+    public struct InteractedEvent
+    {
+        public string targetId;
+        public InteractedEvent(string targetId) { this.targetId = targetId; }
+    }
+
+    /// <summary>Isi tangan di kapal berubah. Pengirim: InventoryManager (Langkah 3). Didengar HUD dan ShipInteractable.</summary>
+    [StickyEvent]
+    public struct ShipHandChangedEvent
+    {
+        public int weight;
+        public int capacity;
+        public ShipHandChangedEvent(int weight, int capacity) { this.weight = weight; this.capacity = capacity; }
+    }
+
+    /// <summary>Tahap bahaya kapal berganti (sway). Pengirim: ShipHazardManager (#75). Didengar #23, #52, #114.</summary>
+    public struct ShipHazardStageChangedEvent
+    {
+        public int stage;
+        public float secondsLeft;
+        public ShipHazardStageChangedEvent(int stage, float secondsLeft) { this.stage = stage; this.secondsLeft = secondsLeft; }
+    }
+
+    /// <summary>NPC disetor ke sekoci. Pengirim: LifeboatExtraction (#74).</summary>
+    public struct NPCRescuedEvent
+    {
+        public string npcId;
+        public NPCRescuedEvent(string npcId) { this.npcId = npcId; }
+    }
 }

@@ -17,7 +17,7 @@ namespace SurvivalIsland
     ///
     /// Belum diimplementasikan di Langkah 1 (sistem pemiliknya belum ditulis), ditandai TODO di kode:
     /// - NarrativeSequencer (#99): adegan intro, sekoci, dan ending. Tanpa itu scene langsung aktif (holdActivation tidak dipakai).
-    /// - RegionStreaming.LoadInitialRegions (#88) dan IslandArrival.Apply (#74).
+    /// - RegionStreaming.LoadInitialRegions (#88). IslandArrival.Apply (#74) disambungkan Langkah 2.
     /// - DeathCinematic (#53), LocalStatsManager.RecordRunEnd (#57), AudioManager.StopWorldAudio, NotificationManager (#22).
     /// </summary>
     public class RunLifecycle : MonoBehaviour
@@ -330,7 +330,9 @@ namespace SurvivalIsland
             }
 
             // 5. TODO #88: yield return RegionStreaming.Instance.LoadInitialRegions(IslandArrival.Instance.LandingPosition);
-            // 6. TODO #74 (Langkah 2): IslandArrival.Instance.Apply(); IslandArrival memanggil GameManager.MarkArrivedOnIsland.
+            // 6. IslandArrival (#74, Langkah 2) memanggil GameManager.MarkArrivedOnIsland sendiri.
+            if (IslandArrival.Instance != null) IslandArrival.Instance.Apply();
+            else Debug.LogError("[RunLifecycle] IslandArrival tidak ada di IslandPhase.");
 
             // 7. DayChangedEvent { newDay = 1 } terkirim pertama kali.
             Game.PublishDayState(false);

@@ -144,8 +144,20 @@ namespace SurvivalIsland
     /// <summary>Bagian items (#66). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class ItemsBalance { }
 
-    /// <summary>Bagian interact (#17). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class InteractBalance { }
+    /// <summary>Interaksi tombol E (#17). Diisi Langkah 2 dari Island_Logic/IslandInteractable.md.</summary>
+    [Serializable]
+    public class InteractBalance
+    {
+        public float range = 3f;                    // Jarak interaksi
+        public float sphereRadius = 0.15f;          // Lebar bidikan
+        public float scanIntervalSeconds = 0.05f;   // Pemindaian 20 kali per detik
+        public float targetGraceSeconds = 0.15f;    // Target bertahan sebentar setelah bidikan lepas
+        public float holdLoseRange = 3.5f;          // Interaksi tahan batal di luar jarak ini
+        public float moveCancelSpeed = 6f;          // Interaksi tahan batal kalau pemain berlari
+        // Warna InteractHighlight. Nama field usulan Langkah 2 (blueprint hanya menyebut "dibaca dari interact").
+        public UnityEngine.Color availableColor = new UnityEngine.Color(1f, 0.95f, 0.6f);   // Kuning muda
+        public UnityEngine.Color blockedColor = new UnityEngine.Color(0.9f, 0.15f, 0.15f);  // Merah
+    }
 
     /// <summary>Bagian camera (#102). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class CameraBalance { }
@@ -159,14 +171,77 @@ namespace SurvivalIsland
     /// <summary>Bagian console (#56). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class ConsoleBalance { }
 
-    /// <summary>Bagian ship (#74, #75). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class ShipBalance { }
+    /// <summary>
+    /// Fase 1 (#74, #75). Diisi Langkah 2 dari LifeboatExtraction.md, ShipTimerManager.md,
+    /// ShipPlayerController.md, dan ShipInteractable.md. Selain durationSeconds (GDD bagian 3), semua usulan yang disetujui (#85).
+    /// </summary>
+    [Serializable]
+    public class ShipBalance
+    {
+        // LifeboatExtraction.md
+        public float durationSeconds = 60f;        // GDD bagian 3. Keputusan developer: batas paling lama
+        public float preGameSeconds = 3f;          // Jeda sebelum kontrol dibuka, di luar 60 detik
+        public float sirenAtSeconds = 1.5f;        // Sirene pada jeda pra-game
+        public int handCapacity = 4;               // Batas berat di tangan (dibaca InventoryManager.ShipHandCapacity)
+        public float lifeboatSafeRadius = 6f;      // Radius area aman
+        public float lifeboatSafeHeight = 2.5f;    // Selisih tinggi maksimum
+        public float departHoldSeconds = 1.5f;     // Tahan E untuk berangkat
+        public float arrivalNpcSpacing = 2f;       // Jarak antar-NPC di pantai
+        // ShipTimerManager.md
+        public float panicStartSeconds = 15f;
+        public float tickPitchMin = 1f;
+        public float tickPitchMax = 2f;
+        public float tickVolume = 0.6f;
+        public float vignetteMaxAlpha = 0.55f;
+        public float timerShakePixels = 6f;
+        public float timerShakeFrequency = 25f;
+        public float musicFadeInSeconds = 1f;
+        public float musicFadeOutSeconds = 0.5f;
+        // ShipPlayerController.md
+        public float moveSpeed = 5f;
+        public float gravity = -9.81f;
+        public float groundedStickVelocity = -2f;
+        // ShipInteractable.md
+        public float pickupColliderPadding = 0.05f;
+    }
 
-    /// <summary>Bagian shipHazard (#75). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class ShipHazardBalance { }
+    /// <summary>Bahaya kapal (#75). Diisi Langkah 2 dari ShipHazardManager.md. Semua usulan yang disetujui (#85).</summary>
+    [Serializable]
+    public class ShipHazardBalance
+    {
+        public float staticTiltDegrees = 4f;
+        public float tiltSpeedInfluence = 0.12f;
+        public float driftSpeedMax = 0.4f;
+        public float swaySpeed = 1f;
+        public float[] swayDegreesByStage = { 2f, 3.5f, 5f, 7f };
+        public float waterRiseMaxPerSec = 0.5f;
+        public float waterAnkleDepth = 0.2f;
+        public float waterKneeDepth = 0.6f;
+        public float waterWaistDepth = 1.2f;
+        public float waterHeadDepth = 1.6f;
+        public float waterAnkleMultiplier = 0.85f;
+        public float waterKneeMultiplier = 0.6f;
+        public float waterWaistMultiplier = 0.35f;
+        public float collapseWarningSeconds = 3f;
+        public int zombieMaxAlive = 8;
+        public float zombieMoveSpeed = 3.5f;
+        public float zombieAggroRadius = 12f;
+        public float zombieMinSpawnDistance = 10f;
+        public float zombieTickSeconds = 0.25f;
+        public float shoveRadius = 1.2f;
+        public float shoveForwardOffset = 1f;
+        public float shoveKnockback = 3f;
+        public float shoveStaggerSeconds = 1.5f;
+        public float shoveCooldownSeconds = 1.5f;
+    }
 
     /// <summary>Bagian infection (#64). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class InfectionBalance { }
+    [Serializable]
+    public class InfectionBalance
+    {
+        // Ditambahkan Langkah 2 karena IslandArrival (#74) memberi vaksin awal. Field lain #64 diisi Langkah 4.
+        public int startingVaccineDoses = 2;
+    }
 
     /// <summary>Bagian hydration (#43). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class HydrationBalance { }

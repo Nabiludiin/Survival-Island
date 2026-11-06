@@ -343,3 +343,13 @@ NavMesh tidak bisa berputar saat bermain, jadi **geometri tidak boleh diputar sa
 16. Tekan Pause pada `T=20` selama 30 detik. **Hasil:** air, timer, dan zombie berhenti.
 17. Mati dan mulai lagi lima kali. **Hasil:** jumlah objek pool tetap, dan tidak ada zombie tertinggal dari run sebelumnya.
 18. Buka Profiler selama Fase 1. **Hasil:** tidak ada lonjakan GC dari `Update` setelah kemunculan zombie.
+
+## 7. Catatan Implementasi (Langkah 2)
+
+- Kelas pendukung berada di file sendiri: `ShipHazardSchedule.cs` (termasuk `ShipHazardKind`, `ShipHazardEntry`, `WaterKeyframe`), `ShipCorridor.cs`, `ShipSwaySource.cs`, `ShipShove.cs`, dan `ShipZombiePoint.cs` (komponen titik dengan `groupId`). Unity mewajibkan `ScriptableObject` berada di file bernama sama.
+- Aset jadwal punya menu konteks "Isi jadwal awal" yang mengisi tabel "Isi jadwal awal". ID grup zombie (`lower_start`, `mid_start`, `mid_45`, `lower_30`, `mid_15`) adalah usulan nama.
+- `ShipHazardStageChangedEvent` dikirim pada entri `SetSwayStage` tahap 1 ke atas (T=45, 30, 15).
+- Arah turun lantai (`downhillDirection`) dan tinggi lantai dek bawah (`lowerDeckFloorY`) diisi di Inspector sebagai data level.
+- `currentSway` mengejar tahap dengan laju `swaySpeed` derajat per detik (usulan, blueprint tidak menyebut lajunya).
+- Belum ada (TODO, Langkah 5): `EnemyAI.SetTarget`, `Dormant` dan bangun, macet 5 detik, gigitan, `EnemyHealth.Died`, serta knockback `ShipShove` (`CollectUniqueDamageables`, `EnemyHitReaction`). Sekarang zombie dimunculkan dari pool, kecepatan agen diatur pengali air, dan zombie terendam kembali ke pool.
+- Belum ada (TODO): `CameraShake` (#24), suara alarm dan kapal (`AudioManager`), dan `ShipRouteAudit`.

@@ -241,3 +241,9 @@ void HandleRunEnded(RunEndedEvent e) { StopCountdown(); }
 14. Ganti `ship.durationSeconds` ke 30 di config. **Hasil:** timer mulai dari 30 tanpa mengubah kode.
 15. Mati lalu ulangi dari kapal tiga kali. **Hasil:** tiap run dimulai dari 60, tanpa sisa vignette atau warna merah.
 16. Biarkan waktu habis di area aman, lalu ulangi di dek bawah. **Hasil:** pada kedua jalur, `FinalShudder` tampil sekali sebelum ringkasan atau sinematik mati.
+
+## 7. Catatan Implementasi (Langkah 2)
+
+- Musik Fase 1 dan sirene akhir lewat `AudioManager`, serta `cameraShakeScale` dari `LocalizationManager` (#104), belum ditulis (TODO). Detak jam (`tickSource`) sudah berjalan.
+- Klip dibuka sebagai `MusicClip` dan `TimeUpClip` untuk dipakai saat `AudioManager` ditulis.
+- Perintah konsol `shiptime` belum ada, karena `DevConsole` (#56) belum ditulis. `DebugSetSecondsLeft` sudah ada.
