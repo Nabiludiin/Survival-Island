@@ -254,16 +254,8 @@ namespace SurvivalIsland
         public InventoryCapacityChangedEvent(int capacity) { this.capacity = capacity; }
     }
 
-    // ---------------------------------------------------------------- Fase 1 (dikirim InventoryManager, Langkah 3)
-
-    /// <summary>Isi tangan di kapal berubah. Pengirim: InventoryManager (instance ShipPhase). Didengar HUD dan ShipInteractable.</summary>
-    [StickyEvent]
-    public struct ShipHandChangedEvent
-    {
-        public int weight;
-        public int capacity;
-        public ShipHandChangedEvent(int weight, int capacity) { this.weight = weight; this.capacity = capacity; }
-    }
+    // ShipHandChangedEvent { weight, capacity } (dikirim InventoryManager) DIDEKLARASIKAN Langkah 2 di file ini,
+    // supaya tidak ganda saat merge. Branch Langkah 3 saja tidak terkompilasi tanpa branch Langkah 2.
 
     // ---------------------------------------------------------------- UI (Langkah 3)
 

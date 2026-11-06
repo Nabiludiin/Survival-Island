@@ -85,7 +85,7 @@ Penyimpangan kecil dari blueprint dicatat di bagian "Catatan Implementasi (Langk
 | `raft/DiseaseCure.cs` | `DiseaseManager.md` |
 | `raft/SlotArrayOps.cs` | `StorageChest.md` |
 
-Lima baris terakhir adalah kontrak milik Langkah lain yang sudah dibutuhkan Langkah 3. Pemiliknya tidak mendeklarasikannya ulang. Event baru Langkah 3 ada di bagian "Ditambah Langkah 3" pada `Core_Logic/GameEvents.cs`. Config yang diisi: `vitals` (tambahan #111), `input`, `equipment`, `items`, `camera`, `traversal`, `carry`, serta satu field di `ship` (`handCapacity`) dan `hydration` (`exertionThirstMultiplier`). Penyimpangan kecil dicatat di bagian "Catatan Implementasi (Langkah 3)" pada blueprint terkait.
+Lima baris terakhir adalah kontrak milik Langkah lain yang sudah dibutuhkan Langkah 3. Pemiliknya tidak mendeklarasikannya ulang. Event baru Langkah 3 ada di bagian "Ditambah Langkah 3" pada `Core_Logic/GameEvents.cs`. Config yang diisi: `vitals` (tambahan #111), `input`, `equipment`, `items`, `camera`, `traversal`, `carry`, serta satu field di `hydration` (`exertionThirstMultiplier`). `ShipHandChangedEvent` dan `ship.handCapacity` yang dipakai `InventoryManager` ditulis Langkah 2, jadi branch Langkah 3 hanya terkompilasi setelah digabung dengan branch Langkah 2. Penyimpangan kecil dicatat di bagian "Catatan Implementasi (Langkah 3)" pada blueprint terkait.
 
 ### Penyiapan di Unity untuk Langkah 3 (belum dilakukan)
 

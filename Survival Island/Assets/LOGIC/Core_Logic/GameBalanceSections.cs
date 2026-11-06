@@ -295,12 +295,8 @@ namespace SurvivalIsland
     /// <summary>Bagian console (#56). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class ConsoleBalance { }
 
-    /// <summary>Bagian ship (#74, #75). Field lain diisi Langkah 2.</summary>
-    [Serializable]
-    public class ShipBalance
-    {
-        public int handCapacity = 4;                        // Ditambah Langkah 3: dibaca InventoryManager.ShipHandCapacity (#74)
-    }
+    /// <summary>Bagian ship (#74, #75). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    [Serializable] public class ShipBalance { }
 
     /// <summary>Bagian shipHazard (#75). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class ShipHazardBalance { }
