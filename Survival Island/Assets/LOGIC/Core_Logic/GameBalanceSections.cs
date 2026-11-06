@@ -450,7 +450,7 @@ namespace SurvivalIsland
     [Serializable] public partial class EnvironmentBalance { }
 
     /// <summary>Bagian disaster (#70). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class DisasterBalance { }
+    [Serializable] public partial class DisasterBalance { }
 
     /// <summary>Bagian beachSupply (#71). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class BeachSupplyBalance { }
@@ -459,7 +459,7 @@ namespace SurvivalIsland
     [Serializable] public class BloodMoonBalance { }
 
     /// <summary>Bagian luckyMachine (#72). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class LuckyMachineBalance { }
+    [Serializable] public partial class LuckyMachineBalance { }
 
     /// <summary>Bagian npc (#76). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class NpcBalance { }
@@ -483,10 +483,10 @@ namespace SurvivalIsland
     [Serializable] public class FlashlightBalance { }
 
     /// <summary>Bagian rescue (#14). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class RescueBalance { }
+    [Serializable] public partial class RescueBalance { }
 
     /// <summary>Bagian deathCinematic (#53). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
-    [Serializable] public class DeathCinematicBalance { }
+    [Serializable] public partial class DeathCinematicBalance { }
 
     /// <summary>Bagian stats (#57). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
     [Serializable] public class StatsBalance { }
@@ -1140,5 +1140,94 @@ namespace SurvivalIsland
         public float maxFogDensity = 0.1f;              // Sekitar 20 m
         public float defaultMinAmbientLuminance = 0.035f;
         public float eruptionRemoteWeight = 0.35f;      // Bobot langit merah di luar Region 1
+    }
+
+    // =====================================================================================
+    // Ditambahkan Langkah 7 (bencana, Lucky Machine, helikopter, sinematik mati).
+    // Deklarasi kelas kosong di atas hanya ditambah kata partial (cara yang sama dengan Langkah 4).
+    // Angka mengikuti tabel di DisasterManager.md, LuckyMachine.md, RescueEventManager.md, dan DeathCinematic.md.
+    // =====================================================================================
+
+    /// <summary>Bencana (#70). Nilai awal dari DisasterManager.md bagian 1 "Nilai config bencana".</summary>
+    public partial class DisasterBalance
+    {
+        public int scheduleBlockDays = 60;
+        // Salinan sementara interval Blood Moon (#50). Pemilik resmi: bloodMoon (HordeManager, belum ditulis).
+        // Saat BloodMoonBalance diisi, DisasterScheduler membaca dari sana dan field ini dihapus.
+        public int bloodMoonIntervalDays = 10;
+        public float fireballIntervalSeconds = 4f;
+        public float fireballIntervalSecondsScale2 = 2.5f;
+        public float fireballRingMin = 8f;
+        public float fireballRingMax = 35f;
+        public float fireballMarkerSeconds = 2.5f;
+        public float fireballRadius = 6f;
+        public float fireballDamageCenter = 35f;
+        public float fireballDamageEdge = 10f;
+        public float fireballStructureDamage = 60f;
+        public float fireballTreeChance = 0.25f;
+        public float fireballDropHeight = 60f;
+        public int eruptionOffscreenHits = 3;
+        public float quakeDamageRatio = 0.25f;
+        public float quakeDamageRatioScale2 = 0.5f;
+        public int quakePulses = 3;
+        public float quakeRemoteDamagePerHit = 75f;
+        public int quakeRemoteHits = 4;
+        public int maxStructuresPerFrame = 16;
+        public float stormPulseSeconds = 30f;
+        public float stormStructureDamage = 30f;
+        public float treeFallSeconds = 45f;
+        public float treeFallRingMin = 12f;
+        public float treeFallRingMax = 30f;
+        public float treeFallRadius = 3f;
+        public float treeFallDamage = 25f;
+        public float treeFallStructureDamage = 60f;
+        public float treeFallMarkerSeconds = 2f;
+    }
+
+    /// <summary>Lucky Machine (#72). Angka sama untuk keempat mesin (keputusan developer, LuckyMachine.md).</summary>
+    public partial class LuckyMachineBalance
+    {
+        public float freeWindowSeconds = 30f;     // GDD bagian 7
+        public int maxFreeSpinsPerWindow = 3;
+        public int maxStoredSpins = 1;
+        public float spinSeconds = 4f;
+        public float vacuumSeconds = 1.2f;
+        public float tierWeightS = 5f;
+        public float tierWeightA = 25f;
+        public float tierWeightB = 70f;
+        public float gateReopenSeconds = 2f;
+        public float cageRewardOffset = 2f;
+        public float vacuumEndScale = 0.2f;
+    }
+
+    /// <summary>Helikopter (#14). Nilai awal dari RescueEventManager.md bagian 1.</summary>
+    public partial class RescueBalance
+    {
+        public float engineWarmupSeconds = 120f;
+        public float engineNoiseRadius = 60f;
+        public float engineNoiseIntervalSeconds = 5f;
+        public int warmupPanicWaveSize = 15;
+        public int targetNightWaveSize = 25;
+        public float abortDistance = 40f;
+        public float partInstallRadius = 4f;      // Radius ReconcileLyingParts, sama dengan ukuran PartInstallZone
+    }
+
+    /// <summary>Sinematik mati (#53). Nilai awal dari DeathCinematic.md bagian 1.</summary>
+    public partial class DeathCinematicBalance
+    {
+        public float ragdollForce = 300f;
+        public float explosionForceMultiplier = 3f;
+        public float sinkDrag = 4f;
+        public float slowMoScale = 0.35f;
+        public float slowMoSeconds = 1.2f;
+        public float cameraRiseSeconds = 1.5f;
+        public float cameraHeight = 2.5f;
+        public float cameraDistance = 3f;
+        public float orbitDegreesPerSecond = 12f;
+        public float holdSeconds = 3.5f;
+        public float collapseHoldSeconds = 5f;
+        public float fadeSeconds = 1.5f;
+        public float messageSeconds = 2f;
+        public float skipAfterSeconds = 2f;
     }
 }

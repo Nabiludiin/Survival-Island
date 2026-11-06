@@ -567,4 +567,92 @@ namespace SurvivalIsland
         public int required;
         public BridgeProgressChangedEvent(int deposited, int required) { this.deposited = deposited; this.required = required; }
     }
+
+    // =====================================================================================
+    // Ditambahkan Langkah 7 (bencana, Lucky Machine, helikopter, sinematik).
+    // Sumber: tabel "Daftar event global" di GameEventBus.md. BloodMoonStartedEvent dikirim HordeManager (#50, belum
+    // ditulis), tetapi ditulis di sini karena DisasterManager sudah mendengarnya. Pemiliknya memakai struct ini
+    // dan tidak mendeklarasikannya ulang.
+    // =====================================================================================
+
+    // ---------------------------------------------------------------- Bencana (Langkah 7)
+
+    /// <summary>Bencana besar masuk tahap Active. Pengirim: DisasterManager. Didengar LuckyMachine (mode gratis 30 detik).</summary>
+    public struct MajorDisasterStartedEvent
+    {
+        public DisasterType type;
+        public float durationSeconds;
+        public MajorDisasterStartedEvent(DisasterType type, float durationSeconds) { this.type = type; this.durationSeconds = durationSeconds; }
+    }
+
+    /// <summary>Malam Blood Moon dimulai. Pengirim: HordeManager (#50). Didengar DisasterManager (Blood Moon menang).</summary>
+    public struct BloodMoonStartedEvent
+    {
+        public int day;
+        public BloodMoonStartedEvent(int day) { this.day = day; }
+    }
+
+    // ---------------------------------------------------------------- Lucky Machine (Langkah 7)
+
+    /// <summary>Musuh selesai tersedot kandang. Pengirim: LuckyMachine. Bukan EnemyKilledEvent.</summary>
+    public struct EnemySacrificedEvent
+    {
+        public string enemyId;
+        public EnemySacrificedEvent(string enemyId) { this.enemyId = enemyId; }
+    }
+
+    /// <summary>Mode gratis mesin mulai atau selesai. Pengirim: LuckyMachine. Didengar HUDManager (hitung mundur).</summary>
+    [StickyEvent]
+    public struct LuckyMachineFreeWindowChangedEvent
+    {
+        public RegionType region;
+        public bool isActive;
+        public float seconds;
+        public LuckyMachineFreeWindowChangedEvent(RegionType region, bool isActive, float seconds)
+        { this.region = region; this.isActive = isActive; this.seconds = seconds; }
+    }
+
+    /// <summary>Hasil satu putaran. Pengirim: LuckyMachine. Didengar statistik (#57).</summary>
+    public struct LuckyMachineSpinResolvedEvent
+    {
+        public string rewardId;
+        public LuckyMachineSpinResolvedEvent(string rewardId) { this.rewardId = rewardId; }
+    }
+
+    // ---------------------------------------------------------------- Helikopter (Langkah 7)
+
+    /// <summary>Suku cadang terpasang. Pengirim: RescueEventManager. Didengar HUD, HelicopterFrame, ObjectiveManager.</summary>
+    [StickyEvent]
+    public struct HelicopterPartInstalledEvent
+    {
+        public string partId;
+        public int installed;
+        public int total;
+        public HelicopterPartInstalledEvent(string partId, int installed, int total)
+        { this.partId = partId; this.installed = installed; this.total = total; }
+    }
+
+    /// <summary>Semua suku cadang terpasang. Pengirim: RescueEventManager.</summary>
+    [StickyEvent]
+    public struct HelicopterReadyEvent { }
+
+    /// <summary>Status mesin helikopter. Pengirim: RescueEventManager. Didengar HUD, CombatMusicDirector (#114), CameraShake (#24).</summary>
+    [StickyEvent]
+    public struct HelicopterEngineChangedEvent
+    {
+        public RescueState state;
+        public float secondsLeft;
+        public HelicopterEngineChangedEvent(RescueState state, float secondsLeft) { this.state = state; this.secondsLeft = secondsLeft; }
+    }
+
+    // ---------------------------------------------------------------- UI (Langkah 7)
+
+    /// <summary>Sinematik mulai atau selesai. Pengirim: DeathCinematic, NarrativeSequencer (#99).</summary>
+    [StickyEvent]
+    public struct CinematicStateChangedEvent
+    {
+        public bool isPlaying;
+        public bool keepMusic;
+        public CinematicStateChangedEvent(bool isPlaying, bool keepMusic) { this.isPlaying = isPlaying; this.keepMusic = keepMusic; }
+    }
 }

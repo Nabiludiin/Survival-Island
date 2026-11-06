@@ -37,6 +37,11 @@ namespace SurvivalIsland
         /// <summary>Run ini memakai safeLayout karena semua seed gagal.</summary>
         public bool UsedFallbackLayout { get; private set; }
 
+        // Ditambahkan Langkah 7 (#70): sumber DisasterData untuk jadwal bencana. Pengganti sementara
+        // RunLayoutSources.disasterData sampai RunLayoutSources ditulis (RunSeedManager.md bagian 1).
+        [Tooltip("Aset DisasterData (Eruption, Earthquake, TropicalStorm). Pindah ke RunLayoutSources saat ada.")]
+        [SerializeField] private DisasterData[] disasterData = Array.Empty<DisasterData>();
+
         private RandomStream[] sequential = Array.Empty<RandomStream>();
         private uint forcedNextSeed;
 
@@ -225,7 +230,15 @@ namespace SurvivalIsland
         /// </summary>
         private RunLayout BuildLayout(uint seed)
         {
-            return new RunLayout();
+            var layout = new RunLayout();
+            // Langkah 7 (#70): blok pertama jadwal bencana, hari 1 sampai scheduleBlockDays, lewat Fork(Disaster, 0).
+            // Memakai seed parameter (bukan CurrentSeed), karena BuildLayout dipanggil sebelum seed ditetapkan.
+            int block = ScheduleBlockDays();
+            var s = new RandomStream(DeriveSeed(seed, RandomStreamId.Disaster, 0UL));
+            DisasterScheduler.Build(ref s, disasterData, 1, block, null, out var schedule);
+            layout.disasterSchedule = schedule;
+            layout.disasterScheduleThroughDay = block;
+            return layout;
         }
 
         /// <summary>TODO Langkah 6/7: RunLayoutValidator.Validate (6 syarat di RunSeedManager.md).</summary>
@@ -235,9 +248,41 @@ namespace SurvivalIsland
             return layout != null;
         }
 
-        /// <summary>TODO Langkah 7: lanjutkan jadwal bencana per blok lewat DisasterScheduler.Build.</summary>
+        /// <summary>
+        /// Lanjutkan jadwal bencana per blok tanpa batas (RunSeedManager.md, #70). Blok ke-n memakai Fork(Disaster, n),
+        /// jadi hasilnya hanya bergantung pada seed dan nomor blok, bukan kapan fungsi dipanggil. Entri baru hanya
+        /// ditambahkan di belakang, sehingga indeks DisasterManager.nextIndex tetap sah. Ditulis Langkah 7.
+        /// </summary>
         public void EnsureDisasterScheduleThrough(int day)
         {
+            var layout = CurrentLayout;
+            if (layout == null || CurrentSeed == 0) return;
+            int block = ScheduleBlockDays();
+            if (block <= 0) return;
+            if (layout.disasterSchedule == null) layout.disasterSchedule = Array.Empty<DisasterScheduleEntry>();
+
+            while (layout.disasterScheduleThroughDay < day)
+            {
+                int fromDay = layout.disasterScheduleThroughDay + 1;
+                int toDay = layout.disasterScheduleThroughDay + block;
+                int blockIndex = layout.disasterScheduleThroughDay / block;
+                var s = Fork(RandomStreamId.Disaster, blockIndex);
+                DisasterScheduler.Build(ref s, disasterData, fromDay, toDay, layout.disasterSchedule, out var added);
+                if (added.Length > 0)
+                {
+                    var merged = new DisasterScheduleEntry[layout.disasterSchedule.Length + added.Length];
+                    Array.Copy(layout.disasterSchedule, merged, layout.disasterSchedule.Length);
+                    Array.Copy(added, 0, merged, layout.disasterSchedule.Length, added.Length);
+                    layout.disasterSchedule = merged;
+                }
+                layout.disasterScheduleThroughDay = toDay;
+            }
+        }
+
+        private static int ScheduleBlockDays()
+        {
+            var bal = GameManager.CurrentBalance;
+            return bal != null ? bal.disaster.scheduleBlockDays : 60;
         }
 
         private static int MaxSeedRerolls()

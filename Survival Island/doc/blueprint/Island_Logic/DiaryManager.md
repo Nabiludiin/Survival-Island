@@ -78,3 +78,11 @@
 8. Mati, lalu mulai run baru dan tekan `J`. **Hasil:** arsip kosong.
 9. Tekan `E` lagi pada buku yang sudah ditemukan. **Hasil:** arsip terbuka, bukan panel Bab 1.
 10. Tekan `J` di tengah malam. **Hasil:** `DiaryArchive` terbuka, `Time.timeScale` 0, dan Esc menutupnya.
+
+## 7. Catatan Implementasi (Langkah 7)
+
+Kode: `Island_Logic/DiaryManager.cs`, `DiaryPanel.cs`, `DiaryArchivePanel.cs`, dan `DiaryEntry.cs` (`DiaryRewardKind`, `DiaryReward`). `DiaryEntry` milik `ObjectiveManager`, tetapi ditulis di sini karena `OpenDiary(DiaryEntry)` membutuhkannya.
+
+- `DiaryManager.cs` tidak menulis `Time.timeScale` atau `Cursor`. Jeda (Claude.md Tahap 5) datang dari `pausesTime` pada panel `Diary` dan `DiaryArchive` di Inspector.
+- **`ObjectiveManager` (#81) belum ditulis.** Bab terbuka dibaca lewat `DiaryManager.ChapterUnlockedQuery`, yang nanti diisi `ObjectiveManager`. Sebelum itu arsip kosong. Tab `Arsip` (#100) dan daftar tujuan selesai belum ada.
+- **`LocalizationManager` (#104) belum ada.** `DiaryEntry` mendapat `fallbackTitle` dan `fallbackBody` sementara. Dihapus saat #104 ditulis.

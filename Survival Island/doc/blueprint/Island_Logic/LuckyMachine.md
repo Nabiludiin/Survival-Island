@@ -318,3 +318,19 @@ Setiap mesin yang regionnya dimuat menerima event ini dan membuka jendelanya sen
 22. Kumpulkan 1 putaran di mesin Region 3, lalu buka panel mesin Region 1. **Hasil:** `storedSpins` mesin Region 1 tetap 0.
 23. Pegang kapak, lalu paksa hadiah `lucky_mod_damage`. **Hasil:** `luckyModifierId` terpasang di kapak, bukan di `Base_Pistol`, dan damage kapak ke zombie naik 1,25 kali.
 24. Pegang kapak dengan `lucky_mod_speed`, lalu tebang pohon. **Hasil:** ayunan lebih cepat, tetapi jumlah pukulan sampai pohon tumbang tetap sama.
+
+## 7. Catatan Implementasi (Langkah 7)
+
+Kode: `Island_Logic/LuckyMachine.cs`, `LuckyMachineCage.cs`, `LuckyMachineData.cs` (`LuckyRewardKind`, `LuckyTier`, `CageGateState`, `SacrificeQuota`), `LuckyRewardData.cs`, `WeaponModifierData.cs`, `LuckyRewardLedger.cs`, dan `LuckyMachinePanel.cs`.
+
+Penyimpangan sementara:
+
+- **`IslandInteractable` (#17) belum ada.** `LuckyMachine` menerapkan `IInteractable` langsung, sama dengan `CraftingStation`.
+- **`RegionStateStore` (#88) belum ada.** Status mesin didaftarkan langsung ke `WorldStateSave` (`Register`) dengan `saveId` dari `SaveIdTag`, `LoadOrder` 140. Skenario tes 19 belum berlaku sampai #88 ditulis.
+- **`LuckyRewardLedger`** ditulis sebagai `MonoBehaviour` di objek manager `IslandPhase`, bukan kelas biasa, supaya punya `OnEnable` dan `OnDisable` untuk `Register`. Data dan API sama. `AddPendingSkin` juga menerima `targetItemId`, karena skin perlu tahu item tujuannya. Ledger mendengar `InventoryChangedEvent` untuk memasangnya.
+- **`StatusEffectManager` (#20) belum ada.** `LuckyRewardData.buff` bertipe `ScriptableObject`, dan hadiah `PermanentBuff` hanya mencatat peringatan. Hadiah itu tetap dihitung di ledger.
+- **Reset pool musuh:** `EnemyInstance.OnSpawned` (Langkah 5) belum mengembalikan skala dan AI. Mesin mengembalikan skala, `EnemyAI` atau `WildlifeAI`, `NavMeshAgent`, dan kebal sesudah `Despawn`, saat objek sudah nonaktif.
+- **Modifier ganda:** modifier yang lebih lemah, atau yang tidak punya target, memberi `duplicateModifierFallback` (isi `lucky_ammo` di Inspector). Modifier aslinya tidak dicatat ke ledger.
+- **Region dilepas saat vakum:** `OnDisable` langsung menjalankan `FinishSacrifice` untuk semua vakum, karena `RegionLoadStateChangedEvent` (#88) belum ada.
+- Angka tambahan: `luckyMachine.vacuumEndScale` (0,2).
+- Belum diimplementasikan: VFX dan suara vakum (#15, #114), notifikasi (#22), kedip lima detik terakhir, efek `WeaponModifierData` pada damage dan kecepatan (dibaca #113), dan Fire Axe menyalakan target (#97).
