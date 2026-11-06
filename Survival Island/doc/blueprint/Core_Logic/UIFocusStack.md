@@ -289,3 +289,11 @@ Panel hanya memanggil `Push` dan `Close`. Pemeriksaan teks `Time.timeScale`, `Cu
 11. Pindah ke jendela lain saat bermain, lalu kembali. **Hasil:** Pause terbuka, dan menutupnya mengunci kursor lagi.
 12. Cari `Time.timeScale` di semua script. **Hasil:** hanya ada penulisan di `UIFocusStack.ApplyState()`.
 13. Tekan `J`, lalu tekan Esc. **Hasil:** `DiaryArchive` menjeda game saat terbuka, lalu tertutup oleh Esc, dan waktu kembali berjalan.
+
+## 7. Catatan Implementasi (Langkah 1)
+
+Kode: `Survival Island/Assets/LOGIC/Core_Logic/UIFocusStack.cs` dan `UIPanel.cs`.
+
+- `Show()` dan `Hide()` tetap `protected abstract`. `UIFocusStack` memanggilnya lewat `InvokeShow()` dan `InvokeHide()` (`internal`), karena kelas lain tidak bisa memanggil anggota `protected`.
+- Tambahan fungsi baca `Contains(UIPanel)` dan `Count`, dipakai `UIPanel.OnDestroy` dan `UIManager.ShowConfirm`.
+- `AudioManager.SetPausedMix` belum dipanggil, karena `AudioManager` belum ditulis (TODO di `ApplyState`).

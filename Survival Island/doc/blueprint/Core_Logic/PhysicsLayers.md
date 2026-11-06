@@ -170,3 +170,10 @@ Karena collider tubuh bukan trigger, raycast dengan `QueryTriggerInteraction.Ign
 4. Arahkan hologram ke pemain atau musuh. **Hasil:** hologram merah, tanpa menabrak apa pun.
 5. Jalankan `LayerAuditWindow` pada prefab yang sengaja diberi layer salah. **Hasil:** prefab masuk laporan.
 6. Ledakkan tong di dekat musuh dengan tiga hitbox. **Hasil:** musuh hanya menerima satu kali damage.
+
+## 7. Catatan Implementasi (Langkah 1)
+
+Kode: `PhysicsMasks.cs` dan `PhysicsQuery.cs` di `Survival Island/Assets/LOGIC/Core_Logic/`.
+
+- `PhysicsMasks.Initialize()` berjalan otomatis sebelum scene pertama (`RuntimeInitializeOnLoadMethod`) dan mencatat kesalahan untuk layer yang belum dibuat di Tags and Layers.
+- `CollectUniqueDamageables` belum ditulis, karena butuh `IDamageable` dari `DamagePipeline` (#59, Langkah 5).

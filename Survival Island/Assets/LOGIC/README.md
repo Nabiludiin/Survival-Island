@@ -2,7 +2,7 @@
 
 Folder ini adalah tempat **kode gabungan C#** Survival Island. Semua *script* yang ditulis dari blueprint di `Survival Island/doc/blueprint/` disimpan di sini, sesuai `README.md` di root (TAHAP 6).
 
-**Status:** belum ada *script*. Folder `Survival Island/` sudah menjadi proyek Unity 6 LTS (keputusan developer), tetapi belum pernah dibuka di Unity, dan belum ada Langkah yang dijalankan.
+**Status:** Langkah 1 (fondasi inti) sudah ditulis, tetapi belum pernah dikompilasi atau dijalankan di Unity. Folder `Survival Island/` adalah proyek Unity 6 LTS (keputusan developer) yang belum pernah dibuka di Unity.
 
 > Jangan tertukar dengan `LOGIC/` di root repo. Folder itu hanya bahan analisis dari game referensi (60 Seconds!, Raft, dan Zombie). Kode dari sana tidak boleh disalin ke folder ini.
 
@@ -28,13 +28,50 @@ Sub-folder baru dibuat saat Langkah pertama yang membutuhkannya dijalankan. Fold
 - Kelas kecil yang hanya dipakai satu sistem boleh satu file dengan pemiliknya, kalau blueprint-nya menulis begitu.
 - Nama kelas, enum, tag, layer, dan scene mengikuti `Survival Island/doc/blueprint/GLOSSARY.md`.
 
+## 🧱 Assembly dan Namespace
+
+- **Assembly definition:** `SurvivalIsland.asmdef` di folder ini. Semua *script* di `LOGIC/` masuk satu assembly `SurvivalIsland`.
+- **Referensi:** `Unity.InputSystem` (`UIPanel.toggleAction`), `Unity.TextMeshPro` (teks panel), dan `UnityEngine.UI` (`Button`, `Slider`). `Unity.AI.Navigation` dan `Unity.RenderPipelines.Universal.Runtime` belum ditambahkan, karena belum dipakai. Langkah yang pertama memakainya menambahkan referensi itu.
+- **Namespace (usulan):** semua kelas memakai namespace `SurvivalIsland`, tanpa sub-namespace.
+- **Kode khusus Editor** (`EditorQuickStart`, `SaveIdTag.OnValidate`) diapit `#if UNITY_EDITOR`, jadi tetap berada di assembly yang sama.
+
+## 🧩 Isi Langkah 1
+
+| File | Blueprint |
+|---|---|
+| `Core_Logic/GameEventBus.cs` (`EventChannel<T>`, `StickyEventAttribute`), `GameEventRegistry.cs`, `GameEvents.cs` | `GameEventBus.md` |
+| `Core_Logic/PhysicsMasks.cs`, `PhysicsQuery.cs` | `PhysicsLayers.md` |
+| `Core_Logic/GameBalanceConfig.cs`, `GameBalanceSections.cs` | `GameBalanceConfig.md` |
+| `Core_Logic/GameManager.cs` (`GamePhase`, `RunResult`, `GameRunSaveData`) | `GameManager.md` |
+| `Core_Logic/RunLifecycle.cs` (`RunState`), `IBootstrapService.cs`, `BootstrapEntry.cs`, `EditorQuickStart.cs`, `MainMenuController.cs` | `RunLifecycle.md` |
+| `Core_Logic/AsyncSceneLoader.cs` | `AsyncSceneLoader.md` |
+| `Core_Logic/RunSeedManager.cs`, `RandomStream.cs`, `RunLayout.cs` | `RunSeedManager.md` |
+| `Core_Logic/UIFocusStack.cs`, `UIPanel.cs` | `UIFocusStack.md` |
+| `Core_Logic/UIManager.cs`, `FadingUIPanel.cs`, `PausePanel.cs`, `LoadingPanel.cs`, `CinematicPanel.cs`, `EndScreenPanel.cs`, `ConfirmDialogPanel.cs` | `UIManager.md` |
+| `Core_Logic/ObjectPooler.cs`, `PooledObject.cs`, `IPoolable.cs` | `ObjectPooler.md` |
+| `Core_Logic/WorldStateSave.cs`, `WorldStateSaveData.cs`, `ISaveable.cs`, `SaveIdTag.cs` | `WorldStateSave.md` (pengganti `SaveSystem.md`, tidak ada kelas `SaveSystem`) |
+| `Core_Logic/DeathReason.cs` | `GLOSSARY.md` (pemilik `DamagePipeline`, Langkah 5) |
+| `Island_Logic/DisasterScheduleEntry.cs` (`DisasterType`) | `DisasterManager.md` (Langkah 7) |
+| `60-seconds/ShipOutcomeData.cs` (`SavedItemData`) | `LifeboatExtraction.md` (Langkah 2) |
+
+Tiga file terakhir adalah kontrak milik Langkah lain yang sudah dibutuhkan Langkah 1. Langkah pemiliknya memakai tipe ini dan tidak mendeklarasikannya ulang. Event baru ditambahkan ke `Core_Logic/GameEvents.cs`, dan bagian config baru diisi di `Core_Logic/GameBalanceSections.cs`.
+
+Penyimpangan kecil dari blueprint dicatat di bagian "Catatan Implementasi (Langkah 1)" pada blueprint terkait.
+
+### Penyiapan di Unity untuk Langkah 1 (belum dilakukan)
+
+1. Buat layer 8 sampai 23 sesuai `PhysicsLayers.md` di **Project Settings > Tags and Layers**. `PhysicsMasks` mencatat kesalahan untuk layer yang belum ada.
+2. Buat aset **Create > Survival > Game Balance Config**, lalu isi ke `GameManager.balanceAsset`.
+3. Buat prefab `PersistentRoot`: objek akar dengan `RunLifecycle`, anak `Managers` (`managersRoot`) berisi `GameManager`, `UIFocusStack`, `UIManager`, `ObjectPooler`, `AsyncSceneLoader`, `RunSeedManager`, `WorldStateSave`, canvas persisten, dan `EventSystem`. Isi `RunLifecycle.orderedServices` sesuai urutan bootstrap di `RunLifecycle.md` (GameManager pertama).
+4. Buat scene `Bootstrap` (kamera hitam dan `BootstrapEntry`), `MainMenu` (`MainMenuController`), `ShipPhase`, dan `IslandPhase`, lalu masukkan ke **Build Settings** dengan `Bootstrap` di indeks 0.
+
 ## 🚀 Status Langkah
 
 Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Langkah [X]".
 
 | Langkah | Isi | Folder utama | Status |
 |---|---|---|---|
-| **1** | Kerangka `GameManager`, `UIManager`, `ObjectPooler`, `SaveSystem`, dan pola *State Management* inti | `Core_Logic/` | Belum dimulai |
+| **1** | Kerangka `GameManager`, `UIManager`, `ObjectPooler`, `SaveSystem`, dan pola *State Management* inti | `Core_Logic/` | Ditulis, belum diuji di Unity |
 | **2** | Fase 1: `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | `60-seconds/` | Belum dimulai |
 | **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Belum dimulai |
 | **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Belum dimulai |

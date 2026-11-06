@@ -135,3 +135,12 @@ Pendengar yang melakukan pekerjaan harian, seperti reset panen atau jadwal kargo
 8. Pada hari ke-75, panggil `TriggerWinSequence`. **Hasil:** `RunEndedEvent` bernilai `Won`.
 9. Tiba di pulau. **Hasil:** `DayChangedEvent { newDay = 1, isReplay = false }` terkirim sekali, dan penghitung hari langsung terisi.
 10. Pada hari ke-10, keluar lalu lanjutkan. **Hasil:** `DayChangedEvent { newDay = 10, isReplay = true }` terkirim sekali setelah `FinishRestore`, `currentDay` tidak berubah, `DayLimitPassedEvent` tidak terkirim, dan panen harian atau jadwal kargo tidak ter-reset.
+
+## 7. Catatan Implementasi (Langkah 1)
+
+Kode: `Survival Island/Assets/LOGIC/Core_Logic/GameManager.cs`. Tambahan kecil terhadap bagian 1-2, tanpa mengubah aturan:
+
+- `currentPhase`, `currentDay`, `hasEscaped`, `hasArrivedOnIsland`, `wasTainted`, dan `shipOutcome` berupa properti yang hanya bisa dibaca dari luar, supaya status run hanya berubah lewat fungsi di blueprint ini.
+- Karena itu ada dua fungsi tulis tambahan: `MarkArrivedOnIsland()` (dipanggil `IslandArrival.Apply`: mengosongkan `savedShipLoot` lalu `hasArrivedOnIsland = true`, #74) dan `MarkTainted()` (dipanggil `DevConsole`, #56).
+- `GameRunSaveData` ditulis di file yang sama, berisi `currentDay`, `hasEscaped`, `hasArrivedOnIsland`, `shipOutcome`, `wasTainted`, dan `phase`.
+- `static GameBalanceConfig CurrentBalance` adalah pembantu baca `Instance.Balance` yang bernilai `null` kalau `GameManager` belum siap.

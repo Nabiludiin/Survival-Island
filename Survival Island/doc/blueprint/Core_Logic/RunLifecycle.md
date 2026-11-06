@@ -356,3 +356,14 @@ Panel `Loading` mengubah bar dengan `Mathf.MoveTowards` dan `Time.unscaledDeltaT
 14. Tekan Play langsung dari `IslandPhase` di Editor. **Hasil:** `EditorQuickStart` menyiapkan manager dan game berjalan.
 15. Biarkan 4 zombie kapal aktif dan beberapa barang tidak terambil, lalu berangkat dengan sekoci. **Hasil:** di `IslandPhase`, `CountActive` untuk `zombie_standar`, `ShipLoot_Generic`, dan `ShipNpc_Generic` bernilai 0.
 16. Tiba di pulau, lalu lihat `eventlog 1`. **Hasil:** `DayChangedEvent { newDay = 1, isReplay = false }` terkirim sekali. Keluar, lalu lanjutkan. **Hasil:** `DayChangedEvent` dengan `isReplay = true` terkirim sekali setelah `FinishRestore`.
+
+## 7. Catatan Implementasi (Langkah 1)
+
+Kode: `RunLifecycle.cs`, `IBootstrapService.cs`, `BootstrapEntry.cs`, `EditorQuickStart.cs`, dan `MainMenuController.cs` di `Survival Island/Assets/LOGIC/Core_Logic/`.
+
+- **`EnterIslandPhase`:** selama transisi `State = StartingRun`, supaya panggilan ganda dan save ditolak. `State = OnIsland` diisi di langkah 8 seperti blueprint.
+- **Tanpa `NarrativeSequencer` (#99):** `LoadSingle` dipanggil tanpa `holdActivation`, dan `EnterIslandPhase` mendorong panel `Loading` sendiri. Saat #99 ditulis, ganti dengan `PlayDuringLoad` sesuai bagian 2.
+- **`MainMenuController`:** mendorong panel `MainMenu` setelah `State == InMenu`, bukan di `Start`. Di `Start`, panel `Loading` mungkin masih di puncak dan menolak panel baru (`rejectsNewPanels`).
+- **Menutup jendela saat Fase 1:** `Application.wantsToQuit` menampilkan `ConfirmDialog` dan menahan penutupan. Penutupan kedua atau klik Ya langsung menutup game.
+- **`EditorQuickStart`:** mencari prefab bernama `PersistentRoot` lewat `AssetDatabase`, jadi lokasi prefab bebas. Scene selain `ShipPhase` diperlakukan sebagai `IslandPhase`.
+- Belum ada: `NarrativeSequencer`, `RegionStreaming`, `IslandArrival`, `DeathCinematic`, `LocalStatsManager`, `AudioManager.StopWorldAudio`, dan notifikasi #22. Semuanya ditandai TODO di kode. Langkah akhir run tetap berjalan tanpa sistem itu.

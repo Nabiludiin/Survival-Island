@@ -329,3 +329,11 @@ Layar akhir membaca seed sebelum reset, karena `ResetForNewRun()` baru berjalan 
 13. Buka file save. **Hasil:** seed, status aliran, dan `layout` tersimpan.
 14. Cari `Random.` di script gameplay. **Hasil:** hanya efek tampilan yang memakainya.
 15. Jalankan `setday 130`, simpan, lalu lanjutkan. Bandingkan dengan run seed sama yang berjalan sampai hari ke-61 lebih dulu. **Hasil:** `disasterScheduleThroughDay` 180, dan isi jadwal sama.
+
+## 7. Catatan Implementasi (Langkah 1)
+
+Kode: `RunSeedManager.cs`, `RandomStream.cs`, dan `RunLayout.cs` di `Survival Island/Assets/LOGIC/Core_Logic/`.
+
+- `RandomStream`, `Fork`, `GetStream`, `BeginNewRun`, `ResolveLayout`, `CaptureSave`, dan `RestoreFromSave` sudah ditulis.
+- `BuildLayout` masih mengembalikan susunan kosong dan pemeriksaan selalu lolos, karena `RunLayoutSources`, `PartSpawnPointTable`, daftar NPC, dan `DisasterData` belum ada. `EnsureDisasterScheduleThrough` dan `RunSeedAudit` juga belum ada. Diisi saat #69, #76, dan #70 ditulis.
+- `DisasterType` dan `DisasterScheduleEntry` sudah ditulis di `Island_Logic/DisasterScheduleEntry.cs`, karena `RunLayout` memakainya. `DisasterManager` (Langkah 7) tidak boleh mendeklarasikannya ulang.

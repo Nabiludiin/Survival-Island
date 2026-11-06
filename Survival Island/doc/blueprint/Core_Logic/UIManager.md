@@ -277,3 +277,12 @@ Dipanggil `RunLifecycle` langkah 10. `UIFocusStack.ClearForNewRun()` sudah menut
 15. Menang lewat konsol. **Hasil:** `WinScreen` tampil tanpa baris penyebab, dengan satu tombol Menu Utama.
 16. Pakai perintah cheat dari `DevConsole` yang menandai run (`isTainted`), lalu mati. **Hasil:** statistik tampil dengan tanda `[CHEAT]`.
 17. Cari `Time.timeScale` dan `Cursor.lockState` di script UI. **Hasil:** tidak ada penulisan di kelas ini.
+
+## 7. Catatan Implementasi (Langkah 1)
+
+Kode: `UIManager.cs`, `FadingUIPanel.cs`, `PausePanel.cs`, `LoadingPanel.cs`, `CinematicPanel.cs`, `EndScreenPanel.cs`, dan `ConfirmDialogPanel.cs` di `Survival Island/Assets/LOGIC/Core_Logic/`.
+
+- Perilaku tampil dan sembunyi bersama ditulis di kelas dasar `FadingUIPanel`. Panel `MainMenu` juga memakai kelas ini langsung.
+- **Urutan hasil `ConfirmDialog`:** `request` dikosongkan **sebelum** `UIFocusStack.Close`, bukan sesudahnya. Alasannya, `Close` memanggil `OnClosed(User)`, yang juga dipakai jalur Esc. Kalau `request` belum kosong, klik Ya akan terbaca sebagai Esc. Urutan yang terlihat pemain tetap sama: panel tertutup, lalu `onResult` dipanggil. Fungsi pembantunya `ResolveConfirm(bool)` dan `HandleConfirmClosed(UICloseReason)`.
+- `Localize(key)` mengembalikan kunci mentah sampai `LocalizationManager` (#104) ditulis.
+- Tombol Keluar dari Tersangkut disembunyikan sampai `ProgressionSafety` (#116) ditulis. Statistik layar akhir disembunyikan sampai `LocalStatsManager` (#57) ditulis. `NotificationLogView` berupa `GameObject` yang hanya dinyalakan dan dimatikan sampai #22 ditulis.

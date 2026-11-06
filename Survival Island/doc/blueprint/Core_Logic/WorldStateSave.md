@@ -447,3 +447,14 @@ Alur saat `Corrupt`:
 25. Jalankan `savedelay 10`, picu autosave, lalu turunkan HP ke 0. **Hasil:** alur mati menunggu paling lama 5 detik tanpa membekukan frame, penulisan autosave dibatalkan, dan setelah alur selesai tidak ada `survival_save.json`.
 26. Ulangi tes 25, lalu matikan proses tepat setelah `MarkRunEnded`. **Hasil:** `run_end.marker` tetap tertulis walaupun `abortWrites = true`, dan boot berikutnya menyelesaikan permadeath.
 27. Jalankan `savedelay 3`, picu autosave, lalu segera pilih Simpan dan Keluar ke Menu. **Hasil:** frame tidak membeku selama menunggu `writeTask`, lalu save `QuitToMenu` tertulis.
+
+## 7. Catatan Implementasi (Langkah 1)
+
+Kode: `WorldStateSave.cs`, `WorldStateSaveData.cs`, `ISaveable.cs`, dan `SaveIdTag.cs` di `Survival Island/Assets/LOGIC/Core_Logic/`. Tidak ada kelas `SaveSystem`.
+
+- **Hasil `ReadRunFile`:** dibaca lewat properti `LoadedSeed` dan `LoadedGame`, karena fungsi itu mengembalikan `bool`.
+- **Penggabungan autosave:** permintaan autosave (`WakeUp`, `Daybreak`, `BridgeComplete`, `DisasterEnded`, `PartInstalled`) ditampung dan diproses di `LateUpdate`, jadi permintaan pada frame yang sama hanya ditulis sekali (tes 15). Saat dijeda, permintaan menunggu.
+- **`QuitToMenu` saat autosave lama belum selesai setelah batas waktu:** dianggap gagal (`SaveCompletedEvent { QuitToMenu, false }`), bukan menulis bersamaan. Dua penulisan bersamaan bisa saling menimpa lewat `File.Replace`. `RunLifecycle` lalu menampilkan `ConfirmDialog`.
+- **`AppQuit` saat menulis:** kalau `writeTask.Wait` habis waktu, save `AppQuit` dibatalkan dengan log kesalahan.
+- Penulisan langsung (tanpa thread lain) hanya untuk `QuitToMenu` dan `AppQuit`. Alasan lain, termasuk `ArrivedOnIsland` dan `Manual`, memakai `Task.Run`.
+- Belum ada: `RegionStateStore`/`CaptureLoadedRegions` (#88), cek musuh di sekitar pemain, `PlayerDamagedEvent`, `VitalWarningChangedEvent`, rasio HP, `SleepSystem`, `PlayerTraversal`, `SpawnManager.RequestAmbush`, notifikasi #22, dan `SaveIdAuditWindow`. Semuanya ditandai TODO di kode.
