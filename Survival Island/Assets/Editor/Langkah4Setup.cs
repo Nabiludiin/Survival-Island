@@ -441,8 +441,8 @@ namespace SurvivalIsland.EditorTools
 
         private static void BuildTerrain()
         {
-            // Terrain greybox 120 x 120 m, datar di Y = 0, posisi sama dengan lantai Langkah 3.
-            // Lapisan 0 = pasir (z < -25, pantai selatan tempat mendarat), lapisan 1 = rumput.
+            // Terrain Region 1 (1000 x 1000 m, X 1000-2000, Z 0-1000, RegionStreaming.md), datar di Y = 0.
+            // Lapisan 0 = pasir (pantai selatan tempat mendarat, Z dunia < R1Origin.z - 25), lapisan 1 = rumput.
             var sand = TerrainLayerAsset("TL_Sand", new Color(0.86f, 0.8f, 0.6f));
             var grass = TerrainLayerAsset("TL_Grass", new Color(0.3f, 0.5f, 0.25f));
 
@@ -451,16 +451,16 @@ namespace SurvivalIsland.EditorTools
             // Aset dibuat lebih dulu; alphamap yang diisi sebelum CreateAsset tidak ikut tersimpan.
             var data = new TerrainData { heightmapResolution = 129 };
             AssetDatabase.CreateAsset(data, dataPath);
-            data.size = new Vector3(120f, 20f, 120f);
-            data.alphamapResolution = 128;
+            data.size = new Vector3(IslandLayout.RegionSize, 20f, IslandLayout.RegionSize);
+            data.alphamapResolution = 512;
             data.terrainLayers = new[] { sand, grass };
             int res = data.alphamapResolution;
             var alpha = new float[res, res, 2];
             for (int z = 0; z < res; z++)
                 for (int x = 0; x < res; x++)
                 {
-                    float worldZ = -60f + (z + 0.5f) / res * 120f;
-                    float s = Mathf.Clamp01((-25f - worldZ) / 4f + 0.5f);   // Peralihan 4 m di sekitar z = -25
+                    float worldZ = IslandLayout.R1Min.z + (z + 0.5f) / res * IslandLayout.RegionSize;
+                    float s = Mathf.Clamp01((IslandLayout.R1Origin.z - 25f - worldZ) / 4f + 0.5f);   // Peralihan 4 m di garis pantai
                     alpha[z, x, 0] = s;
                     alpha[z, x, 1] = 1f - s;
                 }
@@ -470,7 +470,7 @@ namespace SurvivalIsland.EditorTools
 
             var go = Terrain.CreateTerrainGameObject(data);
             go.name = "IslandTerrain";
-            go.transform.position = new Vector3(-60f, 0f, -60f);
+            go.transform.position = IslandLayout.R1Min;
             go.layer = Layer(PhysicsMasks.TerrainLayer);
 
             // SurfaceDetection.md: TerrainSurfaceSource + SurfaceLayerMap (pasir = Pasir, rumput = Rumput), lalu bake.
@@ -516,6 +516,7 @@ namespace SurvivalIsland.EditorTools
             // Node resource (README Langkah 4 nomor 6): ResourceNode + SaveIdTag, layer Obstacle, visual berdiri dan habis.
             // Letak greybox di utara titik mendarat, region Volcano (Region 1 = zona awal).
             var root = new GameObject("ResourceNodes").transform;
+            root.position = IslandLayout.R1Origin;
             var tree = nodes[0]; var stone = nodes[1]; var mushroom = nodes[2]; var sap = nodes[3];
             Vector3[] trees = { new Vector3(-6, 0, -18), new Vector3(4, 0, -15), new Vector3(10, 0, -8), new Vector3(-12, 0, -6), new Vector3(0, 0, -4), new Vector3(15, 0, 2) };
             for (int i = 0; i < trees.Length; i++) TreeNode(root, $"Tree_{i:00}", trees[i], tree, wood, leaf, SurfaceType.Kayu);
@@ -530,7 +531,7 @@ namespace SurvivalIsland.EditorTools
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
-            go.transform.position = pos;
+            go.transform.localPosition = pos;
             go.layer = Layer(PhysicsMasks.ObstacleLayer);
             node = go.AddComponent<ResourceNode>();
             Set(node, "data", data);

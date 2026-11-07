@@ -167,7 +167,7 @@ Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Lan
 | **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Diuji di Unity: tiba di pantai, inventori, hotbar, WorldItem (makan/minum dan pertarungan belum diuji) |
 | **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Diuji di Unity: jam, panen, crafting, bangun, dan restriksi pantai (menu B, demolish, dan tumbuh ulang belum diuji) |
 | **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/`, `Core_Logic/` | Diuji di Unity: zombie standar (terbakar, mengendap, mengejar, menyerang), hitbox, serigala dan babi (varian khusus, terkam, Blood Moon belum diuji) |
-| **6** | `ZoneManager`, frostbite, jembatan kayu, barang berat, `WeatherManager` | `Island_Logic/` | Terkompilasi, belum diuji di Play Mode |
+| **6** | `ZoneManager`, frostbite, jembatan kayu, barang berat, `WeatherManager` | `Island_Logic/` | Diuji di Unity: zona, cuaca, jembatan S1, gerbang S2/S3, angkat barang berat, frostbite (obor, pakaian, jatuh jurang belum diuji) |
 | **7** | *Sudden Event*, `LuckyMachine`, `DiaryManager`, alur menang dan kalah | `Island_Logic/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 
 Isi kolom **Status** dengan salah satu: `Belum dimulai`, `Sedang ditulis`, `Ditulis, belum diuji di Unity`, atau `Diuji di Unity`. Jangan menulis `Diuji di Unity` sebelum *script* benar-benar dijalankan di Unity.
@@ -231,7 +231,7 @@ Dibuat lewat menu **Survival Island > Setup > Langkah 4 - Survival dan Bangun** 
 - **Bangunan:** 12 `BuildableData` (`Assets/Data/Buildables`) dengan prefab greybox di `Assets/Prefabs/Structures`. Tiap prefab punya `StructureNode`, `BaseHealth`, layer `Structure`, dan `SurfaceTag` `Kayu`. Meja memakai `CraftingStation`. `Build_BarbedWire` dan `Build_Lamp` dilewati karena `Mat_Scrap` belum punya data.
 - **Node sumber daya:** `Node_Tree`, `Node_Rock`, `Node_Mushroom`, dan `Node_SapTree` (`Assets/Data/ResourceNodes`, tabel `ResourceRespawn.md`).
 - **`IslandPhase`:**
-  - Lantai kotak diganti Terrain 120 x 120 m, dengan pasir di selatan (z < -25) dan rumput di utara. Terrain memakai `TerrainSurfaceSource`, `SurfaceLayerMap` (pasir = `Pasir`, rumput = `Rumput`), dan peta permukaan yang sudah dibake.
+  - Lantai kotak diganti Terrain Region 1 (1000 x 1000 m sejak menu Langkah 6, posisi di `IslandLayout`), dengan pasir di pantai selatan dan rumput di utara. Terrain memakai `TerrainSurfaceSource`, `SurfaceLayerMap` (pasir = `Pasir`, rumput = `Rumput`), dan peta permukaan yang sudah dibake.
   - 7 pohon (termasuk 1 pohon getah), 3 batu, dan 2 jamur.
   - `DayNightDirector`, `ResourceRespawn`, `CraftingManager`, `TechTreeManager` (`nodes` kosong, sesuai `TechTreeManager.md`), `StructureRegistry`, dan `BuildManager`.
   - `CraftingPanel` dan `BuildMenu` polos. Kedua panel tetap aktif dengan alpha 0, karena `Instance` diisi di `Awake`.
@@ -394,7 +394,62 @@ Kecepatan setengah, Sprint dan Jump mati, regenerasi stamina, dan kunci senjata 
 
 `RegionStreaming` dan `RegionBoundaryGuard` (#88, diganti `ZoneTracker.Active` dan posisi aman di `RegionGateSystem`), `SwimStateChangedEvent`/`SwimmingController` (#13, diganti `PlayerTraversal.Mode == Swimming`), `InteriorZone` (#112), `CampfireManager` (#44), `PostProcessController` (#23), `SettingsManager.brightness` (#19), `VFXManager` (#15), `NotificationManager` (#22), `CompassSystem` (#30), `LoreHintGrantedEvent` (#100), `LightSource` (#98), `DevConsole` (#56), `DiaryChapterUnlockedEvent` (#81, Langkah 7), isi `RunSeedManager.BuildLayout` untuk suku cadang (#89, diganti pemilihan cadangan di `HeavyItemSystem`), aksi `Pakai` pakaian hangat di UI inventori, `NavMeshLink` seam, dan alat Editor `ZoneCoverageAudit`. Semuanya ditandai TODO di kode dan dicatat di bagian "Catatan Implementasi (Langkah 6)" pada blueprint terkait.
 
-### Penyiapan di Unity untuk Langkah 6 (belum dilakukan)
+### Penyiapan di Unity untuk Langkah 6 (sudah dilakukan untuk IslandPhase greybox)
+
+Dibuat lewat menu **Survival Island > Setup > Langkah 6 - Region dan Cuaca** (`Assets/Editor/Langkah6Setup.cs`). Koordinat peta ada di `Assets/Editor/IslandLayout.cs` dan mengikuti peta usulan `RegionStreaming.md`:
+
+| Region | Letak |
+|---|---|
+| R1 Volcano | X 1000-2000, Z 0-1000 |
+| R2 Amazon | X 1000-2000, Z 1000-2000 |
+| R4 Desa | X 0-1000, Z 1000-2000 |
+| R3 Salju | X 0-1000, Z 2000-3000 |
+
+Seam S1 berada di (1500, 1000), S2 di (1000, 1500), S3 di (500, 2000), dan helipad di (500, 2150). Isi Region 1 dari menu Langkah 3 dan 4 sudah digeser ke `IslandLayout.R1Origin` (1500, 0, 60). Pantai pendaratan ada di Z < 35. Tinggi permukaan tidak tertulis di dokumen, jadi semua lantai datar. Urutan menu: 3, 4, 5, lalu 6. Isinya:
+
+- **Peta:**
+  - Terrain R2, R3, dan R4. Masing-masing punya satu lapisan permukaan yang dibake (Tanah, Salju, Tanah).
+  - Tebing di semua tepi selain seam.
+  - Jurang S1 selebar 30 m dengan dasar di Y -20 dan `RavineRecoveryVolume`.
+  - `BridgeSite` di tepi R1 dengan 20 ruas, `deckCollider`, papan TMP, dan `NoBuildVolume`.
+  - `GateBarrier` di S1, S2, dan S3, ditambah `GateBlocker` di S2.
+  - Helipad greybox dengan `NoBuildVolume`. Komponen helikopter dipasang menu Langkah 7.
+  - 4 trigger `ZoneManager` yang saling tumpang tindih 10 m.
+- **Sistem:**
+  - `RegionalWeather` dengan 4 tabel (menu konteks "Isi nilai awal region").
+  - `WeatherManager` dengan partikel hujan dan daun, serta 2 `AudioSource`.
+  - `EnvironmentDirector` dengan 4 profil (menu konteks yang sama) dan Directional Light.
+  - `RegionGateSystem` dengan aturan S1 Bridge, S2 DiaryChapter 3, dan S3 FollowsPrevious.
+  - `HeavyItemSystem` dengan 5 `HeavyItemData` dan prefab, `PartSpawnPoints_Village` (10 titik di desa, jarak 75 m, letaknya greybox), dan `carryAnchor`.
+- **Pool:** 6 pool `Fx_*`, masing-masing 2. Ukuran selain Snow dan Blizzard tidak tertulis. Isinya `ParticleSystem` di akar, tanpa `PooledEffect`.
+- **Pemain dan item:**
+  - `Player_Island` mendapat `WarmthSystem` dan `CarryAnchor`.
+  - `Tool_Torch` memakai `Viewmodel_Torch` (`TorchController`, `Light`, `ParticleSystem`).
+- **NavMesh:** dibake ulang untuk seluruh peta.
+
+**Hasil uji Play Mode (7 November 2026):**
+- **Zona dan cuaca:** di pantai R1 zona `Volcano` dan cuaca cerah. Masuk R2 membuat zona berganti ke `Amazon`, cuaca `Rain`, dan kabut berubah.
+- **Jembatan S1:** bab 2 ditambah 250 kayu membuat 10 ruas, dan 500 kayu membuat 20 ruas, deck aktif, barrier hilang, dan Amazon terbuka.
+- **Gerbang S2 dan S3:** bab 3 membuka Desa dan Salju, dan barrier S2 hilang.
+- **Barang berat:** 5 suku cadang tergeletak di desa. Mengangkat Mesin membuat `SpeedMultiplier` 0,5 dan mengunci senjata.
+- **Frostbite:** di R3 tanpa pakaian hangat, kehangatan habis dalam sekitar 4 detik (`regionSnowCold` 20). Setelah itu stamina habis, lalu HP turun.
+- **Error:** yang tersisa hanya `AudioMixer` kosong.
+
+Belum diuji:
+- Menyetor kayu lewat interaksi E di `BridgeSite`. Uji memakai `DebugDeposit`.
+- Jatuh ke jurang dan dipulihkan.
+- Obor dan pakaian hangat. `WearClothing` belum punya pemanggil di UI.
+- Peralihan suasana dan partikel `Fx_*` secara visual.
+- Badai.
+- Barang berat jatuh karena serangan.
+
+Data yang belum ada di dokumen:
+- Tinggi permukaan dan kedalaman jurang.
+- Letak titik suku cadang dan ukuran pool `Fx_*` suasana.
+- Kurva cahaya per jam dan skybox per region.
+- Jangkauan cahaya obor.
+
+Daftar penyiapan dari blueprint:
 
 1. Scene `IslandPhase`: satu objek manager berisi `RegionalWeather` (4 aset **Create > Survival > Regional Weather Table**, isi lewat menu konteks "Isi nilai awal region"), `WeatherManager` (anak kamera: `rainParticles`, `stormLeavesParticles`, dua `AudioSource` di grup mixer `Ambient`), `EnvironmentDirector` (4 aset **Create > Survival > Region Environment Profile** dengan menu konteks "Isi nilai awal region", Directional Light matahari, material `SkyboxBlended` opsional), `RegionGateSystem` (isi `rules[].barriers` dengan `GateBarrier` dan `GateBlocker`), dan `HeavyItemSystem` (5 aset **Create > Survival > Heavy Item**, aset **Create > Survival > Part Spawn Point Table** minimal 10 titik, `carryAnchor` di depan kamera pemain).
 2. Trigger zona: `BoxCollider` raksasa (IsTrigger, layer `ZoneTrigger`) dengan `ZoneManager` per region, bertumpuk minimal 10 meter di seam, dari dasar laut sampai puncak.

@@ -262,13 +262,14 @@ namespace SurvivalIsland.EditorTools
 
             // Pantai greybox: lantai datar layer Terrain, beberapa batu layer Obstacle.
             var world = new GameObject("BeachGreybox").transform;
+            world.position = IslandLayout.R1Origin;   // Region 1 di peta usulan RegionStreaming.md
             Box(world, "Beach", new Vector3(0f, -0.5f, 0f), new Vector3(120f, 1f, 120f), sandMat, PhysicsMasks.TerrainLayer);
             Box(world, "Rock_A", new Vector3(8f, 0.75f, 12f), new Vector3(3f, 1.5f, 2f), wallMat, PhysicsMasks.ObstacleLayer);
             Box(world, "Rock_B", new Vector3(-10f, 1f, 18f), new Vector3(2f, 2f, 3f), wallMat, PhysicsMasks.ObstacleLayer);
 
             // IslandArrival di pantai selatan (README Langkah 2 nomor 4): landingPoint, lookTarget, npcOrigin, overflowOrigin.
             var arrivalGo = new GameObject("IslandArrival");
-            arrivalGo.transform.position = new Vector3(0f, 0f, -40f);
+            arrivalGo.transform.position = IslandLayout.R1Origin + new Vector3(0f, 0f, -40f);
             var arrival = arrivalGo.AddComponent<IslandArrival>();
             Set(arrival, "landingPoint", Child(arrivalGo.transform, "LandingPoint", new Vector3(0f, 0.05f, 0f)));
             Set(arrival, "lookTarget", Child(arrivalGo.transform, "LookTarget", new Vector3(0f, 1.6f, 30f)));

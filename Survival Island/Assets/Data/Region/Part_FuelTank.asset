@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 984c2f8e246e4531a5f08740d50ab3aa, type: 3}
+  m_Name: Part_FuelTank
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.HeavyItemData
+  partId: Part_FuelTank
+  displayNameKey: 
+  weightKg: 100
+  prefab: {fileID: 8322190978594065496, guid: 2392f1b90339bb84488f275532c22771, type: 3}
+  speedMultiplierOverride: 0

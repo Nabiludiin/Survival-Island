@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8072150477275263192}
   - component: {fileID: 6664916801538879019}
   - component: {fileID: 961258100085016932}
-  - component: {fileID: 5143739296686324678}
+  - component: {fileID: 5968452223782698629}
   m_Layer: 14
   m_Name: WorldItem_Generic
   m_TagString: Untagged
@@ -163,7 +163,7 @@ MonoBehaviour:
   sourceSpawner: {fileID: 0}
   sourcePointIndex: -1
   homeRegion: 0
---- !u!114 &5143739296686324678
+--- !u!114 &5968452223782698629
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

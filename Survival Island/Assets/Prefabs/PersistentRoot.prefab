@@ -5684,6 +5684,36 @@ MonoBehaviour:
     size: 6
     overflow: 0
     maxSize: 0
+  - tag: Fx_Snow
+    prefab: {fileID: 4620826022534735250, guid: 1f9b69a9e7b36f9419577894364bb9ac, type: 3}
+    size: 2
+    overflow: 0
+    maxSize: 0
+  - tag: Fx_Blizzard
+    prefab: {fileID: 9075075027405964366, guid: bca91c2b8456e4b4093c04d5a8bf25f4, type: 3}
+    size: 2
+    overflow: 0
+    maxSize: 0
+  - tag: Fx_AshLight
+    prefab: {fileID: 7697532164750309671, guid: 97ab18c5439ae1c4c80c99e49b9dd373, type: 3}
+    size: 2
+    overflow: 0
+    maxSize: 0
+  - tag: Fx_Spores
+    prefab: {fileID: 8001964805461967531, guid: 1e15898693fb1fa42ad44483ff367072, type: 3}
+    size: 2
+    overflow: 0
+    maxSize: 0
+  - tag: Fx_SnowDust
+    prefab: {fileID: 9187756016343548050, guid: bd3ae50c949177047b4976f4a6a24f20, type: 3}
+    size: 2
+    overflow: 0
+    maxSize: 0
+  - tag: Fx_Mist
+    prefab: {fileID: 4854781639809459121, guid: 557e26cd03348044c8a2df0441d0aac8, type: 3}
+    size: 2
+    overflow: 0
+    maxSize: 0
 --- !u!1 &3752783440837993212
 GameObject:
   m_ObjectHideFlags: 0

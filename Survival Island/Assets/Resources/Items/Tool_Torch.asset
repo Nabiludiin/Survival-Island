@@ -40,7 +40,7 @@ MonoBehaviour:
   repairStation: 1
   worldMesh: {fileID: 0}
   worldMaterial: {fileID: 0}
-  equipPrefab: {fileID: 0}
+  equipPrefab: {fileID: 4768403233281432407, guid: f2745dba16e874a489a0da93fbfb7bec, type: 3}
   handUse: 2
   bagBonusSlots: 0
   shipWeight: 1

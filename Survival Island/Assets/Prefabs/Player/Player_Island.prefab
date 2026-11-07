@@ -19,11 +19,12 @@ GameObject:
   - component: {fileID: 4424620843789379224}
   - component: {fileID: 420448853105228704}
   - component: {fileID: 1235761728896406564}
-  - component: {fileID: 6913827590546823085}
-  - component: {fileID: 7550350127569318365}
-  - component: {fileID: 6357531684194945642}
-  - component: {fileID: 4395970867223689362}
-  - component: {fileID: 8399155474262091718}
+  - component: {fileID: 2398708761052559031}
+  - component: {fileID: 6202905519947410076}
+  - component: {fileID: 6862303491769945276}
+  - component: {fileID: 1196106430516782707}
+  - component: {fileID: 1863548329346872318}
+  - component: {fileID: 6325273904927900860}
   m_Layer: 8
   m_Name: Player_Island
   m_TagString: Player
@@ -213,7 +214,7 @@ MonoBehaviour:
   cameraTransform: {fileID: 8022214797924916484}
   characterController: {fileID: 5338425523829612637}
   rejectClip: {fileID: 0}
---- !u!114 &6913827590546823085
+--- !u!114 &2398708761052559031
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -226,7 +227,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.InfectionSystem
   stats: {fileID: 2334969100669098655}
---- !u!114 &7550350127569318365
+--- !u!114 &6202905519947410076
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -240,7 +241,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.PlayerTargetable
   aimPoint: {fileID: 0}
   aimHeight: 1.2
---- !u!114 &6357531684194945642
+--- !u!114 &6862303491769945276
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -252,7 +253,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f73499166ec4469ebdccafb416c5e8e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.PlayerPinnedState
---- !u!114 &4395970867223689362
+--- !u!114 &1196106430516782707
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -265,7 +266,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.PlayerShove
   shoveFailClip: {fileID: 0}
---- !u!114 &8399155474262091718
+--- !u!114 &1863548329346872318
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -278,6 +279,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.NoiseEmitter
   isPlayerMovement: 1
+--- !u!114 &6325273904927900860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74956369538108119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34df346121ee44d0a8a672ad8dd81659, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.WarmthSystem
+  traversal: {fileID: 0}
 --- !u!1 &1547270341276526745
 GameObject:
   m_ObjectHideFlags: 0
@@ -891,5 +905,37 @@ Transform:
   m_Children:
   - {fileID: 8022214797924916484}
   - {fileID: 9127187337755238508}
+  - {fileID: 3338013344536068961}
   m_Father: {fileID: 4721211807896660994}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8883789175319754134
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3338013344536068961}
+  m_Layer: 0
+  m_Name: CarryAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3338013344536068961
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8883789175319754134}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.5, z: 1.4}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7334421460897896114}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
