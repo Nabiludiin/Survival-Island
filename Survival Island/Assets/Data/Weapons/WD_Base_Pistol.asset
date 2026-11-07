@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f83e4e2e9ce44e9b5daba3694887ca7, type: 3}
+  m_Name: WD_Base_Pistol
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.WeaponData
+  fireMode: 0
+  damage: 30
+  secondsBetweenShots: 0.25
+  magazineSize: 12
+  startingMagazine: 12
+  ammoItemId: Ammo_9mm
+  reloadSeconds: 1.6
+  maxRange: 60
+  spreadBase: 0.4
+  spreadMoving: 1.5
+  spreadPerShot: 0.6
+  spreadMax: 4
+  spreadRecoverPerSec: 6
+  recoilPitch: 1.2
+  recoilYaw: 0.4
+  noiseRadius: 35
+  wearPerShot: 0.25
+  muzzleFlashTag: VFX_Muzzle
+  impactTag: VFX_Impact
+  cameraShakeScale: 0.6

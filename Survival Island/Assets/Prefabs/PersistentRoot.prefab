@@ -5609,6 +5609,11 @@ MonoBehaviour:
     size: 50
     overflow: 0
     maxSize: 0
+  - tag: WorldItem_Generic
+    prefab: {fileID: 5785991256491100926, guid: ddc799cadab35514786a644f5b25ba94, type: 3}
+    size: 128
+    overflow: 1
+    maxSize: 512
 --- !u!1 &3752783440837993212
 GameObject:
   m_ObjectHideFlags: 0
@@ -5803,7 +5808,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: "\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

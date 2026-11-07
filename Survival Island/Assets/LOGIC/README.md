@@ -84,7 +84,7 @@ Langkah 2 memanggil kelas Langkah 3 (`InventoryManager`, `ItemData`, `ItemDataba
 
 ### Penyiapan di Unity untuk Langkah 2 (sudah dilakukan untuk ShipPhase)
 
-Dibuat lewat menu **Survival Island > Setup > Langkah 2 - ShipPhase** (`Assets/Editor/Langkah2Setup.cs`, boleh dijalankan ulang, jalankan setelah menu Langkah 1). Nomor 1 sampai 3 di bawah sudah dibuat. Nomor 4 (`IslandArrival` di `IslandPhase`) belum, karena butuh pemain Fase 2 dan `ItemData` item inti dari penyiapan Langkah 3. Isinya:
+Dibuat lewat menu **Survival Island > Setup > Langkah 2 - ShipPhase** (`Assets/Editor/Langkah2Setup.cs`, boleh dijalankan ulang, jalankan setelah menu Langkah 1). Nomor 1 sampai 3 di bawah sudah dibuat. Nomor 4 (`IslandArrival` di `IslandPhase`) dibuat lewat menu Langkah 3. Isinya:
 
 - **Data:** 7 `ItemData` isi `Loot_Ship` di `Assets/Resources/Items/` (`Food_Can`, `Ammo_9mm`, `Drink_CleanWater`, `Med_Bandage`, `Med_Medkit`, `Med_Vaccine`, `Item_Battery`). Angka diambil dari `ItemUseSystem.md`, `ShipInteractable.md`, `CarryCapacity.md`, dan `RegionLootTable.md`. Ada juga `Assets/Data/Ship/Loot_Ship.asset`, `ShipHazardSchedule.asset` (diisi lewat "Isi jadwal awal"), `Assets/Data/Enemies/zombie_standar.asset` dan `Zombie_Standard_Hit.asset`.
 - **Prefab:** `Assets/Prefabs/Ship/Player_Ship` (rig `FirstPersonCamera`, `ViewmodelCamera` Overlay di Camera Stack, `CameraShake` di rig, `InventoryManager`, `CarryCapacity`), `ShipLoot_Generic`, `ShipNpc_Generic`, dan `Assets/Prefabs/Enemies/zombie_standar` (`NavMeshAgent`, `EnemyAI`, `EnemyHealth`, `EnemyAttack`, `AISensory`, 3 hitbox `EnemyHitbox`).
@@ -101,7 +101,7 @@ Dibuat lewat menu **Survival Island > Setup > Langkah 2 - ShipPhase** (`Assets/E
 
 Pilihan data yang tidak tertulis di blueprint: `ItemType` `Ammo_9mm` = `Material`, `Item_Battery` = `Consumable` (karena `isConsumable`), dan `Med_Bandage` memakai `maxStack` 1 (nilai awal `ItemData`, karena tidak ada di tabel). Mohon dikonfirmasi.
 
-Belum diuji: NPC kapal (butuh aset `NPCData` dan `RunLayoutSources`), zombie menyerang pemain, dan kematian di kapal. `IslandPhase` masih mencatat error `IslandArrival tidak ada` sampai penyiapan Langkah 3.
+Belum diuji: NPC kapal (butuh aset `NPCData` dan `RunLayoutSources`), zombie menyerang pemain, dan kematian di kapal. Error `IslandArrival tidak ada` hilang setelah menu Langkah 3.
 
 1. Scene `ShipPhase`: `ShipTimerManager` (teks timer TMP, `Image` vignette, `AudioSource` detak), `ShipHazardManager` (aset **Create > Survival > Ship Hazard Schedule**, isi lewat menu konteks "Isi jadwal awal"; koridor, titik zombie, bidang air, `lowerDeckBarrier`, `ShipSwaySource`), dan objek Sekoci (layer `Interactable`, collider bukan trigger) dengan `LifeboatExtraction`, `InteractHighlight`, dan `RunSummaryPanel` (id `RunSummary`, `pausesTime`, `releasesCursor`, `blocksGameplayInput`, `isLocked`).
 2. Prefab `Player_Ship` (layer dan tag `Player`): `CharacterController` (height 1,8, radius 0,35, stepOffset 0,3, slopeLimit 45, skinWidth 0,08), `ShipPlayerController`, `PlayerInteractor` (isi `cameraTransform` dengan `WorldCamera`), `ShipShove`, `SurvivalStats`, dan rig `FirstPersonCamera`.
@@ -130,7 +130,25 @@ Belum diuji: NPC kapal (butuh aset `NPCData` dan `RunLayoutSources`), zombie men
 
 Lima baris terakhir adalah kontrak milik Langkah lain yang sudah dibutuhkan Langkah 3. Pemiliknya tidak mendeklarasikannya ulang. Event baru Langkah 3 ada di bagian "Ditambah Langkah 3" pada `Core_Logic/GameEvents.cs`. Config yang diisi: `vitals` (tambahan #111), `input`, `equipment`, `items`, `camera`, `traversal`, `carry`, serta satu field di `hydration` (`exertionThirstMultiplier`). `ShipHandChangedEvent` dan `ship.handCapacity` yang dipakai `InventoryManager` ditulis Langkah 2, jadi branch Langkah 3 hanya terkompilasi setelah digabung dengan branch Langkah 2. Penyimpangan kecil dicatat di bagian "Catatan Implementasi (Langkah 3)" pada blueprint terkait.
 
-### Penyiapan di Unity untuk Langkah 3 (belum dilakukan)
+### Penyiapan di Unity untuk Langkah 3 (sudah dilakukan untuk IslandPhase greybox)
+
+Dibuat lewat menu **Survival Island > Setup > Langkah 3 - IslandPhase** (`Assets/Editor/Langkah3Setup.cs`, boleh dijalankan ulang, jalankan setelah menu Langkah 1 dan 2). Isinya:
+
+- **Item inti:** `Base_Kail` (`Tool`, `TwoHand`), `Base_Pistol` (`Weapon`, `OneHand`, `WD_Base_Pistol` dengan angka dari tabel `GunController.md`), dan `Base_Pisau` (`Weapon`, `OneHand`, `toolClass` `Knife`). Ketiganya `isCoreItem` dan tidak bisa dibuang. `maxDurability` dibiarkan -1 karena blueprint belum memberi angka. `Base_Kail` belum punya viewmodel, karena `FishingSystem` butuh data ikan dari Langkah 4.
+- **Prefab:** viewmodel greybox `Viewmodel_Pistol` (`GunController`) dan `Viewmodel_Pisau` (`MeleeCombatSystem`), dengan pose dari `FirstPersonCamera.md`. Ada juga `Assets/Prefabs/Items/WorldItem_Generic`, yang dipasang sebagai pool `WorldItem_Generic` (128, `Grow`, maksimum 512), dan `Assets/Prefabs/Player/Player_Island` (nomor 4 di bawah, ditambah `PlayerInteractor`, `FistBehaviour`, dan `ConsumableEquippable` di `ViewmodelRoot`).
+- **Scene `IslandPhase`:** pantai datar greybox (layer `Terrain`, dua batu `Obstacle`), `IslandArrival` di pantai selatan, `WorldItemManager`, pemain, dan HUD polos dengan 5 bar vital, prompt, peluru, dan `HotbarView` 8 slot ditambah tangan kiri. Ini lantai sementara, bukan peta pulau.
+
+**Hasil uji Play Mode (7 November 2026):** Run Baru → kapal → setor 3 barang → berangkat → `IslandPhase`.
+- `IslandArrival.Apply` memasukkan item inti, 2 `Med_Vaccine` awal, dan barang kapal ke inventori.
+- `hasArrivedOnIsland` bernilai true.
+- Pistol bisa dipegang (HUD peluru "10 / 12" setelah dua tembakan).
+- Menu Jeda menyimpan senjata.
+- `WorldItem` bisa dijatuhkan, jatuh ke tanah, lalu diambil lagi.
+- Error yang tersisa hanya `AudioMixer` kosong.
+
+Belum diuji: Pisau dan tinju mengenai musuh, makan dan minum, `SurfaceDetection` di lantai non-Terrain, dan save lalu lanjutkan di pulau. Save lama yang dibuat sebelum `IslandArrival` ada akan dilanjutkan tanpa item, karena `Apply` tidak dijalankan di jalur Lanjutkan. Pemain perlu memulai Run Baru.
+
+Daftar penyiapan dari blueprint (sudah dicakup menu di atas, kecuali pengaturan Input System di nomor 1 yang dibuat sebelumnya):
 
 1. **Project Settings > Player > Active Input Handling** = `Input System Package (New)`. Di **Project Settings > Input System Package**: `Update Mode` = `Process Events In Dynamic Update`, `Background Behavior` = `Reset And Disable Non Background Devices`.
 2. Tambahkan `InputManager` ke `Managers` di `PersistentRoot`, di urutan ke-2 `RunLifecycle.orderedServices` (setelah `GameManager`). `EventSystem` persisten memakai `InputSystemUIInputModule`.
@@ -146,7 +164,7 @@ Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Lan
 |---|---|---|---|
 | **1** | Kerangka `GameManager`, `UIManager`, `ObjectPooler`, `SaveSystem`, dan pola *State Management* inti | `Core_Logic/` | Diuji di Unity: alur Bootstrap → MainMenu → Run Baru (pause, layar akhir, dan save/lanjutkan belum diuji) |
 | **2** | Fase 1: `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | `60-seconds/` | Diuji di Unity: ShipPhase greybox sampai IslandPhase (NPC kapal dan mati di kapal belum diuji) |
-| **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
+| **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Diuji di Unity: tiba di pantai, inventori, hotbar, WorldItem (makan/minum dan pertarungan belum diuji) |
 | **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **6** | `ZoneManager`, frostbite, jembatan kayu, barang berat, `WeatherManager` | `Island_Logic/` | Terkompilasi, belum diuji di Play Mode |

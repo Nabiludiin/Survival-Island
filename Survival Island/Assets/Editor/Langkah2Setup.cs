@@ -44,7 +44,7 @@ namespace SurvivalIsland.EditorTools
         private const float LowerY = 0f, MidY = 4f, UpperY = 8f;
         private const float HalfWidth = 7f, HalfLength = 20f, FloorThickness = 0.4f;
 
-        private static Material floorMat, wallMat, debrisMat, lootMat, npcMat, zombieMat, outlineMat, waterMat, boatMat;
+        internal static Material floorMat, wallMat, debrisMat, lootMat, npcMat, zombieMat, outlineMat, waterMat, boatMat;
 
         [MenuItem("Survival Island/Setup/Langkah 2 - ShipPhase")]
         public static void Run()
@@ -187,7 +187,7 @@ namespace SurvivalIsland.EditorTools
 
         // ---------------------------------------------------------------- Material
 
-        private static void CreateMaterials()
+        internal static void CreateMaterials()
         {
             floorMat = Mat("Greybox_Floor", new Color(0.45f, 0.42f, 0.38f));
             wallMat = Mat("Greybox_Wall", new Color(0.3f, 0.33f, 0.36f));
@@ -200,7 +200,7 @@ namespace SurvivalIsland.EditorTools
             waterMat = Mat("Greybox_Water", new Color(0.1f, 0.3f, 0.45f, 0.6f), unlit: false, transparent: true);
         }
 
-        private static Material Mat(string name, Color color, bool unlit = false, bool transparent = false)
+        internal static Material Mat(string name, Color color, bool unlit = false, bool transparent = false)
         {
             string path = $"{MaterialFolder}/{name}.mat";
             var shader = Shader.Find(unlit ? "Universal Render Pipeline/Unlit" : "Universal Render Pipeline/Lit");
@@ -323,12 +323,40 @@ namespace SurvivalIsland.EditorTools
             cc.skinWidth = 0.08f;
             cc.center = new Vector3(0f, 0.9f, 0f);
 
-            // Rig FirstPersonCamera (README Langkah 3 nomor 4): CameraRig > PitchPivot > OffsetPivot > WorldCamera
-            // dan ViewmodelCamera > ViewmodelRoot.
+            var fp = BuildFirstPersonRig(root, out var worldCamGo);
+            var rig = fp.transform.Find("CameraRig");
+
+            // Getaran kamera (#24) di rig, sistem pendukung "Komponen scene". Profil getaran belum dibuat.
+            var shake = rig.gameObject.AddComponent<CameraShake>();
+            Set(shake, "fpCamera", fp);
+
+            var interactor = root.AddComponent<PlayerInteractor>();
+            Set(interactor, "cameraTransform", worldCamGo.transform);
+            Set(interactor, "characterController", cc);
+            var shove = root.AddComponent<ShipShove>();
+            root.AddComponent<SurvivalStats>();
+            // Tangan kapal (ShipHandItems) ada di InventoryManager, yang berada di ShipPhase dan IslandPhase (InventoryManager.md).
+            root.AddComponent<InventoryManager>();
+            root.AddComponent<CarryCapacity>();
+
+            var ship = root.AddComponent<ShipPlayerController>();
+            Set(ship, "controller", cc);
+            Set(ship, "interactor", interactor);
+            Set(ship, "fpCamera", fp);
+            Set(ship, "shove", shove);
+            return SavePrefab(root, $"{ShipPrefabFolder}/Player_Ship.prefab");
+        }
+
+        /// <summary>
+        /// Rig FirstPersonCamera (README Langkah 3 nomor 4): CameraRig > PitchPivot > OffsetPivot > WorldCamera
+        /// dan ViewmodelCamera > ViewmodelRoot. ViewmodelCamera menjadi Overlay di Camera Stack URP.
+        /// </summary>
+        internal static FirstPersonCamera BuildFirstPersonRig(GameObject root, out GameObject worldCamGo)
+        {
             var rig = Child(root.transform, "CameraRig", new Vector3(0f, 1.6f, 0f));
             var pitch = Child(rig, "PitchPivot", Vector3.zero);
             var offset = Child(pitch, "OffsetPivot", Vector3.zero);
-            var worldCamGo = Child(offset, "WorldCamera", Vector3.zero).gameObject;
+            worldCamGo = Child(offset, "WorldCamera", Vector3.zero).gameObject;
             worldCamGo.tag = "MainCamera";
             var worldCam = worldCamGo.AddComponent<Camera>();
             worldCam.nearClipPlane = 0.05f;
@@ -357,29 +385,10 @@ namespace SurvivalIsland.EditorTools
             Set(fp, "worldCamera", worldCam);
             Set(fp, "viewmodelCamera", vmCam);
             Set(fp, "viewmodelRoot", vmRoot);
-
-            // Getaran kamera (#24) di rig, sistem pendukung "Komponen scene". Profil getaran belum dibuat.
-            var shake = rig.gameObject.AddComponent<CameraShake>();
-            Set(shake, "fpCamera", fp);
-
-            var interactor = root.AddComponent<PlayerInteractor>();
-            Set(interactor, "cameraTransform", worldCamGo.transform);
-            Set(interactor, "characterController", cc);
-            var shove = root.AddComponent<ShipShove>();
-            root.AddComponent<SurvivalStats>();
-            // Tangan kapal (ShipHandItems) ada di InventoryManager, yang berada di ShipPhase dan IslandPhase (InventoryManager.md).
-            root.AddComponent<InventoryManager>();
-            root.AddComponent<CarryCapacity>();
-
-            var ship = root.AddComponent<ShipPlayerController>();
-            Set(ship, "controller", cc);
-            Set(ship, "interactor", interactor);
-            Set(ship, "fpCamera", fp);
-            Set(ship, "shove", shove);
-            return SavePrefab(root, $"{ShipPrefabFolder}/Player_Ship.prefab");
+            return fp;
         }
 
-        private static InteractHighlight AddHighlight(GameObject go, PrimitiveType shape)
+        internal static InteractHighlight AddHighlight(GameObject go, PrimitiveType shape)
         {
             // InteractHighlight mewarnai _BaseColor renderer garis luar dan mematikannya saat Off.
             var outline = GameObject.CreatePrimitive(shape);
@@ -417,7 +426,7 @@ namespace SurvivalIsland.EditorTools
             }
         }
 
-        private static void Upsert(List<Pool> pools, string tag, GameObject prefab, int size)
+        internal static void Upsert(List<Pool> pools, string tag, GameObject prefab, int size)
         {
             var pool = pools.Find(p => p.tag == tag);
             if (pool == null)
@@ -809,7 +818,7 @@ namespace SurvivalIsland.EditorTools
 
         // ---------------------------------------------------------------- Bahan
 
-        private static GameObject Box(Transform parent, string name, Vector3 localCenter, Vector3 size, Material mat, string layer)
+        internal static GameObject Box(Transform parent, string name, Vector3 localCenter, Vector3 size, Material mat, string layer)
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
             go.name = name;
@@ -821,7 +830,7 @@ namespace SurvivalIsland.EditorTools
             return go;
         }
 
-        private static Transform Child(Transform parent, string name, Vector3 localPos)
+        internal static Transform Child(Transform parent, string name, Vector3 localPos)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
@@ -829,7 +838,7 @@ namespace SurvivalIsland.EditorTools
             return go.transform;
         }
 
-        private static Canvas CreateCanvas(string name, int order)
+        internal static Canvas CreateCanvas(string name, int order)
         {
             var go = new GameObject(name, typeof(RectTransform));
             go.layer = LayerMask.NameToLayer("UI");
@@ -844,7 +853,7 @@ namespace SurvivalIsland.EditorTools
             return canvas;
         }
 
-        private static T CreatePanel<T>(Transform canvas, string name, UIPanelId id, UIPanelSettings settings) where T : UIPanel
+        internal static T CreatePanel<T>(Transform canvas, string name, UIPanelId id, UIPanelSettings settings) where T : UIPanel
         {
             var rt = Rect(canvas, name);
             Stretch(rt);
@@ -855,7 +864,7 @@ namespace SurvivalIsland.EditorTools
             return panel;
         }
 
-        private static Transform VList(Transform parent)
+        internal static Transform VList(Transform parent)
         {
             var rt = Rect(parent, "Content");
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
@@ -869,7 +878,7 @@ namespace SurvivalIsland.EditorTools
             return rt;
         }
 
-        private static TMP_Text Text(Transform parent, string name, string text, float size)
+        internal static TMP_Text Text(Transform parent, string name, string text, float size)
         {
             var rt = Rect(parent, name);
             rt.sizeDelta = new Vector2(900, size * 1.4f);
@@ -882,7 +891,7 @@ namespace SurvivalIsland.EditorTools
             return tmp;
         }
 
-        private static Button Button(Transform parent, string name, string label)
+        internal static Button Button(Transform parent, string name, string label)
         {
             var rt = Rect(parent, name);
             rt.sizeDelta = new Vector2(500, 72);
@@ -895,7 +904,7 @@ namespace SurvivalIsland.EditorTools
             return button;
         }
 
-        private static Slider Bar(Transform parent, string name, Color color)
+        internal static Slider Bar(Transform parent, string name, Color color)
         {
             var rt = Rect(parent, name);
             rt.sizeDelta = new Vector2(360, 20);
@@ -915,7 +924,7 @@ namespace SurvivalIsland.EditorTools
             return slider;
         }
 
-        private static RectTransform Rect(Transform parent, string name)
+        internal static RectTransform Rect(Transform parent, string name)
         {
             var go = new GameObject(name, typeof(RectTransform));
             go.transform.SetParent(parent, false);
@@ -923,7 +932,7 @@ namespace SurvivalIsland.EditorTools
             return (RectTransform)go.transform;
         }
 
-        private static void Stretch(RectTransform rt)
+        internal static void Stretch(RectTransform rt)
         {
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
@@ -932,7 +941,7 @@ namespace SurvivalIsland.EditorTools
 
         // ---------------------------------------------------------------- Utilitas
 
-        private static int Layer(string name)
+        internal static int Layer(string name)
         {
             int l = LayerMask.NameToLayer(name);
             if (l < 0)
@@ -943,7 +952,7 @@ namespace SurvivalIsland.EditorTools
             return l;
         }
 
-        private static T LoadOrCreate<T>(string path) where T : ScriptableObject
+        internal static T LoadOrCreate<T>(string path) where T : ScriptableObject
         {
             var asset = AssetDatabase.LoadAssetAtPath<T>(path);
             if (asset != null) return asset;
@@ -952,7 +961,7 @@ namespace SurvivalIsland.EditorTools
             return asset;
         }
 
-        private static GameObject SavePrefab(GameObject go, string path)
+        internal static GameObject SavePrefab(GameObject go, string path)
         {
             var prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
             Object.DestroyImmediate(go);
@@ -967,7 +976,7 @@ namespace SurvivalIsland.EditorTools
             return prop;
         }
 
-        private static void Set(Object target, string field, Object value)
+        internal static void Set(Object target, string field, Object value)
         {
             var prop = Prop(target, field, out var so);
             if (prop == null) return;
@@ -975,7 +984,7 @@ namespace SurvivalIsland.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void Set(Object target, string field, string value)
+        internal static void Set(Object target, string field, string value)
         {
             var prop = Prop(target, field, out var so);
             if (prop == null) return;
@@ -983,7 +992,7 @@ namespace SurvivalIsland.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void SetFloat(Object target, string field, float value)
+        internal static void SetFloat(Object target, string field, float value)
         {
             var prop = Prop(target, field, out var so);
             if (prop == null) return;
@@ -991,7 +1000,7 @@ namespace SurvivalIsland.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void SetVector(Object target, string field, Vector3 value)
+        internal static void SetVector(Object target, string field, Vector3 value)
         {
             var prop = Prop(target, field, out var so);
             if (prop == null) return;
@@ -999,7 +1008,7 @@ namespace SurvivalIsland.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void SetArray(Object target, string field, Object[] values)
+        internal static void SetArray(Object target, string field, Object[] values)
         {
             var prop = Prop(target, field, out var so);
             if (prop == null) return;
@@ -1008,7 +1017,7 @@ namespace SurvivalIsland.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void EnsureFolder(string path)
+        internal static void EnsureFolder(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;
             string parent = Path.GetDirectoryName(path).Replace('\\', '/');
