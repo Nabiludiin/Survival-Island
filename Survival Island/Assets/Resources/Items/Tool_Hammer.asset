@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b21117a400dffa340baa2922bed92235, type: 3}
+  m_Name: Tool_Hammer
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.ItemData
+  itemID: Tool_Hammer
+  displayNameKey: 
+  icon: {fileID: 0}
+  prefab: {fileID: 0}
+  type: 3
+  healAmount: 0
+  weaponDamage: 0
+  weaponData: {fileID: 0}
+  maxStack: 1
+  hungerDelta: 0
+  thirstDelta: 0
+  infectionDelta: 0
+  useSeconds: 0
+  restoreSeconds: 0
+  isConsumable: 0
+  isDroppable: 1
+  isCoreItem: 0
+  maxDurability: -1
+  spoilHours: 0
+  poisonChance: 0
+  curesDiseases: 0
+  fuelSeconds: 0
+  appliesEffectId: 
+  isRepairable: 1
+  repairCost:
+  - item: {fileID: 11400000, guid: 0ee00bf18b608f442b4df06c6d26279d, type: 2}
+    amount: 1
+  - item: {fileID: 11400000, guid: 9e68833c51f790f4285319b06ce29b0f, type: 2}
+    amount: 1
+  repairStation: 0
+  worldMesh: {fileID: 0}
+  worldMaterial: {fileID: 0}
+  equipPrefab: {fileID: 6834475010447675802, guid: d721ac1b042002c45bf00dd7489d9dfc, type: 3}
+  handUse: 0
+  bagBonusSlots: 0
+  shipWeight: 1
+  shipPickupAmount: 1
+  toolClass: 0
+  isWarmClothing: 0

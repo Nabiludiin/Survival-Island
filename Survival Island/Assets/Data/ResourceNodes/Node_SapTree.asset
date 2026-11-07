@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4edaf2bc7a99702479abf2e6bd4432ad, type: 3}
+  m_Name: Node_SapTree
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.ResourceNodeData
+  nodeTypeId: Node_SapTree
+  nodeType: 2
+  maxHits: 2
+  toolRules:
+  - tool: 0
+    damage: 0
+  - tool: 1
+    damage: 0
+  - tool: 2
+    damage: 0
+  - tool: 3
+    damage: 1
+  dropItem: {fileID: 11400000, guid: 0af7edcfe372bd143bda222b210db78e, type: 2}
+  dropMin: 1
+  dropMax: 2
+  keepColliderWhenDepleted: 1
+  regrow:
+  - region: 1
+    days: 2

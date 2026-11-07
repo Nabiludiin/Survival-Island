@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 4424620843789379224}
   - component: {fileID: 420448853105228704}
   - component: {fileID: 1235761728896406564}
+  - component: {fileID: 6913827590546823085}
   m_Layer: 8
   m_Name: Player_Island
   m_TagString: Player
@@ -208,6 +209,19 @@ MonoBehaviour:
   cameraTransform: {fileID: 8022214797924916484}
   characterController: {fileID: 5338425523829612637}
   rejectClip: {fileID: 0}
+--- !u!114 &6913827590546823085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74956369538108119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe8ab646323d9ed4db682792ceffbaf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.InfectionSystem
+  stats: {fileID: 2334969100669098655}
 --- !u!1 &1547270341276526745
 GameObject:
   m_ObjectHideFlags: 0

@@ -165,7 +165,7 @@ Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Lan
 | **1** | Kerangka `GameManager`, `UIManager`, `ObjectPooler`, `SaveSystem`, dan pola *State Management* inti | `Core_Logic/` | Diuji di Unity: alur Bootstrap → MainMenu → Run Baru (pause, layar akhir, dan save/lanjutkan belum diuji) |
 | **2** | Fase 1: `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | `60-seconds/` | Diuji di Unity: ShipPhase greybox sampai IslandPhase (NPC kapal dan mati di kapal belum diuji) |
 | **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Diuji di Unity: tiba di pantai, inventori, hotbar, WorldItem (makan/minum dan pertarungan belum diuji) |
-| **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
+| **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Diuji di Unity: jam, panen, crafting, bangun, dan restriksi pantai (menu B, demolish, dan tumbuh ulang belum diuji) |
 | **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **6** | `ZoneManager`, frostbite, jembatan kayu, barang berat, `WeatherManager` | `Island_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **7** | *Sudden Event*, `LuckyMachine`, `DiaryManager`, alur menang dan kalah | `Island_Logic/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
@@ -219,7 +219,43 @@ Kontrak untuk Langkah lain: `RegionType` (Langkah 5 dan 6 tidak mendeklarasikan 
 
 Tambahan di file bersama: event di bagian "Ditambahkan Langkah 4" pada `Core_Logic/GameEvents.cs`; config `resource`, `infection`, `crafting`, `surface`, `build`, dan `sleep.maxGameHoursPerStep` di bagian "Ditambahkan Langkah 4" pada `Core_Logic/GameBalanceSections.cs` (deklarasi kelas di atas hanya ditambah kata `partial`). Hook kecil di file Langkah 3: `ItemUseSystem.CurrentTotalGameHours`, cek dan efek vaksin di `ItemUseSystem`, dan `PlayerTraversal.UpdateSurface`. `SurvivalStats.cs` tidak diubah: lapar dan haus sudah berjalan dari Langkah 3, dan infeksi memakai `SetPenalty`, `AddInfection`, serta `ReduceInfection`. Penyimpangan dicatat di bagian "Catatan Implementasi (Langkah 4)" pada blueprint terkait.
 
-### Penyiapan di Unity untuk Langkah 4 (belum dilakukan)
+### Penyiapan di Unity untuk Langkah 4 (sudah dilakukan untuk IslandPhase greybox)
+
+Dibuat lewat menu **Survival Island > Setup > Langkah 4 - Survival dan Bangun** (`Assets/Editor/Langkah4Setup.cs`, boleh dijalankan ulang, jalankan setelah menu Langkah 3). Semua angka diambil dari blueprint. Isinya:
+
+- **Item (`Resources/Items`):**
+  - Bahan: `Mat_Wood` (100, bahan bakar 60 detik), `Mat_Stone` (100), dan `Mat_Cloth`, `Mat_Rope`, `Mat_Hide`, `Mat_TreeSap`, `Mat_Mushroom`, `Mat_Charcoal` (20, arang 120 detik).
+  - Alat: `Tool_Axe` (`TwoHand`, `Axe`, durabilitas 100, diperbaiki di `WoodBench`), `Tool_Pickaxe`, `Tool_Hammer` (`HammerEquippable`), dan `Tool_Torch` (`OffHand`, tanpa viewmodel).
+  - Lainnya: `Kit_Campfire`, `Gear_WarmClothes`, `Bag_Cloth` (+5 slot), `Bag_Leather` (+10 slot), `Med_Norit`, dan `Med_Antibiotic`. `Med_Bandage` mendapat `curesDiseases = Bleeding`.
+- **Resep:** 12 resep inti `CraftingStation.md` di `Resources/Recipes`, semuanya terbuka sejak awal.
+- **Bangunan:** 12 `BuildableData` (`Assets/Data/Buildables`) dengan prefab greybox di `Assets/Prefabs/Structures`. Tiap prefab punya `StructureNode`, `BaseHealth`, layer `Structure`, dan `SurfaceTag` `Kayu`. Meja memakai `CraftingStation`. `Build_BarbedWire` dan `Build_Lamp` dilewati karena `Mat_Scrap` belum punya data.
+- **Node sumber daya:** `Node_Tree`, `Node_Rock`, `Node_Mushroom`, dan `Node_SapTree` (`Assets/Data/ResourceNodes`, tabel `ResourceRespawn.md`).
+- **`IslandPhase`:**
+  - Lantai kotak diganti Terrain 120 x 120 m, dengan pasir di selatan (z < -25) dan rumput di utara. Terrain memakai `TerrainSurfaceSource`, `SurfaceLayerMap` (pasir = `Pasir`, rumput = `Rumput`), dan peta permukaan yang sudah dibake.
+  - 7 pohon (termasuk 1 pohon getah), 3 batu, dan 2 jamur.
+  - `DayNightDirector`, `ResourceRespawn`, `CraftingManager`, `TechTreeManager` (`nodes` kosong, sesuai `TechTreeManager.md`), `StructureRegistry`, dan `BuildManager`.
+  - `CraftingPanel` dan `BuildMenu` polos. Kedua panel tetap aktif dengan alpha 0, karena `Instance` diisi di `Awake`.
+- **Prefab lama:** `InfectionSystem` di `Player_Island`, dan `ResourceDropGuard` di `WorldItem_Generic`.
+
+**Hasil uji Play Mode (7 November 2026, mulai langsung dari `IslandPhase`):**
+- Jam game berjalan dari 06:00.
+- Pohon tumbang setelah 5 pukulan tangan dan menjatuhkan 10 `Mat_Wood`.
+- `rec_hammer` menghasilkan palu, sedangkan `rec_vaccine` ditolak `NoStation` tanpa Meja Medis.
+- Dengan palu, `Floor_Wood` terbangun di rumput dan memakai 10 kayu.
+- Membangun di pasir ditolak dengan alasan `Beach` dan ghost berwarna merah (restriksi pantai, Pilar 2).
+- `CraftingPanel` menampilkan 12 resep.
+- Error yang tersisa hanya `AudioMixer` kosong.
+
+Belum diuji: `BuildMenu` lewat tombol B, demolish, upgrade, dan perbaikan, meja crafting yang dibangun, tumbuh ulang node, infeksi berjalan, dan save lalu lanjutkan.
+
+Data yang belum ada di blueprint dan perlu dikonfirmasi developer:
+- `maxDurability` `Tool_Pickaxe` dan `Tool_Hammer` (sementara -1).
+- `ItemType` bahan, kit, dan tas (sementara `Material`) serta alat (sementara `Tool`).
+- `maxStack` `Med_Norit` dan `Med_Antibiotic` (sementara 1).
+- ID node pohon dan batu (sementara `Node_Tree` dan `Node_Rock`).
+- Kategori bangunan dasar (sementara `Structure` atau `Furniture`).
+
+Daftar penyiapan dari blueprint:
 
 1. `SurfaceDetection` di `Managers` pada `PersistentRoot`, lalu daftarkan di `RunLifecycle.orderedServices`.
 2. Scene `IslandPhase`: objek manager berisi `DayNightDirector`, `ResourceRespawn`, `CraftingManager`, `TechTreeManager`, `BuildManager` (isi `buildables`, `ghostValidMat`, `ghostInvalidMat`, `structureRoot`), dan `StructureRegistry`. Canvas HUD: `CraftingPanel` (id `Crafting`) dan `BuildMenu` (id `BuildMenu`), keduanya `releasesCursor`, `blocksGameplayInput`, `closableByEsc`, tanpa `pausesTime`.

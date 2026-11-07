@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a4e37014f04a1a449c9d45c60a0b6de, type: 3}
+  m_Name: Door_Wood
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.BuildableData
+  id: Door_Wood
+  nameKey: 
+  icon: {fileID: 0}
+  category: 0
+  prefab: {fileID: 5896834852021072388, guid: eed4d07449797524b86cdfc03385d2f6, type: 3}
+  cost:
+  - itemId: Mat_Wood
+    amount: 10
+  maxHP: 200
+  resistances: []
+  gridSize: {x: 1, y: 1, z: 1}
+  slotKind: 1
+  support: 1
+  navMode: 1
+  isDemolishable: 1
+  unlockNodeId: 

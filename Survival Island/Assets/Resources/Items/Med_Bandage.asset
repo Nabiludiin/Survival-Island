@@ -32,7 +32,7 @@ MonoBehaviour:
   maxDurability: -1
   spoilHours: 0
   poisonChance: 0
-  curesDiseases: 0
+  curesDiseases: 4
   fuelSeconds: 0
   appliesEffectId: 
   isRepairable: 0

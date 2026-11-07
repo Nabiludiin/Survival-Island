@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8072150477275263192}
   - component: {fileID: 6664916801538879019}
   - component: {fileID: 961258100085016932}
+  - component: {fileID: 5143739296686324678}
   m_Layer: 14
   m_Name: WorldItem_Generic
   m_TagString: Untagged
@@ -162,3 +163,15 @@ MonoBehaviour:
   sourceSpawner: {fileID: 0}
   sourcePointIndex: -1
   homeRegion: 0
+--- !u!114 &5143739296686324678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5785991256491100926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c188352500d8d3b46b0acf59322c44be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.ResourceDropGuard
