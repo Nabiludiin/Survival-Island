@@ -290,3 +290,7 @@ Saat `StructureDestroyedEvent` untuk `StructureId` milik api ini: panggil `Extin
 - Belum ada (TODO di kode): `LightSource.SetLit` (#98), `BaseTrap` (#26), `NPCRoster.GetSkillMultiplier` (#76, pengali 1), `FireSystem` (#97), `RegionStreaming` (#88, `homeRegion` dari `ZoneTracker.Active`). `IslandInteractable` (#17) belum ada, jadi menerapkan `IInteractable` langsung.
 - Panel: seret-lepas ke kotak input belum ada. Klik kiri atau kanan item inventori memasukkannya ke baris kosong (klik kanan mengisi beberapa baris dari satu tumpukan). Bahan bakar lewat tombol `Tambah Kayu`, atau klik item yang hanya bahan bakar.
 - Pemakaian `Kit_Campfire` lewat `ItemUseSystem` (memanggil `BuildManager.BeginPlacementFromItem`) belum ada di kode lama.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Api unggun yang hancur saat menyala tidak memicu `FireArea`, sesuai `FireSystem.md` keputusan 2 (api unggun tidak menjalar). TODO lama tentang ini ditutup.

@@ -289,3 +289,7 @@ Kode: `left-4-dead/WildlifeAI.cs` (`AnimalState`), `AnimalData.cs` (`AnimalAttac
 - **Belum ada:** `AmbushPerch` (Jaguar hanya menerkam dari tanah), Gagak terbang dan `CrowFlock` (`FlockDive` memakai gigitan biasa), `FireSystem.IsNearFire` (#97), dan `ThreatAudioEmitter` (#114).
 - Malam dibaca dari `HourChangedEvent`. Gigitan dan racun memakai `EnemyAttack` dengan `AttackData.damageType`.
 - `AnimalCarcass` memakai prompt teks langsung (`Kuliti`) sampai `LocalizationManager` (#104) ada.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Suara tanda (#114): masuk `Alert` dan awal serangan khusus (terkam/seruduk) memanggil `ThreatAudioEmitter.PlayAlertTell()`, yaitu `PlayTell` dengan klip acak `EnemyCueSet.alertClips`. Tafsiran: klip diputar sekali saat masuk state, bukan diulang selama `alertSeconds`.

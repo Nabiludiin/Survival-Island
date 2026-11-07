@@ -137,6 +137,17 @@ namespace SurvivalIsland
             sfxSource.PlayOneShot(clip, volumeMultiplier * SfxScale);
         }
 
+        /// <summary>
+        /// Suara efek 3D sekali putar di posisi dunia, lewat pool PooledAudioSource (#52) dan grup mixer milik sfxSource.
+        /// Kalau pool "Audio_OneShot3D" belum dipasang, klip diputar 2D lewat PlaySFX supaya tetap terdengar.
+        /// </summary>
+        public void PlaySFXAt(AudioClip clip, Vector3 position, float volumeMultiplier = 1f)
+        {
+            if (clip == null) return;
+            var group = sfxSource != null ? sfxSource.outputAudioMixerGroup : null;
+            if (PooledAudioSource.PlayAt(clip, position, group, volumeMultiplier * SfxScale) == null) PlaySFX(clip, volumeMultiplier);
+        }
+
         /// <summary>Putar klip lewat grup Warning (#52).</summary>
         public void PlayWarning(AudioClip clip)
         {

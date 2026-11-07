@@ -245,3 +245,8 @@ Hasil dicatat di `Survival Island/doc/PLAYTEST_LOG.md`.
 Kode: `left-4-dead/HordeCrowdManager.cs` (`CrowdTier`, `ICrowdAgent`).
 
 - Belum ada: titik tujuan bersama per kelompok, update Animator bergiliran per tingkatan, dan perintah `stress`/`crowdstat`/`crowdai` (#56). Avoidance per tingkatan diatur `EnemyAI.SetTier` dengan aturan sederhana (Close = Med, Mid = Low, Far = None).
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Animasi bergiliran ditulis di `EnemyAI.SetTier` dan `LateUpdate`: `Close` Animator jalan sendiri; `Mid`/`Far` Animator dimatikan dan `animator.Update(akumulasi)` dipanggil setiap `animStaggerMid`/`animStaggerFar` frame, bergantian menurut `GetInstanceID`; `Culled` mati. Saat `Dying`, Animator diserahkan ke ragdoll `EnemyHitReaction`.
+- Isi TODO (sistem pendukung): Masih TODO: titik tujuan bersama per kelompok (angka `cluster*` belum masuk config) dan perintah `stress`, `crowdstat`, `crowdai`.

@@ -19,10 +19,12 @@ namespace SurvivalIsland
     /// Blueprint: left-4-dead/EnemyHitReaction.md (#95). Satu-satunya pemilik pengembalian musuh yang mati ke pool
     /// (SpawnManager.Despawn(Killed)), kecuali bangkai hewan (AnimalCarcass) dan zombie terbakar (SunlightExposure).
     /// GDD bagian 5: Zombie Militer berarmor tidak terhuyung kalau badannya ditembak (armorNoFlinchBelow).
-    /// Belum diimplementasikan (TODO): percikan logam lewat VFXManager (#15).
+    /// Percikan logam pada armor lewat VFXManager.Play("VFX_MetalSpark") (#15).
     /// </summary>
     public class EnemyHitReaction : MonoBehaviour, IPoolable
     {
+        private const string MetalSparkTag = "VFX_MetalSpark";   // Katalog VFXManager.md
+
         [SerializeField] private Animator animator;
         [SerializeField] private Collider bodyCapsule;          // Kapsul gerak di layer Enemy
         [SerializeField] private Renderer[] renderers;
@@ -99,7 +101,17 @@ namespace SurvivalIsland
                 case DamageType.Bullet:
                 case DamageType.Melee:
                     float armor = DamageResistanceTable.GetMultiplier(Data != null ? Data.resistances : null, info.type, info.bodyPart);
-                    if (armor < b.armorNoFlinchBelow) break;   // Badan Zombie Militer: tidak terhuyung
+                    if (armor < b.armorNoFlinchBelow)
+                    {
+                        // Badan Zombie Militer: tidak terhuyung, keluar percikan logam (#15). Menghadap balik arah serangan.
+                        var vfx = VFXManager.Instance;
+                        if (vfx != null)
+                        {
+                            Vector3 back = info.hitDirection.sqrMagnitude > 0.0001f ? -info.hitDirection : -transform.forward;
+                            vfx.Play(MetalSparkTag, info.hitPoint, Quaternion.LookRotation(back));
+                        }
+                        break;
+                    }
                     accumulatedPoise += info.amount;
                     if (Data != null && accumulatedPoise >= Data.poise)
                     {

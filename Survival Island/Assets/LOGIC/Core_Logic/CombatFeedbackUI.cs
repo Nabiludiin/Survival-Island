@@ -10,8 +10,8 @@ namespace SurvivalIsland
     /// Komponen di canvas HUD (anak HUDManager), bukan singleton. Hanya mendengar event, tidak mengubah gameplay,
     /// tidak mengirim event, dan tidak menyimpan data.
     ///
-    /// Belum ada (TODO): pilihan SettingsManager.showHitMarkers (usulan 4 blueprint). SettingsManager (#19) sudah ditulis
-    /// tanpa field itu, jadi marker selalu aktif.
+    /// Usulan 4 blueprint: SettingsManager.showHitMarkers (#19, nilai awal aktif) mematikan Hit Marker dan Kill Marker.
+    /// Indikator arah damage tetap tampil.
     /// </summary>
     public class CombatFeedbackUI : MonoBehaviour
     {
@@ -270,6 +270,9 @@ namespace SurvivalIsland
         {
             // 1. Tembakan NPC tidak memberi marker.
             if (!feedbackEnabled || !e.byPlayer) return;
+            // Usulan 4: pemain bisa mematikan marker lewat Settings. Tanpa SettingsManager marker tetap aktif.
+            var settings = SettingsManager.Instance;
+            if (settings != null && !settings.showHitMarkers) return;
             var b = B;
             if (b == null) return;
 

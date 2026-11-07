@@ -107,6 +107,8 @@ namespace SurvivalIsland
                 var r = all[i];
                 // Resep api unggun milik CampfirePanel (#44).
                 if (r == null || r.station == CraftingStationType.Campfire) continue;
+                // Sakelar uji throwable.enabled = false: resep barang lempar tidak didaftarkan (#96).
+                if (CraftingManager.IsRecipeDisabled(r)) continue;
 
                 bool unlocked = mgr != null && mgr.IsRecipeUnlocked(r);
                 // Terkunci dan prasyarat belum terbuka: disembunyikan (usulan disetujui).

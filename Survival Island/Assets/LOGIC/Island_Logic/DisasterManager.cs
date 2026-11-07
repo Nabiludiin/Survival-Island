@@ -420,8 +420,10 @@ namespace SurvivalIsland
 
         private void QuakePulse(DisasterBalance b, int pulses)
         {
-            // Getaran kamera gempa (#24), skala mengikuti skala bencana. TODO #114: suara gemuruh.
+            // Getaran kamera gempa (#24), skala mengikuti skala bencana, dan suara gemuruh (#114) dari DisasterData.pulseClip.
             CameraShake.Play(CameraShakeKind.Earthquake, current.scale);
+            var data = GetData(current.type);
+            if (data != null && data.pulseClip != null) AudioManager.Instance?.PlaySFX(data.pulseClip);
             float ratio = current.scale >= 2 ? b.quakeDamageRatioScale2 : b.quakeDamageRatio;
             quakeRatioPerPulse = ratio / pulses;
 

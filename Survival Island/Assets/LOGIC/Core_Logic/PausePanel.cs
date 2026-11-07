@@ -98,7 +98,8 @@ namespace SurvivalIsland
         {
             var ui = UIManager.Instance;
             if (ui == null || ui.notificationLogView == null) return;
-            // TODO(UI): notificationLogView belum punya komponen daftar. Isi lewat NotificationManager.Instance.GetLog(list) (#22).
+            // Objek notificationLogView memuat komponen NotificationLogView (#22), yang mengisi daftar dari
+            // NotificationManager.GetLog setiap kali diaktifkan (OnEnable). Jadi cukup diaktifkan di sini.
             SetLogVisible(!ui.notificationLogView.activeSelf);
         }
 

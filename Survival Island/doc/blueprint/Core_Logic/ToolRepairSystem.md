@@ -243,3 +243,4 @@ Hasilnya dihitung saat item dipasang atau berubah, lalu disimpan oleh pengendali
 - "Panel ditutup" dibaca dari `CraftingManager.IsPanelOpen` dan dari `UIFocusChangedEvent.isGameplayBlocked == false`. "Stasiun di luar jangkauan" dibaca dari `CraftingManager.IsStationAvailable`.
 - `MeleeCombatSystem.RecalculateStats` belum ada, jadi upgrade pada senjata melee yang sedang dipegang baru terasa saat dipasang ulang (TODO).
 - SFX selesai menunggu `AudioManager` (TODO).
+- Isi TODO (sistem pendukung): `MeleeCombatSystem.RecalculateStats()` sudah ada, dan dipanggil setelah upgrade pada senjata jarak dekat yang sedang dipegang. Catatan TODO tentang fungsi itu tidak berlaku lagi.

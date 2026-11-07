@@ -260,3 +260,7 @@ Kode: `Assets/LOGIC/Core_Logic/ProgressionSafety.cs` (beserta `SafetySeverity`, 
 - **DevConsole:** `softlockcheck`, `unstuck`, dan `clearstones` didaftarkan lewat `DevConsole.Register`. `breaktool` milik `DurabilitySystem` atau `DevConsole`.
 - **Pesan:** `notif.safety_problem`, `notif.zombies_stronger` (`{days}`), `notif.unstuck_countdown` (`{seconds}`), `notif.unstuck_cancelled`, dan `notif.stuck_hint`.
 - **Belum ada:** tombol `Keluar dari Tersangkut` di `PausePanel` (kode lama).
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Batu kecil memakai `ResourceRespawn.CountActiveStones` dan `ForceRegrowStones(RegionType.Volcano, minStonePickupsRegion1)`. Jalur cadangan lewat `PickupInteractable` di kelas ini dihapus. Tanpa `ResourceRespawn` di scene, pemeriksaan alat melaporkan `Blocked` dengan peringatan log.

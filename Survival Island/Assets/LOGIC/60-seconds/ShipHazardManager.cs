@@ -10,11 +10,11 @@ namespace SurvivalIsland
     /// GDD bagian 3: kapal miring, dipenuhi air dan zombie. Jadwal, jumlah zombie, dan cara menghadapinya
     /// adalah usulan yang disetujui developer sebagai nilai awal (#85).
     ///
-    /// Belum diimplementasikan (sistemnya milik Langkah lain, ditandai TODO):
-    /// - Perilaku zombie: EnemyAI.SetTarget, AIState.Dormant, bangun dalam zombieAggroRadius, kembali Dormant saat macet,
-    ///   gigitan Zombie_Ship_Bite, dan EnemyHealth.Died (Langkah 5). Sekarang kelas ini memunculkan zombie dari pool,
-    ///   mengatur agent.speed dengan pengali air, dan mengembalikan zombie yang terendam.
-    /// - Volume alarm kapal (AudioManager belum punya kanal alarm), efek basah layar (#23).
+    /// Perilaku zombie (#75 "Zombie di kapal"): muncul Dormant, bangun lewat EnemyAI.WakeUp kalau pemain dalam
+    /// zombieAggroRadius dan terlihat, atau saat dimunculkan bersama alarm T=45 (tafsiran, lihat Catatan Implementasi);
+    /// kembali Dormant setelah zombieStuckSeconds tanpa jalur lengkap; zombie mati (EnemyHealth.IsAlive) keluar dari daftar.
+    /// Gigitan Zombie_Ship_Bite adalah aset AttackData di ZombieData, bukan kode di sini.
+    /// Belum diimplementasikan (TODO): volume alarm kapal (AudioManager belum punya kanal alarm), efek basah layar (#23).
     /// CameraShake.Play (#24) dan suara air guncangan akhir (AudioManager) sudah tersambung.
     /// - Alat Editor ShipRouteAudit.
     /// </summary>
@@ -51,6 +51,7 @@ namespace SurvivalIsland
         public bool FinalShudderPlayed { get; private set; }
 
         private readonly List<GameObject> activeZombies = new List<GameObject>(8);
+        private readonly Dictionary<int, float> stuckTimers = new Dictionary<int, float>(8);   // instanceID -> detik macet
         private int nextEntryIndex;
         private int swayStage;
         private float zombieTickTimer;
@@ -117,14 +118,21 @@ namespace SurvivalIsland
             IsRunning = false;
             if (playerController != null) playerController.SetShipMoveModifiers(1f, 1f, Vector3.zero);
             SetDrowning(false);
-            // TODO Langkah 5: hentikan serangan zombie (EnemyAI ke state diam). Agen dihentikan sementara di sini.
+            // Serangan zombie berhenti: target dilepas (membatalkan serangan) lalu EnemyAI masuk Dormant.
             for (int i = 0; i < activeZombies.Count; i++)
             {
                 var z = activeZombies[i];
                 if (z == null) continue;
+                var ai = z.GetComponent<EnemyAI>();
+                if (ai != null)
+                {
+                    ai.SetTarget(null);
+                    ai.EnterDormant();
+                }
                 var agent = z.GetComponent<NavMeshAgent>();
                 if (agent != null && agent.isOnNavMesh) agent.isStopped = true;
             }
+            stuckTimers.Clear();
         }
 
         // ---------------------------------------------------------------- Per frame
@@ -177,7 +185,7 @@ namespace SurvivalIsland
                     else Debug.LogWarning($"[ShipHazardManager] CameraShakeKind '{entry.targetId}' tidak dikenal.", this);
                     break;
                 case ShipHazardKind.SpawnZombies:
-                    SpawnZombies(entry.targetId, entry.value);
+                    SpawnZombies(entry.targetId, entry.value, IsAlarmTime(entry.atSecondsLeft));
                     break;
                 case ShipHazardKind.CollapseWarning:
                     { var c = FindCorridor(entry.targetId); if (c != null) c.Warn(); }
@@ -308,7 +316,17 @@ namespace SurvivalIsland
 
         // ---------------------------------------------------------------- Zombie
 
-        private void SpawnZombies(string groupId, int count)
+        /// <summary>true kalau jadwal punya entri AlarmUp pada waktu yang sama (grup yang dibangunkan suara alarm T=45).</summary>
+        private bool IsAlarmTime(float atSecondsLeft)
+        {
+            var entries = schedule != null ? schedule.entries : null;
+            if (entries == null) return false;
+            for (int i = 0; i < entries.Length; i++)
+                if (entries[i].kind == ShipHazardKind.AlarmUp && Mathf.Approximately(entries[i].atSecondsLeft, atSecondsLeft)) return true;
+            return false;
+        }
+
+        private void SpawnZombies(string groupId, int count, bool wakeOnSpawn)
         {
             var pooler = ObjectPooler.Instance;
             if (pooler == null || zombiePoints == null || count <= 0) return;
@@ -350,7 +368,15 @@ namespace SurvivalIsland
                     }
                     agent.speed = hz.zombieMoveSpeed;
                 }
-                // TODO Langkah 5: EnemyAI.SetTarget(pemain) dan state Dormant/bangun. ThreatSystem tidak ada di ShipPhase (#109).
+                // Target lewat EnemyAI langsung, karena ThreatSystem tidak ada di ShipPhase (#109). Zombie muncul tidur,
+                // kecuali grup yang dimunculkan bersama alarm T=45.
+                var ai = zombie.GetComponent<EnemyAI>();
+                if (ai != null)
+                {
+                    if (wakeOnSpawn && p != null) ai.WakeUp(p);
+                    else ai.EnterDormant();
+                }
+                stuckTimers.Remove(zombie.GetInstanceID());
                 activeZombies.Add(zombie);
                 spawned++;
             }
@@ -368,20 +394,72 @@ namespace SurvivalIsland
             {
                 var z = activeZombies[i];
                 // Sudah kembali ke pool lewat jalur lain (mati, dll.): hapus dari daftar.
-                if (z == null || !z.activeInHierarchy) { activeZombies.RemoveAt(i); continue; }
+                if (z == null || !z.activeInHierarchy) { RemoveAt(i); continue; }
+                // Mati (EnemyHealth.Died): keluar dari daftar. Pengembalian ke pool milik EnemyHitReaction (#95).
+                var health = z.GetComponent<EnemyHealth>();
+                if (health != null && !health.IsAlive) { RemoveAt(i); continue; }
 
                 float depth = WaterLevel - z.transform.position.y;
                 if (depth >= hz.waterHeadDepth) { ReturnZombie(i); continue; }   // Dek bawah tidak penuh mayat
 
                 var agent = z.GetComponent<NavMeshAgent>();
                 if (agent != null) agent.speed = hz.zombieMoveSpeed * WaterMultiplier(depth, hz);
+                TickZombieState(z, agent, hz);
             }
+        }
+
+        /// <summary>Bangun dari Dormant saat pemain dekat dan terlihat; kembali Dormant setelah macet (#75).</summary>
+        private void TickZombieState(GameObject z, NavMeshAgent agent, ShipHazardBalance hz)
+        {
+            var ai = z.GetComponent<EnemyAI>();
+            var p = Player;
+            if (ai == null || p == null) return;
+            int id = z.GetInstanceID();
+
+            if (ai.CurrentState == AIState.Dormant)
+            {
+                stuckTimers.Remove(id);
+                Vector3 to = p.position - z.transform.position;
+                if (to.sqrMagnitude <= hz.zombieAggroRadius * hz.zombieAggroRadius && CanSee(z.transform, p)) ai.WakeUp(p);
+                return;
+            }
+
+            // Macet: jalur tidak lengkap terus-menerus selama zombieStuckSeconds.
+            bool pathIncomplete = agent != null && agent.isOnNavMesh && !agent.pathPending && agent.hasPath
+                && agent.pathStatus != NavMeshPathStatus.PathComplete;
+            if (!pathIncomplete) { stuckTimers.Remove(id); return; }
+            stuckTimers.TryGetValue(id, out float stuck);
+            stuck += hz.zombieTickSeconds;
+            if (stuck >= hz.zombieStuckSeconds)
+            {
+                stuckTimers.Remove(id);
+                ai.SetTarget(null);
+                ai.EnterDormant();
+                return;
+            }
+            stuckTimers[id] = stuck;
+        }
+
+        private static bool CanSee(Transform zombie, Transform player)
+        {
+            Vector3 from = zombie.position + Vector3.up * 1.6f;
+            Vector3 to = player.position + Vector3.up * 1.6f;
+            Vector3 dir = to - from;
+            float len = dir.magnitude;
+            return len < 0.01f || !PhysicsQuery.Raycast(new Ray(from, dir / len), out _, len, PhysicsMasks.AIVision);
+        }
+
+        private void RemoveAt(int index)
+        {
+            var z = activeZombies[index];
+            if (z != null) stuckTimers.Remove(z.GetInstanceID());
+            activeZombies.RemoveAt(index);
         }
 
         private void ReturnZombie(int index)
         {
             var z = activeZombies[index];
-            activeZombies.RemoveAt(index);
+            RemoveAt(index);
             if (z != null && ObjectPooler.Instance != null) ObjectPooler.Instance.ReturnToPool(ZombiePoolTag, z);
         }
     }

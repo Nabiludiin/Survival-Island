@@ -242,3 +242,4 @@ Lokasi berikut berasal dari GDD, dan koordinatnya diisi saat level selesai. Tiap
 - Zombie Tribal dikenali lewat komponen `TribalBehavior`. Tribal tidak melempar batu dan tidak mundur.
 - Tidur (#67) dan berenang (#13) belum menghentikan `campTimer`.
 - Perintah `reachcheck` tersedia lewat `DebugReachCheck`. Perintah `navlinks` belum dibuat.
+- Isi TODO (sistem pendukung): Tier 2 berkemah memanggil `AIDirector.RequestCampCounter`. Tanpa Director (scene uji) langsung `SpawnManager.RequestWave` dengan pengali 1.

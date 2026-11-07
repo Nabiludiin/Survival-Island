@@ -332,14 +332,14 @@ namespace SurvivalIsland
             int r = PlayerTargetable.Instance != null ? (int)RegionStreaming.RegionOf(PlayerTargetable.Instance.Position) : (int)ZoneTracker.Active;
             var table = tablesByRegion != null && r >= 0 && r < tablesByRegion.Length ? tablesByRegion[r] : null;
             string id = table != null && !string.IsNullOrEmpty(table.campCounterEnemyId) ? table.campCounterEnemyId : StandardZombieId;
-            // TODO(AIDirector): AIDirector.Instance.RequestCampCounter(id, campCounterCount) (#27).
+            // AITraversal.md tabel "Hukuman berkemah" tier 2: lewat AIDirector (#27). Tanpa Director (scene uji): langsung SpawnManager.
+            var director = AIDirector.Instance;
+            if (director != null) { director.RequestCampCounter(id, b.campCounterCount); return; }
             var spawn = SpawnManager.Instance;
             if (spawn == null) return;
-            int day = GameManager.Instance != null ? GameManager.Instance.currentDay : 1;
-            var mods = AIDirector.Instance != null ? AIDirector.Instance.GetPostTargetModifiers(day) : WaveModifiers.One;
             var req = new WaveRequest
             {
-                count = b.campCounterCount, maxLarge = int.MaxValue, specialShare = 1f, modifiers = mods,
+                count = b.campCounterCount, maxLarge = int.MaxValue, specialShare = 1f, modifiers = WaveModifiers.One,
                 reason = "CampCounter", forcedEnemyId = id, origin = null
             };
             spawn.RequestWave(in req);

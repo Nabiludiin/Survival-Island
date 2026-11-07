@@ -28,7 +28,7 @@ namespace SurvivalIsland
     /// - Kotak overlap dan tapak pantai dihitung dari collider/mesh prefab. Prefab lantai memakai pivot di permukaan atas
     ///   (rok kayu ke bawah), supaya dinding di atasnya tidak dianggap tumpang tindih.
     /// - GhostStatusIcon (#104), batas jebakan (#26) dan lampu (#98), durabilitas palu (#113), dan suara tolak (#16) sudah dipakai.
-    ///   Belum ada (TODO): alasan penolakan di HUD.
+    ///   Alasan penolakan juga dikirim ke HUD (HUDManager.ShowBuildError) saat LastError berubah (BuildMenu.md langkah 6).
     /// </summary>
     [DisallowMultipleComponent]
     public class BuildManager : MonoBehaviour
@@ -48,6 +48,8 @@ namespace SurvivalIsland
         public HammerMode Mode { get; private set; } = HammerMode.Repair;
         public BuildableData Selected { get; private set; }
         public PlacementError LastError { get; private set; } = PlacementError.NoSelection;
+        private PlacementError hudError = PlacementError.None;   // Alasan yang sedang tampil di HUD
+        private bool hudErrorShown;
         public IReadOnlyList<BuildableData> Buildables => buildables;
 
         private class GhostInfo
@@ -160,6 +162,15 @@ namespace SurvivalIsland
         public void HideGhost()
         {
             if (ghost != null && ghost.go != null) ghost.go.SetActive(false);
+            // Alasan di HUD ikut hilang bersama hologram (hanya kalau sedang tampil, karena dipanggil tiap frame).
+            if (hudErrorShown) SetHudError(PlacementError.None);
+        }
+
+        private void SetHudError(PlacementError error)
+        {
+            hudError = error;
+            hudErrorShown = error != PlacementError.None;
+            HUDManager.Instance?.ShowBuildError(error);
         }
 
         /// <summary>Batalkan penempatan dari item (pemain mengganti item).</summary>
@@ -198,8 +209,9 @@ namespace SurvivalIsland
                 bool ok = LastError == PlacementError.None;
                 if (!ghostHasMaterial || ok != ghostValidShown) ApplyGhostMaterial(ok);
             }
-            // 5-6. Ikon status dan teks build.error.<PlacementError> pada hologram (#104). TODO HUD: alasan di HUD.
+            // 5-6. Ikon status dan teks build.error.<PlacementError> pada hologram (#104), dan alasan di HUD saat berubah.
             if (ghostStatusIcon != null) ghostStatusIcon.SetStatus(LastError);
+            if (LastError != hudError) SetHudError(LastError);
         }
 
         /// <summary>

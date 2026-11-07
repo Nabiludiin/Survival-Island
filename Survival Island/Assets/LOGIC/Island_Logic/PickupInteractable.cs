@@ -55,7 +55,7 @@ namespace SurvivalIsland
         /// Dipakai ResourceRespawn (#73) saat batu kecil tumbuh lagi, termasuk ForceRegrowStones (#116).
         /// Objek kembali aktif dengan jumlah awal.
         /// </summary>
-        public void Regrow()
+        public virtual void Regrow()
         {
             isConsumed = false;
             amount = startAmount;

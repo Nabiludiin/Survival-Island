@@ -297,3 +297,7 @@ Kode: `Survival Island/Assets/LOGIC/Core_Logic/EquipmentManager.cs`, `Equippable
 ## 8. Catatan Implementasi (Sistem pendukung)
 
 - **Keputusan developer (7 November 2026):** tangan kosong (`FistBehaviour`) memukul lewat jalur `MeleeCombatSystem` dengan damage `equipment.fistDamage` (nilai awal 5).
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): `public void LowerBriefly()`: viewmodel turun (`ViewmodelMode.Lowered`) selama `equipment.lowerSeconds`, lalu `Visible`, tanpa berganti item (ThrowableSystem.md). Diabaikan saat berganti item atau ada kunci; dibatalkan oleh `BeginSwitch`. Tidak dinaikkan kalau saat itu ada kunci simpan atau `Dead`.

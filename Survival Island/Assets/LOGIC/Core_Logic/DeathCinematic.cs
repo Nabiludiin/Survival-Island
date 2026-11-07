@@ -122,7 +122,8 @@ namespace SurvivalIsland
 
                 // 3. Sting lewat grup Warning (#52). Musik dunia sudah turun: CombatMusicDirector mendengar
                 //    CinematicStateChangedEvent di atas (#114).
-                // TODO #23: tampilkan profile.screenTint lewat PostProcessController (belum ada fungsi warna layar).
+                // Warna layar profil lewat PostProcessController (#23). Alpha 0 (nilai awal Color.clear) = tanpa warna.
+                PostProcessController.Instance?.SetScreenTint(profile.screenTint);
                 if (profile.sting != null) AudioManager.Instance?.PlayWarning(profile.sting);
 
                 // 4.

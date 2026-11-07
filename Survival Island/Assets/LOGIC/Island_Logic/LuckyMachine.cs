@@ -27,6 +27,14 @@ namespace SurvivalIsland
         [SerializeField] private GameObject storedSpinLight;
         [Tooltip("Efek listrik statis saat mode gratis.")]
         [SerializeField] private GameObject freeWindowFx;
+        [Header("Suara (#114). Boleh kosong.")]
+        [Tooltip("Suara 3D saat musuh tersedot ke kandang (LuckyMachine.md \"Vakum\").")]
+        [SerializeField] private AudioClip vacuumClip;
+        [Tooltip("Bunyi tiap detik pada freeWindowWarnSeconds terakhir mode gratis.")]
+        [SerializeField] private AudioClip freeWindowWarnClip;
+        [Tooltip("Kedipan freeWindowFx pada detik-detik terakhir (tampilan, bukan angka gameplay).")]
+        [SerializeField] private float freeWindowBlinkHz = 3f;
+
         [Tooltip("Pengganti modifier yang lebih lemah dari modifier terpasang (LuckyMachine.md \"Hadiah ganda\"), mis. lucky_ammo.")]
         [SerializeField] private LuckyRewardData duplicateModifierFallback;
 
@@ -43,6 +51,7 @@ namespace SurvivalIsland
         private bool spinPaidFromStored;
         private bool spinPaidFromFree;
         private float gateReopenLeft;
+        private int lastWarnSecond = -1;   // Detik terakhir yang sudah berbunyi pada akhir mode gratis
 
         private struct Vacuum
         {
@@ -160,7 +169,8 @@ namespace SurvivalIsland
                 startPos = inst.transform.position,
                 startScale = inst.transform.localScale
             });
-            // TODO #15/#114: partikel dan suara vakum lewat VFXManager dan AudioManager.
+            // Suara vakum 3D lewat AudioManager (#114). Partikel vakum belum ada di katalog VFXManager (TODO #15).
+            AudioManager.Instance?.PlaySFXAt(vacuumClip, inst.transform.position);
         }
 
         private void TickVacuums(float dt, LuckyMachineBalance bal)
@@ -284,7 +294,8 @@ namespace SurvivalIsland
             if (freeWindowRemaining > 0f)
             {
                 freeWindowRemaining -= dt;
-                // TODO #114: lima detik terakhir berkedip dan berbunyi.
+                // LuckyMachine.md "Indikator waktu": lima detik terakhir berkedip dan berbunyi.
+                TickFreeWindowWarning(bal);
                 if (freeWindowRemaining <= 0f) EndFreeWindow();
             }
 
@@ -493,6 +504,20 @@ namespace SurvivalIsland
                 // Item belum dimiliki: dipasang saat item didapat.
                 LuckyRewardLedger.Instance.AddPendingSkin(r.skinId, r.skinTargetItemId);
             }
+        }
+
+        private void TickFreeWindowWarning(LuckyMachineBalance bal)
+        {
+            if (freeWindowRemaining <= 0f || freeWindowRemaining > bal.freeWindowWarnSeconds) { lastWarnSecond = -1; return; }
+            // Bunyi sekali tiap detik penuh (5, 4, 3, 2, 1).
+            int second = Mathf.CeilToInt(freeWindowRemaining);
+            if (second != lastWarnSecond)
+            {
+                lastWarnSecond = second;
+                AudioManager.Instance?.PlaySFXAt(freeWindowWarnClip, transform.position);
+            }
+            if (freeWindowFx != null)
+                freeWindowFx.SetActive(Mathf.Repeat(freeWindowRemaining * freeWindowBlinkHz, 1f) >= 0.5f);
         }
 
         private void ApplyVisuals()

@@ -231,3 +231,7 @@ Kode: `Assets/LOGIC/Island_Logic/NPCCompanion.cs` (beserta `NPCState`) dan `Asse
 - **Tempat kerja:** `CraftingStation` atau `CampfireManager` terdekat dalam `workSearchRadius`, dicari lewat `FindObjectsByType` hanya saat `StayAtBase` mencari tempat kerja.
 - **Prompt perintah:** kunci `prompt.npc_follow`, `prompt.npc_wait`, dan `prompt.npc_base`. Penolakan base memakai `notif.npc_no_base`.
 - **Belum ada (TODO di kode):** penghindaran api (`FireSystem.IsNearFire`, #97).
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Think langkah 1: `FireSystem.TryGetEscapePoint(posisi, npc.fireAvoidMargin, out titik)`, lalu `NavMesh.SamplePosition` dengan radius yang sama dan `SetDestination`. Tick selesai.

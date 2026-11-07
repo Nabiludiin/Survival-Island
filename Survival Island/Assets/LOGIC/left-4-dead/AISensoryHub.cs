@@ -7,7 +7,7 @@ namespace SurvivalIsland
     /// Pembagi tick AISensory, nilai UI Detection Meter, dan titik perburuan malam. Blueprint: left-4-dead/AISensory.md (#49).
     /// Singleton per scene IslandPhase.
     /// IgnoreStealth saat Blood Moon diisi HordeManager (#50). Tarikan cahaya SetLightAttraction (#98) diisi LightSourceSystem.
-    /// Belum diimplementasikan (TODO): DetectionMeterUI (HUD).
+    /// Ikon mata HUD ditulis di DetectionMeterUI (mendengar PlayerDetectionChangedEvent).
     /// </summary>
     public class AISensoryHub : MonoBehaviour
     {

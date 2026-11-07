@@ -264,3 +264,7 @@ public class StorageChestSaveData
 - Peti nonaktif di region yang dilepas tidak mendengar event, jadi tumpahan ke `RegionStateStore` (#88, #90) masih TODO.
 - `InventoryManager` tidak punya fungsi mengisi slot tertentu. Pindah ke slot inventori tertentu dan tukar antar-sisi memakai `AddItem` lalu `MoveSlot`.
 - `IslandInteractable` (#17) belum ada, jadi menerapkan `IInteractable` langsung.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): `StructureDestroyedEvent` didaftarkan di `Awake` dan dilepas di `OnDestroy`, supaya peti di region yang dilepas (#90) tetap menumpahkan isi ke `RegionStateStore`. Batas: peti yang dipulihkan langsung ke induk nonaktif belum menjalankan `Awake`, jadi baru mendengar setelah region dimuat.

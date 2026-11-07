@@ -10,7 +10,7 @@ namespace SurvivalIsland
     /// Siklus, tinggi air, dan akibatnya adalah usulan yang disetujui developer (#85).
     ///
     /// Catatan implementasi (sistem pendukung):
-    /// - WorldItemManager.SweepBelow (#66) dipanggil di StepCollider. Pemindahan HeavyItem (#69) belum ada: TODO di StepCollider.
+    /// - WorldItemManager.SweepBelow (#66) dipanggil di StepCollider. HeavyItemSystem.SweepBelow (#69) juga dipanggil di sana.
     /// - Area NavMesh "Tidal" dibaca lewat NavMesh.GetAreaFromName. Kalau area belum dibuat, SetAreaCost dilewati.
     /// </summary>
     public class TideManager : MonoBehaviour
@@ -184,7 +184,8 @@ namespace SurvivalIsland
             Shader.SetGlobalFloat(TideWaterYId, WaterY);
             // Barang despawns tenggelam lalu hilang 1 jam game; barang penting dan KeyItem pindah ke TideSafePoint.Nearest.
             if (WorldItemManager.Instance != null) WorldItemManager.Instance.SweepBelow(tideZone, WaterY, safePoints);
-            // TODO(HeavyItemSystem #69): HeavyItem yang tertinggal di pantai dipindah ke titik aman yang sama.
+            // HeavyItem yang tertinggal di pantai dipindah ke titik aman yang sama (#69).
+            if (HeavyItemSystem.Instance != null) HeavyItemSystem.Instance.SweepBelow(tideZone, WaterY, safePoints);
         }
 
         private void ApplyNavCost(bool high)

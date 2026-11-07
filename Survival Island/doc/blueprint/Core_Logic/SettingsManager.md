@@ -206,3 +206,4 @@ Menu hanya memanggil fungsi manager ini, dan tidak menulis `QualitySettings` ata
 - `OnClosed(User)` dengan dialog yang ditolak `UIManager.ShowConfirm` (dialog lain terbuka) langsung `Commit`, mengikuti alasan "pilihan pemain tidak hilang".
 - Tab bahasa dan aksesibilitas memanggil `LocalizationManager.SetLocale` dan `SetAccessibility`, yang langsung tersimpan (tidak ikut `Commit`/`Revert`).
 - `LightSourceSystem.ApplyQuality` dan `TutorialManager.ResetSeen` belum ada (TODO).
+- Isi TODO (sistem pendukung): Field `showHitMarkers` (bool, nilai awal `true`) di `SettingsData`, properti baca, dan `SetShowHitMarkers`, untuk usulan 4 `CombatFeedbackUI` (#51). Tidak mengubah `version` data: JSON lama tanpa field ini memakai nilai awal.

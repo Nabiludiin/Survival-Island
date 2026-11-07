@@ -272,3 +272,7 @@ Kode: `Assets/LOGIC/Core_Logic/CombatMusicDirector.cs` (beserta `MusicTier`), `M
 - **Tafsiran:** emitter yang sedang bersuara hanya diganti suara barunya sendiri kalau prioritasnya sama atau lebih tinggi.
 - **Belum dikerjakan:** napas Zombie Lumut dalam 6 m saat `Dormant` milik prefab #25 (`MossBehavior`), bukan komponen ini.
 - **Angka di teks blueprint yang dipindah ke config** (`GameBalance.GrupC1.cs`): `evaluateIntervalSeconds` 0,25, `phaseFloor*` (tabel `PhaseFloor`), `largeThreatWeight` 3, `calmDayNightFadeSeconds` 10, `scheduleLeadSeconds` 0,1, `emitterTicksPerFrame` 16, `tellPriorityBonus` 2, `voiceStealFadeSeconds` 0,05, `sameClipMinSeconds` 0,15, `cinematicFadeOutSeconds` 1, `cinematicFadeInSeconds` 2, `runEndFadeSeconds` 2, `loadStingerSuppressSeconds` 2, `cueMinDistance` 2, `cueSpread` 60.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): `ThreatAudioEmitter.PlayAlertTell()`: pembungkus `PlayTell` dengan klip acak `alertClips` (UnityEngine.Random, suara tampilan). Dipakai `WildlifeAI` dan `TribalBehavior`.

@@ -20,7 +20,7 @@ namespace SurvivalIsland
     /// Catatan implementasi (sistem pendukung, juga di blueprint):
     /// - Musuh tidak memasang ITargetable, jadi target NPC adalah EnemyHealth, dengan titik bidik dari collider musuh.
     /// - Pendaftaran ThreatSystem memakai RegisterCandidate/UnregisterCandidate (API ThreatSystem untuk ITargetable).
-    /// - FireSystem.IsNearFire (#97) belum dipakai: API belum memberi titik api untuk menghindar (TODO di Think).
+    /// - Penghindaran api (#97) lewat FireSystem.TryGetEscapePoint (IsNearFire ditambah titik keluar) di Think langkah 1.
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
     public class NPCCompanion : MonoBehaviour, IInteractable, ITargetable, IDamageable
@@ -202,8 +202,14 @@ namespace SurvivalIsland
             var nav = BaseNavigation.Instance;
             isInsideBase = nav != null && nav.IsInsideBase(transform.position);
 
-            // 1. TODO(FireSystem): if (FireSystem.Instance.IsNearFire(pos, b.fireAvoidMargin)) cari titik di luar api,
-            //    SetDestination ke sana, lalu return (#97). NPC tidak memasang Flammable.
+            // 1. Dekat api: berjalan ke titik di luar api, lalu tick ini selesai (#97). NPC tidak memasang Flammable.
+            var fire = FireSystem.Instance;
+            if (fire != null && fire.TryGetEscapePoint(transform.position, b.fireAvoidMargin, out Vector3 escape))
+            {
+                if (NavMesh.SamplePosition(escape, out NavMeshHit escapeHit, b.fireAvoidMargin, agent.areaMask)) escape = escapeHit.position;
+                agent.SetDestination(escape);
+                return;
+            }
 
             // 2.
             SelectTarget(b);

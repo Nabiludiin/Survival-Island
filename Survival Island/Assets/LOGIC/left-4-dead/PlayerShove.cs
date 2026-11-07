@@ -10,6 +10,9 @@ namespace SurvivalIsland
     /// </summary>
     public class PlayerShove : MonoBehaviour
     {
+        [Tooltip("Bunyi dorongan gagal pada musuh besar (EnemyHitReaction.md \"Shove pemain\" langkah 5). Boleh kosong.")]
+        [SerializeField] private AudioClip shoveFailClip;
+
         private float nextShoveTime;
         private static readonly Collider[] buffer = new Collider[16];
         private readonly List<IDamageable> unique = new List<IDamageable>(8);
@@ -49,6 +52,7 @@ namespace SurvivalIsland
             int count = PhysicsQuery.OverlapSphere(transform.position + Vector3.up + forward, b.shoveRadius, PhysicsMasks.Melee, buffer);
             PhysicsQuery.CollectUniqueDamageables(buffer, count, unique, uniqueColliders);
             // 5.
+            bool failPlayed = false;
             for (int i = 0; i < unique.Count; i++)
             {
                 var c = uniqueColliders[i];
@@ -60,7 +64,12 @@ namespace SurvivalIsland
                 var health = reaction.GetComponent<EnemyHealth>();
                 if (health != null && health.Data != null && health.Data.canBeKnockedBack)
                     reaction.ApplyKnockback(to.normalized, b.shoveKnockback, b.shoveStaggerSeconds);
-                // Musuh besar: bunyi dorongan gagal tanpa reaksi (TODO #114 suara).
+                // Musuh besar: bunyi dorongan gagal tanpa reaksi (#114), suara 3D di posisi musuh, sekali per dorongan.
+                else if (!failPlayed)
+                {
+                    failPlayed = true;
+                    AudioManager.Instance?.PlaySFXAt(shoveFailClip, reaction.transform.position);
+                }
             }
             unique.Clear();
             uniqueColliders.Clear();

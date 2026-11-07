@@ -53,6 +53,8 @@ namespace SurvivalIsland
         private TraversalAgent traversal;
         private EnemyInstance instance;
         private Animator animator;
+        private CrowdTier animTier = CrowdTier.Close;   // Tingkatan terakhir dari SetTier (#93)
+        private float animAccum;                         // Waktu yang belum diterapkan ke Animator saat update bergiliran
         private readonly ThreatState threat = new ThreatState();
         private WaveModifiers waveModifiers = WaveModifiers.One;
         private readonly float[] speedMult = new float[5];
@@ -575,7 +577,26 @@ namespace SurvivalIsland
             if (animator != null)
                 animator.cullingMode = tier == CrowdTier.Close || tier == CrowdTier.Mid
                     ? AnimatorCullingMode.CullUpdateTransforms : AnimatorCullingMode.CullCompletely;
-            // TODO #93: update Animator bergiliran (animStaggerMid/animStaggerFar).
+            // HordeCrowdManager.md "Animasi" (#93): Close = Animator jalan sendiri. Mid/Far = Animator dimatikan lalu
+            // di-Update manual bergiliran di LateUpdate. Culled = mati. Saat Dying, Animator milik ragdoll EnemyHitReaction.
+            animTier = tier;
+            animAccum = 0f;
+            if (animator != null && CurrentState != AIState.Dying) animator.enabled = tier == CrowdTier.Close;
+        }
+
+        private void LateUpdate()
+        {
+            if (animator == null || animTier == CrowdTier.Close || CurrentState == AIState.Dying) return;
+            // EnemyHitReaction menyalakan Animator lagi saat keluar dari pool; tingkatan Mid/Far/Culled tetap memakai mode manual.
+            if (animator.enabled) animator.enabled = false;
+            if (animTier == CrowdTier.Culled) return;
+            var b = Bal;
+            int every = b == null ? 1 : animTier == CrowdTier.Mid ? b.crowd.animStaggerMid : b.crowd.animStaggerFar;
+            animAccum += Time.deltaTime;
+            // Bergantian menurut ID, supaya zombie dalam satu tingkatan tidak di-update pada frame yang sama.
+            if (every > 1 && (Time.frameCount + (GetInstanceID() & 0x7fffffff)) % every != 0) return;
+            animator.Update(animAccum);
+            animAccum = 0f;
         }
 
         // ---------------------------------------------------------------- Pool
@@ -583,6 +604,9 @@ namespace SurvivalIsland
         public void OnSpawned()
         {
             var b = Bal;
+            // Tingkatan animasi dari hidup sebelumnya tidak terbawa (#93). HordeCrowdManager.Register mengatur ulang.
+            animTier = CrowdTier.Close;
+            animAccum = 0f;
             // 1. Langsung tanpa RequestState, karena state lama bisa Dying atau BurnToAshes.
             CurrentState = AIState.Idle;
             CurrentTarget = null;

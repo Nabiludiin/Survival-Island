@@ -90,3 +90,4 @@
 - Volume ke mixer: blueprint tidak menyebut nama parameternya, jadi dipakai parameter terekspos `Master_Vol`, `Music_Vol`, dan `SFX_Vol` (nama bisa diganti di Inspector), dikonversi ke dB (0 menjadi -80 dB). Kalau `Master_Vol` tidak ada di mixer, volume dikalikan di sumber (`PlaySFX` seperti teks blueprint, dan volume `bgmSource`). Kalau ada, pengali di sumber menjadi 1 supaya volume tidak dikali dua kali.
 - `SetCinematicMix` memakai snapshot ketiga opsional `cinematicSnapshot`. Snapshot `Paused` didahulukan kalau jeda dan adegan aktif bersamaan.
 - `StopWorldAudio`: `AmbientAudio`, `CombatMusicDirector`, dan `PooledAudioSource` belum ada (TODO).
+- Isi TODO (sistem pendukung): `PlaySFXAt(AudioClip, Vector3, float volumeMultiplier = 1)`: suara 3D sekali putar lewat `PooledAudioSource.PlayAt` (pool `Audio_OneShot3D`) dan grup mixer `sfxSource`. Kalau pool tidak ada, klip diputar 2D lewat `PlaySFX`. Dipakai `ResourceNode`, `PlayerShove`, dan `LuckyMachine`.

@@ -224,3 +224,7 @@ Kode: `left-4-dead/AISensory.cs` (`AwarenessLevel`, `NoiseSourceKind`), `AISenso
 - `HuntHint` memakai `UnityEngine.Random`, karena tidak memengaruhi isi dunia yang disimpan. Tarikan cahaya (#98) yang memakai aliran `Gameplay` masih TODO.
 - `IgnoreStealth` berupa properti yang diisi `HordeManager` (#50) nanti. `DetectionMeterUI` belum ditulis, tetapi `PlayerDetectionChangedEvent` sudah dikirim.
 - `NoiseEmitter.Player` (statis) dan `NoiseEmitter.Emit(Vector3, float, NoiseSourceKind)` ditambahkan untuk sumber suara tanpa komponen sendiri.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): `DetectionMeterUI` ditulis di `left-4-dead/DetectionMeterUI.cs`. Config baru `stealth.detectionMeterFadeSeconds` (1). Warna, skala denyut, dan lama denyut adalah field tampilan di Inspector.

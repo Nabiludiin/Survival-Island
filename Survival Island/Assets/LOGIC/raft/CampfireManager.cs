@@ -44,7 +44,7 @@ namespace SurvivalIsland
     /// Catatan implementasi (sistem pendukung):
     /// - IslandInteractable (#17) belum ada, jadi kelas ini menerapkan IInteractable langsung.
     /// - homeRegion: diisi RegionStreaming.RegionOf (#88) saat dibangun dan disimpan.
-    /// - LightSource (#98), NPCRoster (#76), dan BaseTrap (#26) sudah disambung. FireSystem (#97): TODO di titik panggilnya.
+    /// - LightSource (#98), NPCRoster (#76), dan BaseTrap (#26) sudah disambung. Api unggun tidak menjalar (FireSystem.md keputusan 2, #97).
     /// </summary>
     public class CampfireManager : MonoBehaviour, IInteractable, ISaveable
     {
@@ -516,7 +516,7 @@ namespace SurvivalIsland
                 }
                 row.Clear();
             }
-            // TODO(FireSystem #97): api unggun yang hancur saat menyala tidak memicu api menyebar di versi ini.
+            // FireSystem.md (#97) keputusan 2: api unggun tidak menjalar, jadi hancur saat menyala tidak memicu FireArea.
         }
 
         // ---------------------------------------------------------------- IInteractable

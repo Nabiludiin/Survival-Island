@@ -268,3 +268,10 @@ Kode: `Survival Island/Assets/LOGIC/raft/ResourceNode.cs`, `ResourceNodeData.cs`
 - **Tanpa `RunSeedManager`** (scene uji), `ResourceNode` memakai aliran cadangan, supaya tidak error.
 - **Belum ada (TODO):** `VFXManager.Play` (#15), `AudioManager` (#16, sementara `AudioSource` opsional di node), notifikasi `Butuh alat lain` (#22), `NoiseEmitter.Emit(..., NoiseSourceKind.Tool)` (#49, Langkah 5), `Flammable` (#97), `CoconutPickup`, `StonePickup`, `CountActiveStones`, `ForceRegrowStones` (#43, #116, butuh `PickupInteractable` #17), dan `ResourceAuditWindow`.
 - Belum diuji di Unity.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): `ResourceNode.PlaySound` memakai `AudioManager.PlaySFXAt`; `AudioSource` di node hanya cadangan tanpa `AudioManager`.
+- Isi TODO (sistem pendukung): `CountActiveStones(RegionType)` dan `ForceRegrowStones(RegionType, int minimum)` menghitung semua `PickupInteractable` dengan item `Mat_Stone` (termasuk `StonePickup`), supaya batu kecil lama di scene tetap terhitung. `ForceRegrowStones` menumbuhkan sampai jumlah aktif mencapai `minimum` dan mengembalikan jumlah yang ditumbuhkan. `IsSmallStone` dibuka publik untuk perintah `clearstones`.
+- Isi TODO (sistem pendukung): `StonePickup` (`resource.stoneRespawnDays`) dan `CoconutPickup` (`resource.coconutRespawnDays`) memakai dasar bersama `RegrowablePickup : PickupInteractable, IRegrowable` (tidak disebut blueprint, dibuat supaya aturan tidak ditulis dua kali). Jam tumbuh = jam absolut + hari * 24 + jitter `regrowJitterHours` dari aliran Gameplay, lalu `MarkDepleted`. Jam tumbuh ikut disimpan (`RegrowablePickupSaveData`). `PickupInteractable.Regrow` menjadi `virtual`.
+- Isi TODO (sistem pendukung): Tafsiran: benda yang sudah diambil tetap ada di daftar `depleted` walau objeknya nonaktif (objek nonaktif tidak bisa memakai `OnDisable` untuk `Forget`); dilepas di `OnDestroy`.

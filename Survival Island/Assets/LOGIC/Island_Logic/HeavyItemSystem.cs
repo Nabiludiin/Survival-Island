@@ -38,7 +38,7 @@ namespace SurvivalIsland
     ///   RecoveryTick memeriksa batas bawah RegionRecord.bounds. Tanpa RegionStreaming (scene uji), semua barang aktif.
     ///   Data barang tetap di world_parts (manager IslandPhase), bukan RegionStateStore.
     /// - SwimStateChangedEvent (#13, cadangan PlayerTraversal.Mode), CompassSystem (#30), LoreHintGrantedEvent (#100), dan
-    ///   notifikasi (#22) sudah disambung. Belum ada (TODO): VFXManager (#15).
+    ///   notifikasi (#22) sudah disambung. Debu saat barang dijatuhkan lewat VFXManager (#15), tag dropDustTag.
     /// </summary>
     public class HeavyItemSystem : MonoBehaviour, ISaveable
     {
@@ -48,6 +48,8 @@ namespace SurvivalIsland
 
         [SerializeField] private HeavyItemData[] parts = Array.Empty<HeavyItemData>();
         [SerializeField] private PartSpawnPointTable spawnPoints;
+        [Tooltip("Efek debu saat barang dijatuhkan (HeavyItemSystem.md \"Objek pool\"). Tag dari katalog VFXManager.")]
+        [SerializeField] private string dropDustTag = "VFX_ImpactDust";
         [Tooltip("Titik pegang di depan kamera pemain. Diisi dari prefab pemain Fase 2.")]
         [SerializeField] private Transform carryAnchor;
         [Tooltip("Induk barang yang tergeletak. Kosong = objek ini.")]
@@ -321,6 +323,9 @@ namespace SurvivalIsland
                 {
                     Vector3 pos = DropPosition(player.transform, reason);
                     item.transform.SetPositionAndRotation(pos, Quaternion.Euler(0f, player.transform.eulerAngles.y, 0f));
+                    // Debu saat jatuh (#15). Di air barang langsung dipindah ke posisi valid, jadi tidak ada debu.
+                    if (reason != DropReason.Water && !string.IsNullOrEmpty(dropDustTag))
+                        VFXManager.Instance?.Play(dropDustTag, pos, Quaternion.identity);
                 }
                 records[index].position = item.transform.position;
                 records[index].rotation = item.transform.rotation;
@@ -488,6 +493,39 @@ namespace SurvivalIsland
                 if (player != null && !r.isDiscovered && (pos - playerPos).sqrMagnitude <= discoverSqr) r.isDiscovered = true;
                 if (r.isDiscovered) SetPartMarker(r);
             }
+        }
+
+        /// <summary>
+        /// Dipanggil TideManager.StepCollider (#91): barang Lying yang tertinggal di pantai di bawah permukaan air dipindah ke
+        /// TideSafePoint terdekat, sama seperti WorldItemManager.SweepBelow. Barang yang dibawa pemain tidak diperiksa.
+        /// </summary>
+        public void SweepBelow(Bounds zone, float waterY, TideSafePoint[] safe)
+        {
+            bool moved = false;
+            for (int i = 0; i < records.Length; i++)
+            {
+                var r = records[i];
+                var item = i < instances.Length ? instances[i] : null;
+                if (r == null || r.state != PartState.Lying || item == null || !item.gameObject.activeInHierarchy) continue;
+                Vector3 p = item.transform.position;
+                if (p.y >= waterY) continue;
+                if (p.x < zone.min.x || p.x > zone.max.x || p.z < zone.min.z || p.z > zone.max.z) continue;
+                var point = TideSafePoint.Nearest(safe, p);
+                if (point == null) continue;   // Tanpa titik aman: dibiarkan, sama dengan WorldItemManager
+                Vector3 target = point.Position + Vector3.up * 0.5f;
+                if (item.Body != null)
+                {
+                    item.Body.linearVelocity = Vector3.zero;
+                    item.Body.angularVelocity = Vector3.zero;
+                }
+                item.transform.position = target;
+                if (item.Body != null) item.Body.position = target;
+                r.position = target;
+                r.region = RegionStreaming.RegionOf(target);
+                moved = true;
+            }
+            // Notifikasi "Suku cadang dikembalikan" (#22), sekali per sapuan.
+            if (moved && NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.part_returned", NotificationKind.Info);
         }
 
         /// <summary>Kembalikan barang ke posisi valid terakhir. Barang tidak pernah bisa hilang (#116 hanya membaca status).</summary>

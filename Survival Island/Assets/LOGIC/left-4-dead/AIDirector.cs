@@ -48,7 +48,8 @@ namespace SurvivalIsland
     /// seberapa beringas; SpawnManager menentukan jenis dan tempat.
     /// Catatan Langkah 5: malam dibaca dari HourChangedEvent (DayPhaseTracker), bukan NightfallEvent (Langkah 4).
     /// isHeld mengikuti SleepStateChangedEvent (#67). isOverridden diatur HordeManager lewat SetOverridden saat Blood Moon (#50).
-    /// Belum diimplementasikan (TODO): RequestCampCounter (#94), pengali jumlah dari DifficultyProfile (field belum diberi nama).
+    /// RequestCampCounter (#94) dipanggil AITraversal. Belum diimplementasikan (TODO): pengali jumlah dari DifficultyProfile
+    /// (field belum diberi nama).
     /// </summary>
     public class AIDirector : MonoBehaviour, ISaveable
     {
@@ -320,6 +321,23 @@ namespace SurvivalIsland
             int accepted = spawn.RequestWave(in r);
             spawnedTonight += accepted;
             return accepted;
+        }
+
+        /// <summary>
+        /// Pembalas berkemah (#94, AIDirector.md "Fungsi publik"): gelombang dengan forcedEnemyId. Boleh saat Relax dan tidak
+        /// memakai nightBudget (spawnedTonight tidak bertambah). Pengali pasca hari ke-60 tetap berlaku.
+        /// </summary>
+        public int RequestCampCounter(string enemyId, int count)
+        {
+            var spawn = SpawnManager.Instance;
+            if (spawn == null || count <= 0 || string.IsNullOrEmpty(enemyId)) return 0;
+            int day = GameManager.Instance != null ? GameManager.Instance.currentDay : 1;
+            var r = new WaveRequest
+            {
+                count = count, maxLarge = int.MaxValue, specialShare = 1f, modifiers = GetPostTargetModifiers(day),
+                reason = "CampCounter", forcedEnemyId = enemyId, origin = null
+            };
+            return spawn.RequestWave(in r);
         }
 
         /// <summary>Hanya dari SpawnManager.Despawn (Stuck, OffNavMesh, TooFar, RegionUnloaded) dan slot gagal.</summary>

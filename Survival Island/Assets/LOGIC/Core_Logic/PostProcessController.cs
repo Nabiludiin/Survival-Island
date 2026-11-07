@@ -51,6 +51,7 @@ namespace SurvivalIsland
         private bool drowningFlag;
         private float swimBreathTarget;
         private bool snapNextFrame = true;
+        private Color screenTint = Color.clear;   // Warna layar adegan mati (#53). Alpha = kekuatan, 0 = tidak ada.
 
         // Profil region: dua volume crossfade.
         private float weightA, weightB, targetA, targetB, blendSpeed;
@@ -232,7 +233,17 @@ namespace SurvivalIsland
             isPulsing = false;
             drowningFlag = false;
             swimBreathTarget = 0f;
+            screenTint = Color.clear;
             snapNextFrame = true;
+        }
+
+        /// <summary>
+        /// Warna layar dari DeathCinematicProfile.screenTint (#53). RGB menjadi warna Color Filter, alpha menjadi kekuatannya
+        /// (0 = tidak ada). Bertahan sampai ClearStatusEffects atau SetScreenTint(Color.clear); scene diganti juga menghapusnya.
+        /// </summary>
+        public void SetScreenTint(Color tint)
+        {
+            screenTint = tint;
         }
 
         /// <summary>
@@ -281,6 +292,9 @@ namespace SurvivalIsland
             if (b == null) return;
             var pp = b.postProcess;
             float dt = Time.deltaTime;   // Efek ikut berhenti saat jeda
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            ApplyDebugOverrides();
+#endif
 
             // Region crossfade.
             if (blendSpeed > 0f)
@@ -348,7 +362,10 @@ namespace SurvivalIsland
             {
                 float saturation = Mathf.Lerp(infectionCurrent * pp.infectionSaturationMin, -100f, deathCurrent);
                 Color filter = Color.Lerp(Color.Lerp(Color.white, infectionTint, infectionCurrent), underwaterTint, underwaterCurrent);
-                colorAdjust.active = saturation < -0.01f || infectionCurrent > 0.001f || underwaterCurrent > 0.001f;
+                // Warna layar adegan mati (#53) di atas filter lain, dengan alpha sebagai kekuatan.
+                float tintWeight = Mathf.Clamp01(screenTint.a);
+                if (tintWeight > 0.001f) filter = Color.Lerp(filter, new Color(screenTint.r, screenTint.g, screenTint.b, 1f), tintWeight);
+                colorAdjust.active = saturation < -0.01f || infectionCurrent > 0.001f || underwaterCurrent > 0.001f || tintWeight > 0.001f;
                 if (colorAdjust.active)
                 {
                     colorAdjust.saturation.value = saturation;
@@ -371,6 +388,38 @@ namespace SurvivalIsland
             hitPulse = Mathf.MoveTowards(hitPulse, 0f, pp.hitPulseDecayPerSec * dt);
         }
 
-        // TODO(DevConsole): perintah "postfx <efek> <0..1>" untuk memaksa target (#56).
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // ---------------------------------------------------------------- Debug (DevConsole #56)
+
+        /// <summary>Nama efek untuk perintah postfx, urutannya sama dengan larik debugOverride.</summary>
+        public static readonly string[] DebugEffectNames =
+            { "hp", "wound", "freeze", "breath", "infection", "underwater", "sleep", "death" };
+
+        private readonly float[] debugOverride = { -1f, -1f, -1f, -1f, -1f, -1f, -1f, -1f };
+
+        /// <summary>
+        /// Perintah "postfx &lt;efek&gt; &lt;0..1&gt;" (#56): paksa target efek, menimpa nilai dari event sampai dilepas.
+        /// value &lt; 0 melepas paksaan. false kalau nama efek tidak dikenal.
+        /// </summary>
+        public bool DebugForceTarget(string effect, float value)
+        {
+            int index = System.Array.IndexOf(DebugEffectNames, effect);
+            if (index < 0) return false;
+            debugOverride[index] = value < 0f ? -1f : Mathf.Clamp01(value);
+            return true;
+        }
+
+        private void ApplyDebugOverrides()
+        {
+            if (debugOverride[0] >= 0f) hpTarget = debugOverride[0];
+            if (debugOverride[1] >= 0f) woundTarget = debugOverride[1];
+            if (debugOverride[2] >= 0f) freezeTarget = debugOverride[2];
+            if (debugOverride[3] >= 0f) breathTarget = debugOverride[3];
+            if (debugOverride[4] >= 0f) infectionTarget = debugOverride[4];
+            if (debugOverride[5] >= 0f) underwaterTarget = debugOverride[5];
+            if (debugOverride[6] >= 0f) sleepTarget = debugOverride[6];
+            if (debugOverride[7] >= 0f) deathTarget = debugOverride[7];
+        }
+#endif
     }
 }

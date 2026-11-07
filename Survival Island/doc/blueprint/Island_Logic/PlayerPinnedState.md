@@ -207,3 +207,8 @@ Kode: `Island_Logic/PlayerPinnedState.cs` (`PinReleaseReason`, `IPinAttacker`).
 - **Hook damage:** `public static float ModifyIncomingEnemyDamage(in DamageInfo info, float amount)` dipanggil `SurvivalStats.TakeDamage` langkah 3. Serangan "dari musuh" dikenali dari `info.source` yang punya `EnemyHealth`.
 - Mode tahan tombol (#19) belum ada, karena `InputManager` belum punya `StruggleHeld`. Saklarnya disiapkan di `pinned.holdToStruggle`.
 - Tusukan Pisau berlaku kalau `Base_Pisau` ada di inventori. Status `Broken` dan keausan menunggu `DurabilitySystem` (#113). `CameraShake` (#24) dan cek panel `Cinematic` masih TODO.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Mode tahan (#19): kalau `SettingsManager.holdToStruggle`, menahan `Struggle` (`InputManager.StruggleHeld`, baru) menambah `holdProgressPerSec * mult * dt` dengan biaya `struggleStaminaHoldPerSec * dt`; dilepas = turun `mashDecayPerSec`. Mode tekan berulang dimatikan selama mode tahan.
+- Isi TODO (sistem pendukung): Langkah 6 `TryPin`: `CameraShake.Play(CameraShakeKind.Pinned)`. Animasi tusuk masih TODO.

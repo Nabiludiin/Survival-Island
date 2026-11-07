@@ -14,7 +14,8 @@ namespace SurvivalIsland
     /// Jaguar menahan pemain lewat PlayerPinnedState (GDD bagian 3, Diterkam).
     ///
     /// Catatan Langkah 5 (TODO): Jaguar menunggu di pohon (AmbushPerch) belum ada, jadi terkaman hanya dari tanah;
-    /// Gagak terbang (baseOffset, CrowFlock) belum ada, jadi FlockDive memakai gigitan biasa; api (#97) dan suara (#114).
+    /// Gagak terbang (baseOffset, CrowFlock) belum ada, jadi FlockDive memakai gigitan biasa; api (#97).
+    /// Suara tanda Alert dan serangan khusus lewat ThreatAudioEmitter.PlayAlertTell (#114).
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent), typeof(EnemyHealth))]
     public class WildlifeAI : MonoBehaviour, IPoolable, IThreatAgent, IHitReactive, IPinAttacker
@@ -27,6 +28,7 @@ namespace SurvivalIsland
         private NavMeshAgent agent;
         private EnemyHealth health;
         private EnemyAttack attack;
+        private ThreatAudioEmitter emitter;   // Suara tanda (#114). Boleh tidak ada.
         private AnimalData data;
         private NavMeshPath path;
         private readonly ThreatState threat = new ThreatState();
@@ -76,6 +78,7 @@ namespace SurvivalIsland
             agent = GetComponent<NavMeshAgent>();
             health = GetComponent<EnemyHealth>();
             attack = GetComponent<EnemyAttack>();
+            emitter = GetComponent<ThreatAudioEmitter>();
             data = health.Data as AnimalData;
             path = new NavMeshPath();
             if (data == null) Debug.LogError($"[WildlifeAI] '{name}' butuh AnimalData di EnemyHealth.", this);
@@ -140,7 +143,11 @@ namespace SurvivalIsland
             switch (s)
             {
                 case AnimalState.Wander: ApplyStateSpeed(data.wanderSpeed); break;
-                case AnimalState.Alert: ApplyStateSpeed(0f); break;
+                case AnimalState.Alert:
+                    ApplyStateSpeed(0f);
+                    // Bersuara saat masuk Alert (WildlifeAI.md tabel state, #114). Klip diputar sekali, panjangnya dari aset.
+                    if (emitter != null) emitter.PlayAlertTell();
+                    break;
                 case AnimalState.Chase: chaseStartPoint = transform.position; unreachableTimer = 0f; ApplyStateSpeed(data.chaseSpeed); break;
                 case AnimalState.ReturnToTerritory:
                     ApplyStateSpeed(data.wanderSpeed * b.returnSpeedMultiplier);
@@ -208,7 +215,6 @@ namespace SurvivalIsland
             Vector3 to = t.Position - transform.position; to.y = 0f;
             if (to.sqrMagnitude > 0.001f) transform.rotation = Quaternion.LookRotation(to);
             if (agent.isOnNavMesh) agent.ResetPath();
-            // TODO #114: ThreatAudioEmitter.PlayTell selama alertSeconds.
             if (stateTimer < b.alertSeconds) return;
             if ((t.Position - transform.position).sqrMagnitude > data.aggroRadius * data.aggroRadius * 1.5f) { SetState(AnimalState.Wander); return; }
             SetState(AnimalState.Chase);
@@ -245,6 +251,8 @@ namespace SurvivalIsland
         {
             SetState(AnimalState.Attack);
             attackStep = 1;
+            // Tanda serangan khusus lewat ThreatAudioEmitter (#114), misalnya geraman Jaguar sebelum menerkam (WildlifeAI.md).
+            if (emitter != null) emitter.PlayAlertTell();
             if (agent.isOnNavMesh) agent.ResetPath();
         }
 

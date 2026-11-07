@@ -30,7 +30,8 @@ namespace SurvivalIsland
     /// - SpillContents dipanggil dari StructureDestroyedEvent milik peti ini. BaseHealth.Remove (bongkar) dan kematian
     ///   (TakeDamage) sama-sama menerbitkan event itu, jadi satu jalur menutup keduanya.
     /// - Isi yang tumpah di region yang tidak dimuat ditulis ke RegionStateStore lewat WorldItemManager.SpawnOrStore (#88).
-    ///   Peti nonaktif di region yang dilepas (#90) tetap tidak mendengar StructureDestroyedEvent: TODO(RemoteBaseSimulation #90).
+    ///   Peti nonaktif di region yang dilepas (#90) tetap mendengar StructureDestroyedEvent, karena pendaftaran di Awake/OnDestroy.
+    ///   Peti yang dipulihkan langsung ke structureRoot nonaktif (Awake belum berjalan) belum mendengar sampai region dimuat.
     /// </summary>
     public class StorageChest : MonoBehaviour, IInteractable, ISaveable
     {
@@ -65,16 +66,18 @@ namespace SurvivalIsland
         private void Awake()
         {
             if (slots == null) slots = NewSlots(SlotCountConfig);
+            // Didaftarkan di Awake dan dilepas di OnDestroy (bukan OnEnable/OnDisable), supaya peti di region yang dilepas
+            // (structureRoot nonaktif) tetap menumpahkan isinya saat hancur oleh RemoteBaseSimulation (#90, StorageChest.md).
+            EventChannel<StructureDestroyedEvent>.Raised += HandleStructureDestroyed;
         }
 
-        private void OnEnable()
+        private void OnDestroy()
         {
-            EventChannel<StructureDestroyedEvent>.Raised += HandleStructureDestroyed;
+            EventChannel<StructureDestroyedEvent>.Raised -= HandleStructureDestroyed;
         }
 
         private void OnDisable()
         {
-            EventChannel<StructureDestroyedEvent>.Raised -= HandleStructureDestroyed;
             SetHourListening(false);
         }
 

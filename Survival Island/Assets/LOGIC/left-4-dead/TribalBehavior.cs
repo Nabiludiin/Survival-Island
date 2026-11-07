@@ -27,6 +27,13 @@ namespace SurvivalIsland
         private float blockedTimer;
         private float holdDamageTimer;
         private TribalSnare activeSnare;
+        private ThreatAudioEmitter emitter;   // Suara peringatan windup (#114). Boleh tidak ada.
+
+        protected override void Awake()
+        {
+            base.Awake();
+            emitter = GetComponent<ThreatAudioEmitter>();
+        }
 
         public string AttackerId => zombie != null ? zombie.enemyId : "zombie_tribal";
         public Transform LookTarget => headPoint != null ? headPoint : transform;
@@ -63,8 +70,9 @@ namespace SurvivalIsland
                     float d = DistanceToPlayer;
                     bool pinned = EventChannel<PlayerPinnedEvent>.HasLast && EventChannel<PlayerPinnedEvent>.Last.isPinned;
                     if (d < b.tribalRangeMin || d > b.tribalRangeMax || pinned || !CanSeePlayer()) return false;
-                    // 2. Windup: berhenti dan mengayun. TODO #114: ThreatAudioEmitter.PlayTell.
+                    // 2. Windup: berhenti, mengayun, dan suara peringatan lewat ThreatAudioEmitter (#114).
                     step = SnareStep.Windup;
+                    if (emitter != null) emitter.PlayAlertTell();
                     stepTimer = b.tribalWindupSeconds;
                     if (agent.isOnNavMesh) agent.isStopped = true;
                     return true;

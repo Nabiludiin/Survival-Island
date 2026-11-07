@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SurvivalIsland
@@ -7,8 +8,8 @@ namespace SurvivalIsland
     /// Usulan disetujui (#85): Pistol dan Pisau tidak dipakai di Fase 1. Dorongan sejauh shoveKnockback, terhuyung
     /// shoveStaggerSeconds, tanpa damage, tanpa stamina, jeda shoveCooldownSeconds.
     ///
-    /// Belum diimplementasikan: PhysicsQuery.CollectUniqueDamageables dan EnemyHitReaction.ApplyKnockback milik
-    /// Langkah 5 (#59, #95). Sampai itu ada, dorongan hanya memeriksa jeda dan mencari collider musuh.
+    /// Target dikumpulkan lewat PhysicsQuery.CollectUniqueDamageables (#59), lalu EnemyHitReaction.ApplyKnockback (#95)
+    /// dengan angka shipHazard. Pola sama dengan PlayerShove di pulau, tanpa stamina dan tanpa kerucut arah.
     /// </summary>
     public class ShipShove : MonoBehaviour
     {
@@ -19,6 +20,8 @@ namespace SurvivalIsland
         [SerializeField] private string shoveTrigger = "Shove";
 
         private readonly Collider[] buffer = new Collider[16];
+        private readonly List<IDamageable> unique = new List<IDamageable>(8);
+        private readonly List<Collider> uniqueColliders = new List<Collider>(8);
         private float nextShoveTime;
 
         /// <summary>Jumlah collider terakhir yang terkena. Untuk uji di Inspector.</summary>
@@ -53,10 +56,20 @@ namespace SurvivalIsland
             Vector3 center = transform.position + transform.forward * hz.shoveForwardOffset;
             LastHitCount = PhysicsQuery.OverlapSphere(center, hz.shoveRadius, PhysicsMasks.Melee, buffer);
 
-            // 4-5. TODO Langkah 5 (#59, #95):
-            //   PhysicsQuery.CollectUniqueDamageables(buffer, LastHitCount, results);
-            //   untuk tiap IDamageable yang punya EnemyHitReaction:
-            //     ApplyKnockback(arah dari pemain, hz.shoveKnockback, hz.shoveStaggerSeconds).
+            // 4. Satu target per musuh walau beberapa collider-nya kena (#59).
+            PhysicsQuery.CollectUniqueDamageables(buffer, LastHitCount, unique, uniqueColliders);
+            // 5. Dorong menjauh dari pemain dan terhuyung, tanpa damage (#95).
+            for (int i = 0; i < uniqueColliders.Count; i++)
+            {
+                var reaction = uniqueColliders[i] != null ? uniqueColliders[i].GetComponentInParent<EnemyHitReaction>() : null;
+                if (reaction == null) continue;
+                Vector3 away = reaction.transform.position - transform.position;
+                away.y = 0f;
+                if (away.sqrMagnitude < 0.0001f) away = transform.forward;
+                reaction.ApplyKnockback(away.normalized, hz.shoveKnockback, hz.shoveStaggerSeconds);
+            }
+            unique.Clear();
+            uniqueColliders.Clear();
             for (int i = 0; i < LastHitCount; i++) buffer[i] = null;
         }
     }

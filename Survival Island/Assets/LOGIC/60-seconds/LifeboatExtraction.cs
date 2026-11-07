@@ -13,10 +13,11 @@ namespace SurvivalIsland
     /// GDD bagian 3: Fase 1, Base Item, prioritas barang dan NPC, dan kembali ke Fase 1 saat kalah.
     /// Sekoci, aturan setor, dan akibat gagal adalah usulan yang disetujui developer (#85).
     ///
-    /// Belum diimplementasikan (ditandai TODO):
+    /// Catatan implementasi:
     /// - SpawnShipNpcs: keputusan developer (sistem pendukung): NPCData di ShipPhase diambil dari daftar npcDatabase di
     ///   Inspector (aset yang sama dengan NPCRoster), dan titik dari shipNpcPoints sesuai RunLayout.shipNpcPointByNpc.
-    /// - Penanda sekoci di HUD saat sirene, dan isi sekoci di HUD (HUDManager belum punya fungsi untuk itu).
+    /// Penanda sekoci di HUD sejak sirene (HUDManager.SetLifeboatHighlighted) dan isi sekoci setelah setor
+    /// (HUDManager.ShowLifeboatContents) sudah tersambung.
     /// Sirene pra-game dan SFX setor lewat AudioManager, teks prompt lewat LocalizationManager (#104).
     /// </summary>
     public class LifeboatExtraction : MonoBehaviour, IInteractable
@@ -119,8 +120,9 @@ namespace SurvivalIsland
                 if (!sirenPlayed && elapsed >= ship.sirenAtSeconds)
                 {
                     sirenPlayed = true;
-                    // Sirene lewat grup Warning. TODO(HUDManager): tandai sekoci di HUD (belum ada fungsi publiknya).
+                    // Sirene lewat grup Warning, lalu sekoci ditandai di HUD (langkah 5).
                     AudioManager.Instance?.PlayWarning(sirenClip);
+                    HUDManager.Instance?.SetLifeboatHighlighted(true);
                 }
                 if (RunEnding) yield break;
                 yield return null;
@@ -247,7 +249,10 @@ namespace SurvivalIsland
 
             inv.ClearShipHand();
             AudioManager.Instance?.PlaySFX(depositClip);
-            // TODO(HUDManager): isi sekoci di HUD (belum ada elemen dan fungsi publiknya).
+            // Langkah setor 3: isi sekoci di HUD.
+            int itemTotal = 0;
+            for (int i = 0; i < depositedItems.Count; i++) itemTotal += depositedItems[i].amount;
+            HUDManager.Instance?.ShowLifeboatContents(itemTotal, rescuedNpcIds.Count);
         }
 
         private void AddDeposited(string itemId, int amount)

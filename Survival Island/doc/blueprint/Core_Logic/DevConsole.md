@@ -286,3 +286,4 @@ Kode: `Assets/LOGIC/Core_Logic/DevConsole.cs`, seluruhnya di dalam `#if UNITY_ED
 - `streamstat` dan `streamdelay` memakai `RegionStreaming.GetState`, `IsStalled`, dan `DebugExtraDelaySeconds`.
 - Masih TODO (sistemnya belum punya fungsi yang dibutuhkan): `tpregion` (titik uji region, #88), `savecorrupt` dan `savedelay` (#80), `settide` (#91), `postfx` (#23), rincian `spawnstat` (#62), dan `heli install all` (#69).
 - `loadlast` memanggil `RunLifecycle.ReturnToMainMenu()`, menunggu `State == InMenu`, lalu `ContinueRun()`.
+- Isi TODO (sistem pendukung): Sudah ditulis: `savecorrupt`, `savedelay <detik>` (#80), `postfx <efek> <0..1|off>` (#23), `heli install all` (daftar `partId` dibaca dari `HeavyItemSystem`, #69), dan `surfacedebug <0|1>` (memasang `SurfaceDebugOverlay` di objek konsol, #86). Masih TODO: `tpregion` (titik uji per region belum ada di peta).

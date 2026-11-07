@@ -53,6 +53,7 @@ namespace SurvivalIsland
         private EquippableBehaviour offHandBehaviour;
         private EquipState state = EquipState.Idle;
         private float switchTimer;
+        private float briefLowerTimer;   // LowerBriefly (#96): viewmodel turun tanpa berganti item
         private int pendingIndex = NoPending;
         private int targetIndex = NoSlot;
         private int lastIndex = NoSlot;
@@ -129,6 +130,7 @@ namespace SurvivalIsland
         private void Update()
         {
             if (state != EquipState.Idle) TickSwitch();   // Tetap selesai walau panel tanpa jeda terbuka
+            TickBriefLower();
             if (locks != EquipLock.None) return;          // Kunci Menu mengikuti IsGameplayInputBlocked
             ReadHotbarInput();
             if (state != EquipState.Idle || activeBehaviour == null) return;
@@ -210,8 +212,32 @@ namespace SurvivalIsland
             BeginSwitch(index);
         }
 
+        /// <summary>
+        /// Viewmodel item aktif turun sebentar lalu naik lagi, tanpa berganti item (ThrowableSystem.md: saat melempar, #96).
+        /// Lama turun memakai equipment.lowerSeconds. Diabaikan saat sedang berganti item atau ada kunci.
+        /// </summary>
+        public void LowerBriefly()
+        {
+            if (state != EquipState.Idle || locks != EquipLock.None) return;
+            briefLowerTimer = Balance != null ? Balance.equipment.lowerSeconds : 0.15f;
+            if (FirstPersonCamera.Instance != null) FirstPersonCamera.Instance.SetViewmodelMode(ViewmodelMode.Lowered);
+        }
+
+        private void TickBriefLower()
+        {
+            if (briefLowerTimer <= 0f) return;
+            briefLowerTimer -= Time.deltaTime;
+            if (briefLowerTimer > 0f) return;
+            briefLowerTimer = 0f;
+            // Pergantian item atau kunci simpan/mati yang mulai di tengah jalan sudah mengatur mode viewmodel sendiri.
+            // Kunci Menu tidak mengubah viewmodel, jadi tetap dinaikkan.
+            if (state == EquipState.Idle && (locks & (StashLocks | EquipLock.Dead)) == 0 && FirstPersonCamera.Instance != null)
+                FirstPersonCamera.Instance.SetViewmodelMode(ViewmodelMode.Visible);
+        }
+
         private void BeginSwitch(int index)
         {
+            briefLowerTimer = 0f;
             LastUnequippedInstanceId = ActiveInstanceId;
             if (activeBehaviour != null) activeBehaviour.OnUnequip();
             targetIndex = index;

@@ -353,3 +353,10 @@ NavMesh tidak bisa berputar saat bermain, jadi **geometri tidak boleh diputar sa
 - `currentSway` mengejar tahap dengan laju `swaySpeed` derajat per detik (usulan, blueprint tidak menyebut lajunya).
 - Belum ada (TODO, Langkah 5): `EnemyAI.SetTarget`, `Dormant` dan bangun, macet 5 detik, gigitan, `EnemyHealth.Died`, serta knockback `ShipShove` (`CollectUniqueDamageables`, `EnemyHitReaction`). Sekarang zombie dimunculkan dari pool, kecepatan agen diatur pengali air, dan zombie terendam kembali ke pool.
 - Belum ada (TODO): `CameraShake` (#24), suara alarm dan kapal (`AudioManager`), dan `ShipRouteAudit`.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Zombie kapal: muncul `EnterDormant`, lalu `EnemyAI.WakeUp(pemain)` kalau pemain dalam `zombieAggroRadius` dan terlihat (raycast `PhysicsMasks.AIVision` setinggi 1,6 m). Macet: `pathStatus != PathComplete` terus-menerus selama `shipHazard.zombieStuckSeconds` (config baru, 5 dari tabel "Zombie di kapal") membuat zombie `Dormant` lagi. Zombie dengan `EnemyHealth.IsAlive == false` keluar dari `activeZombies`. `StopAll` memanggil `SetTarget(null)` dan `EnterDormant`.
+- Isi TODO (sistem pendukung): Tafsiran "bangun saat suara T=45 untuk grup yang dijadwalkan": grup `SpawnZombies` yang punya waktu sama dengan entri `AlarmUp` langsung bangun saat muncul. Grup lain muncul tidur. Perlu dikonfirmasi developer.
+- Isi TODO (sistem pendukung): `ShipShove` langkah 4-5: `PhysicsQuery.CollectUniqueDamageables` lalu `EnemyHitReaction.ApplyKnockback(arah menjauh, shoveKnockback, shoveStaggerSeconds)`, tanpa damage.
+- Isi TODO (sistem pendukung): Masih TODO: volume alarm kapal (`AlarmUp`) karena belum ada sumber/klip alarm dan besarnya kenaikan, efek basah layar (#23), dan `ShipRouteAudit`.

@@ -366,8 +366,9 @@ namespace SurvivalIsland
             Reg("spawnstat", "spawnstat", "Musuh aktif, Submerged, dan kegagalan titik spawn (#62).", 0, false, CmdSpawnStat);
             Reg("settide", "settide <low|high|auto>", "Memaksa level air (#91).", 1, true, CmdSetTide);
             Reg("notify", "notify <jenis> <kunci>", "Memanggil NotificationManager.Show.", 2, false, CmdNotify);
-            Reg("postfx", "postfx <efek> <0..1>", "Memaksa target efek PostProcessController.", 2, false, CmdPostFx);
+            Reg("postfx", "postfx <efek> <0..1|off>", "Memaksa target efek PostProcessController.", 2, false, CmdPostFx);
             Reg("shake", "shake <kind> [scale]", "Memanggil CameraShake.Play.", 1, false, CmdShake);
+            Reg("surfacedebug", "surfacedebug <0|1>", "Kisi permukaan di sekitar pemain (SurfaceDebugOverlay, #86).", 1, false, CmdSurfaceDebug);
             Reg("shiptime", "shiptime <detik>", "Mengatur sisa waktu timer kapal (#56).", 1, true, CmdShipTime);
             Reg("heli", "heli <status|install <partId>|warmup <detik>|liftoff>", "Perintah helikopter (#14).", 1, false, CmdHeli);
             Reg("stats", "stats", "Ringkasan stats.json (#57).", 0, false, CmdStats);
@@ -770,14 +771,21 @@ namespace SurvivalIsland
 
         private string CmdSaveCorrupt(string[] args)
         {
-            // TODO(WorldStateSave): WorldStateSave belum membuka path file utama untuk konsol (#80).
-            return "TODO: savecorrupt menunggu fungsi Debug di WorldStateSave (#80).";
+            // Satu byte file save utama diubah lewat WorldStateSave.DebugCorruptMainFile (#80, skenario 9).
+            var save = WorldStateSave.Instance;
+            if (save == null) return "WorldStateSave tidak ada.";
+            save.DebugCorruptMainFile(out string message);
+            return "savecorrupt: " + message;
         }
 
         private string CmdSaveDelay(string[] args)
         {
-            // TODO(WorldStateSave): penundaan tulis untuk uji #80 belum ada di WorldStateSave.
-            return "TODO: savedelay menunggu fungsi Debug di WorldStateSave (#80).";
+            // Penundaan buatan sebelum file utama diganti, hanya untuk save di thread lain (#80, skenario 8, 24, 25, 27).
+            var save = WorldStateSave.Instance;
+            if (save == null) return "WorldStateSave tidak ada.";
+            if (!TryFloat(args[0], out float seconds) || seconds < 0f) return Usage("savedelay");
+            save.DebugSetWriteDelay(seconds);
+            return "savedelay = " + save.DebugWriteDelaySeconds.ToString("0.0", CultureInfo.InvariantCulture) + " s";
         }
 
         private string CmdSpawnStat(string[] args)
@@ -821,8 +829,26 @@ namespace SurvivalIsland
 
         private string CmdPostFx(string[] args)
         {
-            // TODO(PostProcessController): belum ada fungsi untuk memaksa target efek (#23).
-            return "TODO: postfx menunggu fungsi Debug di PostProcessController (#23).";
+            // Memaksa target efek lewat PostProcessController.DebugForceTarget (#23). Nilai negatif atau "off" melepasnya.
+            var pp = PostProcessController.Instance;
+            if (pp == null) return "PostProcessController tidak ada di scene ini.";
+            string effect = args[0].ToLowerInvariant();
+            float value;
+            if (args[1].ToLowerInvariant() == "off") value = -1f;
+            else if (!TryFloat(args[1], out value)) return Usage("postfx");
+            if (!pp.DebugForceTarget(effect, value))
+                return "Efek: " + string.Join(", ", PostProcessController.DebugEffectNames) + ".";
+            return value < 0f ? "postfx " + effect + " dilepas" : "postfx " + effect + " = " + Mathf.Clamp01(value).ToString("0.00", CultureInfo.InvariantCulture);
+        }
+
+        private string CmdSurfaceDebug(string[] args)
+        {
+            // SurfaceDetection.md "Tampilan debug": overlay dipasang sekali di objek konsol (persisten), lalu dinyalakan/dimatikan.
+            if (!TryBool(args[0], out bool on)) return Usage("surfacedebug");
+            var overlay = GetComponent<SurfaceDebugOverlay>();
+            if (overlay == null && on) overlay = gameObject.AddComponent<SurfaceDebugOverlay>();
+            if (overlay != null) overlay.enabled = on;
+            return "surfacedebug " + (on ? "1" : "0");
         }
 
         private string CmdShake(string[] args)
@@ -853,8 +879,19 @@ namespace SurvivalIsland
                     return $"State {rescue.State}, terpasang {rescue.InstalledCount}, pemanasan {rescue.WarmupLeft.ToString("0.0", CultureInfo.InvariantCulture)} s";
                 case "install":
                     if (args.Length < 2) return "Cara pakai: heli install <partId>";
-                    // TODO(RescueEventManager): "heli install all" butuh daftar partId resmi (#69).
-                    if (args[1].ToLowerInvariant() == "all") return "TODO: install all menunggu daftar partId (#69).";
+                    // "heli install all": daftar partId resmi dibaca dari HeavyItemSystem (data world_parts, #69).
+                    if (args[1].ToLowerInvariant() == "all")
+                    {
+                        var heavy = HeavyItemSystem.Instance;
+                        if (heavy == null) return "HeavyItemSystem tidak ada di scene ini.";
+                        for (int i = 0; i < heavy.PartCount; i++)
+                        {
+                            var r = heavy.GetRecord(i);
+                            if (r != null && !string.IsNullOrEmpty(r.partId)) rescue.InstallPart(r.partId);
+                        }
+                        MarkTainted();
+                        return $"InstallPart semua ({heavy.PartCount}). Terpasang {rescue.InstalledCount}.";
+                    }
                     rescue.InstallPart(args[1]);
                     MarkTainted();
                     return $"InstallPart({args[1]}). Terpasang {rescue.InstalledCount}.";

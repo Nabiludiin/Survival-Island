@@ -21,8 +21,9 @@ namespace SurvivalIsland
     /// Pembagi update AI musuh ke beberapa frame, supaya 30 sampai 50 zombie tetap ringan.
     /// Blueprint: left-4-dead/HordeCrowdManager.md (#93). Usulan teknis; mendukung Horde malam GDD bagian 3.
     /// Singleton per scene (IslandPhase dan ShipPhase).
-    /// Belum diimplementasikan (TODO #93): titik tujuan bersama per kelompok (cluster), animator stagger per tingkatan,
-    /// perintah DevConsole stress/crowdstat/crowdai (#56).
+    /// Animator bergiliran per tingkatan dijalankan EnemyAI.SetTier/LateUpdate (animStaggerMid/animStaggerFar).
+    /// Belum diimplementasikan (TODO #93): titik tujuan bersama per kelompok (cluster), perintah DevConsole
+    /// stress/crowdstat/crowdai (#56).
     /// </summary>
     public class HordeCrowdManager : MonoBehaviour
     {

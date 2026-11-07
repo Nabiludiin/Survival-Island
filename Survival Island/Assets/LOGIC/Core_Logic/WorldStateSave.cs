@@ -17,10 +17,11 @@ namespace SurvivalIsland
     ///
     /// Aturan pertempuran (musuh dalam radius, PlayerDamagedEvent, VitalWarningChangedEvent, rasio HP, SleepSystem,
     /// PlayerTraversal), SpawnManager.EngagedEnemyCount dan RequestAmbush (#62), dan notifikasi (#22) sudah tersambung.
-    /// Belum diimplementasikan, ditandai TODO di kode:
+    /// Fungsi debug DevConsole (#56) savecorrupt (DebugCorruptMainFile) dan savedelay (DebugSetWriteDelay) hanya ada di
+    /// Editor dan Development Build.
     /// RegionStreaming.CaptureLoadedRegions dan RegionStateStore (regionStoreJson, #88) sudah tersambung. Tanpa RegionStreaming
     /// (scene uji), regionStoreJson kosong dan objek region memakai jalur cadangan Register (RegionSaveRouting).
-    /// - Alat Editor SaveIdAuditWindow.
+    /// Belum diimplementasikan (TODO): alat Editor SaveIdAuditWindow.
     /// </summary>
     public class WorldStateSave : MonoBehaviour, IBootstrapService
     {
@@ -302,7 +303,11 @@ namespace SurvivalIsland
             isWriting = true;
             writingReason = reason;
             string path = mainPath, backup = bakPath;
-            writeTask = Task.Run(() => WriteAtomic(path, json, true, backup));
+            int delayMs = 0;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            delayMs = debugWriteDelayMs;   // Perintah savedelay (#56), hanya untuk penulisan di thread lain
+#endif
+            writeTask = Task.Run(() => WriteAtomic(path, json, true, backup, delayMs));
             return true;
         }
 
@@ -405,7 +410,7 @@ namespace SurvivalIsland
         /// Tulis tanpa merusak file lama: file .tmp, Flush(true), lalu File.Replace (atau File.Move kalau belum ada).
         /// Kalau game mati sebelum File.Replace, file utama masih versi lama. Bisa berjalan di thread lain.
         /// </summary>
-        private bool WriteAtomic(string path, string json, bool abortable, string backupPath)
+        private bool WriteAtomic(string path, string json, bool abortable, string backupPath, int debugDelayMs = 0)
         {
             string tmp = path + ".tmp";
             try
@@ -416,6 +421,9 @@ namespace SurvivalIsland
                     stream.Write(bytes, 0, bytes.Length);
                     stream.Flush(true);   // Pastikan data sampai ke disk
                 }
+
+                // Penundaan buatan untuk uji #80 (savedelay): .tmp sudah ada, file utama belum diganti.
+                if (debugDelayMs > 0) System.Threading.Thread.Sleep(debugDelayMs);
 
                 // Hanya save run yang bisa dibatalkan (abortable). run_end.marker selalu tertulis.
                 if (abortable && abortWrites)
@@ -822,6 +830,54 @@ namespace SurvivalIsland
             var balance = GameManager.CurrentBalance;
             return balance != null ? balance.run.saveWaitTimeoutSeconds : 0f;
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // ---------------------------------------------------------------- Debug (DevConsole #56, uji #80)
+
+        private volatile int debugWriteDelayMs;
+
+        /// <summary>Penundaan buatan sebelum File.Replace, untuk autosave di thread lain (savedelay). 0 = mati.</summary>
+        public float DebugWriteDelaySeconds => debugWriteDelayMs / 1000f;
+
+        /// <summary>Perintah savedelay &lt;detik&gt;: tunda penulisan save di thread lain. 0 mematikan.</summary>
+        public void DebugSetWriteDelay(float seconds)
+        {
+            debugWriteDelayMs = Mathf.Max(0, Mathf.RoundToInt(seconds * 1000f));
+        }
+
+        /// <summary>
+        /// Perintah savecorrupt: ubah satu byte di tengah file save utama, supaya CRC atau JSON gagal dan .bak dipakai
+        /// saat menu dibuka (WorldStateSave.md skenario 9). false kalau file tidak ada atau gagal ditulis.
+        /// </summary>
+        public bool DebugCorruptMainFile(out string message)
+        {
+            if (string.IsNullOrEmpty(mainPath) || !File.Exists(mainPath))
+            {
+                message = "File save utama tidak ada.";
+                return false;
+            }
+            try
+            {
+                var bytes = File.ReadAllBytes(mainPath);
+                if (bytes.Length == 0)
+                {
+                    message = "File save utama kosong.";
+                    return false;
+                }
+                int index = bytes.Length / 2;
+                bytes[index] ^= 0x01;
+                File.WriteAllBytes(mainPath, bytes);
+                continuableCache = null;
+                message = $"Byte {index} dari {bytes.Length} diubah: {mainPath}";
+                return true;
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                message = "Gagal: " + ex.Message;
+                return false;
+            }
+        }
+#endif
 
         private static void TryDelete(string path)
         {

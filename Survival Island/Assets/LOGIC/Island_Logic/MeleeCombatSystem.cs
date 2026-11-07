@@ -10,10 +10,12 @@ namespace SurvivalIsland
     ///
     /// Panen memanggil ResourceNode.ReceiveHit milik Langkah 4, jadi file ini terkompilasi setelah branch Langkah 4 digabung.
     /// DurabilitySystem.ApplyWear dan WeaponStatCalculator (#113) serta animasi ayun lewat PlayerAnimDriver (#12) sudah dipakai.
-    /// Belum ada (TODO): Fire Axe (#97). Keausan Pisau saat bertarung memakai resource.knifeDecayPerCombatHit (keputusan developer).
+    /// Fire Axe (#97): Reward_FireAxe menyalakan target ber-Flammable dengan peluang fire.fireAxeIgniteChance. Keausan Pisau saat bertarung memakai resource.knifeDecayPerCombatHit (keputusan developer).
     /// </summary>
     public class MeleeCombatSystem : EquippableBehaviour
     {
+        private const string FireAxeItemId = "Reward_FireAxe";   // MeleeCombatSystem.md "Fire Axe"
+
         [SerializeField] private float fallbackDamage = 25f;   // Dipakai kalau ItemData.weaponDamage 0 (nilai lama blueprint)
         [SerializeField] private float attackRange = 2f;
         [SerializeField] private float attackCooldown = 1f;
@@ -33,8 +35,16 @@ namespace SurvivalIsland
             base.OnEquip(instance);
             this.instance = instance;
             itemId = instance != null ? instance.itemId : null;
+            RecalculateStats();
+        }
+
+        /// <summary>
+        /// Hitung ulang damage dari upgrade dan modifier Lucky Machine (#113). Dipanggil saat dipasang, dan oleh
+        /// ToolRepairSystem setelah upgrade selesai pada item yang sedang dipegang (MeleeCombatSystem.md, #113).
+        /// </summary>
+        public void RecalculateStats()
+        {
             var item = itemId != null ? ItemDatabase.Get(itemId) : null;
-            // Damage akhir setelah upgrade dan modifier Lucky Machine (#113).
             meleeDamage = WeaponStatCalculator.GetMeleeDamage(GetBaseDamage(item), instance);
         }
 
@@ -101,6 +111,12 @@ namespace SurvivalIsland
                     hitDirection = camT.forward, bodyPart = BodyPart.Torso, byPlayer = true   // hitDirection wajib untuk knockback #95
                 };
                 bool applied = DamageRouter.ApplyHit(hit, info);
+                // Fire Axe (MeleeCombatSystem.md, #97): peluang menyalakan target yang punya Flammable.
+                if (applied && itemId == FireAxeItemId && bal != null)
+                {
+                    var flammable = hit.collider.GetComponentInParent<Flammable>();
+                    if (flammable != null) flammable.TryIgnite(bal.fire.fireAxeIgniteChance, true);
+                }
                 if (!applied && audioSource != null && surfaceHitClip != null) audioSource.PlayOneShot(surfaceHitClip);
                 // Keausan setelah damage (#113).
                 if (applied) { var weaponItem = itemId != null ? ItemDatabase.Get(itemId) : null; ApplyToolWear(weaponItem != null ? weaponItem.toolClass : ToolClass.None, false); }

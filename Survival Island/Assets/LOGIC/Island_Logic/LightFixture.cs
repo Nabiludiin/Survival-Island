@@ -13,9 +13,8 @@ namespace SurvivalIsland
     /// Catatan implementasi (sistem pendukung):
     /// - IslandInteractable (#17) belum ada: IInteractable langsung (diizinkan IslandInteractable.md bagian "Jenis objek").
     /// - ISaveable lewat StructureRecord.extraJson (pola CampfireManager), SaveId = StructureId, LoadOrder 100.
-    /// - "Tahan E 0,6 detik menambah bahan bakar" belum ditulis: PlayerInteractor hanya mengenal satu HoldSeconds per target,
-    ///   jadi tekan dan tahan tidak bisa dibedakan tanpa mengubah PlayerInteractor (kode lama). Sementara, menekan E saat mati
-    ///   dan bahan bakar belum penuh juga menambah 1 item sebelum menyala. TODO(PlayerInteractor #17).
+    /// - Keputusan developer (7 November 2026, LightSourceSystem.md): tahan E 0,6 detik tidak dipakai. Menekan E saat mati
+    ///   dan bahan bakar belum penuh menambah 1 item sebelum menyala, karena PlayerInteractor hanya punya satu waktu tahan.
     /// </summary>
     public class LightFixture : MonoBehaviour, IInteractable, ISaveable
     {

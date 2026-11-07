@@ -44,7 +44,7 @@ namespace SurvivalIsland
     /// Manager per scene IslandPhase. Pemeriksaan jalur diantre dengan batas maxPathChecksPerFrame.
     ///
     /// Catatan implementasi (sistem pendukung):
-    /// - EnemyAI (kode Langkah 5) baru memanggil Forget; PollChase/PollAttacking/NotifySpawned belum (TODO di EnemyAI). Status jalur per zombie disimpan di sini,
+    /// - EnemyAI memanggil NotifySpawned, PollChase, PollAttacking, dan Forget. Status jalur per zombie disimpan di sini,
     ///   bukan di EnemyAI, supaya integrasinya cukup beberapa baris (lihat laporan Grup F).
     /// - StructureRegistry tidak membuka daftar struktur, jadi pusat base dan pengaturan obstacle memakai pemindaian
     ///   FindObjectsByType yang hanya berjalan saat jumlah struktur berubah.

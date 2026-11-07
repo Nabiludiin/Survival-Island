@@ -254,3 +254,8 @@ Barang yang tergeletak di dalam trigger juga terpasang, sehingga pemain tidak di
 - `RegionStreaming` (#88, sistem pendukung): `RegionLoadStateChangedEvent` didengar. `Unloading` menyalin posisi barang `Lying`, menghitung ulang `records[i].region`, lalu membuat kinematic dan mematikan barang di region itu. `Loaded` menyalakan barang di posisi tersimpan dan mengembalikan `isKinematic = false` (tafsiran paling sederhana: sama seperti barang yang dijatuhkan). `CreateInstances` hanya menyalakan barang `Carried` atau `Lying` di region yang dimuat. `records[i].region` juga diperbarui di `Drop`, `ReturnToValid`, dan `RecoveryTick`. `RecoveryTick` memanggil `ReturnToValid` untuk barang di bawah `RegionRecord.bounds.min.y` (lewat `RegionStreaming.TryGetBounds`), walaupun masih bergerak. Tanpa `RegionStreaming` (scene uji), semua barang aktif seperti sebelumnya. Data tetap di `world_parts`, bukan `RegionStateStore`.
 - `SwimStateChangedEvent` (#13) belum ada; berenang dibaca dari `PlayerTraversal.Mode == Swimming`. `CompassSystem` (#30), `LoreHintGrantedEvent` (#100), notifikasi (#22), dan `VFXManager` (#15) ditandai TODO.
 - `carryAnchor` diisi di Inspector atau lewat `SetCarryAnchor`. Kalau kosong, barang menempel pada transform pemain.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Debu saat dijatuhkan (selain `Water`) lewat `VFXManager.Play(dropDustTag)`. Tafsiran tag: `VFX_ImpactDust` dari katalog (field Inspector).
+- Isi TODO (sistem pendukung): `SweepBelow(Bounds, float waterY, TideSafePoint[])` dipanggil `TideManager.StepCollider`: barang `Lying` di bawah air dalam zona dipindah ke `TideSafePoint` terdekat, dengan notifikasi `notif.part_returned` sekali.

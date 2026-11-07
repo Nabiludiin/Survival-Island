@@ -9,13 +9,16 @@ namespace SurvivalIsland
     /// Isi magazine di ItemInstance.magazineAmmo; cadangan = jumlah ammoItemId di InventoryManager.
     ///
     /// Status Broken, keausan, dan statistik akhir memakai DurabilitySystem dan WeaponStatCalculator (#113).
-    /// Catatan Langkah 5 (TODO): VFXManager (#15) belum dipakai, jadi muzzle flash
-    /// memakai ParticleSystem di viewmodel (tanpa Instantiate); AnimationController (#12) dan SFX belum ada;
-    /// NPCGunUser (#76) belum ditulis. Radius suara memakai WeaponData.noiseRadius (lihat GunController.md Catatan Implementasi).
+    /// Muzzle flash lewat VFXManager.Play(muzzleFlashTag, ..., muzzlePoint, viewmodel: true) (#15). ParticleSystem di
+    /// viewmodel tetap dipakai kalau VFXManager atau muzzlePoint tidak ada. Catatan Langkah 5 (TODO): AnimationController
+    /// (#12) belum dipakai; NPCGunUser (#76) belum ditulis. Radius suara memakai WeaponData.noiseRadius (lihat GunController.md Catatan Implementasi).
     /// </summary>
     public class GunController : EquippableBehaviour
     {
-        [SerializeField] private ParticleSystem muzzleFlash;   // Di layer PlayerViewmodel
+        [Tooltip("Ujung laras di viewmodel. Efek VFX_Muzzle menempel di sini (GunController.md langkah 8, #15).")]
+        [SerializeField] private Transform muzzlePoint;
+        [Tooltip("Cadangan kalau VFXManager atau muzzlePoint tidak ada. Di layer PlayerViewmodel.")]
+        [SerializeField] private ParticleSystem muzzleFlash;
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip fireClip, dryClip, reloadClip;
 
@@ -98,8 +101,11 @@ namespace SurvivalIsland
             if (!core.Fire(in ray, shooter, instance.itemId, true, weapon.impactTag)) return;
             // 7. Keausan per tembakan (#113) diterapkan di akhir fungsi, karena senjata Destroyed langsung dilepas.
             instance.magazineAmmo--;
-            // 8. Muzzle flash dari partikel viewmodel (Claude.md Pilar 3).
-            if (muzzleFlash != null) muzzleFlash.Play(true);
+            // 8. Muzzle flash (Claude.md Pilar 3) lewat VFXManager, menempel di laras viewmodel (#15).
+            var vfx = VFXManager.Instance;
+            if (vfx != null && muzzlePoint != null && !string.IsNullOrEmpty(weapon.muzzleFlashTag))
+                vfx.Play(weapon.muzzleFlashTag, muzzlePoint.position, muzzlePoint.rotation, muzzlePoint, true);
+            else if (muzzleFlash != null) muzzleFlash.Play(true);
             if (audioSource != null && fireClip != null) audioSource.PlayOneShot(fireClip);
             // 9.
             if (fpc != null) fpc.AddRecoil(weapon.recoilPitch, Random.Range(-weapon.recoilYaw, weapon.recoilYaw));
@@ -121,7 +127,8 @@ namespace SurvivalIsland
             if (Time.time < nextDryClickTime) return;
             nextDryClickTime = Time.time + (bal != null ? bal.gun.dryClickCooldown : 0.25f);
             if (audioSource != null && dryClip != null) audioSource.PlayOneShot(dryClip);
-            // Magazine kosong dan cadangan ada: reload otomatis. Cadangan kosong: TODO HUDManager berkedip.
+            // Magazine kosong dan cadangan ada: reload otomatis. Cadangan kosong: HUDManager.UpdateAmmo membuat teks
+            // peluru berkedip sendiri saat 0 / 0 (dari AmmoChangedEvent).
             if (GetReserve() > 0) ScheduleAutoReload();
         }
 

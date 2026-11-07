@@ -227,3 +227,5 @@ Batas issue: ledakan tong ada di `EnvironmentalHazard`, api menyebar di #97, dan
 - `EquipmentManager` belum punya API untuk menurunkan viewmodel sebentar saat melempar.
 - Sakelar `enabled = false` belum menyembunyikan resep di `CraftingManager` (#77).
 - Proyektil dimunculkan lebih dulu, baru barang dikurangi, supaya barang tidak hilang kalau pool penuh.
+- Isi TODO (sistem pendukung): Melempar memanggil `EquipmentManager.LowerBriefly()`.
+- Isi TODO (sistem pendukung): Sakelar uji `throwable.enabled = false`: `CraftingManager.IsRecipeDisabled` menandai resep berawalan `rec_throw_`; `CraftingPanel` melewatinya dan `IsRecipeUnlocked` mengembalikan false (RequestCraft menjadi `Locked`).

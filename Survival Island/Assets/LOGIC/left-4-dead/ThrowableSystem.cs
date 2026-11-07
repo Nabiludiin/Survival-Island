@@ -17,8 +17,9 @@ namespace SurvivalIsland
     /// Manager di scene IslandPhase (Fase 1 tidak memakainya). ISaveable world_throwables (LoadOrder 60).
     ///
     /// Catatan implementasi (sistem pendukung):
-    /// - EquipmentManager belum punya API menurunkan viewmodel sebentar saat melempar (TODO #60).
-    /// - Resep (rec_throw_*) adalah aset CraftingRecipe (#77); sakelar enabled = false tidak menyembunyikan resep (TODO #77).
+    /// - Viewmodel item aktif diturunkan sebentar lewat EquipmentManager.LowerBriefly (#60).
+    /// - Resep (rec_throw_*) adalah aset CraftingRecipe (#77); sakelar enabled = false menyembunyikan dan mengunci resep itu
+    ///   lewat CraftingManager.IsRecipeDisabled.
     /// </summary>
     public class ThrowableSystem : MonoBehaviour, ISaveable
     {
@@ -237,7 +238,8 @@ namespace SurvivalIsland
             var playerCollider = player != null ? player.GetComponent<Collider>() : null;
             projectile.Launch(d, v0, playerCollider);
             cooldownTimer = b.throwCooldownSeconds;
-            // TODO(EquipmentManager): turunkan viewmodel item aktif sebentar, lalu naikkan lagi (#60).
+            // Viewmodel item aktif turun sebentar lalu naik lagi; item aktif tidak berganti (#60).
+            EquipmentManager.Instance?.LowerBriefly();
         }
 
         // ---------------------------------------------------------------- Event

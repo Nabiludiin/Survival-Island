@@ -167,3 +167,4 @@ Kode: `Assets/LOGIC/Core_Logic/CombatFeedbackUI.cs` dan `DamageIndicator.cs` (ko
 - `OnDisable` mengembalikan semua indikator ke pool, karena indikator adalah anak canvas HUD milik scene (aturan `IPoolable`: objek pool tidak boleh tertinggal sebagai anak objek scene).
 - Setelah `PlayerDiedEvent` atau `RunEndedEvent`, `CinematicStateChangedEvent { isPlaying = false }` tidak menyalakan umpan balik lagi sampai scene diganti.
 - Belum ada: `SettingsManager.showHitMarkers` (usulan 4). `SettingsManager` sudah ditulis tanpa field itu, jadi marker selalu aktif.
+- Isi TODO (sistem pendukung): `SettingsManager.showHitMarkers` (usulan 4) sudah ada, nilai awal aktif, dengan toggle opsional `showHitMarkersToggle` di `SettingsPanel`. Tafsiran: pilihan ini mematikan Hit Marker dan Kill Marker beserta suaranya; indikator arah damage tetap tampil. Catatan "Belum ada: showHitMarkers" di atas tidak berlaku lagi.

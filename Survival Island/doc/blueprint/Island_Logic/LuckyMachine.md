@@ -334,3 +334,9 @@ Penyimpangan sementara:
 - **Region dilepas saat vakum:** `OnDisable` langsung menjalankan `FinishSacrifice` untuk semua vakum, karena `RegionLoadStateChangedEvent` (#88) belum ada.
 - Angka tambahan: `luckyMachine.vacuumEndScale` (0,2).
 - Belum diimplementasikan: VFX dan suara vakum (#15, #114), notifikasi (#22), kedip lima detik terakhir, efek `WeaponModifierData` pada damage dan kecepatan (dibaca #113), dan Fire Axe menyalakan target (#97).
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Vakum: `vacuumClip` (opsional) lewat `AudioManager.PlaySFXAt`. Partikel vakum belum ada di katalog `VFXManager` (TODO, perlu tag dan aset).
+- Isi TODO (sistem pendukung): Lima detik terakhir mode gratis: config baru `luckyMachine.freeWindowWarnSeconds` (5). `freeWindowWarnClip` berbunyi sekali tiap detik penuh, dan `freeWindowFx` berkedip dengan `freeWindowBlinkHz` (Inspector, tampilan).
+- Isi TODO (sistem pendukung): `LuckyMachineCage.IsInsideAnyCage(Vector3)` (daftar statis kandang aktif, tanpa query fisika) dipakai `SpecialZombieAI`.

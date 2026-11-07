@@ -196,3 +196,7 @@ Memancing di tebing karang tetap bisa kapan saja. Diary Bab 1 mengajarkan cara i
 - `DebugSetSurge(value, auto)` untuk perintah `settide` di `DevConsole`.
 - `LowTideSpot` memberi 1 `Food_RawFish` tanpa lempar acak. Inventori penuh menjatuhkan `WorldItem`.
 - Belum diuji di Unity.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): `StepCollider` memanggil `HeavyItemSystem.SweepBelow(tideZone, WaterY, safePoints)` setelah `WorldItemManager.SweepBelow`.

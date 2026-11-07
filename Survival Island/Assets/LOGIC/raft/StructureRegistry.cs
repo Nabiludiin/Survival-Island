@@ -36,7 +36,8 @@ namespace SurvivalIsland
     ///
     /// Catatan implementasi (Langkah 4):
     /// - Struktur ukuran lebih dari satu sel (gridSize > 1) belum didukung; semua struktur awal berukuran 1 sel.
-    /// - Isi peti saat bongkar ditangani StorageChest lewat StructureDestroyedEvent (#46). RemoteBaseSimulation (#90): TODO.
+    /// - Isi peti saat bongkar atau hancur ditangani StorageChest lewat StructureDestroyedEvent (#46), termasuk peti nonaktif
+    ///   yang dihancurkan RemoteBaseSimulation (#90).
     /// - Durabilitas palu saat bongkar dikurangi HammerEquippable setelah TryDemolish berhasil (#113).
     /// </summary>
     [DisallowMultipleComponent]

@@ -165,9 +165,23 @@ namespace SurvivalIsland
 
         // ---------------------------------------------------------------- Status resep
 
+        /// <summary>Awalan resep barang lempar (ThrowableSystem.md "Resep", #96).</summary>
+        public const string ThrowRecipePrefix = "rec_throw_";
+
+        /// <summary>
+        /// Resep tidak didaftarkan: sakelar uji throwable.enabled = false menyembunyikan resep rec_throw_* (ThrowableSystem.md
+        /// "Sistem nonaktif"). CraftingPanel melewati resep ini, dan RequestCraft menolaknya sebagai Locked.
+        /// </summary>
+        public static bool IsRecipeDisabled(CraftingRecipe r)
+        {
+            if (r == null || string.IsNullOrEmpty(r.recipeId) || !r.recipeId.StartsWith(ThrowRecipePrefix, System.StringComparison.Ordinal)) return false;
+            var b = GameManager.CurrentBalance;
+            return b != null && !b.throwable.enabled;
+        }
+
         public bool IsRecipeUnlocked(CraftingRecipe r)
         {
-            if (r == null) return false;
+            if (r == null || IsRecipeDisabled(r)) return false;
             if (r.startsUnlocked) return true;
             return !string.IsNullOrEmpty(r.techNodeId) && TechTreeManager.Instance != null && TechTreeManager.Instance.IsUnlocked(r.techNodeId);
         }

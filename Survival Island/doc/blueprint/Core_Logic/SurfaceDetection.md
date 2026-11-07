@@ -262,3 +262,7 @@ Kode: `Survival Island/Assets/LOGIC/Core_Logic/SurfaceDetection.cs` (`SurfaceSam
 - **Penyiapan:** `SurfaceDetection` ditaruh di `Managers` pada `PersistentRoot`, dan didaftarkan di `RunLifecycle.orderedServices`.
 - **Belum ada (TODO):** `SurfaceAuditWindow`, `SurfaceDebugOverlay`, dan perintah `surfacedebug` (#56).
 - Belum diuji di Unity.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): `SurfaceDebugOverlay` (hanya Editor/Development Build) dan perintah `surfacedebug <0|1>`: kisi dibaca lewat `TryGetTerrainSurfaceAtXZ` dan diambil ulang setelah pemain berpindah satu sel (`debugGridSpacing`), digambar dengan `GL.LINES` di `RenderPipelineManager.endCameraRendering` (URP). Titik dengan `sand >= beachBuildSandWeight` berwarna merah. Teks titik di bawah pemain lewat `OnGUI`. Shader `Hidden/Internal-Colored` harus ikut build pengembangan. `SurfaceAuditWindow` masih TODO.

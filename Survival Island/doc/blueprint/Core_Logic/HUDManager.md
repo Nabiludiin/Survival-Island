@@ -119,3 +119,6 @@
 - Ambang tampilan (infeksi merah di atas 80, suhu 100/50) dan warna berupa field Inspector, karena tata letak dan warna masih usulan.
 - `HotbarView` juga digambar ulang saat `DurabilityStateChangedEvent` dan `HeavyItemChangedEvent`.
 - `InputBindingsChangedEvent`: meminta ulang prompt butuh `PlayerInteractor` membuang cache `lastActionText` (TODO di kode lama).
+- Isi TODO (sistem pendukung): `HandleBindings` tidak perlu melakukan apa pun: `PlayerInteractor` mendengar `InputBindingsChangedEvent` sendiri, membuang cache, lalu memanggil `ShowInteraction` lagi.
+- Isi TODO (sistem pendukung): Fase 1: `SetLifeboatHighlighted(bool)` (penanda sekoci sejak sirene; tetap tampil saat berat tangan > 0) dan `ShowLifeboatContents(int items, int npcs)` dengan elemen opsional `lifeboatContentsText`, kunci `hud.lifeboat_contents` (cadangan "Sekoci: {items} barang, {npcs} NPC").
+- Isi TODO (sistem pendukung): Bangun (#79): elemen opsional `buildHintText`, `ShowBuildHint(string)`, `ShowBuildError(PlacementError)` (kunci `build.error.<PlacementError>`), dan `ShowDemolishPreview(int)` (kunci `hud.demolish_preview`, cadangan "Ikut runtuh: {n}").

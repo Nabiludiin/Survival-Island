@@ -13,7 +13,8 @@ namespace SurvivalIsland
     /// (blueprint: "Tick setiap tickSeconds"), supaya ikut berhenti saat jeda tanpa coroutine.
     ///
     /// isInWater dari SwimStateChangedEvent (#13, cadangan PlayerTraversal.Mode), isInInterior dari InteriorZoneChangedEvent (#112),
-    /// dan api unggun dari CampfireManager.IsNearLit (#44). Belum ada (TODO): notifikasi HUD (#22).
+    /// dan api unggun dari CampfireManager.IsNearLit (#44). Indikator HUD dibaca HUDManager sendiri dari WarmthChangedEvent
+    /// (WarmthSystem.md "Indikator HUD"); notifikasi obor (Terlalu basah, obor habis) milik TorchController.
     /// </summary>
     public class WarmthSystem : MonoBehaviour, ISaveable
     {

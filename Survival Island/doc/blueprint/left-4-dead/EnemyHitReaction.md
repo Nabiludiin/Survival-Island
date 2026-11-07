@@ -280,3 +280,8 @@ Kode: `left-4-dead/EnemyHitReaction.cs` (`HitReactionKind`, `IHitReactive`), `Co
 - **`CorpseBudget` berupa kelas statis**, bukan manager scene, karena isinya hanya antrean. `SpawnManager.Awake` mengosongkannya, dan `SpawnManager` memanggil `FadeAllZombies()` saat siang tiba.
 - Drop (`SpawnDrop`, #103) dan percikan logam (#15) masih TODO. Animasi memakai trigger Animator `Stagger`, `Knockback`, dan `Die` sampai `AnimIds` (#12) ada.
 - Pudar memakai `MaterialPropertyBlock` dengan properti `_Fade` dan `_BaseColor`. Shader zombie perlu mendukung salah satunya.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Armor: `VFXManager.Play("VFX_MetalSpark", info.hitPoint, arah balik serangan)` saat `armor < armorNoFlinchBelow`.
+- Isi TODO (sistem pendukung): `PlayerShove`: musuh besar memainkan `shoveFailClip` (field opsional) lewat `AudioManager.PlaySFXAt` di posisi musuh, sekali per dorongan.

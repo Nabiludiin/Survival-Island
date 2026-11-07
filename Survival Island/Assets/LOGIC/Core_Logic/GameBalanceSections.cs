@@ -69,7 +69,7 @@ namespace SurvivalIsland
         public int treeDropMax = 12;
         public float axeDecayPerUse = 1f;
         public float harvestNoiseRadius = 10f;   // Disetujui developer (#61)
-        // TODO Langkah 4: tambahan #73 (rockDrop, respawn, dll.).
+        // Tambahan #73 (rockDrop, respawn, dll.) ada di deklarasi partial bagian akhir file ini.
     }
 
     /// <summary>Region (angka inti #84). Tambahan #68 diisi Langkah 6.</summary>
@@ -79,7 +79,7 @@ namespace SurvivalIsland
         public int bridgeWoodCost = 500;                 // GDD bagian 5: nilai awal 500, bisa disetel
         public float heavyItemSpeedMultiplier = 0.5f;    // Claude.md Tahap 4, Region 4
         public int helicopterPartCount = 5;              // Disetujui developer (#69)
-        // TODO Langkah 6: tambahan #68 (bridgeDepositHoldSeconds, ravineMinWidth, gateVerifySeconds, ravineFallDamage).
+        // Tambahan #68 (bridgeDepositHoldSeconds, ravineMinWidth, gateVerifySeconds, ravineFallDamage) ada di deklarasi partial bagian akhir file ini.
     }
 
     /// <summary>Cuaca (angka inti #84). Tambahan #115 diisi Langkah 6.</summary>
@@ -87,7 +87,7 @@ namespace SurvivalIsland
     public partial class WeatherBalance
     {
         public float weatherIntervalGameHours = 8f;   // Waktu game, bukan waktu nyata
-        // TODO Langkah 6: tambahan #115 (effects, minSevereDay, presentBlendSeconds, audio).
+        // Tambahan #115 (effects, minSevereDay, presentBlendSeconds, audio) ada di deklarasi partial bagian akhir file ini.
     }
 
     /// <summary>Profil kesulitan. Versi awal hanya satu profil Normal dengan semua pengali 1 (#84).</summary>
@@ -161,7 +161,7 @@ namespace SurvivalIsland
         public float rebindTimeoutSeconds = 5f;
     }
 
-    /// <summary>Bagian streaming (#88). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian streaming (#88). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class StreamingBalance { }
 
     /// <summary>Bagian equipment (#60). Diisi Langkah 3 (EquipmentManager.md).</summary>
@@ -302,7 +302,7 @@ namespace SurvivalIsland
         public float overflowSpacing = 0.6f;
     }
 
-    /// <summary>Bagian console (#56). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian console (#56). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class ConsoleBalance { }
 
     /// <summary>
@@ -362,6 +362,7 @@ namespace SurvivalIsland
         public float zombieAggroRadius = 12f;
         public float zombieMinSpawnDistance = 10f;
         public float zombieTickSeconds = 0.25f;
+        public float zombieStuckSeconds = 5f;               // "Macet: lewat 5 detik tanpa jalur lengkap" (ShipHazardManager.md)
         public float shoveRadius = 1.2f;
         public float shoveForwardOffset = 1f;
         public float shoveKnockback = 3f;
@@ -369,7 +370,7 @@ namespace SurvivalIsland
         public float shoveCooldownSeconds = 1.5f;
     }
 
-    /// <summary>Bagian infection (#64). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian infection (#64). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable]
     public partial class InfectionBalance
     {
@@ -377,176 +378,176 @@ namespace SurvivalIsland
         public int startingVaccineDoses = 2;
     }
 
-    /// <summary>Bagian hydration (#43). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian hydration (#43). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable]
     public partial class HydrationBalance
     {
         public float exertionThirstMultiplier = 1.25f;      // Ditambah Langkah 3: dipakai SurvivalStats.TickDrains (VitalsRules.md, #43)
     }
 
-    /// <summary>Bagian campfire (#44). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian campfire (#44). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class CampfireBalance { }
 
-    /// <summary>Bagian disease (#45). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian disease (#45). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class DiseaseBalance { }
 
-    /// <summary>Bagian statusEffects (#20). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian statusEffects (#20). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class StatusEffectsBalance { }
 
-    /// <summary>Bagian crafting (#77). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian crafting (#77). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class CraftingBalance { }
 
-    /// <summary>Bagian repair (#113). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian repair (#113). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class RepairBalance { }
 
-    /// <summary>Bagian upgrade (#113). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian upgrade (#113). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class UpgradeBalance { }
 
-    /// <summary>Bagian fishing (#55). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian fishing (#55). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class FishingBalance { }
 
-    /// <summary>Bagian debris (#106). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian debris (#106). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class DebrisBalance { }
 
-    /// <summary>Bagian surface (#86). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian surface (#86). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class SurfaceBalance { }
 
-    /// <summary>Bagian build (#79). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian build (#79). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class BuildBalance { }
 
-    /// <summary>Bagian baseNav (#78). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian baseNav (#78). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class BaseNavBalance { }
 
-    /// <summary>Bagian integrity (#47). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian integrity (#47). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class IntegrityBalance { }
 
-    /// <summary>Bagian storage (#46). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian storage (#46). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class StorageBalance { }
 
-    /// <summary>Bagian sleep (#67). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian sleep (#67). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class SleepBalance { }
 
-    /// <summary>Bagian trap (#26). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian trap (#26). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class TrapBalance { }
 
-    /// <summary>Bagian throwable (#96). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian throwable (#96). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class ThrowableBalance { }
 
-    /// <summary>Bagian lair (#112). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian lair (#112). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class LairBalance { }
 
-    /// <summary>Bagian warmth (#65). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian warmth (#65). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class WarmthBalance { }
 
-    /// <summary>Bagian heavyItem (#69). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian heavyItem (#69). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class HeavyItemBalance { }
 
-    /// <summary>Bagian swimming (#13). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian swimming (#13). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class SwimmingBalance { }
 
-    /// <summary>Bagian tide (#91). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian tide (#91). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class TideBalance { }
 
-    /// <summary>Bagian environment (#92). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian environment (#92). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class EnvironmentBalance { }
 
-    /// <summary>Bagian disaster (#70). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian disaster (#70). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class DisasterBalance { }
 
-    /// <summary>Bagian beachSupply (#71). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian beachSupply (#71). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class BeachSupplyBalance { }
 
-    /// <summary>Bagian bloodMoon (#50). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian bloodMoon (#50). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class BloodMoonBalance { }
 
-    /// <summary>Bagian luckyMachine (#72). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian luckyMachine (#72). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class LuckyMachineBalance { }
 
-    /// <summary>Bagian npc (#76). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian npc (#76). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class NpcBalance { }
 
-    /// <summary>Bagian objective (#81). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian objective (#81). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class ObjectiveBalance { }
 
-    /// <summary>Bagian loot (#103). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian loot (#103). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class LootBalance { }
 
-    /// <summary>Bagian remoteBase (#90). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian remoteBase (#90). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class RemoteBaseBalance { }
 
-    /// <summary>Bagian fire (#97). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian fire (#97). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class FireBalance { }
 
-    /// <summary>Bagian light (#98). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian light (#98). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class LightBalance { }
 
-    /// <summary>Bagian flashlight (#98). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian flashlight (#98). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class FlashlightBalance { }
 
-    /// <summary>Bagian rescue (#14). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian rescue (#14). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class RescueBalance { }
 
-    /// <summary>Bagian deathCinematic (#53). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian deathCinematic (#53). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class DeathCinematicBalance { }
 
-    /// <summary>Bagian stats (#57). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian stats (#57). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class StatsBalance { }
 
-    /// <summary>Bagian narrative (#99). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian narrative (#99). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class NarrativeBalance { }
 
-    /// <summary>Bagian safety (#116). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian safety (#116). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class SafetyBalance { }
 
-    /// <summary>Bagian animation (#12). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian animation (#12). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class AnimationBalance { }
 
-    /// <summary>Bagian vfx (#15). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian vfx (#15). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class VfxBalance { }
 
-    /// <summary>Bagian tutorial (#16). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian tutorial (#16). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class TutorialBalance { }
 
-    /// <summary>Bagian settings (#19). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian settings (#19). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class SettingsBalance { }
 
-    /// <summary>Bagian footstep (#21). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian footstep (#21). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class FootstepBalance { }
 
-    /// <summary>Bagian notification (#22). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian notification (#22). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class NotificationBalance { }
 
-    /// <summary>Bagian postProcess (#23). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian postProcess (#23). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class PostProcessBalance { }
 
-    /// <summary>Bagian shake (#24). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian shake (#24). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class ShakeBalance { }
 
-    /// <summary>Bagian combatFeedback (#51). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian combatFeedback (#51). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class CombatFeedbackBalance { }
 
-    /// <summary>Bagian ambientAudio (#52). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian ambientAudio (#52). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class AmbientAudioBalance { }
 
-    /// <summary>Bagian combatMusic (#114). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian combatMusic (#114). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class CombatMusicBalance { }
 
-    /// <summary>Bagian lore (#100). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian lore (#100). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class LoreBalance { }
 
-    /// <summary>Bagian barks (#100). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian barks (#100). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class BarksBalance { }
 
-    /// <summary>Bagian localization (#104). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian localization (#104). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class LocalizationBalance { }
 
-    /// <summary>Bagian optimization (#62, #93). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian optimization (#62, #93). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class OptimizationBalance { }
 
-    /// <summary>Bagian compass (#30). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian compass (#30). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class CompassBalance { }
 
-    /// <summary>Bagian hazard (#59). TODO: diisi Langkah pemiliknya sesuai GameBalanceConfig.md.</summary>
+    /// <summary>Bagian hazard (#59). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
     [Serializable] public partial class HazardBalance { }
 
     // =====================================================================================
@@ -764,6 +765,7 @@ namespace SurvivalIsland
     public partial class StealthBalance
     {
         public bool enabled = true;                 // Saklar tes. false = semua zombie langsung Aware
+        public float detectionMeterFadeSeconds = 1f; // DetectionMeterUI: ikon memudar dalam 1 detik (AISensory.md)
         public float sightRange = 22f;
         public float sightAngleDeg = 120f;
         public float closeSenseRange = 2.5f;
@@ -1200,6 +1202,7 @@ namespace SurvivalIsland
         public float gateReopenSeconds = 2f;
         public float cageRewardOffset = 2f;
         public float vacuumEndScale = 0.2f;
+        public float freeWindowWarnSeconds = 5f;  // "Lima detik terakhir berkedip dan berbunyi" (LuckyMachine.md)
     }
 
     /// <summary>Helikopter (#14). Nilai awal dari RescueEventManager.md bagian 1.</summary>

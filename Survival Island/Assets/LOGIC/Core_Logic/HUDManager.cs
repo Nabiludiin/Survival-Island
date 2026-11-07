@@ -67,6 +67,12 @@ namespace SurvivalIsland
         [SerializeField] private TMP_Text shipHandWeight;
         [SerializeField] private GameObject lifeboatMarker;
         [SerializeField] private GameObject safeZoneLine;
+        [Tooltip("Isi sekoci setelah setor (LifeboatExtraction.md langkah setor 3). Boleh kosong.")]
+        [SerializeField] private TMP_Text lifeboatContentsText;
+
+        [Header("Bangun (#79)")]
+        [Tooltip("Alasan penolakan penempatan dan jumlah runtuhan sebelum bongkar (BuildMenu.md). Boleh kosong.")]
+        [SerializeField] private TMP_Text buildHintText;
 
         [Header("Tampilan (usulan, menunggu developer)")]
         [SerializeField] private Color infectionNormal = new Color(0.55f, 0.75f, 0.3f);
@@ -182,6 +188,10 @@ namespace SurvivalIsland
             SetActive(shipHandWeight, isShipPhase);
             SetActive(lifeboatMarker, false);
             SetActive(safeZoneLine, false);
+            SetActive(lifeboatContentsText, false);
+            SetActive(buildHintText, false);
+            lifeboatHighlighted = false;
+            shipHandCarrying = false;
             SetActive(daysLeftText, !isShipPhase);
             SetActive(partsText, false);
             SetActive(engineText, false);
@@ -315,8 +325,8 @@ namespace SurvivalIsland
 
         private void HandleBindings(InputBindingsChangedEvent e)
         {
-            // TODO(PlayerInteractor #17): minta ulang teks prompt yang sedang tampil. PlayerInteractor menyimpan cache
-            // lastActionText, jadi perlu membuang cache itu saat InputBindingsChangedEvent lalu memanggil ShowInteraction lagi.
+            // Prompt interaksi dibangun ulang oleh PlayerInteractor sendiri (#17): ia mendengar event yang sama, membuang
+            // cache lastActionText, lalu memanggil ShowInteraction lagi. HUD tidak perlu melakukan apa pun di sini.
         }
 
         // ---------------------------------------------------------------- Hari (#81)
@@ -352,8 +362,61 @@ namespace SurvivalIsland
         {
             if (!isShipPhase) return;
             if (shipHandWeight != null) shipHandWeight.text = e.weight + " / " + e.capacity;
-            // Penanda sekoci tampil selama pemain membawa barang.
-            SetActive(lifeboatMarker, e.weight > 0);
+            // Penanda sekoci tampil selama pemain membawa barang, atau sejak sirene pra-game (#74).
+            shipHandCarrying = e.weight > 0;
+            SetActive(lifeboatMarker, shipHandCarrying || lifeboatHighlighted);
+        }
+
+        private bool lifeboatHighlighted;   // Ditandai LifeboatExtraction saat sirene pra-game
+        private bool shipHandCarrying;
+
+        /// <summary>
+        /// Tandai sekoci di HUD (LifeboatExtraction.md pra-game langkah 5). Penanda tetap tampil selama pemain membawa
+        /// barang walau tanda ini dilepas.
+        /// </summary>
+        public void SetLifeboatHighlighted(bool value)
+        {
+            if (!isShipPhase) return;
+            lifeboatHighlighted = value;
+            SetActive(lifeboatMarker, shipHandCarrying || lifeboatHighlighted);
+        }
+
+        // ---------------------------------------------------------------- Bangun (#79)
+
+        /// <summary>
+        /// Teks petunjuk bangun: alasan penolakan (BuildMenu.md BuildManager langkah 6) atau jumlah struktur yang ikut runtuh
+        /// sebelum bongkar (BuildMenu.md "PreviewCollapse"). Teks kosong menyembunyikan elemen.
+        /// </summary>
+        public void ShowBuildHint(string text)
+        {
+            if (buildHintText == null) return;
+            bool show = !string.IsNullOrEmpty(text);
+            if (show) buildHintText.text = text;
+            buildHintText.gameObject.SetActive(show);
+        }
+
+        /// <summary>Alasan penolakan penempatan sebagai teks build.error.&lt;PlacementError&gt; (#104). None = disembunyikan.</summary>
+        public void ShowBuildError(PlacementError error)
+        {
+            if (error == PlacementError.None) { ShowBuildHint(null); return; }
+            string key = "build.error." + error;
+            ShowBuildHint(Text(key, error.ToString()));
+        }
+
+        /// <summary>Jumlah struktur lain yang ikut runtuh kalau target dibongkar. 0 = disembunyikan.</summary>
+        public void ShowDemolishPreview(int collapseCount)
+        {
+            if (collapseCount <= 0) { ShowBuildHint(null); return; }
+            ShowBuildHint(Text("hud.demolish_preview", "Ikut runtuh: {n}", "n", collapseCount.ToString()));
+        }
+
+        /// <summary>Isi sekoci setelah setor (#74): jumlah barang (total amount) dan NPC yang sudah diselamatkan.</summary>
+        public void ShowLifeboatContents(int itemCount, int npcCount)
+        {
+            if (!isShipPhase || lifeboatContentsText == null) return;
+            lifeboatContentsText.text = Text("hud.lifeboat_contents", "Sekoci: {items} barang, {npcs} NPC",
+                "items", itemCount.ToString(), "npcs", npcCount.ToString());
+            lifeboatContentsText.gameObject.SetActive(true);
         }
 
         // ---------------------------------------------------------------- Helikopter (#14, #69)

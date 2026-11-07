@@ -69,7 +69,8 @@ namespace SurvivalIsland
                 holdTarget = aimed;
                 holdTimer = 0f;
                 holding = aimed != null;
-                // TODO HUD: tampilkan registry.PreviewCollapse(aimed) sebelum bongkar.
+                // Jumlah struktur yang ikut runtuh ditampilkan sebelum bongkar (BuildMenu.md, PreviewCollapse).
+                HUDManager.Instance?.ShowDemolishPreview(aimed != null ? registry.PreviewCollapse(aimed) : 0);
                 return;
             }
             if (!holding || holdTarget == null) return;
@@ -93,6 +94,7 @@ namespace SurvivalIsland
 
         private void CancelHold()
         {
+            if (holding || holdTarget != null) HUDManager.Instance?.ShowDemolishPreview(0);
             holding = false;
             holdTimer = 0f;
             holdTarget = null;

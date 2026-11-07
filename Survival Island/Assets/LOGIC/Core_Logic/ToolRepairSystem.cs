@@ -257,7 +257,7 @@ namespace SurvivalIsland
             if (eq != null && eq.ActiveInstanceId == inst.instanceId)
             {
                 if (eq.Active is GunController gun) gun.RecalculateStats();
-                // TODO(MeleeCombatSystem): MeleeCombatSystem.RecalculateStats() belum ada; melee membaca damage saat dipasang.
+                else if (eq.Active is MeleeCombatSystem melee) melee.RecalculateStats();
             }
             if (upgrade.kind == UpgradeKind.Durability)
                 EventChannel<DurabilityStateChangedEvent>.Publish(

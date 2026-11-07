@@ -14,8 +14,8 @@ namespace SurvivalIsland
     /// - Region node dari RegionSceneRoot induk, status lewat RegionStateStore (#88, RegionSaveRouting). Tanpa RegionStreaming
     ///   (scene uji): region dari Inspector, dan node mendaftar ke WorldStateSave (LoadOrder 0) sebagai jalur cadangan.
     /// - VFXManager.Play (#15), NotificationManager "Butuh alat lain" (#22), dan NoiseEmitter (#49) sudah disambung.
-    ///   Belum ada (TODO): suara 3D lewat AudioManager (#16, sementara AudioSource opsional di node),
-    ///   Flammable (#97).
+    ///   Suara 3D lewat AudioManager.PlaySFXAt (pool PooledAudioSource); AudioSource di node hanya cadangan kalau
+    ///   AudioManager tidak ada. Api (#97): Flammable di prefab pohon memanggil ForceDeplete(false) saat selesai terbakar.
     /// </summary>
     [DisallowMultipleComponent]
     public class ResourceNode : MonoBehaviour, ISaveable, IRegrowable
@@ -239,8 +239,11 @@ namespace SurvivalIsland
 
         private void PlaySound(AudioClip clip)
         {
-            // TODO #16: AudioManager.Instance.PlaySFXAt(clip, transform.position). Sementara AudioSource opsional.
-            if (clip != null && audioSource != null) audioSource.PlayOneShot(clip);
+            if (clip == null) return;
+            // Suara 3D di posisi node (#16). AudioSource opsional di node dipakai hanya kalau AudioManager tidak ada.
+            var audio = AudioManager.Instance;
+            if (audio != null) audio.PlaySFXAt(clip, transform.position);
+            else if (audioSource != null) audioSource.PlayOneShot(clip);
         }
 
         // ---------------------------------------------------------------- Simpan dan muat (#80)

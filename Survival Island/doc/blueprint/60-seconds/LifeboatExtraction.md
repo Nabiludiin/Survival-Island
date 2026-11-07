@@ -308,3 +308,7 @@ Fungsi `GameManager.SaveFase1Loot(List<Item>)` diganti `SaveShipOutcome`. `ShipT
 ## 8. Catatan Implementasi (Sistem pendukung)
 
 - **Keputusan developer (7 November 2026):** `NPCData` di ShipPhase diambil dari daftar `npcDatabase` di Inspector `LifeboatExtraction`, berisi aset yang sama dengan `NPCRoster.database`. Titik NPC diambil dari `shipNpcPoints[RunLayout.shipNpcPointByNpc[i]]` (indeks `i` kalau data titik kosong). `SpawnShipNpcs` memanggil `SpawnFromPool<ShipInteractable>("ShipNpc_Generic", ...)` lalu `Setup(npcData)`.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Pra-game langkah 5: `HUDManager.SetLifeboatHighlighted(true)` saat sirene. Tafsiran: tanda tetap menyala sampai scene diganti. Setor langkah 3: `HUDManager.ShowLifeboatContents(total amount barang, jumlah NPC)`.

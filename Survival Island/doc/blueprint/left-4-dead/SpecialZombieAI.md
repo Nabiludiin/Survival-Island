@@ -296,3 +296,8 @@ Kode: `left-4-dead/ZombieData.cs` (`SpecialZombieKind`), `EnemyData.cs`, `Specia
 - **Lumut:** sorotan senter dan tingkat cahaya (#98) masih TODO.
 - **Beku:** `WarmthSystem.ApplyColdBurst` (#65, Langkah 6) masih TODO.
 - Pengaman macet varian besar ada di kelas dasar (`TickLargeStuck`), dipanggil `MilitaryBehavior`.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Zombie Tribal: windup memanggil `ThreatAudioEmitter.PlayAlertTell()` (klip `alertClips` di `EnemyCueSet`, tafsiran tanpa klip baru).
+- Isi TODO (sistem pendukung): `TickLargeStuck` dilewati (dan penghitungnya direset) selama `LuckyMachineCage.IsInsideAnyCage(posisi)`.

@@ -19,8 +19,8 @@ namespace SurvivalIsland
     /// Pemain tertahan musuh dan cara lepas sendiri. Blueprint: Island_Logic/PlayerPinnedState.md (#110).
     /// GDD bagian 3 (Diterkam): Jaguar dan Zombie Tribal bisa menahan pemain, dan pemain harus melepaskan diri sendiri,
     /// misalnya dengan Pisau. Tanpa bantuan NPC (keputusan developer). Claude.md Pilar 3: PlayerPinnedState.
-    /// Keausan Pisau lewat DurabilitySystem (#113) sudah dipakai. Belum diimplementasikan (TODO): mode tahan tombol
-    /// (#19, butuh StruggleHeld di InputManager), CameraShake Pinned (#24), animasi tusuk.
+    /// Keausan Pisau lewat DurabilitySystem (#113), mode tahan tombol (SettingsManager.holdToStruggle #19, lewat
+    /// InputManager.StruggleHeld), dan CameraShake Pinned (#24) sudah dipakai. Belum diimplementasikan (TODO): animasi tusuk.
     /// </summary>
     public class PlayerPinnedState : MonoBehaviour
     {
@@ -90,6 +90,8 @@ namespace SurvivalIsland
                 AttackCoordinator.Instance.SetAttackerLimit(PlayerTargetable.Instance, b.maxOtherAttackers);
             // 5. EquipmentManager memasang EquipLock.Pinned, UIFocusStack menutup panel, HeavyItemSystem menjatuhkan barang.
             EventChannel<PlayerPinnedEvent>.Publish(new PlayerPinnedEvent(attacker.AttackerId, true));
+            // 6. Satu getaran saat diterkam (#24).
+            CameraShake.Play(CameraShakeKind.Pinned);
             return true;
         }
 
@@ -110,9 +112,22 @@ namespace SurvivalIsland
             float mult = EscapeMultiplier(b);
             var input = InputManager.Instance;
             bool pressed = input != null && input.StrugglePressed;
+            bool holdMode = SettingsManager.Instance != null && SettingsManager.Instance.holdToStruggle;
 
+            // 4b. Aksesibilitas #19 (holdToStruggle): menahan Struggle menambah kemajuan per detik dengan biaya stamina
+            //     per detik. Kemajuan turun kalau tombol dilepas (PlayerPinnedState.md tabel cara lepas).
+            if (holdMode)
+            {
+                bool held = input != null && input.StruggleHeld;
+                if (held)
+                {
+                    EscapeProgress += b.holdProgressPerSec * mult * dt;
+                    if (stats != null) stats.SpendStamina(b.struggleStaminaHoldPerSec * dt, StaminaUse.Struggle);   // Boleh gagal
+                }
+                else EscapeProgress = Mathf.Max(0f, EscapeProgress - b.mashDecayPerSec * dt);
+            }
             // 4. Menekan berulang. Tekanan lebih cepat dari mashMinPressInterval diabaikan.
-            if (pressed && Time.time - lastPressTime >= b.mashMinPressInterval)
+            else if (pressed && Time.time - lastPressTime >= b.mashMinPressInterval)
             {
                 lastPressTime = Time.time;
                 EscapeProgress += b.mashProgressPerPress * mult;

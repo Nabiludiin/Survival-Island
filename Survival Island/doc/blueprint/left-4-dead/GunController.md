@@ -258,3 +258,7 @@ Kode: `left-4-dead/GunController.cs`, `GunCore.cs`, `WeaponData.cs` (`FireMode`,
 - `WeaponStatCalculator` dan `DurabilitySystem` (#113) belum ada. Statistik disalin dari `WeaponData`, dan status `Broken` serta keausan dilewati.
 - `VFXManager` (#15) belum ada. Muzzle flash memakai `ParticleSystem` di prefab viewmodel (tanpa `Instantiate`), dan efek impact masih TODO. Peluru tetap raycast tanpa objek, jadi tidak ada peluru yang di-pool.
 - `NPCGunUser` (#76) belum ditulis. `AmmoChangedEvent.reserve` bernilai -1 untuk cadangan tak terbatas (Laser Pistol).
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Muzzle flash langkah 8 memakai `VFXManager.Play(weapon.muzzleFlashTag, muzzlePoint.position, muzzlePoint.rotation, muzzlePoint, true)` dengan field baru `muzzlePoint`. `ParticleSystem muzzleFlash` tetap sebagai cadangan. Teks peluru berkedip saat 0 / 0 sudah dilakukan `HUDManager.UpdateAmmo`.

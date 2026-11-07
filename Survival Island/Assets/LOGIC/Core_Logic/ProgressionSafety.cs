@@ -38,8 +38,8 @@ namespace SurvivalIsland
     /// Manager scene IslandPhase (Fase 1 hanya 60 detik, jadi sistem ini tidak aktif di kapal).
     ///
     /// Catatan implementasi (sistem pendukung, juga di blueprint):
-    /// - ResourceRespawn.ForceRegrowStones dan jumlah batu aktif (#73) belum ada. Sementara, batu kecil dihitung dan
-    ///   ditumbuhkan lagi lewat PickupInteractable (Mat_Stone) di Region 1 (TODO(ResourceRespawn) di kode).
+    /// - Batu kecil aktif dan penumbuhan paksa lewat ResourceRespawn.CountActiveStones dan ForceRegrowStones (#73),
+    ///   yang menghitung PickupInteractable (Mat_Stone) di Region 1.
     /// - Tombol "Keluar dari Tersangkut" di PausePanel (kode lama) belum ada. Pemanggil memakai RequestUnstuck().
     /// - path_blocked memeriksa pusat struktur terhadap NoBuildVolume.IsBlocked.
     /// </summary>
@@ -245,13 +245,17 @@ namespace SurvivalIsland
             int stones = inv != null ? inv.GetCount(StoneId) : 0;
             for (int c = 0; c < chests.Length; c++) if (chests[c] != null) stones += chests[c].CountItem(StoneId);
             if (stones >= 2) return SafetySeverity.Ok;
-            // 3. Batu kecil aktif di Region 1.
-            // TODO(ResourceRespawn): ganti dengan jumlah batu aktif ResourceRespawn (#73).
-            if (CountActiveStones() > 0) return SafetySeverity.Ok;
+            // 3. Batu kecil aktif di Region 1 (#73).
+            var respawn = ResourceRespawn.Instance;
+            if (respawn == null)
+            {
+                Debug.LogWarning("[ProgressionSafety] ResourceRespawn tidak ada di scene, batu kecil tidak bisa diperiksa.");
+                return SafetySeverity.Blocked;
+            }
+            if (respawn.CountActiveStones(RegionType.Volcano) > 0) return SafetySeverity.Ok;
             // 4.
             var b = Balance;
-            // TODO(ResourceRespawn): ResourceRespawn.Instance.ForceRegrowStones(RegionType.Volcano, minStonePickupsRegion1).
-            int grown = ForceRegrowStonesFallback(b != null ? b.safety.minStonePickupsRegion1 : 4);
+            int grown = respawn.ForceRegrowStones(RegionType.Volcano, b != null ? b.safety.minStonePickupsRegion1 : 4);
             Debug.LogWarning($"[ProgressionSafety] Jalur alat tertutup. {grown} batu kecil Region 1 ditumbuhkan lagi.");
             return SafetySeverity.Fixed;
         }
@@ -266,32 +270,6 @@ namespace SurvivalIsland
                 if (DurabilitySystem.GetState(s.instance) != DurabilityState.Destroyed) return true;
             }
             return false;
-        }
-
-        private static bool IsSmallStone(PickupInteractable p) => p != null && p.Item != null && p.Item.itemID == StoneId;
-
-        private static int CountActiveStones()
-        {
-            var all = FindObjectsByType<PickupInteractable>(FindObjectsSortMode.None);
-            int n = 0;
-            for (int i = 0; i < all.Length; i++)
-                if (IsSmallStone(all[i]) && all[i].IsAvailable && RegionStreaming.RegionOf(all[i].transform.position) == RegionType.Volcano) n++;
-            return n;
-        }
-
-        private static int ForceRegrowStonesFallback(int count)
-        {
-            var all = FindObjectsByType<PickupInteractable>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            int grown = 0;
-            for (int i = 0; i < all.Length && grown < count; i++)
-            {
-                var p = all[i];
-                if (!IsSmallStone(p) || !p.IsConsumed) continue;
-                if (RegionStreaming.RegionOf(p.transform.position) != RegionType.Volcano) continue;
-                p.Regrow();
-                grown++;
-            }
-            return grown;
         }
 
         private void CheckParts()
@@ -607,7 +585,7 @@ namespace SurvivalIsland
                 int n = 0;
                 for (int i = 0; i < all.Length; i++)
                 {
-                    if (!IsSmallStone(all[i]) || RegionStreaming.RegionOf(all[i].transform.position) != RegionType.Volcano) continue;
+                    if (!ResourceRespawn.IsSmallStone(all[i]) || RegionStreaming.RegionOf(all[i].transform.position) != RegionType.Volcano) continue;
                     all[i].DebugConsume();
                     n++;
                 }

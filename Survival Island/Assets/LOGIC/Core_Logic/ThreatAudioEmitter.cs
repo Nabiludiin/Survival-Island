@@ -192,6 +192,17 @@ namespace SurvivalIsland
         /// Suara serangan dari EnemyAttack.telegraphClip (#109), MossBehavior, dan WildlifeAI, lewat sumber 3D dan batas suara
         /// yang sama. Memakai priority + tellPriorityBonus, dan tidak dibatasi maxSameVariantVoices.
         /// </summary>
+        /// <summary>
+        /// Suara tanda dari EnemyCueSet.alertClips (klip acak), lewat PlayTell. Dipakai WildlifeAI (Alert dan tanda serangan,
+        /// WildlifeAI.md "Api dan suara") dan TribalBehavior (windup #25). Tidak berbunyi kalau alertClips kosong.
+        /// </summary>
+        public void PlayAlertTell()
+        {
+            if (cues == null || cues.alertClips == null || cues.alertClips.Length == 0) return;
+            // Suara tampilan saja, jadi memakai UnityEngine.Random biasa tanpa seed (#89).
+            PlayTell(cues.alertClips[Random.Range(0, cues.alertClips.Length)]);
+        }
+
         public void PlayTell(AudioClip clip)
         {
             if (clip == null) return;

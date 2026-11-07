@@ -136,6 +136,33 @@ namespace SurvivalIsland
             return false;
         }
 
+        /// <summary>
+        /// Titik di luar FireArea terdekat yang menjangkau pos (radius + margin), searah dari pusat api ke pos. Dipakai NPC
+        /// untuk menghindar (NPCCompanion.md Think langkah 1). false kalau pos tidak dekat api. Tanpa query fisika.
+        /// </summary>
+        public bool TryGetEscapePoint(Vector3 pos, float margin, out Vector3 escape)
+        {
+            escape = pos;
+            float best = float.MaxValue;
+            FireArea nearest = null;
+            for (int i = 0; i < areas.Count; i++)
+            {
+                var a = areas[i];
+                if (a == null || !a.IsActive) continue;
+                float r = a.Radius + margin;
+                float d = (a.transform.position - pos).sqrMagnitude;
+                if (d <= r * r && d < best) { best = d; nearest = a; }
+            }
+            if (nearest == null) return false;
+            Vector3 center = nearest.transform.position;
+            Vector3 dir = pos - center;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.0001f) dir = Vector3.forward;
+            escape = center + dir.normalized * (nearest.Radius + margin);
+            escape.y = pos.y;
+            return true;
+        }
+
         /// <summary>Angka acak 0..1 dari aliran Gameplay (#89). Cadangan UnityEngine.Random di scene uji.</summary>
         public static float Roll01()
         {

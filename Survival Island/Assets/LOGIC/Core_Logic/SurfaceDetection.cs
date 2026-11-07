@@ -19,7 +19,8 @@ namespace SurvivalIsland
     /// GDD bagian 4: pemain dilarang membangun di pasir pantai. Batas pantai dibaca dari tekstur Terrain yang sama
     /// dengan yang dilihat pemain (alphamap yang di-bake), bukan dari layer Sand/Beach.
     ///
-    /// Belum ada di Langkah 4 (TODO): SurfaceAuditWindow (Editor), SurfaceDebugOverlay dan perintah surfacedebug (#56).
+    /// SurfaceDebugOverlay dan perintah surfacedebug (#56) ada di Editor/Development Build. Belum ada (TODO):
+    /// SurfaceAuditWindow (alat Editor).
     /// </summary>
     [DisallowMultipleComponent]
     public class SurfaceDetection : MonoBehaviour, IBootstrapService

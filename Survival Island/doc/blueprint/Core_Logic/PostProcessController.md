@@ -228,3 +228,5 @@ Belum diuji di Unity, karena proyek Unity belum dibuat.
 - `gaussianEnd` saat tidak menyelam (200 m) berada di field prefab `dofClearEndMeters`.
 - `colorAdjust.active` menyala saat infeksi, bawah air, atau mati.
 - Belum ada (TODO): `SwimStateChangedEvent` (#13) dan `SleepStateChangedEvent` (#67) belum dideklarasikan pemiliknya, jadi efek bawah air, napas dari renang, dan tidur belum tersambung (tanda `Drowning` sudah). Perintah `postfx` di `DevConsole`. `screenTint` milik `DeathCinematic` tidak punya API di blueprint ini.
+- Isi TODO (sistem pendukung): `SetScreenTint(Color tint)`: warna layar dari `DeathCinematicProfile.screenTint` (#53). RGB menjadi Color Filter, alpha menjadi kekuatan (0 = tidak ada), di atas filter infeksi dan air. Dikosongkan `ClearStatusEffects`. Fungsi ini tidak disebut blueprint (tafsiran sederhana).
+- Isi TODO (sistem pendukung): Debug (`#if UNITY_EDITOR || DEVELOPMENT_BUILD`): `DebugForceTarget(string effect, float value)` untuk `postfx`. Nama efek: hp, wound, freeze, breath, infection, underwater, sleep, death. Nilai menimpa target dari event setiap frame sampai dilepas dengan nilai negatif (`postfx <efek> off`).

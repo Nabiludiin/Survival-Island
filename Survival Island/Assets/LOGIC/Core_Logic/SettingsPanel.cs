@@ -54,6 +54,8 @@ namespace SurvivalIsland
         [SerializeField] private Toggle headBobToggle;
         [SerializeField] private Toggle weaponSwayToggle;
         [SerializeField] private Toggle fovKickToggle;
+        [Tooltip("Usulan 4 CombatFeedbackUI (#51): tampilkan Hit Marker dan Kill Marker. Boleh kosong.")]
+        [SerializeField] private Toggle showHitMarkersToggle;
         [SerializeField] private Toggle chromaticToggle;          // Di samping headBob (#23)
 
         [Header("Lainnya")]
@@ -173,6 +175,7 @@ namespace SurvivalIsland
             AddToggle(headBobToggle, v => Settings?.SetHeadBob(v));
             AddToggle(weaponSwayToggle, v => Settings?.SetWeaponSway(v));
             AddToggle(fovKickToggle, v => Settings?.SetFovKick(v));
+            AddToggle(showHitMarkersToggle, v => Settings?.SetShowHitMarkers(v));
             AddToggle(chromaticToggle, v => Settings?.SetChromaticAberration(v));
 
             AddToggle(tutorialToggle, v => Settings?.SetTutorialEnabled(v));
@@ -273,6 +276,7 @@ namespace SurvivalIsland
                 SetToggle(headBobToggle, s.headBobEnabled);
                 SetToggle(weaponSwayToggle, s.weaponSwayEnabled);
                 SetToggle(fovKickToggle, s.fovKickEnabled);
+                SetToggle(showHitMarkersToggle, s.showHitMarkers);
                 SetToggle(chromaticToggle, s.chromaticAberrationEnabled);
                 SetToggle(tutorialToggle, s.tutorialEnabled);
                 SetToggle(holdToStruggleToggle, s.holdToStruggle);

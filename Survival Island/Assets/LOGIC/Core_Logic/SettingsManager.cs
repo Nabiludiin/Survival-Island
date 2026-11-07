@@ -34,6 +34,7 @@ namespace SurvivalIsland
         public TextureQuality textureQuality = TextureQuality.Full;
         public float brightness = 1f;
         public bool tutorialEnabled = true;
+        public bool showHitMarkers = true;               // Usulan 4 CombatFeedbackUI (#51): nilai awal aktif
 
         /// <summary>Salinan dangkal. Semua kolom bertipe nilai, jadi salinan ini lepas dari aslinya.</summary>
         public SettingsData Clone() => (SettingsData)MemberwiseClone();
@@ -114,6 +115,7 @@ namespace SurvivalIsland
         public TextureQuality textureQuality => data.textureQuality;
         public float brightness => data.brightness;
         public bool tutorialEnabled => data.tutorialEnabled;
+        public bool showHitMarkers => data.showHitMarkers;
 
         /// <summary>Ada perubahan yang belum di-Commit.</summary>
         public bool IsDirty => isDirty;
@@ -246,6 +248,7 @@ namespace SurvivalIsland
         public void SetChromaticAberration(bool value) { data.chromaticAberrationEnabled = value; isDirty = true; }
         public void SetHoldToStruggle(bool value) { data.holdToStruggle = value; isDirty = true; }
         public void SetTutorialEnabled(bool value) { data.tutorialEnabled = value; isDirty = true; }
+        public void SetShowHitMarkers(bool value) { data.showHitMarkers = value; isDirty = true; }   // Usulan 4 #51
 
         /// <summary>Dibaca EnvironmentDirector (#92), yang mengalikan ambient dengan nilai ini.</summary>
         public void SetBrightness(float value)

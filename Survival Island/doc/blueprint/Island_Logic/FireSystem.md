@@ -226,3 +226,7 @@ Aturan `Storm` dan `Blizzard` sama dengan `CampfireManager`. Objek beratap tidak
 - Api struktur di region yang tidak dimuat saat load tidak dinyalakan lagi, karena `Flammable` struktur itu belum aktif.
 - `byPlayer` ikut disimpan di `world_fire`, supaya friendly fire tetap sama setelah load.
 - Belum diuji di Unity.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): `TryGetEscapePoint(Vector3, float margin, out Vector3)`: titik di tepi `FireArea` terdekat (radius + margin) searah pusat ke posisi. Tanpa query fisika. Dipakai `NPCCompanion`.
