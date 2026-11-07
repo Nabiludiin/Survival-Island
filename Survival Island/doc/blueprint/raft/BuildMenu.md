@@ -460,3 +460,7 @@ Kode: `Survival Island/Assets/LOGIC/raft/BuildableData.cs` (`BuildCategory`, `Bu
 - **Struktur lebih dari satu sel** (`gridSize > 1`) belum didukung. Semua struktur awal berukuran satu sel.
 - **Belum ada (TODO):** mode Repair dan Upgrade (#47), durabilitas palu (#113), `GhostStatusIcon` dan teks `build.error.*` (#104), batas jebakan (#26) dan lampu (#98), isi peti saat bongkar (#46), notifikasi #22, suara #16, `BaseNavigation` (#78, `navMode` baru disimpan sebagai data), dan aset `BuildableData` (dibuat di Unity).
 - Belum diuji di Unity.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): `BuildManager` mengirim alasan ke `HUDManager.ShowBuildError` saat `LastError` berubah, dan menyembunyikannya bersama hologram. `HammerEquippable` menampilkan `PreviewCollapse` lewat `HUDManager.ShowDemolishPreview` saat target bongkar berganti, dan menyembunyikannya saat tahan dibatalkan.

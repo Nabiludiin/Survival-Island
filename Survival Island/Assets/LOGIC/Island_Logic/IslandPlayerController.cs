@@ -34,6 +34,10 @@ namespace SurvivalIsland
         [SerializeField] private SurvivalStats stats;
 
         private Vector3 velocity;
+        // Dorongan luar (#101, keputusan developer 7 November 2026): kecepatan awal yang memudar linier ke 0.
+        private Vector3 externalStartVelocity;
+        private float externalDuration;
+        private float externalElapsed;
         private readonly float[] speedModifiers = new float[Enum.GetValues(typeof(SpeedModifierId)).Length];
         private bool carryingHeavy;
         private bool registeredForSave;
@@ -62,6 +66,7 @@ namespace SurvivalIsland
         private void OnEnable()
         {
             EventChannel<HeavyItemChangedEvent>.Raised += HandleHeavyItem;
+            EventChannel<PlayerDiedEvent>.Raised += HandlePlayerDied;
             carryingHeavy = EventChannel<HeavyItemChangedEvent>.HasLast && EventChannel<HeavyItemChangedEvent>.Last.isCarried;
             if (WorldStateSave.Instance != null)
             {
@@ -73,6 +78,8 @@ namespace SurvivalIsland
         private void OnDisable()
         {
             EventChannel<HeavyItemChangedEvent>.Raised -= HandleHeavyItem;
+            EventChannel<PlayerDiedEvent>.Raised -= HandlePlayerDied;
+            ClearExternalVelocity();
             if (registeredForSave && WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
             registeredForSave = false;
             IsSprinting = false;
@@ -84,6 +91,7 @@ namespace SurvivalIsland
         }
 
         private void HandleHeavyItem(HeavyItemChangedEvent e) => carryingHeavy = e.isCarried;
+        private void HandlePlayerDied(PlayerDiedEvent e) => ClearExternalVelocity();
 
         // ---------------------------------------------------------------- Gerak
 
@@ -95,12 +103,15 @@ namespace SurvivalIsland
 
             // 3. Tanah: isGrounded ditambah raycast pendek ke PhysicsMasks.Ground (menggantikan Physics.CheckSphere).
             IsGrounded = CheckGrounded(t);
+            Vector3 external = TickExternalVelocity(Time.deltaTime);
 
             // 1. Mode Climbing, Sliding, Swimming, Locked: skrip ini tidak menggerakkan pemain.
+            // Pengecualian: dorongan luar tetap berlaku (misalnya jerat Tribal menarik pemain yang sedang Locked karena ditahan).
             if (traversal != null && !traversal.AllowsGroundMove)
             {
                 IsSprinting = false;
                 if (traversal.Mode != TraversalMode.Sliding) velocity.y = 0f;
+                if (external != Vector3.zero) controller.Move(external * Time.deltaTime);
                 return;
             }
 
@@ -129,7 +140,39 @@ namespace SurvivalIsland
             // 7. Gravitasi, lalu Move.
             if (IsGrounded && velocity.y < 0f) velocity.y = -2f;
             velocity.y += t.gravity * Time.deltaTime;
-            controller.Move((horizontal + Vector3.up * velocity.y) * Time.deltaTime);
+            controller.Move((horizontal + external + Vector3.up * velocity.y) * Time.deltaTime);
+        }
+
+        // ---------------------------------------------------------------- Dorongan luar (#101)
+
+        /// <summary>
+        /// Keputusan developer (7 November 2026): kecepatan tambahan dari luar (tarikan jerat Tribal, dorongan) yang memudar
+        /// linier ke 0 selama durationSeconds, ditambahkan ke controller.Move. Tafsiran: panggilan baru menggantikan dorongan
+        /// yang sedang berjalan (tidak ditumpuk), supaya pemanggil per frame tidak membuat kecepatan terus bertambah.
+        /// </summary>
+        public void AddExternalVelocity(Vector3 extraVelocity, float durationSeconds)
+        {
+            if (durationSeconds <= 0f) { ClearExternalVelocity(); return; }
+            externalStartVelocity = extraVelocity;
+            externalDuration = durationSeconds;
+            externalElapsed = 0f;
+        }
+
+        /// <summary>Hapus dorongan luar. Dipanggil Teleport, saat mati, dan saat pemanggil berhenti menarik.</summary>
+        public void ClearExternalVelocity()
+        {
+            externalStartVelocity = Vector3.zero;
+            externalDuration = 0f;
+            externalElapsed = 0f;
+        }
+
+        private Vector3 TickExternalVelocity(float dt)
+        {
+            if (externalDuration <= 0f) return Vector3.zero;
+            float k = 1f - externalElapsed / externalDuration;
+            externalElapsed += dt;
+            if (externalElapsed >= externalDuration) ClearExternalVelocity();
+            return k > 0f ? externalStartVelocity * k : Vector3.zero;
         }
 
         private bool CheckGrounded(TraversalBalance t)
@@ -175,6 +218,7 @@ namespace SurvivalIsland
             transform.position = position;
             controller.enabled = wasEnabled;
             velocity = Vector3.zero;
+            ClearExternalVelocity();
             if (traversal != null) traversal.ResetFallTracking();
             // Langkah 6 (ZoneManager.md): hitung ulang zona, karena OnTriggerExit tidak dijamin terkirim.
             ZoneManager.ResyncAll(position);

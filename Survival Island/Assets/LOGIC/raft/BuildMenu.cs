@@ -72,12 +72,12 @@ namespace SurvivalIsland
         private void BuildMain()
         {
             if (mainButtons.Count > 0) return;
-            // TODO #104: kunci teks.
-            AddMain("Perbaiki", () => Choose(HammerMode.Repair, null));
-            AddMain("Bangun Struktur", () => { ring = Ring.Structure; DrawSub(); });
-            AddMain("Bangun Perabot", () => { ring = Ring.Furniture; DrawSub(); });
-            AddMain("Upgrade", () => Choose(HammerMode.Upgrade, null));
-            AddMain("Bongkar", () => Choose(HammerMode.Demolish, null));
+            // Label dari LocalizationManager (#104).
+            AddMain(Text("build.menu.repair", "Perbaiki"), () => Choose(HammerMode.Repair, null));
+            AddMain(Text("build.menu.structure", "Bangun Struktur"), () => { ring = Ring.Structure; DrawSub(); });
+            AddMain(Text("build.menu.furniture", "Bangun Perabot"), () => { ring = Ring.Furniture; DrawSub(); });
+            AddMain(Text("build.menu.upgrade", "Upgrade"), () => Choose(HammerMode.Upgrade, null));
+            AddMain(Text("build.menu.demolish", "Bongkar"), () => Choose(HammerMode.Demolish, null));
         }
 
         private void AddMain(string label, UnityEngine.Events.UnityAction action)
@@ -172,6 +172,13 @@ namespace SurvivalIsland
             if (BuildManager.Instance != null) BuildManager.Instance.SelectMode(mode, data);
             // Memilih lalu menutup menu.
             if (UIFocusStack.Instance != null) UIFocusStack.Instance.Close(this, UICloseReason.User);
+        }
+
+        /// <summary>Teks dari LocalizationManager (#104); teks bawaan kalau kunci belum ada di tabel.</summary>
+        private static string Text(string key, string fallback)
+        {
+            var loc = LocalizationManager.Instance;
+            return loc != null && loc.Has(key) ? loc.Get(key) : fallback;
         }
     }
 }

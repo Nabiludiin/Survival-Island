@@ -5,8 +5,8 @@ namespace SurvivalIsland
     /// <summary>
     /// Zombie Lumut: menyamar Dormant, bangun saat amarah penuh (gaya Witch). SpecialZombieAI.md (#25). GDD bagian 5, Region 2.
     /// Usulan disetujui developer: tidak bisa kembali menyamar. Pemain jongkok tanpa senter tidak menaikkan amarah.
-    /// Belum diimplementasikan (TODO): sorotan senter (FlashlightController.IsPointInBeam, #98) dan tingkat cahaya
-    /// (LightSourceSystem, #98). Tanda samar (napas, mata) ada di aset prefab.
+    /// Sorotan senter (FlashlightController.IsPointInBeam) dan tingkat cahaya (LightSourceSystem) menaikkan amarah (#98).
+    /// Tanda samar (napas, mata) ada di aset prefab.
     /// </summary>
     public class MossBehavior : SpecialZombieAI
     {
@@ -55,7 +55,20 @@ namespace SurvivalIsland
                 bool crouching = trav != null && trav.IsCrouching;
                 if (!crouching) { rage += b.mossRagePerSec * dt; threat = true; }
             }
-            // TODO #98: senter dalam mossLightDistance dan LightSourceSystem.GetLightLevelAt.
+            // SpecialZombieAI.md (#98): disorot senter dalam mossLightDistance dengan garis pandang bebas.
+            if (!threat && d <= b.mossLightDistance && FlashlightController.IsPointInBeam(transform.position + Vector3.up) && CanSeePlayer())
+            {
+                rage += b.mossRagePerSec * dt;
+                threat = true;
+            }
+            // Tingkat cahaya statis di posisi Lumut minimal light.mossStaticLightLevel.
+            var lightBal = GameManager.CurrentBalance != null ? GameManager.CurrentBalance.light : null;
+            if (!threat && lightBal != null && LightSourceSystem.Instance != null
+                && LightSourceSystem.Instance.GetLightLevelAt(transform.position) >= lightBal.mossStaticLightLevel)
+            {
+                rage += b.mossRagePerSec * dt;
+                threat = true;
+            }
             if (!threat && rage < 1f) rage = Mathf.Max(0f, rage - b.mossRageDecayPerSec * dt);
 
             if (rage >= 1f)

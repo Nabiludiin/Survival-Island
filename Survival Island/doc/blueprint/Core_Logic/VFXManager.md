@@ -167,3 +167,12 @@ Angka lain: `GameBalanceConfig.vfx.lowQualityDensity` 0,5 dan `mediumQualityDens
 9. Mati saat banyak efek aktif, lalu mulai run baru. **Hasil:** `activeEffects` kosong, dan tidak ada `MissingReferenceException`.
 10. Pilih kualitas `Low` di `SettingsManager`. **Hasil:** batas efek turun menjadi separuh.
 11. Simpan handle efek loop, biarkan efek kembali, lalu panggil `Stop`. **Hasil:** tidak ada efek lain yang berhenti.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `VFXManager.cs` (juga `VFXEntry`, `VFXHandle`) dan `PooledEffect.cs`. Katalog di `GameBalance.FondasiA.cs` (`vfx.catalog`), satu baris per tag.
+- `densityMultiplier` adalah properti publik (dibaca `WeatherManager`). `QualityPreset.Custom` tidak disebut blueprint, jadi dianggap kualitas penuh (1).
+- Pembukuan efek aktif dilakukan di `PooledEffect.OnReturned` lewat `VFXManager.NotifyReturned`, sehingga `ObjectPooler.ReturnAllActive` (#82) juga menjaga `activeCount` tetap benar.
+- Skala laju partikel diterapkan ke `rateOverTimeMultiplier` dan jumlah burst (dibulatkan ke atas).
+- Tag `impactBySurface`, darah, dan debu bangunan berada di field prefab, dengan nilai awal sesuai tabel.
+- `Release(PooledEffect)` publik untuk pengembalian lebih awal; `PooledEffect` memanggil `ObjectPooler.ReturnToPool` langsung saat umurnya habis.

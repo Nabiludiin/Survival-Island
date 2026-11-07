@@ -213,3 +213,7 @@ Kode: `Core_Logic/DeathCinematic.cs` (`DeathStyle`, `DeathProfile`), dipanggil `
 - Profil yang tidak diisi memakai gaya dari tabel "Penyebab dan gaya". `Zombify` memakai `infection.zombifyCinematicSeconds`.
 - `Sink` memakai `Rigidbody.linearDamping` (nama Unity 6 untuk `drag`).
 - Belum diimplementasikan: warna layar dan `sting` (#23, #114), `VFXManager` untuk `Fire` (#15), dan teks lewat `LocalizationManager`. `messageKey` dikirim apa adanya ke `ShowCaption`.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Langkah 3: `PostProcessController.SetScreenTint(profile.screenTint)` (alpha = kekuatan; nilai awal `Color.clear` berarti tanpa warna).

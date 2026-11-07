@@ -6,8 +6,7 @@ namespace SurvivalIsland
     /// Satu hadiah Lucky Machine. Blueprint: Island_Logic/LuckyMachine.md bagian 1 (#72).
     /// GDD bagian 7: hadiah berupa skin, buff permanen, enchant senjata atau alat, dan senjata ajaib.
     ///
-    /// Penyimpangan: blueprint memakai StatusEffectData untuk buff, tetapi StatusEffectManager (#20) belum ditulis.
-    /// Sementara field buff bertipe ScriptableObject; tipe diganti saat #20 ada.
+    /// Field buff bertipe StatusEffectData (#20), sesuai blueprint.
     /// </summary>
     [CreateAssetMenu(menuName = "Survival/Lucky Reward")]
     public class LuckyRewardData : ScriptableObject
@@ -25,8 +24,8 @@ namespace SurvivalIsland
         public WeaponModifierData modifier;
         public string skinId;
         public string skinTargetItemId;
-        [Tooltip("TODO #20: StatusEffectData dengan durationUnit Permanent.")]
-        public ScriptableObject buff;
+        [Tooltip("StatusEffectData dengan durationUnit Permanent (#20).")]
+        public StatusEffectData buff;
         public ItemData item;
         public int amount = 1;
     }

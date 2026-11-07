@@ -230,3 +230,16 @@ Lokasi berikut berasal dari GDD, dan koordinatnya diisi saat level selesai. Tiap
 11. Jeda game saat zombie melompat. **Hasil:** berhenti di udara, lalu lanjut.
 12. Bunuh zombie yang sedang memanjat, lalu pakai ulang dari pool. **Hasil:** gate kosong, dan `updatePosition = true`.
 13. Ulangi daftar titik playtest pada tiap region. **Hasil:** tidak ada titik yang aman selamanya.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `AITraversal.cs`, `TraversalAgent.cs`, `TraversalLinkGate.cs`, dan `ThrownRock.cs` di `Assets/LOGIC/left-4-dead/`. Config AI ditambahkan ke `TraversalBalance` di `Core_Logic/GameBalance.GrupF.cs`. Bagian `traversal` ini sama dengan milik pemain.
+- Ada angka teknis tambahan yang tidak ada di tabel. Semuanya usulan teknis dan perlu persetujuan developer: `rockDamage` 10 dan `rockWindupSeconds` 1 (cadangan kalau aset `Zombie_Rock_Throw` belum dipasang), `rockSpeed` 16, `retreatDistance` 15, `rockLifetimeSeconds` 6, dan `linkAvoidCost` 1000.
+- `EnemyAI.CrowdTick` belum memanggil `TraversalAgent.Tick`. Untuk sementara, `TraversalAgent.Update` menjalankan tick sendiri. Tiap frame diproses tepat satu kali dengan `Time.deltaTime`.
+- Respons dijalankan oleh `TraversalAgent.TickUnreachable(target)`. `EnemyAI` cukup memanggilnya saat `BaseNavigation` mengembalikan `NoStructure`.
+- `AIDirector.RequestCampCounter` belum ada. Pembalas diminta lewat `SpawnManager.RequestWave` dengan `forcedEnemyId` dari `RegionSpawnTable.campCounterEnemyId`. Tabelnya diisi di Inspector `AITraversal`.
+- Daftar musuh dikumpulkan dari `TraversalAgent` yang mendaftar sendiri, karena `HordeCrowdManager` tidak membuka daftarnya.
+- Zombie Tribal dikenali lewat komponen `TribalBehavior`. Tribal tidak melempar batu dan tidak mundur.
+- Tidur (#67) dan berenang (#13) belum menghentikan `campTimer`.
+- Perintah `reachcheck` tersedia lewat `DebugReachCheck`. Perintah `navlinks` belum dibuat.
+- Isi TODO (sistem pendukung): Tier 2 berkemah memanggil `AIDirector.RequestCampCounter`. Tanpa Director (scene uji) langsung `SpawnManager.RequestWave` dengan pengali 1.

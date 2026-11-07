@@ -2,13 +2,16 @@ namespace SurvivalIsland
 {
     /// <summary>
     /// Tangan kosong (EquipmentManager.md, usulan disetujui #85 poin 7: klik kiri menjadi pukulan lemah).
-    /// Pukulan memakai jalur MeleeCombatSystem (Langkah 5). TODO Langkah 5: teruskan PrimaryAction ke pukulan lemah.
+    /// Pukulan memakai jalur MeleeCombatSystem (stamina, raycast Melee, damage lewat DamageRouter).
+    /// Keputusan developer (sistem pendukung): damage dasar pukulan = equipment.fistDamage (nilai awal 5).
+    /// Tanpa item, jadi tidak ada keausan, dan ResourceNode menolak pukulan tanpa alat.
     /// </summary>
-    public class FistBehaviour : EquippableBehaviour
+    public class FistBehaviour : MeleeCombatSystem
     {
-        public override void PrimaryAction(ActionPhase phase)
+        protected override float GetBaseDamage(ItemData item)
         {
-            // TODO Langkah 5 (MeleeCombatSystem): pukulan lemah tanpa item.
+            var bal = GameManager.CurrentBalance;
+            return bal != null ? bal.equipment.fistDamage : base.GetBaseDamage(item);
         }
     }
 }

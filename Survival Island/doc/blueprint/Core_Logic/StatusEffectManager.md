@@ -225,3 +225,13 @@ Semua efek yang aktif dikalikan, sehingga urutan pemberian efek tidak mengubah h
 13. Buka Profiler dengan 8 efek aktif. **Hasil:** `Update` tanpa alokasi GC.
 14. Beri efek dengan `blocksHPRegen`. **Hasil:** `SetHPRegenBlocked(true)`, HP tidak pulih, dan regenerasi stamina tetap berjalan.
 15. Beri `Debuff_Bleeding`, lalu tunggu lebih dari 6 jam game. **Hasil:** efek tidak habis sendiri. `DiseaseManager` menghapusnya pada `HourChangedEvent` berikutnya dan memasang `Debuff_WoundInfection`.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Assets/LOGIC/Core_Logic/StatusEffectManager.cs` (enum, `ActiveEffect`, manager), `StatusEffectData.cs`, `StatusEffectDatabase.cs` (aset berisi daftar efek, Dictionary dibangun sekali), dan `StatusEffectBar.cs`.
+- `Buff_Supplement` membaca durasi dan kecepatan dari `statusEffects.supplementSeconds` dan `supplementSpeedMultiplier`, bukan dari asetnya. Efek lain memakai nilai aset.
+- Tafsiran daftar penuh: buff baru ditolak; debuff menggantikan buff dengan sisa waktu nyata terpendek (`GameHours` dikonversi lewat `time.timeMultiplier`, `Permanent` dianggap tak terbatas). Kalau tidak ada buff, debuff ditolak dengan peringatan.
+- `Extend` untuk efek `GameHours` menambah `endGameHour`; untuk `Permanent` tidak berpengaruh.
+- Tambahan baca untuk HUD: `GetRemainingSeconds(in ActiveEffect)` dan `GetFullSeconds(StatusEffectData)`.
+- `OnRestoreFinished` mengirim `StatusEffectChangedEvent` untuk tiap efek yang dipulihkan, supaya ikon tergambar ulang.
+- `SetMaxBonus` hanya dipanggil kalau pengali HP berubah.

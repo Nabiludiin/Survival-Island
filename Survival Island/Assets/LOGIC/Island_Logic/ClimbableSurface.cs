@@ -8,11 +8,10 @@ namespace SurvivalIsland
     /// Tangga atau tali yang dipanjat dengan E. Blueprint: Island_Logic/PlayerTraversal.md bagian "Tangga dan tali" (#101).
     /// Layer Interactable, collider biasa (bukan trigger).
     ///
-    /// Catatan implementasi (Langkah 3): blueprint menulis ClimbableSurface : IslandInteractable (#17). Kelas dasar itu belum
-    /// ada di branch ini, jadi alur interaksi ditulis di TryBeginClimb. TODO #17: ganti basis ke IslandInteractable,
-    /// CanInteract mengembalikan CarryingHeavyItem saat membawa Heavy Item, dan OnInteract memanggil TryBeginClimb.
+    /// Mewarisi IslandInteractable (#17): tombol E lewat PlayerInteractor, CanInteract mengembalikan CarryingHeavyItem saat
+    /// membawa Heavy Item (blockedWhileCarrying), dan OnInteract memanggil TryBeginClimb. Objek statis tanpa saveId.
     /// </summary>
-    public class ClimbableSurface : MonoBehaviour
+    public class ClimbableSurface : IslandInteractable
     {
         public ClimbKind kind = ClimbKind.Ladder;
         public Transform bottomPoint;
@@ -37,12 +36,50 @@ namespace SurvivalIsland
             return sq < 0.0001f ? 0f : Mathf.Clamp01(Vector3.Dot(position - Bottom, ab) / sq);
         }
 
+        private void Reset()
+        {
+            blockedWhileCarrying = true;   // PlayerTraversal.md: CanInteract = CarryingHeavyItem saat membawa Heavy Item
+        }
+
+        /// <summary>Tidak tersedia saat pemain sudah memanjat permukaan ini.</summary>
+        public override bool IsAvailable => base.IsAvailable && !IsActiveClimb();
+
+        /// <summary>PlayerTraversal.md: BeginClimb dipanggil ClimbableSurface.OnInteract.</summary>
+        protected override bool OnInteract(in InteractContext ctx)
+        {
+            var traversal = FindTraversal(ctx.Player);
+            return TryBeginClimb(traversal);
+        }
+
+        private static PlayerTraversal FindTraversal(Transform player)
+        {
+            if (player != null)
+            {
+                var t = player.GetComponentInParent<PlayerTraversal>();
+                if (t != null) return t;
+            }
+            var pc = IslandPlayerController.Instance;
+            return pc != null ? pc.GetComponent<PlayerTraversal>() : null;
+        }
+
+        private bool IsActiveClimb()
+        {
+            var pc = IslandPlayerController.Instance;
+            var t = pc != null ? pc.GetComponent<PlayerTraversal>() : null;
+            return t != null && t.ActiveClimb == this;
+        }
+
         /// <summary>Ditolak saat membawa Heavy Item ("Tangan penuh", PlayerTraversal.md).</summary>
         public bool TryBeginClimb(PlayerTraversal traversal)
         {
             if (traversal == null) return false;
             bool heavy = EventChannel<HeavyItemChangedEvent>.HasLast && EventChannel<HeavyItemChangedEvent>.Last.isCarried;
-            if (heavy) return false;   // TODO #22: notifikasi "Tangan penuh"
+            if (heavy)
+            {
+                // Notifikasi "Tangan penuh" (#22).
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.hands_full", NotificationKind.Warning);
+                return false;
+            }
             return traversal.BeginClimb(this);
         }
     }

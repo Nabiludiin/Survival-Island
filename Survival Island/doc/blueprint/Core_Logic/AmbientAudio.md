@@ -202,3 +202,15 @@ Random memakai `UnityEngine.Random` biasa. Suara tidak memengaruhi gameplay, seh
 10. Masuk ke Region 3. **Hasil:** suara berganti ke `ambient_snow`.
 11. Mati di pantai, lalu mulai run baru. **Hasil:** suara memudar, Fase 1 tanpa ambient pulau, dan di pulau hanya suara area saat itu yang aktif.
 12. Biarkan one-shot berbunyi 10 menit sambil melihat Profiler. **Hasil:** tidak ada `Instantiate` baru, dan jumlah objek aktif `Audio_OneShot3D` kembali turun.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Core_Logic/AmbientAudio.cs`, `AmbientProfile.cs` (beserta `AmbientLayer` dan `AmbientOneShot`), `AmbientZone.cs`, `PooledAudioSource.cs`. Belum diuji di Unity.
+
+- **Tafsiran:** `AmbientProfile` dan `AmbientZone` ditulis di file sendiri, karena Unity mewajibkan nama file sama dengan nama kelas `ScriptableObject` dan `MonoBehaviour`. `AmbientDeck` kelas privat di `AmbientAudio`; AudioSource deck dibuat sekali di `Initialize`, jadi prefab hanya perlu mengisi grup `AmbientA` dan `AmbientB`.
+- **Tafsiran:** peredaman tidur (`sleepDuckDb`) dan fade run berakhir digabung ke parameter `AmbientA_Vol` dan `AmbientB_Vol`, sehingga mixer tidak perlu parameter tambahan untuk grup `Ambient`.
+- **Tafsiran:** `AmbientZone` menghitung collider pemain yang ada di dalam, supaya `ExitZone` di `OnDisable` hanya dipanggil kalau pemain memang di dalam. `ExitZone` tidak pernah membuat hitungan negatif.
+- **Tafsiran:** setelah `RunEndedEvent`, perubahan area tidak memulai crossfade lagi sampai fase berikutnya. `ResetForNewRun` juga mengosongkan status fase, supaya `PhaseChangedEvent` berikutnya memulai deck dari awal.
+- **Tafsiran:** one-shot mengikuti deck yang paling keras. Siang atau malam dibaca dari `NightfallEvent` dan `DaybreakEvent` sticky (yang harinya lebih baru).
+- **Angka di teks blueprint yang dipindah ke config** (`GameBalance.GrupC1.cs`): `startCrossfadeSeconds` 0,5, `tideMinVolume` 0,6, `oneShotHeightMin/Max` 5/15.
+- **`PooledAudioSource`:** punya `PlayAt(clip, posisi, grup, volume)` dan `StopAll()` untuk `AudioManager.StopWorldAudio`. Pool `Audio_OneShot3D` (16, `Fixed`) harus didaftarkan di `ObjectPooler`.

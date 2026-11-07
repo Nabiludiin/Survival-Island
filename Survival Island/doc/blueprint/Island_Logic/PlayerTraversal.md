@@ -372,3 +372,7 @@ Kode: `Survival Island/Assets/LOGIC/Island_Logic/PlayerTraversal.cs` (`Traversal
 ## Catatan Implementasi (Langkah 4)
 
 - `UpdateSurface` membaca `SurfaceDetection.Instance.GetSurfaceAt(transform.position)` kalau `SurfaceDetection` ada.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): `ClimbableSurface` sekarang mewarisi `IslandInteractable`: `OnInteract` memanggil `TryBeginClimb` dengan `PlayerTraversal` dari `ctx.Player` (cadangan `IslandPlayerController`). `blockedWhileCarrying` memberi `CarryingHeavyItem`. Tidak tersedia selama sedang dipanjat. `promptKey` diisi di Inspector (kunci belum ditentukan).

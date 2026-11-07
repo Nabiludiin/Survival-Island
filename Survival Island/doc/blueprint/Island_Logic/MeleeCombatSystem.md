@@ -115,3 +115,13 @@ Kode: `Island_Logic/MeleeCombatSystem.cs`.
 
 - Damage dibaca dari `ItemData.weaponDamage`, dengan cadangan 25 di prefab kalau nilainya 0. Jarak (2) dan jeda (1) berada di prefab viewmodel, karena `ItemData` belum punya field untuk itu. Pindahkan ke data senjata kalau #113 menambahkannya.
 - Panen memanggil `ResourceNode.ReceiveHit(toolClass, hitPoint, true)` milik Langkah 4, lalu berhenti tanpa damage. `DurabilitySystem.ApplyWear` (#113), `AnimationController` (#12), dan Fire Axe (#97) masih TODO.
+
+## 8. Catatan Implementasi (Sistem pendukung)
+
+- **Keputusan developer (7 November 2026):** tusukan Pisau yang kena musuh memakai keausan `resource.knifeDecayPerCombatHit` (nilai awal 1).
+- **Keputusan developer (7 November 2026):** pukulan tangan kosong memakai `MeleeCombatSystem` lewat `FistBehaviour` (turunan kelas ini) dengan damage dasar `equipment.fistDamage` (nilai awal 5). Damage dasar dibaca dari `protected virtual GetBaseDamage(ItemData)`. Tanpa item, jadi tanpa keausan.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): `public void RecalculateStats()` menghitung ulang damage lewat `WeaponStatCalculator.GetMeleeDamage`; dipanggil `OnEquip` dan `ToolRepairSystem` (#113).
+- Isi TODO (sistem pendukung): Fire Axe (#97): kalau `itemId == Reward_FireAxe`, damage berhasil, dan target punya `Flammable`, panggil `TryIgnite(fire.fireAxeIgniteChance, true)`.

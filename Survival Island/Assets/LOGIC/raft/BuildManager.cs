@@ -8,7 +8,8 @@ namespace SurvivalIsland
     public enum PlacementError
     {
         None, NoSelection, OutOfRange, NoBuildZone, UnknownSurface, Beach, TooSteep,
-        MaxLevel, MaxStructures, Overlap, Occupied, NoSupport, NotEnoughMaterial
+        MaxLevel, MaxStructures, Overlap, Occupied, NoSupport, NotEnoughMaterial,
+        MaxLights   // LightSourceSystem.md: "Terlalu banyak lampu" (#98)
     }
 
     /// <summary>
@@ -21,13 +22,13 @@ namespace SurvivalIsland
     /// bahwa air pasang akan menghanyutkan bangunan di sana."
     ///
     /// Catatan implementasi (Langkah 4):
-    /// - RegionStreaming (#88) belum ada, jadi struktur menjadi anak structureRoot (TODO #88: GetStructureRoot(GetRegionAt)).
+    /// - Struktur menjadi anak structureRoot region dari RegionStreaming (#88), dengan cadangan structureRoot sendiri.
     /// - Hologram dibuat dari salinan prefab di bawah induk nonaktif, lalu semua Behaviour, Collider, dan Rigidbody dibuang
     ///   sebelum diaktifkan, supaya Awake/OnEnable komponen struktur tidak pernah berjalan pada hologram.
     /// - Kotak overlap dan tapak pantai dihitung dari collider/mesh prefab. Prefab lantai memakai pivot di permukaan atas
     ///   (rok kayu ke bawah), supaya dinding di atasnya tidak dianggap tumpang tindih.
-    /// - Belum ada (TODO): GhostStatusIcon dan teks build.error.* (#104), HUD alasan, batas jebakan (#26) dan lampu (#98),
-    ///   durabilitas palu (DurabilitySystem #113), suara tolak (#16).
+    /// - GhostStatusIcon (#104), batas jebakan (#26) dan lampu (#98), durabilitas palu (#113), dan suara tolak (#16) sudah dipakai.
+    ///   Alasan penolakan juga dikirim ke HUD (HUDManager.ShowBuildError) saat LastError berubah (BuildMenu.md langkah 6).
     /// </summary>
     [DisallowMultipleComponent]
     public class BuildManager : MonoBehaviour
@@ -37,12 +38,18 @@ namespace SurvivalIsland
         [SerializeField] private BuildableData[] buildables;
         [SerializeField] private Material ghostValidMat;
         [SerializeField] private Material ghostInvalidMat;
-        [Tooltip("Induk struktur sementara sampai RegionStreaming.GetStructureRoot (#88) ada.")]
+        [Tooltip("Induk struktur cadangan kalau RegionStreaming (#88) tidak ada atau region tidak punya structureRoot.")]
         [SerializeField] private Transform structureRoot;
+        [Tooltip("Ikon status pada hologram (#104). Boleh kosong.")]
+        [SerializeField] private GhostStatusIcon ghostStatusIcon;
+        [Tooltip("Suara saat penempatan ditolak (#16). Boleh kosong.")]
+        [SerializeField] private AudioClip rejectClip;
 
         public HammerMode Mode { get; private set; } = HammerMode.Repair;
         public BuildableData Selected { get; private set; }
         public PlacementError LastError { get; private set; } = PlacementError.NoSelection;
+        private PlacementError hudError = PlacementError.None;   // Alasan yang sedang tampil di HUD
+        private bool hudErrorShown;
         public IReadOnlyList<BuildableData> Buildables => buildables;
 
         private class GhostInfo
@@ -121,8 +128,13 @@ namespace SurvivalIsland
             return null;
         }
 
-        /// <summary>Induk struktur di posisi ini. TODO #88: RegionStreaming.Instance.GetStructureRoot(GetRegionAt(pos)).</summary>
-        public Transform GetStructureRoot(Vector3 pos) => structureRoot;
+        /// <summary>Induk struktur di posisi ini: structureRoot region dari RegionStreaming (#88), cadangan structureRoot.</summary>
+        public Transform GetStructureRoot(Vector3 pos)
+        {
+            var rs = RegionStreaming.Instance;
+            var root = rs != null ? rs.GetStructureRoot(rs.GetRegionAt(pos)) : null;
+            return root != null ? root : structureRoot;
+        }
 
         // ---------------------------------------------------------------- Mode
 
@@ -150,6 +162,15 @@ namespace SurvivalIsland
         public void HideGhost()
         {
             if (ghost != null && ghost.go != null) ghost.go.SetActive(false);
+            // Alasan di HUD ikut hilang bersama hologram (hanya kalau sedang tampil, karena dipanggil tiap frame).
+            if (hudErrorShown) SetHudError(PlacementError.None);
+        }
+
+        private void SetHudError(PlacementError error)
+        {
+            hudError = error;
+            hudErrorShown = error != PlacementError.None;
+            HUDManager.Instance?.ShowBuildError(error);
         }
 
         /// <summary>Batalkan penempatan dari item (pemain mengganti item).</summary>
@@ -188,12 +209,14 @@ namespace SurvivalIsland
                 bool ok = LastError == PlacementError.None;
                 if (!ghostHasMaterial || ok != ghostValidShown) ApplyGhostMaterial(ok);
             }
-            // 5-6. TODO #104: GhostStatusIcon dan teks build.error.<PlacementError> ke HUD.
+            // 5-6. Ikon status dan teks build.error.<PlacementError> pada hologram (#104), dan alasan di HUD saat berubah.
+            if (ghostStatusIcon != null) ghostStatusIcon.SetStatus(LastError);
+            if (LastError != hudError) SetHudError(LastError);
         }
 
         /// <summary>
         /// Tombol B (OpenBuildMenu): palu di hotbar = ganti ke palu lewat RequestSlot lalu buka menu.
-        /// Palu tidak ada di hotbar = notifikasi "Butuh palu di hotbar" (TODO #22).
+        /// Palu tidak ada di hotbar = notifikasi "Butuh palu di hotbar" (#22).
         /// </summary>
         private void HandleOpenBuildMenuKey()
         {
@@ -214,7 +237,8 @@ namespace SurvivalIsland
                 BuildMenu.Open();
                 return;
             }
-            // TODO #22: NotificationManager "Butuh palu di hotbar".
+            // Notifikasi "Butuh palu di hotbar" (#22).
+            if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.need_hammer", NotificationKind.Warning);
         }
 
         /// <summary>Hologram aktif kalau palu dipegang atau sedang menaruh dari item.</summary>
@@ -396,7 +420,18 @@ namespace SurvivalIsland
             // 7.
             int maxLevels = b != null ? b.maxLevels : 3;
             if (p.level >= maxLevels) return PlacementError.MaxLevel;
-            // 8. TODO #26: trap.maxTrapsPerRegion. TODO #98: light.maxLightStructures.
+            // 8. BaseDefense.md (#26): Defense di atas trap.maxTrapsPerRegion ditolak dengan MaxStructures. Api unggun tidak dihitung.
+            if (data.category == BuildCategory.Defense && data.prefab != null)
+            {
+                var trapBal = GameManager.CurrentBalance != null ? GameManager.CurrentBalance.trap : null;
+                var trap = data.prefab.GetComponent<BaseTrap>();
+                if (trapBal != null && trap != null && trap.Kind != TrapKind.Campfire
+                    && BaseTrap.CountInRegion(RegionStreaming.RegionOf(p.pos)) >= trapBal.maxTrapsPerRegion)
+                    return PlacementError.MaxStructures;
+            }
+            // LightSourceSystem.md (#98): struktur cahaya baru di atas light.maxLightStructures ditolak.
+            if (data.prefab != null && data.prefab.GetComponent<LightFixture>() != null && !LightSourceSystem.CanBuildLightStructure())
+                return PlacementError.MaxLights;
             var registry = StructureRegistry.Instance;
             int maxStructures = b != null ? b.maxStructures : 400;
             if (registry != null && registry.Count >= maxStructures) return PlacementError.MaxStructures;
@@ -452,7 +487,8 @@ namespace SurvivalIsland
             LastError = current.valid ? ValidatePlacement(Selected, current) : PlacementError.OutOfRange;
             if (LastError != PlacementError.None)
             {
-                // TODO #16: suara tolak.
+                // Suara tolak (#16).
+                if (AudioManager.Instance != null && rejectClip != null) AudioManager.Instance.PlaySFX(rejectClip);
                 return false;
             }
 
@@ -462,7 +498,9 @@ namespace SurvivalIsland
             if (placingInstanceId >= 0) inv.RemoveInstance(placingInstanceId);
             else if (data.cost != null)
                 for (int i = 0; i < data.cost.Length; i++) inv.RemoveItem(data.cost[i].itemId, data.cost[i].amount);
-            // 3. TODO #113: durabilitas palu -= build.hammerDecayPerBuild (hanya saat memakai palu).
+            // 3. Durabilitas palu -= build.hammerDecayPerBuild (#113), hanya saat memakai palu (bukan penempatan dari item).
+            if (placingInstanceId < 0 && EquipmentManager.Instance != null && EquipmentManager.Instance.Active is HammerEquippable)
+                DurabilitySystem.ApplyWear(EquipmentManager.Instance.ActiveInstance, Balance != null ? Balance.build.hammerDecayPerBuild : 1f);
 
             // 4-5. Struktur memakai Instantiate, bukan pool, karena jarang dibuat dan hidup lama (DamagePipeline.md).
             var registry = StructureRegistry.Instance;

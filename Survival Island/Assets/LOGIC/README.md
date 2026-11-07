@@ -2,7 +2,7 @@
 
 Folder ini adalah tempat **kode gabungan C#** Survival Island. Semua *script* yang ditulis dari blueprint di `Survival Island/doc/blueprint/` disimpan di sini, sesuai `README.md` di root (TAHAP 6).
 
-**Status:** Langkah 1 sampai 7 sudah ditulis dan digabung ke `main`. Proyek Unity 6 LTS di `Survival Island/` sudah dibuka di Unity; kode gabungan Langkah 1-3 terkompilasi tanpa error di Unity 6000.3.10f1 (6 November 2026), begitu juga gabungan Langkah 4-5 dan Langkah 6-7 (7 November 2026), tetapi belum ada yang dijalankan di Play Mode.
+**Status:** Langkah 1 sampai 7 sudah ditulis dan digabung ke `main`. Sistem pendukung (semua blueprint lain yang dipakai) ditulis di branch `claude/elegant-liskov-301aa5`, lihat bagian "Ditambahkan: sistem pendukung"; belum dikompilasi di Unity. Proyek Unity 6 LTS di `Survival Island/` sudah dibuka di Unity; kode gabungan Langkah 1-3 terkompilasi tanpa error di Unity 6000.3.10f1 (6 November 2026), begitu juga gabungan Langkah 4-5 dan Langkah 6-7 (7 November 2026), tetapi belum ada yang dijalankan di Play Mode.
 
 > Jangan tertukar dengan `LOGIC/` di root repo. Folder itu hanya bahan analisis dari game referensi (60 Seconds!, Raft, dan Zombie). Kode dari sana tidak boleh disalin ke folder ini.
 
@@ -319,3 +319,153 @@ Langkah 7: *Sudden Event* (`DisasterManager`, Fireball Region 1 dari `ObjectPool
 5. `Region3_Snow`: `HelicopterFrame` dengan bagian per `partId`, anak `PartInstallZone` (trigger `ZoneTrigger`), dan `CockpitInteractable` (layer `Interactable`).
 6. Prefab pemain Fase 1 dan Fase 2: `DeathCinematic` (isi `cameraRig` dan, kalau ada, `PlayerBodyRig` nonaktif dengan tulang `Rigidbody` kinematic dan `focusBone`).
 7. Aset **Create > Survival > Diary Entry** untuk Bab 1 sampai 3, diisi ke `DiaryArchivePanel.chapters`.
+
+## 🧩 Ditambahkan: sistem pendukung
+
+Semua blueprint yang belum punya kode ditulis di branch `claude/elegant-liskov-301aa5` (7 November 2026). Status: **ditulis, belum dikompilasi di Unity.** Kode dicek dengan `dotnet build` (netstandard2.1, C# 9) terhadap DLL Unity 6000.3.10f1 dan DLL `Library/ScriptAssemblies` checkout utama (Input System, TextMeshPro, UGUI, Cinemachine, URP, RP Core, AI Navigation), tanpa stub: 0 error dan 0 warning di Editor, rilis, dan `DEVELOPMENT_BUILD`. Belum ada yang dijalankan di Play Mode. File `.meta` belum dibuat; Unity membuatnya saat proyek dibuka.
+
+Penyimpangan dan tafsiran dicatat di bagian "Catatan Implementasi (Sistem pendukung)" pada tiap blueprint.
+
+### Tidak ditulis
+
+| Blueprint | Alasan |
+|---|---|
+| `raft/FarmingSystem.md` (#48), `Island_Logic/SupplyDrop.md` (#54), `Core_Logic/WorldMapSystem.md` (#105), `Island_Logic/NPCInfection.md` (#117) | Diputuskan developer tidak dipakai (arsip) |
+| `GameEventBus.md`, `PhysicsLayers.md`, `SaveSystem.md`, `DamagePipeline.md`, `EnvironmentProfile.md`, `VitalsRules.md` | Sudah dicakup kode Langkah 1-6 dengan nama kelas lain (lihat tabel Langkah di atas) |
+
+### File → blueprint
+
+| File | Blueprint |
+|---|---|
+| `Core_Logic/SettingsManager.cs`, `SettingsPanel.cs` | `SettingsManager.md` (#19) |
+| `Core_Logic/AudioManager.cs` | `AudioManager.md` (#114) |
+| `Core_Logic/LocalizationManager.cs` (`AccessibilityOptions`, `FlashGuard`), `LocalizationTable.cs`, `LocalizedText.cs`, `SubtitlePresenter.cs`, `LocalizationAuditWindow.cs` (Editor) | `LocalizationManager.md` (#104) |
+| `Core_Logic/CameraShake.cs`, `CameraShakeProfile.cs` | `CameraShake.md` (#24, Cinemachine 3.x) |
+| `Core_Logic/VFXManager.cs` (`VFXEntry`, `VFXHandle`), `PooledEffect.cs` | `VFXManager.md` (#15) |
+| `Core_Logic/NotificationManager.cs`, `NotificationRow.cs`, `NotificationLogView.cs` | `NotificationManager.md` (#22) |
+| `Core_Logic/PostProcessController.cs` | `PostProcessController.md` (#23) |
+| `Core_Logic/GhostStatusIcon.cs` | `LocalizationManager.md` (penanda selain warna di hologram bangunan) |
+| `Core_Logic/RegionLootTable.cs`, `LootTable.cs` | `RegionLootTable.md` (#103) |
+| `Core_Logic/LootSpawnerSystem.cs` | `LootSpawnerSystem.md` |
+| `Core_Logic/StatusEffectManager.cs`, `StatusEffectData.cs`, `StatusEffectDatabase.cs`, `StatusEffectBar.cs` | `StatusEffectManager.md` (#20) |
+| `Core_Logic/DurabilitySystem.cs` | `DurabilitySystem.md` |
+| `Core_Logic/ToolRepairSystem.cs`, `ItemUpgradeData.cs`, `WeaponStatCalculator.cs` | `ToolRepairSystem.md` (#113) |
+| `Core_Logic/HUDManager.cs`, `HotbarView.cs` | `HUDManager.md`, `EquipmentManager.md` (HotbarView) |
+| `Core_Logic/AmbientAudio.cs`, `AmbientProfile.cs`, `AmbientZone.cs`, `PooledAudioSource.cs` | `AmbientAudio.md` (#52) |
+| `Core_Logic/CombatMusicDirector.cs`, `MusicSet.cs`, `EnemyCueSet.cs`, `ThreatAudioEmitter.cs` | `CombatMusicDirector.md` (#114) |
+| `Core_Logic/FootstepAudio.cs`, `SurfaceAudioSet.cs` | `FootstepAudio.md` (#21) |
+| `Core_Logic/AnimationController.cs` (`AnimIds`), `PlayerAnimDriver.cs`, `EnemyAnimDriver.cs` | `AnimationController.md` (#12) |
+| `Core_Logic/OptimizationManager.cs` | `OptimizationManager.md` |
+| `Core_Logic/CombatFeedbackUI.cs`, `DamageIndicator.cs` | `CombatFeedbackUI.md` |
+| `Core_Logic/CompassSystem.cs` (`MapMarkerRegistry`), `CompassIcon.cs` | `CompassSystem.md` (#30) |
+| `Core_Logic/TutorialManager.cs`, `TutorialHint.cs`, `TutorialHintPanel.cs` | `TutorialManager.md` (#16) |
+| `Core_Logic/LocalStatsManager.cs`, `StatsPanel.cs` | `LocalStatsManager.md` (#57) |
+| `Core_Logic/DevConsole.cs` (hanya Editor dan `DEVELOPMENT_BUILD`) | `DevConsole.md` (#56) |
+| `Core_Logic/NarrativeSequencer.cs` (`EndingContext`), `NarrativeScene.cs`, `HelipadFoundVolume.cs` | `NarrativeSequencer.md` (#99) |
+| `Core_Logic/RegionStreaming.cs`, `RegionStateStore.cs`, `RegionSceneRoot.cs`, `SeamBarrier.cs`, `RegionBoundaryGuard.cs` | `RegionStreaming.md` (#88) |
+| `Core_Logic/ProgressionSafety.cs` | `ProgressionSafety.md` (#116) |
+| `Island_Logic/NPCData.cs`, `NPCRoster.cs`, `NPCCompanion.cs`, `left-4-dead/NPCGunUser.cs` | `NPCRoster.md`, `NPCCompanion.md` (#76), `GunController.md` (bagian NPC) |
+| `Island_Logic/ObjectiveManager.cs`, `ObjectiveData.cs`, `DiaryBook.cs` | `ObjectiveManager.md` (#81) |
+| `Island_Logic/LoreCollectibles.cs`, `LoreEntry.cs`, `LorePoint.cs`, `LoreReaderPanel.cs`, `BarkSet.cs`, `NPCBarks.cs` | `LoreCollectibles.md` (#100) |
+| `Island_Logic/IslandInteractable.cs`, `PickupInteractable.cs`, `LootContainerInteractable.cs` | `IslandInteractable.md` (#17, sisa di luar kontrak Langkah 2) |
+| `Island_Logic/RemoteBaseSimulation.cs` | `RemoteBaseSimulation.md` (#90) |
+| `Island_Logic/EnvironmentalHazard.cs` | `EnvironmentalHazard.md` (#96) |
+| `Island_Logic/FireSystem.cs`, `Flammable.cs`, `FlammableProfile.cs`, `FireArea.cs`, `BurnEffect.cs`, `FireExtinguishTarget.cs` | `FireSystem.md` (#97) |
+| `Island_Logic/LightSourceSystem.cs`, `LightSource.cs`, `LightFixture.cs`, `LightFixtureData.cs` | `LightSourceSystem.md` (#98) |
+| `Island_Logic/FlashlightController.cs` | `FlashlightController.md` |
+| `Island_Logic/TideManager.cs`, `TideSafePoint.cs`, `LowTideSpot.cs`, `TideZoneAuditWindow.cs` (Editor) | `TideManager.md` (#91) |
+| `Island_Logic/SwimmingController.cs`, `WaterVolume.cs` | `WaterSwimmingController.md` (#13) |
+| `Island_Logic/BeachSupplyManager.cs`, `BeachSupplyPoint.cs`, `BeachCrate.cs` | `BeachSupplyManager.md` |
+| `Island_Logic/SleepSystem.cs`, `BedInteractable.cs`, `SleepPanel.cs` | `SleepSystem.md` |
+| `left-4-dead/HordeManager.cs` | `HordeManager.md` (#50) |
+| `left-4-dead/AITraversal.cs`, `TraversalAgent.cs`, `TraversalLinkGate.cs`, `ThrownRock.cs` | `AITraversal.md` (#94) |
+| `left-4-dead/ZombieLair.cs`, `InteriorZone.cs`, `LairNest.cs`, `LairRegistry.cs`, `LairData.cs` | `ZombieLair.md` (#112) |
+| `left-4-dead/ThrowableSystem.cs`, `ThrowableData.cs`, `ThrowableProjectile.cs`, `LureTargetable.cs` | `ThrowableSystem.md` |
+| `raft/BaseNavigation.cs`, `BaseDoor.cs`, `BaseDoorLatch.cs`, `BaseAnchor.cs` | `BaseNavigation.md` (#78) |
+| `raft/BuildingIntegrity.cs`, `StructureVisual.cs`, `StructureIntegrityInfo.cs` | `BuildingIntegrity.md` (#47) |
+| `raft/BaseTrap.cs`, `BaseTrapZone.cs`, `TrapData.cs` | `BaseDefense.md` |
+| `raft/HydrationSystem.cs`, `RainwaterCollector.cs`, `WaterSourcePoint.cs` | `HydrationSystem.md` |
+| `raft/DiseaseManager.cs` (`DiseaseType`, `DiseaseEffectTable`), `DiseaseOverlay.cs` | `DiseaseManager.md` |
+| `raft/CampfireManager.cs`, `CookingRecipe.cs`, `CampfirePanel.cs` | `CampfireManager.md` (#44) |
+| `raft/FishingSystem.cs`, `WaterBody.cs`, `FishingTensionHUD.cs` | `FishingSystem.md` |
+| `raft/DebrisRetrieval.cs`, `DebrisItem.cs`, `DebrisLane.cs` | `DebrisRetrieval.md` |
+| `raft/StorageChest.cs`, `StoragePanel.cs`, `SlotGridView.cs`, `SlotGridViewCell.cs` | `StorageChest.md` |
+
+Event baru ada di akhir `Core_Logic/GameEvents.cs` (bagian "Ditambahkan: sistem pendukung"), dan field config baru di akhir `Core_Logic/GameBalanceSections.cs`. Semua kelas bagian config dibuat `partial`, begitu juga `GameBalanceConfig`. `SurvivalIsland.asmdef` menambah referensi `Unity.Cinemachine`, `Unity.RenderPipelines.Universal.Runtime`, `Unity.RenderPipelines.Core.Runtime`, dan `Unity.AI.Navigation`.
+
+### Tambahan untuk `PersistentRoot` (`RunLifecycle.orderedServices`)
+
+Urutan lengkap sesuai tabel "Urutan bootstrap" di `RunLifecycle.md`. Yang baru punya kode ditebalkan:
+
+1. `GameManager`
+2. `InputManager`
+3. **`SettingsManager`**
+4. **`AudioManager`**
+5. **`AmbientAudio`**
+6. **`CombatMusicDirector`**
+7. **`LocalizationManager`**
+8. `UIFocusStack`
+9. `UIManager`
+10. **`NotificationManager`**
+11. **`TutorialManager`**
+12. `ObjectPooler` (lalu `SurfaceDetection`, seperti sekarang)
+13. **`VFXManager`**
+14. `AsyncSceneLoader`
+15. `RunSeedManager`
+16. `WorldStateSave`
+17. **`LocalStatsManager`**
+18. **`DevConsole`** (hanya Editor dan `DEVELOPMENT_BUILD`; di build rilis kelasnya tidak ada)
+19. **`NarrativeSequencer`** (usulan teknis: persisten menurut tabel masa hidup di `RunLifecycle.md`, dan punya `ResetForNewRun`)
+
+Juga di bawah `PersistentRoot`, tetapi bukan service: `SubtitlePresenter`, canvas notifikasi, `SettingsPanel` (isi `UIManager.settingsPanel`), `TutorialHintPanel`, UI `DevConsole`, dan UI `NarrativeSequencer`.
+
+### Komponen scene
+
+| Scene | Komponen |
+|---|---|
+| `ShipPhase` dan `IslandPhase` | `HUDManager` + `HotbarView` + `StatusEffectBar` + `CombatFeedbackUI`, `CameraShake` (rig kamera), `PostProcessController` (`PostFxRig`), `LootSpawnerSystem` (dek kapal atau region), `FootstepAudio` (pemain) |
+| `IslandPhase` | `ToolRepairSystem`, `OptimizationManager`, `CompassSystem` (anak HUD), `RegionStreaming`, `RegionBoundaryGuard`, `FireSystem`, `LightSourceSystem`, `TideManager`, `BeachSupplyManager`, `SleepSystem`, `HordeManager`, `AITraversal`, `LairRegistry`, `ThrowableSystem`, `BaseNavigation`, `BuildingIntegrity`, `DebrisRetrieval`, `NPCRoster`, `ObjectiveManager`, `LoreCollectibles`, `NPCBarks`, `RemoteBaseSimulation`, `ProgressionSafety`. Di pemain: `StatusEffectManager`, `HydrationSystem`, `DiseaseManager`, `SwimmingController`. Panel: `CampfirePanel`, `StoragePanel`, `SleepPanel`, `LoreReaderPanel`, `DiseaseOverlay`, `FishingTensionHUD` |
+| Scene region | `RegionSceneRoot` (akar), `ZombieLair` + `InteriorZone` + `LairNest`, `EnvironmentalHazard`, `LowTideSpot`, `DebrisLane`, `WaterSourcePoint`, `WaterBody`, `AmbientZone`, `HelipadFoundVolume` (Region3_Snow), `TraversalLinkGate` |
+| `MainMenu` | `StatsPanel` (isi `MainMenuController.statsPanel`) |
+
+### Penyiapan di Unity (belum dilakukan)
+
+1. **Audio:** `AudioMixer` dengan grup `Music`, `Ambient` (anak `AmbientA` dan `AmbientB`), `EnemyCue`, `Warning`, dan `SFX`; snapshot `Normal`, `Paused`, dan `Cinematic` (opsional); parameter terekspos `Master_Vol`, `Music_Vol`, `SFX_Vol`, `AmbientA_Vol`, `AmbientB_Vol`, dan `Ambient_Lowpass`. Tiga `AudioSource` di `AudioManager` (bgm, sfx, warning). Aset `AmbientProfile`, `MusicSet` (5 stem), `EnemyCueSet`, dan `SurfaceAudioSet` (8 baris).
+2. **Teks:** aset `LocalizationTable` `id` dan `en` (bisa impor CSV). Kunci baru yang dipakai kode: `hud.*`, `notif.*`, `prompt.*`, `ui.settings.*`, `ui.flash_warning.*`, `ui.language.<id>`, `ui.compass.n/e/s/w`, `ui.stats.*`, `objective.*`, `lore.*`, dan `bark.*`. Kalau kunci belum ada, kode menampilkan kunci atau teks cadangan.
+3. **Kamera dan layar:** `CameraShakeProfile` di rig kamera. `PostFxRig` per scene: tiga `Volume` global (A dan B priority 0, Status priority 10), dan Post Processing aktif di kamera. `SettingsManager` menulis `shadowDistance` dan `maxAdditionalLightsCount` ke aset URP aktif; di Editor perubahan ini ikut tersimpan ke aset.
+4. **Pool `ObjectPooler`:** semua tag `VFX_*` di `vfx.catalog` (prefab dengan `PooledEffect`), `Audio_OneShot3D` (16), `UI_DamageIndicator` (6), `ShipLoot_Generic`, `WorldItem_Generic`, `Debris_Generic`, `FX_FireArea` (8), `FX_FireBurn` (24), `Supply_BeachCrate`, `Thrown_Rock`, proyektil barang lempar, `FX_RepairHit`, `FX_UpgradeDust`, dan `FX_StructureCrack`.
+5. **NavMesh Area:** `JumpLink`, `ClimbLink`, `HighClimbLink`, `DropLow`, `DropMid`, `DropHigh`, `DoorLink`, `Interior`, dan `Tidal`.
+6. **Scene region:** `Region1_Volcano`, `Region2_Amazon`, `Region3_Snow`, dan `Region4_Village`, masing-masing dengan satu akar `RegionSceneRoot` dan masuk Build Settings. Isi `RegionStreaming.regions[4]` dan `seams[3]`, lalu pasang `SeamBarrier` dan `NavMeshLink` per seam.
+7. **Data:** `LootTable` (Loot_Ship, Loot_Region1-4, Loot_Lair_*, Drop_Zombie_*, Debris_Default, kargo pantai), `StatusEffectData` + `StatusEffectDatabase`, `ItemUpgradeData` (`Resources/ItemUpgrades`), `CookingRecipe` (`Resources/Recipes`), `DiseaseEffectTable`, `ThrowableData` x4, `TrapData` x3, `LairData`, `FlammableProfile` x6, `LightFixtureData` x2, `NPCData` x3, `BarkSet`, `ObjectiveData` x8, `DiaryEntry` x3, `LoreEntry`, `TutorialHint` (`Resources/TutorialHints`), dan `NarrativeScene` x7.
+8. **Prefab:** NPC (`NavMeshAgent`, `NPCCompanion`, `NPCGunUser`, layer `NPC`), musuh (`TraversalAgent`, `ThreatAudioEmitter`, `AnimationController`, `EnemyAnimDriver`, `Flammable`, tag `Zombie` atau `Animal`), struktur (`StructureIntegrityInfo`, `StructureVisual`, `BaseDoor`, `BaseTrap`, `CampfireManager`, `StorageChest`, `RainwaterCollector`, `LightFixture`, `BedInteractable`), Tong Merah (`EnvironmentalHazard`), viewmodel `Base_Kail` (`FishingSystem`) dan senter (`FlashlightController`), serta rig tangan (`PlayerAnimDriver`).
+9. **UI:** semua panel di atas memakai `UIPanel` dengan setelan dari blueprint masing-masing (jeda, kursor, blok input, Esc).
+
+### Keputusan developer setelah sistem pendukung (7 November 2026)
+
+Dicatat di `doc/USULAN_TERBUKA.md` (Keputusan utama) dan blueprint terkait.
+
+- `EnemyAI` memakai `BaseNavigation.PollChase`/`PollAttacking`, `NotifySpawned`, dan `TraversalAgent.TickUnreachable`. Tanpa `BaseNavigation` di scene, pemeriksaan jalur Langkah 5 tetap dipakai.
+- Pusat base: rata-rata posisi struktur (sudah begitu di kode).
+- Obor Dinding: tekan `E` menambah 1 kayu (sudah begitu di kode).
+- Trigger `Shove` (`AnimIds.Shove`) dipakai `PlayerShove`. Tambahkan parameter trigger `Shove` di `AC_PlayerArms`.
+- `resource.knifeDecayPerCombatHit` = 1 (`MeleeCombatSystem`), dan `equipment.fistDamage` = 5 (`FistBehaviour` sekarang turunan `MeleeCombatSystem`).
+- `LifeboatExtraction`: isi `npcDatabase` (aset `NPCData` yang sama dengan `NPCRoster`) dan `shipNpcPoints`, serta pool `ShipNpc_Generic`. `NarrativeSequencer`: isi `npcDatabase`; beat dengan `textKey` `narrative.lifeboat.lost` (teks tabel memakai `{names}`) menyebut korban kapal.
+- `NarrativeSequencer` masuk `orderedServices` urutan 19.
+- `ItemData.OnValidate` (Editor) mencatat error untuk item non-inti dengan durabilitas yang tidak bisa diperbaiki, kecuali `Tool_Torch` dan `Tool_Flashlight`.
+
+### TODO sisa yang disambung (7 November 2026)
+
+- **#88 penyimpanan region:** `RegionSaveRouting` (di `RegionStateStore.cs`). Objek di bawah `RegionSceneRoot` dipegang `RegionStateStore` saat `RegionStreaming` ada, dan tetap mendaftar ke `WorldStateSave` di scene uji tanpa streaming. `WorldItemManager.CaptureRegion`/`RestoreRegion`/`SweepBelow`, `WorldItem.sourceSpawner`, `LootSpawnerSystem.HandleRegionLoadState`, `HeavyItemSystem` per region, `RunLifecycle` memanggil `LoadInitialRegions`. Pastikan semua objek region berada di bawah `RegionSceneRoot` dan `RegionStreaming.regions[].bounds` terisi.
+- **File baru:** `Core_Logic/SurfaceDebugOverlay.cs` (debug, perintah `surfacedebug`), `left-4-dead/DetectionMeterUI.cs` (meter deteksi stealth, `AISensory.md`), `raft/RegrowablePickup.cs`, `StonePickup.cs`, `CoconutPickup.cs` (`ResourceRespawn.md`).
+- **Sambungan lain:** zombie kapal tidur dan bangun (`ShipHazardManager`), `ShipShove` mendorong, penanda dan isi sekoci di HUD, `SettingsManager.showHitMarkers`, `AudioManager.PlaySFXAt` (3D lewat pool `Audio_OneShot3D`), `PostProcessController.SetScreenTint`, `MeleeCombatSystem.RecalculateStats`, `EquipmentManager.LowerBriefly` saat melempar, `CraftingStation` dan `ClimbableSurface` mewarisi `IslandInteractable`, perintah DevConsole `savecorrupt`, `savedelay`, `postfx`, `heli install all`, `surfacedebug`.
+- **Penyiapan Unity baru:** `HUDManager.lifeboatContentsText` dan `buildHintText`; `DetectionMeterUI` di HUD; `SettingsPanel.showHitMarkersToggle`; `GunController.muzzlePoint`; klip `PlayerShove.shoveFailClip`, `DisasterData.pulseClip`, `LuckyMachine.vacuumClip` dan `freeWindowWarnClip`; batu kecil dan kelapa memakai `StonePickup`/`CoconutPickup`; `ClimbableSurface` di layer `Interactable` dengan `promptKey`; kunci `notif.tide_items_moved`, `hud.lifeboat_contents`, `hud.demolish_preview`; shader `Hidden/Internal-Colored` ikut Development Build.
+- **Masih TODO (29):** butuh keputusan desain (alarm kapal T=45, pengali `DifficultyProfile`, gaya dorong tarikan Tribal, titik tujuan kelompok #93), aset baru (partikel vakum dan api obor, animasi berbaring dan tusuk pisau, layar basah), titik uji `tpregion`, sistem berblueprint besar yang belum ditulis (`VillageZombieHiding`/`HidingSpot` #63, `BushSpawnPoint`, `AmbushPerch`, `RunLayoutSources`/`RunLayoutValidator`, jalur bersama kelompok), dan alat Editor yang butuh assembly Editor terpisah.
+
+### Keputusan developer putaran kedua (7 November 2026)
+
+- **Alarm kapal:** isi `ShipHazardManager.alarmSource` (AudioSource dengan klip alarm). Centang `ShipZombiePoint.wakeOnAlarm` di 2 titik dek tengah.
+- **Kesulitan:** `DifficultyProfile.enemyCountMultiplier` (dipakai `AIDirector`) dan `harvestYieldMultiplier` (dipakai `ResourceNode`).
+- **Dorongan luar:** `IslandPlayerController.AddExternalVelocity`, dipakai tarikan Zombie Tribal.
+- **Kelompok zombie jauh (#93):** jalur bersama per sel di `HordeCrowdManager`, perintah `crowdstat`, `stress`, `crowdai`.
+- **`RunLayoutSources` dan `RunLayoutValidator` (#89):** buat aset **Survival > Run Layout Sources**, isi ke `RunSeedManager.layoutSources`, lalu isi `partSpawnPoints`, `shipNpcs`, dan `disasterData`. Jalankan menu "Salin data kapal dari scene ShipPhase yang terbuka", "Periksa isReachable" pada `PartSpawnPointTable`, isi `safeLayout`, lalu "Periksa safeLayout" dan "RunSeedAudit". Sebelum itu, semua seed gagal pemeriksaan dan run memakai `safeLayout`. Tanpa aset ini, perilaku lama tetap jalan dengan peringatan.
+- **Zombie Desa, Lumut, Jaguar, Gagak:** file baru `left-4-dead/HidingSpot.cs`, `VillageZombieHiding.cs`, `BushSpawnPoint.cs`, `AmbushPerch.cs`, `CrowFlock.cs`. Prefab `zombie_desa` mendapat `VillageZombieHiding` (Animator: bool `Dormant`, trigger `Emerge`). `Region4_Village` mendapat `HidingSpot` (kapasitas total minimal 30). `Region2_Amazon` mendapat `BushSpawnPoint` (entri `zombie_lumut` diberi `useBushPoints = true`) dan `AmbushPerch`. Animator Jaguar perlu trigger `Climb`.

@@ -8,14 +8,17 @@ namespace SurvivalIsland
     /// headshot 2x. Input datang dari EquipmentManager (PrimaryAction), reload dari InputManager.ReloadPressed.
     /// Isi magazine di ItemInstance.magazineAmmo; cadangan = jumlah ammoItemId di InventoryManager.
     ///
-    /// Catatan Langkah 5 (TODO): DurabilitySystem (#113) belum ada, jadi status Broken dan keausan dilewati;
-    /// WeaponStatCalculator (#113) belum ada (statistik dari WeaponData); VFXManager (#15) belum ada, jadi muzzle flash
-    /// memakai ParticleSystem di viewmodel (tanpa Instantiate); AnimationController (#12) dan SFX belum ada;
-    /// NPCGunUser (#76) belum ditulis. Radius suara memakai WeaponData.noiseRadius (lihat GunController.md Catatan Implementasi).
+    /// Status Broken, keausan, dan statistik akhir memakai DurabilitySystem dan WeaponStatCalculator (#113).
+    /// Muzzle flash lewat VFXManager.Play(muzzleFlashTag, ..., muzzlePoint, viewmodel: true) (#15). ParticleSystem di
+    /// viewmodel tetap dipakai kalau VFXManager atau muzzlePoint tidak ada. Catatan Langkah 5 (TODO): AnimationController
+    /// (#12) belum dipakai; NPCGunUser (#76) belum ditulis. Radius suara memakai WeaponData.noiseRadius (lihat GunController.md Catatan Implementasi).
     /// </summary>
     public class GunController : EquippableBehaviour
     {
-        [SerializeField] private ParticleSystem muzzleFlash;   // Di layer PlayerViewmodel
+        [Tooltip("Ujung laras di viewmodel. Efek VFX_Muzzle menempel di sini (GunController.md langkah 8, #15).")]
+        [SerializeField] private Transform muzzlePoint;
+        [Tooltip("Cadangan kalau VFXManager atau muzzlePoint tidak ada. Di layer PlayerViewmodel.")]
+        [SerializeField] private ParticleSystem muzzleFlash;
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip fireClip, dryClip, reloadClip;
 
@@ -70,10 +73,10 @@ namespace SurvivalIsland
             base.OnUnequip();
         }
 
-        /// <summary>Statistik dari WeaponData. TODO #113: WeaponStatCalculator.Get (upgrade dan modifier Lucky Machine).</summary>
+        /// <summary>Statistik dari WeaponData, ditambah upgrade dan modifier Lucky Machine lewat WeaponStatCalculator (#113).</summary>
         public void RecalculateStats()
         {
-            if (weapon != null) core.SetStats(WeaponStats.From(weapon));
+            if (weapon != null) core.SetStats(WeaponStatCalculator.Get(WeaponStats.From(weapon), instance));
         }
 
         public override void PrimaryAction(ActionPhase phase)
@@ -82,7 +85,8 @@ namespace SurvivalIsland
             // 1. SemiAuto hanya Pressed; Auto juga Held.
             if (phase == ActionPhase.Released) return;
             if (weapon.fireMode == FireMode.SemiAuto && phase != ActionPhase.Pressed) return;
-            // 2. TODO #113: DurabilitySystem.GetState(instance) == Broken -> klik kosong + notifikasi "Pistol rusak" (#22).
+            // 2. Senjata Broken (#113): klik kosong. Notifikasi "Item rusak" dikirim EquipmentManager.RejectBroken.
+            if (DurabilitySystem.GetState(instance) == DurabilityState.Broken) { DryClick(); return; }
             // 3.
             if (isReloading) return;
             // 4. Klik kosong tidak mengirim Noise Sphere.
@@ -94,11 +98,14 @@ namespace SurvivalIsland
             Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
             // 6.
             GameObject shooter = IslandPlayerController.Instance != null ? IslandPlayerController.Instance.gameObject : gameObject;
-            if (!core.Fire(in ray, shooter, instance.itemId, true)) return;
-            // 7. TODO #113: DurabilitySystem.ApplyWear(instance, wearPerShot).
+            if (!core.Fire(in ray, shooter, instance.itemId, true, weapon.impactTag)) return;
+            // 7. Keausan per tembakan (#113) diterapkan di akhir fungsi, karena senjata Destroyed langsung dilepas.
             instance.magazineAmmo--;
-            // 8. Muzzle flash dari partikel viewmodel (Claude.md Pilar 3).
-            if (muzzleFlash != null) muzzleFlash.Play(true);
+            // 8. Muzzle flash (Claude.md Pilar 3) lewat VFXManager, menempel di laras viewmodel (#15).
+            var vfx = VFXManager.Instance;
+            if (vfx != null && muzzlePoint != null && !string.IsNullOrEmpty(weapon.muzzleFlashTag))
+                vfx.Play(weapon.muzzleFlashTag, muzzlePoint.position, muzzlePoint.rotation, muzzlePoint, true);
+            else if (muzzleFlash != null) muzzleFlash.Play(true);
             if (audioSource != null && fireClip != null) audioSource.PlayOneShot(fireClip);
             // 9.
             if (fpc != null) fpc.AddRecoil(weapon.recoilPitch, Random.Range(-weapon.recoilYaw, weapon.recoilYaw));
@@ -110,6 +117,8 @@ namespace SurvivalIsland
             EventChannel<WeaponFiredEvent>.Publish(new WeaponFiredEvent(instance.itemId, cam.transform.position, true));
             // 12. Reload otomatis.
             if (instance.magazineAmmo == 0 && GetReserve() > 0) ScheduleAutoReload();
+            // 7. Keausan (#113). Kalau Destroyed, DurabilitySystem menghapus item dan EquipmentManager melepasnya.
+            DurabilitySystem.ApplyWear(instance, weapon.wearPerShot);
         }
 
         private void DryClick()
@@ -118,7 +127,8 @@ namespace SurvivalIsland
             if (Time.time < nextDryClickTime) return;
             nextDryClickTime = Time.time + (bal != null ? bal.gun.dryClickCooldown : 0.25f);
             if (audioSource != null && dryClip != null) audioSource.PlayOneShot(dryClip);
-            // Magazine kosong dan cadangan ada: reload otomatis. Cadangan kosong: TODO HUDManager berkedip.
+            // Magazine kosong dan cadangan ada: reload otomatis. Cadangan kosong: HUDManager.UpdateAmmo membuat teks
+            // peluru berkedip sendiri saat 0 / 0 (dari AmmoChangedEvent).
             if (GetReserve() > 0) ScheduleAutoReload();
         }
 

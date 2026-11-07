@@ -35,6 +35,30 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Fitur tambahan yang dipakai | #96, #106, dan #112 |
 | Fitur yang tidak dipakai | #48, #54, #105, dan #117 |
 | Angka inti | Hari 15 menit, 8 sampai 12 kayu per pohon, 5 suku cadang, dan frostbite 1 HP per detik |
+| Pusat base (Blood Moon, `BaseNavigation.md` usulan 7) | Rata-rata posisi semua struktur, dihitung ulang saat jumlah struktur berubah |
+| Zombie terhalang base | `EnemyAI` memakai `BaseNavigation.PollChase`. Posisi tunggu dan respons traversal tidak ditimpa kejaran, dan target dicoret setelah `threat.unreachableSeconds` |
+| Bahan bakar Obor Dinding | Tekan `E` pada obor mati yang belum penuh menambah 1 kayu lalu menyala. Tidak ada tahan `E` 0,6 detik |
+| Animasi dorong | Trigger `Shove` di rig tangan, dipakai `PlayerShove` (`AnimationController.md`) |
+| Keausan Pisau saat bertarung | 1 per tusukan yang kena musuh (`resource.knifeDecayPerCombatHit`) |
+| Pukulan tangan kosong | 5 damage (`equipment.fistDamage`) |
+| NPC di kapal | `NPCData` dari daftar di Inspector `LifeboatExtraction` dan `NarrativeSequencer`, aset yang sama dengan `NPCRoster` |
+| Urutan bootstrap `NarrativeSequencer` | Urutan 19, setelah `DevConsole` |
+| Validasi durabilitas | Validasi Editor `ItemData` untuk item non-inti yang tidak bisa diperbaiki (kecuali obor dan senter), dan nama `DurabilitySystem.GetRatio`, disetujui |
+| Angka usulan teknis sistem pendukung | Disetujui sebagai nilai awal, boleh diubah saat playtest: `traversal.rockDamage` 10, `rockWindupSeconds` 1, `rockSpeed` 16, `retreatDistance` 15, `rockLifetimeSeconds` 6, `linkAvoidCost` 1000; `throwable.fireTickSeconds` 1; `lair.nestHP` 300, `registryTickSeconds` 1; `interact.containerNoiseRadius` 8; `npc.doorKeepAwayRadius`, `commandBlockEnemyRadius`, `fireAvoidMargin`; `safety.stuckHintMoveThreshold`; `campfire.skyCheckDistance`, `structureRecheckRadius`, `cookedNotifyDistance`; `debris.bobAmplitude`, `bobFrequency`; volume musik Calm saat Alert 0,5; volume kerumunan jumlah musuh dibagi 24 |
+| Alarm kapal `T=45` | Satu sumber alarm berbunyi sejak awal Fase 1 dengan volume 0,5, lalu naik ke 1 dalam 1 detik saat `AlarmUp` (`shipHazard.alarmBaseVolume`, `alarmRaisedVolume`, `alarmRaiseSeconds`) |
+| Zombie kapal saat alarm | Tiap `ShipZombiePoint` punya centang `wakeOnAlarm`. Saat `AlarmUp`, zombie di titik yang dicentang langsung bangun. Zombie lain tetap tidur sampai pemain dekat dan terlihat |
+| Pengali kesulitan | `DifficultyProfile.enemyCountMultiplier` dan `harvestYieldMultiplier`, nilai awal 1 |
+| Dorongan luar pada pemain | `IslandPlayerController.AddExternalVelocity(kecepatan, durasi)`, dipakai tarikan Zombie Tribal (#101) |
+| Suara tanda serangan | Suara tanda hewan dan windup Zombie Tribal diulang selama state berlangsung, jeda 2 detik |
+| Kelompok zombie jauh (#93) | Jalur bersama per sel ditulis sekarang, dengan angka `crowd.cluster*` dari `HordeCrowdManager.md` |
+| Tafsiran sistem pendukung yang disetujui | Tanda sekoci di HUD menyala sampai scene diganti. `showHitMarkers` mematikan Hit Marker dan Kill Marker, indikator arah damage tetap. Debu barang berat jatuh memakai `VFX_ImpactDust`. Tanpa `ResourceRespawn`, keluar dari tersangkut melapor `Blocked` |
+| Sistem berblueprint yang ditulis sekarang | `VillageZombieHiding`/`HidingSpot` (#63), `BushSpawnPoint`, `AmbushPerch`, `RunLayoutSources` dan validatornya |
+| NPC kapal per run | Selalu 3 (medis, tukang, koki). Seed hanya mengacak titiknya |
+| Syarat bekal kapal | Dihitung per objek. Makanan, peluru, dan minuman dikenali dari data item yang ada, tanpa daftar itemID tetap |
+| Zombie Desa terlambat bersembunyi | Langsung terbakar saat fajar, dengan jeda acak |
+| Zombie Lumut tanpa titik semak | Slot batal, tidak pindah ke titik spawn biasa |
+| Perch Jaguar | Hanya perch dalam `wanderRadius` dari `homePoint`. Saat malam, dilukai di perch, atau perch hilang, Jaguar langsung dipindah ke kaki pohon. Trigger animasi `Climb` resmi |
+| Gagak naik setelah menukik | Durasi sama dengan menukik (`crowDiveSeconds`) |
 
 ## Usulan yang menjadi nilai awal, per issue
 

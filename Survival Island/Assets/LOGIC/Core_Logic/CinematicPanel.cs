@@ -46,6 +46,12 @@ namespace SurvivalIsland
             if (captionText != null) captionText.text = UIManager.Localize(key);
         }
 
+        /// <summary>Teks tengah yang sudah diformat (mis. nama korban dari NarrativeSequencer).</summary>
+        public void ShowCaptionText(string text)
+        {
+            if (captionText != null) captionText.text = text ?? string.Empty;
+        }
+
         public void ClearCaption()
         {
             if (captionText != null) captionText.text = string.Empty;

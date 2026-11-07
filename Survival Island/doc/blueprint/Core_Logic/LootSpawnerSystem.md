@@ -237,3 +237,14 @@ Dipanggil `RegionStreaming.CaptureRegion` satu frame setelah `Unloading`, dan ol
 13. Kecilkan pool `WorldItem_Generic` ke 1, lalu masuk region dengan banyak loot. **Hasil:** sebagian barang tidak muncul tanpa error, dan muncul setelah region dimuat ulang dengan pool normal.
 14. Masuk region pada hari 1 dan hari 20 dengan seed sama, di dua run berbeda. **Hasil:** titik kosong sama, tetapi isi bisa berbeda karena skala hari (#103).
 15. Mati di kapal lalu ulangi dengan seed baru. **Hasil:** objek kapal lama kembali ke pool, dan susunan baru muncul tanpa sisa.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Assets/LOGIC/Core_Logic/LootSpawnerSystem.cs` (`LootPointDef`, `LootPointState`, `LootSpawnerSaveData`, `LootSpawnerSystem`).
+- **Dengan #88:** `homeRegion` dibaca dari `RegionSceneRoot` induk di `Awake`, `HandleRegionLoadState` tersambung (`Loaded` memanggil `SpawnOrRestore`, `Unloading` memanggil `ReleaseForUnload`), dan spawner tidak mendaftar ke `WorldStateSave`. Kalau spawner baru aktif setelah regionnya `Loaded` (event terlewat), `Start()` menyebar langsung.
+- **Jalur cadangan scene uji tetap ada** (keputusan sesi induk, lewat `RegionSaveRouting`): tanpa `RegionStreaming` atau di luar `RegionSceneRoot`, `homeRegion` dari Inspector, spawner mendaftar ke `WorldStateSave` (`LoadOrder` 0), dan penyebaran dipicu `Start()`. Saat melanjutkan save, `Start()` menunggu dan penyebaran dijalankan di `OnRestoreFinished`.
+- **`WorldItem.sourceSpawner`/`sourcePointIndex` (#66) sudah ada:** `SpawnPoint` mengisinya, dan `WorldItem` memanggil `MarkTaken`/`UpdateRemaining` sendiri. `SyncLiveItems()` hanya menyalin `Amount` dari objek yang masih milik spawner; objek yang kembali ke pool lewat jalur lain dilepas dari `liveItems` tanpa mengubah baris, sesuai "Kasus Khusus". Array `liveInstances` dihapus.
+- Lokasi kapal atau pulau dibaca dari `GameManager.currentPhase` (`SinkingShip` = kapal).
+- `UpdateRemaining(i, 0)` diperlakukan sebagai `MarkTaken(i)`.
+- `spawnerId` otomatis memakai awalan `ship` kalau `table.location == Ship`, selain itu `r<1-4>` dari `homeRegion`.
+- **Keputusan developer (7 November 2026):** Isi `RollPoint` dipindah ke `RollPointCore`. Fungsi baru `RollPointForSeed(kind, guaranteedItems, table, spawnerId, pointIndex, streamId, day, seed, ...)` dipakai `RunLayoutValidator` syarat 4 untuk seed calon, dengan hasil sama persis seperti `RollPoint` (#89). Getter baru `SpawnPointDefs` dibaca menu Editor `RunLayoutSources`.

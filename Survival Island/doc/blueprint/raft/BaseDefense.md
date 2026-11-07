@@ -174,3 +174,12 @@ Menyalakan musuh dan api yang menjalar diatur #97. Jebakan ini hanya memberi dam
 9. Jeda game saat zombie di kawat. **Hasil:** damage dan lambat berhenti, lalu lanjut sesudahnya.
 10. Simpan dan muat dengan jebakan HP 30. **Hasil:** posisi dan HP sama. Mati, lalu mulai run baru. **Hasil:** jebakan hilang.
 11. Pasang 30 jebakan dengan 100 zombie, sambil membuka Profiler. **Hasil:** tanpa alokasi GC dari `BaseTrap`.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `BaseTrap.cs`, `BaseTrapZone.cs`, dan `TrapData.cs` di `Assets/LOGIC/raft/`. Config `trap` ada di `Core_Logic/GameBalance.GrupF.cs`.
+- Angka diambil dari `GameBalanceConfig.trap` lewat `TrapData.GetStats`, lalu disimpan sebagai salinan per jebakan. Dengan begitu, aset tidak berubah saat bermain.
+- `BaseTrapZone` dipasang di anak `TriggerZone`, lalu meneruskan `OnTriggerEnter` dan `OnTriggerExit` ke `BaseTrap`.
+- Keausan jebakan dikirim paling akhir di `HitVictim`, karena bisa menghancurkan jebakan.
+- `Flammable.TryIgnite` (#97) belum ada (TODO).
+- Batas `maxTrapsPerRegion` belum dipakai `BuildManager`. TODO-nya ada di kode lama `BuildManager.cs`.

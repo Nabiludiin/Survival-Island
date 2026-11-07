@@ -12,8 +12,9 @@ namespace SurvivalIsland
     /// Claude.md Tahap 4 menyebut coroutine FrostbiteTick(). Di sini FrostbiteTick dipanggil dari akumulator Time.deltaTime
     /// (blueprint: "Tick setiap tickSeconds"), supaya ikut berhenti saat jeda tanpa coroutine.
     ///
-    /// Belum ada (TODO): SwimStateChangedEvent (#13, sementara isInWater dibaca dari PlayerTraversal.Mode == Swimming),
-    /// InteriorZoneChangedEvent (#112), CampfireManager.ActiveLit (#44), dan notifikasi HUD (#22).
+    /// isInWater dari SwimStateChangedEvent (#13, cadangan PlayerTraversal.Mode), isInInterior dari InteriorZoneChangedEvent (#112),
+    /// dan api unggun dari CampfireManager.IsNearLit (#44). Indikator HUD dibaca HUDManager sendiri dari WarmthChangedEvent
+    /// (WarmthSystem.md "Indikator HUD"); notifikasi obor (Terlalu basah, obor habis) milik TorchController.
     /// </summary>
     public class WarmthSystem : MonoBehaviour, ISaveable
     {
@@ -63,7 +64,8 @@ namespace SurvivalIsland
             EventChannel<RegionChangedEvent>.Raised += HandleRegion;
             EventChannel<WeatherChangedEvent>.Raised += HandleWeather;
             EventChannel<RunEndedEvent>.Raised += HandleRunEnded;
-            // TODO #13: SwimStateChangedEvent. TODO #112: InteriorZoneChangedEvent.
+            EventChannel<InteriorZoneChangedEvent>.Raised += HandleInterior;   // #112, sticky
+            if (EventChannel<InteriorZoneChangedEvent>.HasLast) isInInterior = EventChannel<InteriorZoneChangedEvent>.Last.isInside;
 
             // Sticky: pemain yang dimuat di Region 3 langsung terkena dingin.
             if (EventChannel<RegionChangedEvent>.HasLast) currentRegion = EventChannel<RegionChangedEvent>.Last.to;
@@ -82,6 +84,7 @@ namespace SurvivalIsland
             EventChannel<RegionChangedEvent>.Raised -= HandleRegion;
             EventChannel<WeatherChangedEvent>.Raised -= HandleWeather;
             EventChannel<RunEndedEvent>.Raised -= HandleRunEnded;
+            EventChannel<InteriorZoneChangedEvent>.Raised -= HandleInterior;
             if (registeredForSave && WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
             registeredForSave = false;
         }
@@ -94,6 +97,7 @@ namespace SurvivalIsland
         private void HandleRegion(RegionChangedEvent e) => currentRegion = e.to;
         private void HandleWeather(WeatherChangedEvent e) => weatherByRegion[(int)e.region] = e.weather;
         private void HandleRunEnded(RunEndedEvent e) => runEnded = true;
+        private void HandleInterior(InteriorZoneChangedEvent e) => isInInterior = e.isInside;
 
         // ---------------------------------------------------------------- Pemeriksaan berkala
 
@@ -104,8 +108,10 @@ namespace SurvivalIsland
             var w = bal.warmth;
             float dt = Time.deltaTime; // Game dijeda: Warmth dan durasi obor ikut berhenti
 
-            // TODO #13: ganti dengan SwimStateChangedEvent.isSwimming.
-            isInWater = traversal != null && traversal.Mode == TraversalMode.Swimming;
+            // SwimStateChangedEvent.isSwimming (#13, sticky). Cadangan tanpa SwimmingController: PlayerTraversal.Mode.
+            isInWater = EventChannel<SwimStateChangedEvent>.HasLast
+                ? EventChannel<SwimStateChangedEvent>.Last.isSwimming
+                : traversal != null && traversal.Mode == TraversalMode.Swimming;
 
             shelterTimer -= dt;
             if (shelterTimer <= 0f)
@@ -234,8 +240,8 @@ namespace SurvivalIsland
 
         private bool IsNearLitCampfire()
         {
-            // TODO #44: CampfireManager.ActiveLit dalam campfire.warmthRadius.
-            return false;
+            // Api unggun menyala dalam campfire.warmthRadius (#44).
+            return CampfireManager.IsNearLit(transform.position);
         }
 
         private void RefreshShelter(WarmthBalance w)

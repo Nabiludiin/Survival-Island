@@ -6,16 +6,16 @@ namespace SurvivalIsland
     /// Meja crafting (Build_WoodBench, Build_MedicalBench). Mendaftar sebagai stasiun aktif, dan membuka CraftingPanel lewat E.
     /// Blueprint: Core_Logic/CraftingStation.md (#77). GDD bagian 4: meja crafting berada di base.
     ///
-    /// Catatan implementasi (Langkah 4): blueprint menulis CraftingStation : IslandInteractable (#17). Kelas dasar itu
-    /// belum ada, jadi kelas ini menerapkan IInteractable (Langkah 2) langsung. TODO #17: ganti basis ke IslandInteractable.
+    /// Mewarisi IslandInteractable (#17): highlight, penolakan CarryingHeavyItem (blockedWhileCarrying), dan prompt dari
+    /// promptKey diatur kelas dasar. saveId dibiarkan kosong, karena meja adalah struktur yang disimpan StructureRegistry.
     /// Collider interaksi berada di anak layer Interactable yang sedikit menonjol (BuildMenu.md "Layer pada prefab struktur").
     /// </summary>
-    public class CraftingStation : MonoBehaviour, IInteractable
+    public class CraftingStation : IslandInteractable
     {
+        private const string DefaultPromptKey = "prompt.crafting_station";   // Kunci teks #104: "Buka meja crafting"
+
         [SerializeField] private CraftingStationType stationType = CraftingStationType.WoodBench;
         [SerializeField] private Transform centerPoint;
-        [SerializeField] private string promptText = "Buka meja crafting";   // TODO #104: kunci teks
-        [SerializeField] private InteractHighlight highlight;
 
         public CraftingStationType StationType => stationType;
         public Vector3 Center => centerPoint != null ? centerPoint.position : transform.position + Vector3.up * 0.8f;
@@ -37,22 +37,17 @@ namespace SurvivalIsland
             if (CraftingManager.Instance != null) CraftingManager.Instance.UnregisterStation(this);
         }
 
-        // ---------------------------------------------------------------- IInteractable
+        // ---------------------------------------------------------------- IslandInteractable
 
-        public bool IsAvailable => isActiveAndEnabled;
-        public float HoldSeconds => 0f;
-        public string GetPrompt() => promptText;
-
-        public InteractBlockReason CanInteract(in InteractContext ctx)
+        private void Reset()
         {
-            // Membawa Heavy Item: E terhalang. Tombol C tetap membuka panel.
-            return ctx.IsCarryingHeavyItem ? InteractBlockReason.CarryingHeavyItem : InteractBlockReason.None;
+            promptKey = DefaultPromptKey;
+            blockedWhileCarrying = true;   // Membawa Heavy Item: E terhalang. Tombol C tetap membuka panel.
         }
 
-        public void OnHoverEnter() { if (highlight != null) highlight.SetState(HighlightState.Available); }
-        public void OnHoverExit() { if (highlight != null) highlight.SetState(HighlightState.Off); }
+        public override string GetPrompt() => Localize(string.IsNullOrEmpty(promptKey) ? DefaultPromptKey : promptKey);
 
-        public bool Interact(in InteractContext ctx)
+        protected override bool OnInteract(in InteractContext ctx)
         {
             var panel = CraftingPanel.Instance;
             if (panel == null || UIFocusStack.Instance == null) return false;

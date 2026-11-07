@@ -219,3 +219,14 @@ Belum diuji di Unity, karena proyek Unity belum dibuat.
 15. Mati. **Hasil:** warna hilang selama 2 detik. Run baru mulai dengan layar bersih.
 16. Keluar dari Play Mode setelah efek aktif. **Hasil:** aset `StatusProfile` tidak berubah.
 17. Buka Profiler selama 60 detik. **Hasil:** tidak ada alokasi GC dari `Update`.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `PostProcessController.cs`. Config di `GameBalance.FondasiA.cs`.
+- `InfectionSystem` mengirim tahap 1 sampai 4, jadi indeks `stageVision` adalah `stage - 1` (dibatasi), bukan `stageVision[e.stage]`.
+- `SetRegionProfile`: profil baru diisi ke volume yang bobotnya lebih kecil. Kalau dipanggil di tengah transisi, bobot berlanjut dari nilai saat ini (isi volume yang diisi ulang bisa sedikit berubah, karena profil satu volume diganti).
+- `gaussianEnd` saat tidak menyelam (200 m) berada di field prefab `dofClearEndMeters`.
+- `colorAdjust.active` menyala saat infeksi, bawah air, atau mati.
+- Belum ada (TODO): `SwimStateChangedEvent` (#13) dan `SleepStateChangedEvent` (#67) belum dideklarasikan pemiliknya, jadi efek bawah air, napas dari renang, dan tidur belum tersambung (tanda `Drowning` sudah). Perintah `postfx` di `DevConsole`. `screenTint` milik `DeathCinematic` tidak punya API di blueprint ini.
+- Isi TODO (sistem pendukung): `SetScreenTint(Color tint)`: warna layar dari `DeathCinematicProfile.screenTint` (#53). RGB menjadi Color Filter, alpha menjadi kekuatan (0 = tidak ada), di atas filter infeksi dan air. Dikosongkan `ClearStatusEffects`. Fungsi ini tidak disebut blueprint (tafsiran sederhana).
+- Isi TODO (sistem pendukung): Debug (`#if UNITY_EDITOR || DEVELOPMENT_BUILD`): `DebugForceTarget(string effect, float value)` untuk `postfx`. Nama efek: hp, wound, freeze, breath, infection, underwater, sleep, death. Nilai menimpa target dari event setiap frame sampai dilepas dengan nilai negatif (`postfx <efek> off`).

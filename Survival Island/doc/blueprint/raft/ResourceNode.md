@@ -127,3 +127,7 @@ Belum diuji di Unity, karena blueprint ini baru rancangan.
 ## 7. Catatan Implementasi (Langkah 4)
 
 Kode: `Survival Island/Assets/LOGIC/raft/ResourceNode.cs`, `ResourceNodeData.cs` (`NodeType`, `NodeStatus`, `HitResult`, `ToolRule`, `RegrowRule`, `IRegrowable`), `ResourceDropGuard.cs`, `ResourceRespawn.cs`. Rincian di `ResourceRespawn.md` bagian 7.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- **Keputusan developer (7 November 2026):** Hasil panen (jumlah item jatuh saat node habis, setelah `stream.Range(min, max + 1)`) dikali `DifficultyProfile.harvestYieldMultiplier`, dibulatkan dengan `Mathf.RoundToInt`, dan minimal 1 kalau hasil asli lebih dari 0 (`ApplyHarvestYield`). Pengali tidak memengaruhi stream acak, jadi urutan acak tetap sama.

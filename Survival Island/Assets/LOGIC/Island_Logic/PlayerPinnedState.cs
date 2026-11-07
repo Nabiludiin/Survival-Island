@@ -19,8 +19,8 @@ namespace SurvivalIsland
     /// Pemain tertahan musuh dan cara lepas sendiri. Blueprint: Island_Logic/PlayerPinnedState.md (#110).
     /// GDD bagian 3 (Diterkam): Jaguar dan Zombie Tribal bisa menahan pemain, dan pemain harus melepaskan diri sendiri,
     /// misalnya dengan Pisau. Tanpa bantuan NPC (keputusan developer). Claude.md Pilar 3: PlayerPinnedState.
-    /// Belum diimplementasikan (TODO): mode tahan tombol (#19, butuh StruggleHeld di InputManager), keausan Pisau lewat
-    /// DurabilitySystem (#113), CameraShake Pinned (#24), animasi tusuk.
+    /// Keausan Pisau lewat DurabilitySystem (#113), mode tahan tombol (SettingsManager.holdToStruggle #19, lewat
+    /// InputManager.StruggleHeld), dan CameraShake Pinned (#24) sudah dipakai. Belum diimplementasikan (TODO): animasi tusuk.
     /// </summary>
     public class PlayerPinnedState : MonoBehaviour
     {
@@ -72,7 +72,9 @@ namespace SurvivalIsland
             if (b == null || !b.enabled || attacker == null || IsPinned || Time.time < repinImmuneUntil) return false;
             if (stats != null && !stats.IsAlive) return false;
             if (traversal != null && traversal.Mode == TraversalMode.Swimming) return false;
-            // TODO #99: tolak saat panel Cinematic aktif.
+            // Tolak saat panel Cinematic aktif (#99).
+            var ui = UIManager.Instance;
+            if (ui != null && ui.cinematicPanel != null && UIFocusStack.Instance != null && UIFocusStack.Instance.Contains(ui.cinematicPanel)) return false;
             // 2.
             Attacker = attacker;
             IsPinned = true;
@@ -88,6 +90,8 @@ namespace SurvivalIsland
                 AttackCoordinator.Instance.SetAttackerLimit(PlayerTargetable.Instance, b.maxOtherAttackers);
             // 5. EquipmentManager memasang EquipLock.Pinned, UIFocusStack menutup panel, HeavyItemSystem menjatuhkan barang.
             EventChannel<PlayerPinnedEvent>.Publish(new PlayerPinnedEvent(attacker.AttackerId, true));
+            // 6. Satu getaran saat diterkam (#24).
+            CameraShake.Play(CameraShakeKind.Pinned);
             return true;
         }
 
@@ -108,9 +112,22 @@ namespace SurvivalIsland
             float mult = EscapeMultiplier(b);
             var input = InputManager.Instance;
             bool pressed = input != null && input.StrugglePressed;
+            bool holdMode = SettingsManager.Instance != null && SettingsManager.Instance.holdToStruggle;
 
+            // 4b. Aksesibilitas #19 (holdToStruggle): menahan Struggle menambah kemajuan per detik dengan biaya stamina
+            //     per detik. Kemajuan turun kalau tombol dilepas (PlayerPinnedState.md tabel cara lepas).
+            if (holdMode)
+            {
+                bool held = input != null && input.StruggleHeld;
+                if (held)
+                {
+                    EscapeProgress += b.holdProgressPerSec * mult * dt;
+                    if (stats != null) stats.SpendStamina(b.struggleStaminaHoldPerSec * dt, StaminaUse.Struggle);   // Boleh gagal
+                }
+                else EscapeProgress = Mathf.Max(0f, EscapeProgress - b.mashDecayPerSec * dt);
+            }
             // 4. Menekan berulang. Tekanan lebih cepat dari mashMinPressInterval diabaikan.
-            if (pressed && Time.time - lastPressTime >= b.mashMinPressInterval)
+            else if (pressed && Time.time - lastPressTime >= b.mashMinPressInterval)
             {
                 lastPressTime = Time.time;
                 EscapeProgress += b.mashProgressPerPress * mult;
@@ -134,7 +151,9 @@ namespace SurvivalIsland
             if (knifeCooldownTimer > 0f) return;
             var inv = InventoryManager.Instance;
             if (inv == null || !inv.HasItem(KnifeItemId, 1)) return;
-            // TODO #113: tolak kalau DurabilitySystem.GetState(pisau) == Broken.
+            // Pisau Broken tidak bisa dipakai menusuk (#113).
+            var knife = inv.FindFirstInstance(KnifeItemId);
+            if (DurabilitySystem.GetState(knife) == DurabilityState.Broken) return;
             var target = Attacker.DamageTarget;
             if (target != null)
             {
@@ -150,7 +169,8 @@ namespace SurvivalIsland
                 target.TakeDamage(info);
             }
             knifeCooldownTimer = b.knifeCooldownSeconds;
-            // TODO #113: DurabilitySystem.ApplyWear(pisau, knifeDurabilityCost).
+            // Keausan pisau per tusukan (#113).
+            DurabilitySystem.ApplyWear(knife, b.knifeDurabilityCost);
             if (!IsPinned) return;   // Penyerang sudah melepas lewat ReleaseByAttacker
             EscapeProgress += b.knifeProgress * mult;
             if (EscapeProgress >= 1f) Release(PinReleaseReason.EscapedWithKnife);

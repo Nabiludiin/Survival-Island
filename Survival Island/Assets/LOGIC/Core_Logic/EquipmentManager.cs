@@ -40,6 +40,11 @@ namespace SurvivalIsland
         [Tooltip("Dipakai makanan, minuman, atau obat di hotbar yang tidak punya equipPrefab sendiri.")]
         [SerializeField] private ConsumableEquippable consumableBehaviour;
         [SerializeField] private InventoryManager inventory;
+        [Header("Suara (#16)")]
+        [Tooltip("Klik pada slot hotbar kosong.")]
+        [SerializeField] private AudioClip emptySlotClip;
+        [Tooltip("Suara patah saat klik kiri dengan item Broken (#113).")]
+        [SerializeField] private AudioClip brokenClip;
 
         private int[] hotbar;
         private int activeHotbarIndex = 1;   // Slot Base_Pistol
@@ -48,6 +53,7 @@ namespace SurvivalIsland
         private EquippableBehaviour offHandBehaviour;
         private EquipState state = EquipState.Idle;
         private float switchTimer;
+        private float briefLowerTimer;   // LowerBriefly (#96): viewmodel turun tanpa berganti item
         private int pendingIndex = NoPending;
         private int targetIndex = NoSlot;
         private int lastIndex = NoSlot;
@@ -124,6 +130,7 @@ namespace SurvivalIsland
         private void Update()
         {
             if (state != EquipState.Idle) TickSwitch();   // Tetap selesai walau panel tanpa jeda terbuka
+            TickBriefLower();
             if (locks != EquipLock.None) return;          // Kunci Menu mengikuti IsGameplayInputBlocked
             ReadHotbarInput();
             if (state != EquipState.Idle || activeBehaviour == null) return;
@@ -132,14 +139,25 @@ namespace SurvivalIsland
             if (input == null) return;
             if (input.FlashlightPressed) ToggleOffHand();   // Tombol F (#18), bukan lagi dibaca FlashlightController
 
-            // TODO #113: kalau DurabilitySystem.GetState(ActiveInstance) == Broken, klik kiri memanggil RejectBroken().
-            if (input.PrimaryPressed) activeBehaviour.PrimaryAction(ActionPhase.Pressed);
+            // Item Broken tidak bisa dipakai: klik kiri hanya memberi suara dan notifikasi, item tetap di hotbar (#113).
+            if (DurabilitySystem.GetState(ActiveInstance) == DurabilityState.Broken)
+            {
+                if (input.PrimaryPressed) RejectBroken();
+            }
+            else if (input.PrimaryPressed) activeBehaviour.PrimaryAction(ActionPhase.Pressed);
             else if (input.PrimaryHeld) activeBehaviour.PrimaryAction(ActionPhase.Held);
             else if (input.PrimaryReleased) activeBehaviour.PrimaryAction(ActionPhase.Released);
 
             if (input.SecondaryPressed) activeBehaviour.SecondaryAction(ActionPhase.Pressed);
             else if (input.SecondaryHeld) activeBehaviour.SecondaryAction(ActionPhase.Held);
             else if (input.SecondaryReleased) activeBehaviour.SecondaryAction(ActionPhase.Released);
+        }
+
+        /// <summary>Klik kiri dengan item Broken (#113): suara patah dan notifikasi. Aksi item tidak dijalankan.</summary>
+        private void RejectBroken()
+        {
+            AudioManager.Instance?.PlaySFX(brokenClip);
+            if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.item_broken", NotificationKind.Warning);   // "Item rusak"
         }
 
         private void ReadHotbarInput()
@@ -177,7 +195,8 @@ namespace SurvivalIsland
             if (index >= 0 && index == activeHotbarIndex && state == EquipState.Idle) index = NoSlot;
             if (index >= 0 && hotbar[index] == NoSlot)
             {
-                // Tombol slot kosong: ditolak. TODO #21: suara klik.
+                // Tombol slot kosong: ditolak dengan suara klik (#21).
+                AudioManager.Instance?.PlaySFX(emptySlotClip);
                 return;
             }
             if (state != EquipState.Idle)
@@ -193,8 +212,32 @@ namespace SurvivalIsland
             BeginSwitch(index);
         }
 
+        /// <summary>
+        /// Viewmodel item aktif turun sebentar lalu naik lagi, tanpa berganti item (ThrowableSystem.md: saat melempar, #96).
+        /// Lama turun memakai equipment.lowerSeconds. Diabaikan saat sedang berganti item atau ada kunci.
+        /// </summary>
+        public void LowerBriefly()
+        {
+            if (state != EquipState.Idle || locks != EquipLock.None) return;
+            briefLowerTimer = Balance != null ? Balance.equipment.lowerSeconds : 0.15f;
+            if (FirstPersonCamera.Instance != null) FirstPersonCamera.Instance.SetViewmodelMode(ViewmodelMode.Lowered);
+        }
+
+        private void TickBriefLower()
+        {
+            if (briefLowerTimer <= 0f) return;
+            briefLowerTimer -= Time.deltaTime;
+            if (briefLowerTimer > 0f) return;
+            briefLowerTimer = 0f;
+            // Pergantian item atau kunci simpan/mati yang mulai di tengah jalan sudah mengatur mode viewmodel sendiri.
+            // Kunci Menu tidak mengubah viewmodel, jadi tetap dinaikkan.
+            if (state == EquipState.Idle && (locks & (StashLocks | EquipLock.Dead)) == 0 && FirstPersonCamera.Instance != null)
+                FirstPersonCamera.Instance.SetViewmodelMode(ViewmodelMode.Visible);
+        }
+
         private void BeginSwitch(int index)
         {
+            briefLowerTimer = 0f;
             LastUnequippedInstanceId = ActiveInstanceId;
             if (activeBehaviour != null) activeBehaviour.OnUnequip();
             targetIndex = index;
@@ -492,12 +535,15 @@ namespace SurvivalIsland
         private void HandleActiveItemLost()
         {
             LastUnequippedInstanceId = ActiveInstanceId;
+            bool wasConsumable = activeBehaviour != null && activeBehaviour == consumableBehaviour;
             if (activeBehaviour != null && activeBehaviour != fistBehaviour) activeBehaviour.OnUnequip();
             int from = activeHotbarIndex;
             activeHotbarIndex = NoSlot;
             SetActiveBehaviour(fistBehaviour, null, false);
             state = EquipState.Idle;
-            // TODO #22: notifikasi "Item rusak" (kecuali tumpukan konsumsi habis).
+            // Notifikasi "Item rusak" (#22), kecuali tumpukan konsumsi yang habis dipakai.
+            if (!wasConsumable && NotificationManager.Instance != null)
+                NotificationManager.Instance.Show("notif.item_broken", NotificationKind.Warning);
             for (int step = 1; step < hotbar.Length; step++)
             {
                 int i = (from + step) % hotbar.Length;

@@ -83,6 +83,19 @@ namespace SurvivalIsland
             // GLOSSARY.md: item inti dan KeyItem tidak bisa dibuang (#116).
             if (isCoreItem || type == ItemType.KeyItem) isDroppable = false;
             if (maxStack < 1) maxStack = 1;
+
+            // Keputusan developer (DurabilitySystem.md "Menunggu developer" nomor 1, disetujui di sistem pendukung):
+            // item non-inti yang memakai durabilitas harus bisa diperbaiki, kecuali obor dan senter yang memakai
+            // durabilitas sebagai bahan bakar. Item seperti itu akan rusak permanen, jadi ditandai sebagai kesalahan data.
+            if (maxDurability > 0f && !isRepairable && !isCoreItem && !UsesDurabilityAsFuel(itemID))
+                Debug.LogError($"[ItemData] '{itemID}': maxDurability > 0 tetapi isRepairable = false dan bukan item inti. " +
+                               "Aktifkan isRepairable, atau set maxDurability = -1 (DurabilitySystem.md).", this);
+        }
+
+        /// <summary>Obor dan senter memakai durabilitas sebagai bahan bakar atau baterai (pengecualian validasi).</summary>
+        private static bool UsesDurabilityAsFuel(string id)
+        {
+            return id == "Tool_Torch" || id == "Tool_Flashlight";
         }
 #endif
     }

@@ -8,7 +8,7 @@ namespace SurvivalIsland
     /// Status node tech tree. Singleton per scene di IslandPhase, bukan ISaveable: statusnya disimpan CraftingManager
     /// di entri world_recipes. Blueprint: Core_Logic/TechTreeManager.md (#34, #77, #80). Usulan, belum ada di GDD.
     ///
-    /// Belum ada di Langkah 4 (TODO): AudioManager.PlaySFX(unlockClip) (#16), validasi Editor rantai prasyarat.
+    /// Belum ada di Langkah 4 (TODO): validasi Editor rantai prasyarat.
     /// </summary>
     [DisallowMultipleComponent]
     public class TechTreeManager : MonoBehaviour
@@ -16,9 +16,7 @@ namespace SurvivalIsland
         public static TechTreeManager Instance { get; private set; }
 
         [SerializeField] private TechNodeData[] nodes;
-#pragma warning disable 0169 // Dipakai saat AudioManager (#16) ada
         [SerializeField] private AudioClip unlockClip;
-#pragma warning restore 0169
 
         private readonly Dictionary<string, TechNodeData> nodesById = new Dictionary<string, TechNodeData>(StringComparer.Ordinal);
         private readonly HashSet<string> unlocked = new HashSet<string>(StringComparer.Ordinal);
@@ -88,7 +86,7 @@ namespace SurvivalIsland
             // Pemicu tidak disimpan: pemain mengulang pemicunya setelah prasyarat terbuka.
             if (!IsUnlocked(n.requiredNodeId)) return false;
             unlocked.Add(nodeId);
-            // TODO #16: AudioManager.Instance.PlaySFX(unlockClip).
+            AudioManager.Instance?.PlaySFX(unlockClip);   // SFX node terbuka (#16)
             EventChannel<TechNodeUnlockedEvent>.Publish(new TechNodeUnlockedEvent(nodeId));
             return true;
         }

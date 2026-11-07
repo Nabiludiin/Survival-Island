@@ -11,7 +11,7 @@ namespace SurvivalIsland
     /// menentukan tahap, memasang penalti lewat SetPenalty, dan menerapkan vaksin.
     /// HP tahap 3 dan 4 dihitung SurvivalStats sendiri (VitalsRules.md baris HP 5), bukan di sini.
     ///
-    /// Belum ada di Langkah 4 (TODO): notifikasi (#22), pengali NPC medis (NPCRoster #76), efek layar (#23 membaca event).
+    /// Notifikasi (#22) dan pengali NPC medis (NPCRoster #76) sudah disambung. Efek layar milik #23 (membaca event).
     /// </summary>
     [DisallowMultipleComponent]
     public class InfectionSystem : MonoBehaviour
@@ -70,7 +70,8 @@ namespace SurvivalIsland
             if (e.infection >= critical && !warnedCritical)
             {
                 warnedCritical = true;
-                // TODO #22: NotificationManager "Infeksi kritis, segera suntik vaksin".
+                // Notifikasi kritis (#22): "Infeksi kritis, segera suntik vaksin".
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.infection_critical", NotificationKind.Danger);
             }
             else if (e.infection < critical)
             {
@@ -106,7 +107,8 @@ namespace SurvivalIsland
             EventChannel<InfectionStageChangedEvent>.Publish(new InfectionStageChangedEvent(stage));
             if (!force && stage > previous)
             {
-                // TODO #22: notifikasi tahap, contoh "Mulai demam" untuk tahap 2.
+                // Notifikasi tahap (#22), contoh "Mulai demam" untuk tahap 2. Kunci notif.infection_stage<N>.
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.infection_stage" + stage, NotificationKind.Warning);
             }
         }
 
@@ -136,7 +138,8 @@ namespace SurvivalIsland
             if (stats == null || item == null) return false;
             if (stats.Infection <= 0f)
             {
-                // TODO #22: notifikasi "Tidak terinfeksi".
+                // Notifikasi "Tidak terinfeksi" (#22).
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.not_infected", NotificationKind.Info);
                 return false;
             }
             return true;
@@ -149,7 +152,8 @@ namespace SurvivalIsland
             float amount = -item.infectionDelta;
             if (amount <= 0f) return;
 
-            // TODO #76: amount *= NPCRoster.Instance.GetSkillMultiplier(NPCSkill.Medic) (medicVaccineMultiplier saat NPC medis hidup).
+            // GDD bagian 3: NPC ahli medis hidup membuat dosis vaksin x medicVaccineMultiplier (#76).
+            if (NPCRoster.Instance != null) amount *= NPCRoster.Instance.GetSkillMultiplier(NPCSkill.Medic);
             stats.ReduceInfection(amount);
             EventChannel<VaccineUsedEvent>.Publish(new VaccineUsedEvent(amount, stats.Infection));
 

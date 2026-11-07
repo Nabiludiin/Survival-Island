@@ -31,6 +31,8 @@ namespace SurvivalIsland
 
         public AudioClip warningClip;
         public AudioClip activeLoop;
+        [Tooltip("Gempa: suara gemuruh tiap denyut (DisasterManager.md \"Gempa\" langkah 1). Boleh kosong.")]
+        public AudioClip pulseClip;
 
         public bool IsMajor(int scale) => scale >= majorMinScale;
 

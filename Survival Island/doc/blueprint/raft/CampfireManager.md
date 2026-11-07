@@ -279,3 +279,18 @@ Saat `StructureDestroyedEvent` untuk `StructureId` milik api ini: panggil `Extin
 19. Simpan saat masak, keluar, lalu lanjutkan. **Hasil:** progres, bahan bakar, dan isi baris sama.
 20. Hancurkan api unggun saat panel terbuka. **Hasil:** panel tertutup, dan isi jatuh sebagai `WorldItem`.
 21. Mati, lalu mulai run baru. **Hasil:** tidak ada api unggun dari run lama.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- File: `Assets/LOGIC/raft/CampfireManager.cs` (`CookRow`, `CookRowState`, `CampfireReject`, `CampfireManager`), `CookingRecipe.cs`, `CampfirePanel.cs`. Event `ItemCookedEvent` di `GameEvents.GrupG.cs`.
+- `RecipeDatabase.FindCookingByInput` belum ada dan `RecipeDatabase` adalah kode lama, jadi pencarian ditulis sebagai `CookingRecipe.FindByInput(itemId)`. Bahan pertama resep dianggap input.
+- `CookingRecipe.timeSource` memilih lama masak: `campfire.cookSeconds` (nilai awal), `campfire.boilSeconds` (untuk `boil_water`), atau `craftSeconds` aset.
+- Config tambahan (usulan teknis): `campfire.skyCheckDistance`, `structureRecheckRadius` (sama dengan #43), dan `cookedNotifyDistance` (15 meter dari teks blueprint).
+- `CampfireManager.IsNearLit(pos)` ditambahkan untuk `WarmthSystem` (#65).
+- Belum ada (TODO di kode): `LightSource.SetLit` (#98), `BaseTrap` (#26), `NPCRoster.GetSkillMultiplier` (#76, pengali 1), `FireSystem` (#97), `RegionStreaming` (#88, `homeRegion` dari `ZoneTracker.Active`). `IslandInteractable` (#17) belum ada, jadi menerapkan `IInteractable` langsung.
+- Panel: seret-lepas ke kotak input belum ada. Klik kiri atau kanan item inventori memasukkannya ke baris kosong (klik kanan mengisi beberapa baris dari satu tumpukan). Bahan bakar lewat tombol `Tambah Kayu`, atau klik item yang hanya bahan bakar.
+- Pemakaian `Kit_Campfire` lewat `ItemUseSystem` (memanggil `BuildManager.BeginPlacementFromItem`) belum ada di kode lama.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Api unggun yang hancur saat menyala tidak memicu `FireArea`, sesuai `FireSystem.md` keputusan 2 (api unggun tidak menjalar). TODO lama tentang ini ditutup.

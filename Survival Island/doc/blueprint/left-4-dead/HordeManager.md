@@ -205,3 +205,15 @@ Zombie yang tersisa terbakar saat fajar lewat `SunlightExposure` (#63). `HordeMa
 13. Jeda game. **Hasil:** gelombang tidak muncul selama jeda.
 14. Mati saat Blood Moon, lalu mulai run baru. **Hasil:** langit normal, dan event tidak aktif.
 15. Atur `balance bloodMoon.enabled 0`, lalu `setday 10`. **Hasil:** malam berjalan biasa. Saklar ini hanya untuk tes.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Assets/LOGIC/left-4-dead/HordeManager.cs`. Config `bloodMoon` ada di `Core_Logic/GameBalance.GrupF.cs`. Event `BloodMoonWarningEvent` dan `BloodMoonEndedEvent` ada di `Core_Logic/GameEvents.GrupF.cs`.
+- `LoadOrder` bernilai 130, sesuai tabel urutan di `WorldStateSave.md`. Data save mendapat tambahan `lastWarningDay`, supaya peringatan tidak terkirim dua kali setelah load.
+- `AIDirector` dan `AISensoryHub` belum mendengar `BloodMoonStartedEvent`. Untuk sementara, `HordeManager` memanggil `AIDirector.SetOverridden` dan mengatur `AISensoryHub.IgnoreStealth` langsung saat mulai, saat load, dan saat selesai.
+- Override 3 `BaseAnchor` di `ThreatSystem` belum ada. `BaseAnchor` sudah terdaftar sebagai kandidat biasa.
+- `RegionStreaming` (#88) belum ada. Region dianggap sudah dimuat, dan tabel gelombang memakai `ZoneTracker.Active`, bukan `GetRegionAt(center)`.
+- Pusat serbuan memakai `BaseNavigation.IsAnchorEngaged`, sesuai langkah 1 di bagian "Spawn massal".
+- `SetSleeping(bool)` disediakan untuk `SleepSystem` (#67). Lihat juga status `SleepStateChangedEvent` di laporan.
+- Teks peringatan memakai kunci `notif.bloodmoon.warning` dengan `NotificationKind.Danger`.
+- Perintah `DevConsole` tersedia lewat `DebugStart`, `DebugStop`, dan `DebugStatus`.

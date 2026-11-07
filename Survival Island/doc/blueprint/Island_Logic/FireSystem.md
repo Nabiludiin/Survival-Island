@@ -215,3 +215,18 @@ Aturan `Storm` dan `Blizzard` sama dengan `CampfireManager`. Objek beratap tidak
 12. Save saat dinding menyala, lalu load. **Hasil:** HP sama, api menyala lagi dengan sisa waktu yang sama.
 13. Mati saat base terbakar, lalu mulai run baru. **Hasil:** tidak ada efek api tersisa, dan pool kembali penuh.
 14. Tekan jeda saat api menyala. **Hasil:** HP dan timer berhenti.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Island_Logic/FireSystem.cs`, `Flammable.cs`, `FlammableProfile.cs` (enum `FlammableKind` untuk aturan akhir bakar dan batas vegetasi), `FireArea.cs`, `BurnEffect.cs`, `FireExtinguishTarget.cs`. Config `GameBalanceConfig.fire` di `GameBalance.GrupE.cs`.
+- Tafsiran `rainBurnMultiplier` 0,5: `burnRemaining` berkurang `1 / 0,5` = 2 kali lebih cepat, dan durasi `FireArea` tak beratap saat `Rain` dikali 0,5.
+- Tambahan angka `fire.roofCheckDistance` (20, sama dengan `campfire.skyCheckDistance`) untuk jarak raycast atap.
+- `FireArea` menjalankan tick sendiri (`Update`). `FireSystem` memegang daftar, batas, dan carve.
+- `FireExtinguishTarget` menunjuk `BurnEffect` atau `FireArea` di objek yang sama. `BurnEffect.Bind` mematikan collider padam kalau pemiliknya musuh.
+- Api struktur di region yang tidak dimuat saat load tidak dinyalakan lagi, karena `Flammable` struktur itu belum aktif.
+- `byPlayer` ikut disimpan di `world_fire`, supaya friendly fire tetap sama setelah load.
+- Belum diuji di Unity.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): `TryGetEscapePoint(Vector3, float margin, out Vector3)`: titik di tepi `FireArea` terdekat (radius + margin) searah pusat ke posisi. Tanpa query fisika. Dipakai `NPCCompanion`.

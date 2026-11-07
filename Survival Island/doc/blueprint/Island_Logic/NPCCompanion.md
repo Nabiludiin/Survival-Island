@@ -218,3 +218,20 @@ Daftar usulan umum ada di `NPCRoster.md` bagian 5.
 15. Tekan `E` pada NPC saat zombie berada 3 meter darinya. **Hasil:** perintah ditolak.
 16. Jeda game saat NPC berjalan. **Hasil:** `Think` dan regen berhenti.
 17. Buka Profiler dengan tiga NPC aktif. **Hasil:** `Think` tidak mengalokasi GC, dan tidak berjalan pada frame yang sama.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Island_Logic/NPCCompanion.cs` (beserta `NPCState`) dan `Assets/LOGIC/left-4-dead/NPCGunUser.cs`. Belum diuji di Unity.
+
+- **Target musuh:** musuh tidak memasang `ITargetable` (kontrak itu hanya untuk target musuh di `ThreatSystem.md`). Karena itu `currentTarget` berupa `EnemyHealth`, titik bidik dari `Collider.bounds.center`, dan `NPCGunUser.TryShootAt(Vector3 aimPoint)` menerima titik, bukan `ITargetable`. Musuh dengan `EnemyAI.IsActiveThreat == false` (Dormant, Submerged) dilewati.
+- **ThreatSystem:** pendaftaran memakai `RegisterCandidate` dan `UnregisterCandidate`, yaitu API `ThreatSystem` untuk `ITargetable`.
+- **Angka baru (usulan, di `GameBalanceConfig.npc`):** `doorKeepAwayRadius` 1,5 (jarak dari pintu di `NPCRoster.md`), `commandBlockEnemyRadius` 5 (penolakan perintah `E`), dan `fireAvoidMargin` 2 (untuk `FireSystem.IsNearFire`).
+- **Pintu:** `autoTraverseOffMeshLink = false`. NPC menyeberang link sendiri di `Update`. Link milik `BaseDoor` memanggil `RequestNpcPass`, lalu `NotifyNpcPassed`. Saat `TakeCover`, Area `DoorLink` dikeluarkan dari `areaMask`.
+- **Titik berlindung:** delapan sampel di cincin 2,5 m sekitar `homePoint` yang lolos `NavMesh.SamplePosition` dan `IsInsideBase`. Yang terjauh dari musuh dipilih.
+- **Tempat kerja:** `CraftingStation` atau `CampfireManager` terdekat dalam `workSearchRadius`, dicari lewat `FindObjectsByType` hanya saat `StayAtBase` mencari tempat kerja.
+- **Prompt perintah:** kunci `prompt.npc_follow`, `prompt.npc_wait`, dan `prompt.npc_base`. Penolakan base memakai `notif.npc_no_base`.
+- **Belum ada (TODO di kode):** penghindaran api (`FireSystem.IsNearFire`, #97).
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Think langkah 1: `FireSystem.TryGetEscapePoint(posisi, npc.fireAvoidMargin, out titik)`, lalu `NavMesh.SamplePosition` dengan radius yang sama dan `SetDestination`. Tick selesai.

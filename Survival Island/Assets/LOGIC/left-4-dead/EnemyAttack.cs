@@ -15,7 +15,8 @@ namespace SurvivalIsland
     public class EnemyAttack : MonoBehaviour, IPoolable
     {
         [SerializeField] private Animator animator;
-        [SerializeField] private AudioSource telegraphSource;   // TODO #114: ganti ThreatAudioEmitter.PlayTell
+        [Tooltip("Cadangan kalau musuh tidak punya ThreatAudioEmitter (#114).")]
+        [SerializeField] private AudioSource telegraphSource;
 
         public AttackPhase Phase { get; private set; } = AttackPhase.None;
         public AttackData Current => current;
@@ -41,6 +42,7 @@ namespace SurvivalIsland
         private NavMeshAgent agent;
         private EnemyHealth health;
         private EnemyAI ai;
+        private ThreatAudioEmitter emitter;
         private int EnemyId => GetInstanceID();
 
         private void Awake()
@@ -49,6 +51,7 @@ namespace SurvivalIsland
             health = GetComponent<EnemyHealth>();
             ai = GetComponent<EnemyAI>();
             if (animator == null) animator = GetComponentInChildren<Animator>();
+            emitter = GetComponentInChildren<ThreatAudioEmitter>();
             enabled = false;
         }
 
@@ -112,7 +115,9 @@ namespace SurvivalIsland
 
         private void Telegraph()
         {
-            if (telegraphSource != null && current.telegraphClip != null) telegraphSource.PlayOneShot(current.telegraphClip);
+            // Suara aba-aba lewat ThreatAudioEmitter (#114), cadangan AudioSource lokal.
+            if (emitter != null) emitter.PlayTell(current.telegraphClip);
+            else if (telegraphSource != null && current.telegraphClip != null) telegraphSource.PlayOneShot(current.telegraphClip);
             if (target == null || target.Kind != TargetKind.Player) return;
             var bal = GameManager.CurrentBalance;
             float interval = bal != null ? bal.enemyAttack.telegraphMinInterval : 0.5f;

@@ -232,3 +232,12 @@ Sticky `CinematicStateChangedEvent.Last` dibaca di `OnEnable`.
 13. Ganti bahasa ke Inggris. **Hasil:** huruf arah berubah menjadi N, E, S, dan W.
 14. Buka inventori. **Hasil:** kompas tetap tampil. Buka `Pause`. **Hasil:** kompas tertutup panel.
 15. Putar kamera terus selama satu menit dengan Profiler terbuka. **Hasil:** tidak ada alokasi GC dari `CompassSystem`.
+
+## Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Core_Logic/CompassSystem.cs` (berisi `MarkerIcon`, `MapMarker`, `MapMarkerRegistry`) dan `CompassIcon.cs`. Event `MapMarkerChangedEvent` di `GameEvents.GrupC2.cs`. Belum diuji di Unity.
+
+- `CompassIcon` mendapat dua field opsional `arrowLeft` dan `arrowRight` untuk panah penanda `Objective` yang dijepit di ujung bilah.
+- Huruf arah memakai `CanvasGroup` opsional pada objek teksnya untuk efek pudar di ujung bilah.
+- Bagian yang bergantung pada `WorldMapSystem` (#105) tidak ditulis, sesuai keputusan developer.
+- Pemasang penanda lama belum disambung: TODO di `HeavyItemSystem.cs` (#69) dan `BeachSupplyManager` (#71) diisi oleh session induk.

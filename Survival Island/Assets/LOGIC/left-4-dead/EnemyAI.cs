@@ -17,9 +17,12 @@ namespace SurvivalIsland
     /// ke pool saat mati (EnemyHitReaction lewat SpawnManager.Despawn).
     ///
     /// Catatan Langkah 5 (penyimpangan sementara, dicatat di EnemyAI.md "Catatan Implementasi"):
-    /// - BaseNavigation (#78) belum ada. Pemeriksaan terhalang memakai NavMeshAgent.pathStatus milik agen sendiri, dan sasaran
-    ///   bangunan dicari dengan OverlapSphere di layer Structure bertag BaseWall/BaseDoor (Claude.md Pilar 3).
-    /// - AITraversal (#94) dan ZombieLair (#112) belum ada: respons Surround/Retreat/RockThrow dan lair dilewati (TODO).
+    /// - Pemeriksaan terhalang memakai BaseNavigation.PollChase/PollAttacking (#78) dan TraversalAgent.TickUnreachable
+    ///   (#94, respons Surround/Retreat/RockThrow). Keputusan developer (sistem pendukung): selama BaseNavigation memberi
+    ///   posisi tunggu atau respons traversal, Chase tidak menimpanya dengan MoveTo ke pemain, dan ReportUnreachable baru
+    ///   dikirim setelah threat.unreachableSeconds. Tanpa BaseNavigation di scene (misalnya ShipPhase), cadangan lama
+    ///   dipakai: NavMeshAgent.pathStatus milik agen sendiri dan OverlapSphere di layer Structure bertag BaseWall/BaseDoor.
+    /// - TraversalAgent.Tick (#94) dipanggil dari CrowdTick. Sarang zombie (#112) dicatat di LairRegistry, bukan di EnemyAI.
     /// - Tanpa HordeCrowdManager di scene, EnemyAI men-tick dirinya sendiri tiap 0,2 detik (cadangan, misalnya ShipPhase).
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent), typeof(EnemyHealth))]
@@ -47,8 +50,11 @@ namespace SurvivalIsland
         private EnemyAttack attack;
         private AISensory sensory;
         private SpecialZombieAI special;
+        private TraversalAgent traversal;
         private EnemyInstance instance;
         private Animator animator;
+        private CrowdTier animTier = CrowdTier.Close;   // Tingkatan terakhir dari SetTier (#93)
+        private float animAccum;                         // Waktu yang belum diterapkan ke Animator saat update bergiliran
         private readonly ThreatState threat = new ThreatState();
         private WaveModifiers waveModifiers = WaveModifiers.One;
         private readonly float[] speedMult = new float[5];
@@ -58,6 +64,13 @@ namespace SurvivalIsland
 
         private IDamageable currentBreach;
         private float blockedTimer;
+        // Status dari BaseNavigation.PollChase (#78). Hasil hanya dikirim sekali per pemeriksaan, jadi disimpan di sini.
+        private enum NavHold : byte { None, WaitSlot, Unreachable }
+        private NavHold navHold;
+        private Vector3 navHoldPosition;
+        private bool hasBreachSlot;
+        private Vector3 breachSlotPosition;
+        private float unreachableTimer;
         private float pathCheckTimer;
         private float spawnGraceTimer;
         private float huntTimer;
@@ -89,6 +102,7 @@ namespace SurvivalIsland
             attack = GetComponent<EnemyAttack>();
             sensory = GetComponent<AISensory>();
             special = GetComponent<SpecialZombieAI>();
+            traversal = GetComponent<TraversalAgent>();
             instance = GetComponent<EnemyInstance>();
             animator = GetComponentInChildren<Animator>();
             defaultAreaMask = agent.areaMask;
@@ -133,7 +147,8 @@ namespace SurvivalIsland
 
             TickSpeedModifiers();
             if (spawnGraceTimer > 0f) spawnGraceTimer -= dt;
-            // 2. TODO #94: TraversalAgent.Tick(dt).
+            // 2. Lintasan NavMeshLink (#94).
+            if (traversal != null) traversal.Tick(dt);
             // 3. Kemampuan varian (#25).
             if (special != null && special.TickSpecial(dt)) { UpdateEngaged(); return; }
             if (CurrentState == AIState.Dormant) return;
@@ -166,6 +181,8 @@ namespace SurvivalIsland
             }
 
             if (CurrentState == AIState.Chase || CurrentState == AIState.AttackPlayer) CurrentState = AIState.Idle;
+            navHold = NavHold.None;
+            unreachableTimer = 0f;
             if (level == AwarenessLevel.Suspicious && sensory != null) MoveTo(sensory.LastStimulusPosition);
             else if (DayPhaseTracker.IsNight && AISensoryHub.Instance != null) MoveTo(AISensoryHub.Instance.HuntHint);   // Unaware saat malam
         }
@@ -214,16 +231,68 @@ namespace SurvivalIsland
                     dest = huntPoint;
                 }
             }
-            MoveTo(dest);
+            // Keputusan developer: posisi tunggu dan respons traversal tidak ditimpa MoveTo ke pemain.
+            if (navHold == NavHold.WaitSlot) MoveTo(navHoldPosition);
+            else if (navHold == NavHold.Unreachable && traversal != null && traversal.TickUnreachable(t)) { }
+            else MoveTo(dest);
 
-            // 4. Pemeriksaan terhalang (jalur sementara, lihat catatan kelas).
+            // 4. Pemeriksaan terhalang.
             CheckBlocked(dt);
+            if (CurrentState != AIState.Chase) return;
+            TickUnreachableTimer(dt);
         }
 
         private void CheckBlocked(float dt)
         {
             var b = Bal;
-            if (b == null || Data == null || !Data.canAttackBuildings || spawnGraceTimer > 0f || IsShipPhase) return;
+            if (b == null || Data == null || !Data.canAttackBuildings || IsShipPhase) return;
+            var nav = BaseNavigation.Instance;
+            if (nav != null)
+            {
+                // BaseNavigation mengatur jeda spawn, interval pemeriksaan, dan pembagian posisi serangan (#78).
+                switch (nav.PollChase(this, out var bt))
+                {
+                    case BlockedCheck.Clear:
+                        navHold = NavHold.None;
+                        unreachableTimer = 0f;
+                        break;
+                    case BlockedCheck.Breach:
+                        navHold = NavHold.None;
+                        unreachableTimer = 0f;
+                        currentBreach = bt.target;
+                        hasBreachSlot = true;
+                        breachSlotPosition = bt.slotPosition;
+                        CurrentState = AIState.AttackBuilding;
+                        break;
+                    case BlockedCheck.Wait:
+                        navHold = NavHold.WaitSlot;
+                        navHoldPosition = bt.slotPosition;
+                        break;
+                    case BlockedCheck.NoStructure:
+                        navHold = NavHold.Unreachable;
+                        break;
+                }
+                return;
+            }
+            CheckBlockedFallback(dt, b);
+        }
+
+        /// <summary>Terhalang tanpa struktur: target dicoret sementara setelah unreachableSeconds (#108).</summary>
+        private void TickUnreachableTimer(float dt)
+        {
+            if (navHold != NavHold.Unreachable) { unreachableTimer = 0f; return; }
+            var b = Bal;
+            unreachableTimer += dt;
+            if (b == null || unreachableTimer < b.threat.unreachableSeconds) return;
+            unreachableTimer = 0f;
+            navHold = NavHold.None;
+            if (ThreatSystem.Instance != null) ThreatSystem.Instance.ReportUnreachable(this);
+        }
+
+        /// <summary>Cadangan tanpa BaseNavigation di scene: pemeriksaan jalur Langkah 5.</summary>
+        private void CheckBlockedFallback(float dt, GameBalanceConfig b)
+        {
+            if (spawnGraceTimer > 0f) return;
             pathCheckTimer -= dt;
             if (pathCheckTimer > 0f) return;
             float interval = b.crowd.fallbackPathCheckIntervalSeconds;
@@ -238,7 +307,7 @@ namespace SurvivalIsland
                 CurrentState = AIState.AttackBuilding;
                 return;
             }
-            // Tanpa struktur: target dicoret sementara setelah unreachableSeconds (#108). TODO #94: AITraversal.GetResponse.
+            // Tanpa struktur: target dicoret sementara setelah unreachableSeconds (#108).
             if (blockedTimer >= b.threat.unreachableSeconds && ThreatSystem.Instance != null)
             {
                 blockedTimer = 0f;
@@ -270,11 +339,18 @@ namespace SurvivalIsland
 
         private void TickAttackBuilding(float dt)
         {
+            var nav = BaseNavigation.Instance;
             if (currentBreach == null || !currentBreach.IsAlive)
             {
-                currentBreach = null;
-                CurrentState = AIState.Chase;
+                if (nav != null) nav.ReleaseSlot(this);
+                ExitAttackBuilding();
                 return;
+            }
+            // BaseNavigation (#78): kembali ke Chase saat struktur hilang, pintu terbuka, atau jalur ke target sudah lengkap.
+            if (nav != null && hasBreachSlot)
+            {
+                var tgt = CurrentTarget;
+                if (nav.PollAttacking(this, tgt != null ? tgt.Position : transform.position)) { ExitAttackBuilding(); return; }
             }
             var c = currentBreach as Component;
             Vector3 p = c != null ? c.transform.position : transform.position;
@@ -285,7 +361,15 @@ namespace SurvivalIsland
             {
                 if (attack != null) attack.TryStartStructureAttack(currentBreach);
             }
-            else MoveTo(closest);
+            else MoveTo(hasBreachSlot ? breachSlotPosition : closest);   // Posisi serangan dari BaseNavigation kalau ada
+        }
+
+        private void ExitAttackBuilding()
+        {
+            currentBreach = null;
+            hasBreachSlot = false;
+            navHold = NavHold.None;
+            CurrentState = AIState.Chase;
         }
 
         private void MoveTo(Vector3 target)
@@ -410,8 +494,14 @@ namespace SurvivalIsland
 
         private void HandleDamaged(DamageInfo info)
         {
-            if (!info.byPlayer) return;
-            // EnemyAI.md: damage dari pemain memanggil ThreatSystem.ReportAttacker. TODO #76: penyerang NPC.
+            if (!info.byPlayer)
+            {
+                // Penyerang NPC (#76): tembakan NPCGunUser membawa source = objek NPC.
+                var npc = info.source != null ? info.source.GetComponentInParent<NPCCompanion>() : null;
+                if (npc != null && ThreatSystem.Instance != null) ThreatSystem.Instance.ReportAttacker(this, npc);
+                return;
+            }
+            // EnemyAI.md: damage dari pemain memanggil ThreatSystem.ReportAttacker.
             if (sensory != null) sensory.ForceAware(info.hitPoint - info.hitDirection * 2f);
             if (ThreatSystem.Instance != null && PlayerTargetable.Instance != null)
                 ThreatSystem.Instance.ReportAttacker(this, PlayerTargetable.Instance);
@@ -487,7 +577,26 @@ namespace SurvivalIsland
             if (animator != null)
                 animator.cullingMode = tier == CrowdTier.Close || tier == CrowdTier.Mid
                     ? AnimatorCullingMode.CullUpdateTransforms : AnimatorCullingMode.CullCompletely;
-            // TODO #93: update Animator bergiliran (animStaggerMid/animStaggerFar).
+            // HordeCrowdManager.md "Animasi" (#93): Close = Animator jalan sendiri. Mid/Far = Animator dimatikan lalu
+            // di-Update manual bergiliran di LateUpdate. Culled = mati. Saat Dying, Animator milik ragdoll EnemyHitReaction.
+            animTier = tier;
+            animAccum = 0f;
+            if (animator != null && CurrentState != AIState.Dying) animator.enabled = tier == CrowdTier.Close;
+        }
+
+        private void LateUpdate()
+        {
+            if (animator == null || animTier == CrowdTier.Close || CurrentState == AIState.Dying) return;
+            // EnemyHitReaction menyalakan Animator lagi saat keluar dari pool; tingkatan Mid/Far/Culled tetap memakai mode manual.
+            if (animator.enabled) animator.enabled = false;
+            if (animTier == CrowdTier.Culled) return;
+            var b = Bal;
+            int every = b == null ? 1 : animTier == CrowdTier.Mid ? b.crowd.animStaggerMid : b.crowd.animStaggerFar;
+            animAccum += Time.deltaTime;
+            // Bergantian menurut ID, supaya zombie dalam satu tingkatan tidak di-update pada frame yang sama.
+            if (every > 1 && (Time.frameCount + (GetInstanceID() & 0x7fffffff)) % every != 0) return;
+            animator.Update(animAccum);
+            animAccum = 0f;
         }
 
         // ---------------------------------------------------------------- Pool
@@ -495,6 +604,9 @@ namespace SurvivalIsland
         public void OnSpawned()
         {
             var b = Bal;
+            // Tingkatan animasi dari hidup sebelumnya tidak terbawa (#93). HordeCrowdManager.Register mengatur ulang.
+            animTier = CrowdTier.Close;
+            animAccum = 0f;
             // 1. Langsung tanpa RequestState, karena state lama bisa Dying atau BurnToAshes.
             CurrentState = AIState.Idle;
             CurrentTarget = null;
@@ -504,6 +616,9 @@ namespace SurvivalIsland
             waveModifiers = WaveModifiers.One;
             currentBreach = null;
             blockedTimer = 0f;
+            navHold = NavHold.None;
+            hasBreachSlot = false;
+            unreachableTimer = 0f;
             pathCheckTimer = (GetInstanceID() & 7) * 0.125f;
             huntTimer = 0f;
             tokenRetryTimer = 0f;
@@ -522,6 +637,8 @@ namespace SurvivalIsland
             agent.enabled = true;
             agent.Warp(hit.position);
             if (!agent.isOnNavMesh) { ReturnSelf(DespawnReason.OffNavMesh); return; }
+            // Mulai jeda spawn BaseNavigation dari awal (#78).
+            if (BaseNavigation.Instance != null) BaseNavigation.Instance.NotifySpawned(this);
             agent.isStopped = false;
             agent.updateRotation = true;
             // 3.
@@ -553,9 +670,13 @@ namespace SurvivalIsland
             if (ThreatSystem.Instance != null) ThreatSystem.Instance.Unregister(this);
             if (HordeCrowdManager.Instance != null) HordeCrowdManager.Instance.Unregister(this);
             registeredCrowd = false;
-            // TODO #78: BaseNavigation.ReleaseSlot.
+            // Lepas posisi serangan dan status jalur di BaseNavigation (#78).
+            if (BaseNavigation.Instance != null) BaseNavigation.Instance.Forget(this);
             currentBreach = null;
             blockedTimer = 0f;
+            navHold = NavHold.None;
+            hasBreachSlot = false;
+            unreachableTimer = 0f;
             agent.areaMask = defaultAreaMask;
             IsBurning = false;
             CurrentTarget = null;

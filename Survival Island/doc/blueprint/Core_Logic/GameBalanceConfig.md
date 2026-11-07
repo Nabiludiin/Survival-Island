@@ -187,7 +187,7 @@ Asumsi: jarak 400 meter, dan 150 meter di antaranya berada di area dingin. Jarak
 
 ### Profil kesulitan
 
-`DifficultyProfile` berisi `hungerMultiplier`, `thirstMultiplier`, dan `enemyDamageMultiplier`, yang dibaca `SurvivalStats` (#111), serta pengali jumlah musuh dan hasil panen. Versi awal hanya punya satu profil, `Normal`, dengan semua pengali bernilai 1.
+`DifficultyProfile` berisi `hungerMultiplier`, `thirstMultiplier`, dan `enemyDamageMultiplier`, yang dibaca `SurvivalStats` (#111), serta `enemyCountMultiplier` (jumlah musuh, `AIDirector`) dan `harvestYieldMultiplier` (hasil panen, `ResourceNode`). Versi awal hanya punya satu profil, `Normal`, dengan semua pengali bernilai 1.
 
 ### Lembar catatan playtest
 
@@ -338,3 +338,10 @@ Angka di tabel ini adalah usulan awal dari blueprint pemiliknya. Rincian dan ala
 - `sleep` baru berisi `maxGameHoursPerStep`. Field tidur lain diisi Langkah pemilik `SleepSystem` (#67).
 - Angka baru usulan Langkah 4: `resource.dropImpulse` 1,5 (dorongan item jatuh dari node).
 - `resource.minNodesPerRegion` memakai struct `RegionNodeMinimum { region, trees, rocks, mushrooms, sapTrees }`.
+
+## 8. Catatan Implementasi (Sistem pendukung)
+
+- Field baru dari keputusan developer (7 November 2026): `resource.knifeDecayPerCombatHit` = 1 dan `equipment.fistDamage` = 5.
+- Angka usulan teknis dari penulisan sistem pendukung yang tidak ada di tabel blueprint disetujui sebagai nilai awal (lihat `USULAN_TERBUKA.md`). Semua kelas bagian config dan `GameBalanceConfig` sendiri sekarang `partial`.
+- **Keputusan developer (7 November 2026):** `DifficultyProfile` mendapat `enemyCountMultiplier` = 1 (dipakai `AIDirector`, jumlah mob per gelombang) dan `harvestYieldMultiplier` = 1 (dipakai `ResourceNode`, hasil panen dibulatkan, minimal 1 kalau hasil asli > 0). Profil aktif dibaca lewat `DifficultyProfile.Active` (profil pertama, sama dengan cara `SurvivalStats` sebelumnya; `SurvivalStats` sekarang juga memakai properti ini).
+- **Keputusan developer (7 November 2026):** Field baru lain: `shipHazard.alarmBaseVolume` 0,5, `alarmRaisedVolume` 1, `alarmRaiseSeconds` 1; `wildlife.alertCueRepeatSeconds` 2; `specialZombie.tribalWindupCueRepeatSeconds` 2; `crowd.clusterUpdateSeconds` 1, `clusterCellSize` 8, `clusterMinDistance` 15, `clusterWaypointLookahead` 12. Tambahan teknis (usulan, bukan dari keputusan): `specialZombie.tribalPullFadeSeconds` 0,25, durasi tiap dorongan tarikan Tribal lewat `AddExternalVelocity`.

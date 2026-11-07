@@ -13,7 +13,8 @@ namespace SurvivalIsland
     /// - DayNightDirector.SunDirection (Langkah 4) belum ada. Arah matahari dibaca dari RenderSettings.sun (Directional Light
     ///   yang diatur DayNightDirector), dengan elevasi minimal minSunElevationDeg. Tanpa sun, dipakai arah tegak ke atas.
     /// - Siang/malam dari HourChangedEvent (DayPhaseTracker), bukan DaybreakEvent/NightfallEvent.
-    /// - Zombie sarang di InteriorZone (#112) dan VillageZombieHiding/HidingSpot (Zombie Desa) belum ditulis (TODO #112, #63).
+    /// - Zombie sarang di InteriorZone dibaca dari LairRegistry (#112). Zombie Desa yang Submerged diberi IsProtected oleh
+    ///   VillageZombieHiding (#63), dan ReportEmergence meneruskan jumlah penghuni HidingSpot ke AIDirector.
     /// </summary>
     public class SunlightExposure : MonoBehaviour, IPoolable
     {
@@ -96,7 +97,8 @@ namespace SurvivalIsland
         {
             var b = Bal;
             if (b == null) return;
-            // 1. TODO #112: zombie sarang di dalam InteriorZone terlindungi.
+            // 1. Zombie sarang di dalam InteriorZone terlindungi (#112).
+            if (ai != null && LairRegistry.IsShelteredLairZombie(ai)) return;
             if (IsProtected) return;
             // 2. Arah matahari, elevasi dinaikkan ke minimal minSunElevationDeg.
             Vector3 dir = SunDirection(b.minSunElevationDeg);
@@ -117,6 +119,16 @@ namespace SurvivalIsland
             if (elevation >= minElevationDeg || flat.sqrMagnitude < 0.0001f) return toSun.y > 0f ? toSun.normalized : Vector3.up;
             float rad = minElevationDeg * Mathf.Deg2Rad;
             return (flat.normalized * Mathf.Cos(rad) + Vector3.up * Mathf.Sin(rad)).normalized;
+        }
+
+        /// <summary>
+        /// Laporan ke Director (SunlightExposure.md): dipanggil SpawnManager saat malam tiba. Zombie Desa yang akan naik
+        /// dari HidingSpot dihitung sebagai spawn luar, supaya mob pertama tidak menumpuk di atasnya (#27).
+        /// </summary>
+        public static void ReportEmergence()
+        {
+            int n = HidingSpot.TotalOccupants;
+            if (n > 0 && AIDirector.Instance != null) AIDirector.Instance.AddExternalSpawn(n);
         }
 
         /// <summary>Mulai urutan terbakar. Penjaga burnPending supaya hanya sekali.</summary>

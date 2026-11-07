@@ -78,6 +78,8 @@ namespace SurvivalIsland
         public bool ThrowPressed => actions != null && actions.Gameplay.Throw.WasPressedThisFrame();
         public bool DropHeavyItemPressed => actions != null && actions.Gameplay.DropHeavyItem.WasPressedThisFrame();
         public bool StrugglePressed => actions != null && actions.Gameplay.Struggle.WasPressedThisFrame();
+        /// <summary>Tombol Struggle sedang ditahan. Mode aksesibilitas holdToStruggle (#19, PlayerPinnedState.md).</summary>
+        public bool StruggleHeld => actions != null && actions.Gameplay.Struggle.IsPressed();
         public bool ShovePressed => actions != null && actions.Gameplay.Shove.WasPressedThisFrame();
         public bool OpenInventoryPressed => actions != null && actions.Gameplay.OpenInventory.WasPressedThisFrame();
         public bool OpenCraftingPressed => actions != null && actions.Gameplay.OpenCrafting.WasPressedThisFrame();

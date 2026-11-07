@@ -22,7 +22,7 @@ namespace SurvivalIsland
 
         public static DisasterManager Instance { get; private set; }
 
-        [Tooltip("Aset DisasterData yang sama dengan RunSeedManager.disasterData. Dipakai untuk durasi tahap.")]
+        [Tooltip("Aset DisasterData yang sama dengan RunLayoutSources.disasterData. Kosong = memakai sumber RunSeedManager.")]
         [SerializeField] private DisasterData[] disasterData = Array.Empty<DisasterData>();
 
         // ---------------------------------------------------------------- Status (API di DisasterManager.md bagian 2)
@@ -49,6 +49,7 @@ namespace SurvivalIsland
         private RegionType playerRegion = RegionType.Volcano;   // GDD bagian 5: Region 1 zona awal
         private bool spawnOverrideActive;
         private SpawnOverrideHandle spawnOverride;
+        private WeatherOverrideHandle weatherOverride;   // Badai Tropis (#115)
 
         private readonly Queue<BaseHealth> quakeQueue = new Queue<BaseHealth>(64);
         private float quakeRatioPerPulse;
@@ -133,9 +134,13 @@ namespace SurvivalIsland
 
         private DisasterData GetData(DisasterType type)
         {
-            if (disasterData == null) return null;
-            for (int i = 0; i < disasterData.Length; i++)
-                if (disasterData[i] != null && disasterData[i].type == type) return disasterData[i];
+            // Field sendiri diutamakan (aset lama). Kosong: sumber jadwal yang sama dengan RunSeedManager (#89).
+            var list = disasterData != null && disasterData.Length > 0
+                ? disasterData
+                : (RunSeedManager.Instance != null ? RunSeedManager.Instance.DisasterDataSource : null);
+            if (list == null) return null;
+            for (int i = 0; i < list.Length; i++)
+                if (list[i] != null && list[i].type == type) return list[i];
             return null;
         }
 
@@ -166,9 +171,34 @@ namespace SurvivalIsland
             phaseTimeLeft = data.warningSeconds;
             // Dikirim sejak Warning, supaya SleepSystem membangunkan pemain sebelum efek dimulai.
             EventChannel<DisasterStartedEvent>.Publish(new DisasterStartedEvent(current.type, current.scale));
-            // TODO #22: NotificationManager.Post(teks peringatan di tabel DisasterManager.md).
-            // TODO #104: SubtitleRequestedEvent { sourceKind = Warning }. TODO #114: AudioManager.PlayWarning(data.warningClip).
-            // TODO #92: Erupsi memulai langit merah lewat EnvironmentDirector.PushEventLayer(Eruption, bobot).
+            // Notifikasi (#22) dan subtitle peringatan (#104) dengan kunci yang sama, lalu warningClip (#114).
+            string key = WarningKey(current.type);
+            if (NotificationManager.Instance != null) NotificationManager.Instance.Show(key, NotificationKind.Danger);
+            EventChannel<SubtitleRequestedEvent>.Publish(new SubtitleRequestedEvent(key, null, 2, SubtitleSourceKind.Warning));
+            if (AudioManager.Instance != null && data.warningClip != null) AudioManager.Instance.PlayWarning(data.warningClip);
+            // Erupsi memulai langit merah (#92).
+            ApplyEruptionSky();
+        }
+
+        /// <summary>Kunci teks peringatan per bencana (tabel "Notifikasi peringatan" di DisasterManager.md).</summary>
+        private static string WarningKey(DisasterType type)
+        {
+            switch (type)
+            {
+                case DisasterType.Eruption: return "notif.disaster_eruption";            // "Gunung berapi bergemuruh. Cari perlindungan"
+                case DisasterType.Earthquake: return "notif.disaster_earthquake";        // "Tanah bergetar"
+                case DisasterType.TropicalStorm: return "notif.disaster_storm";          // "Angin menguat. Badai mendekat"
+                default: return string.Empty;
+            }
+        }
+
+        /// <summary>Lapisan langit merah erupsi (#92): bobot 1 di Region 1, environment.eruptionRemoteWeight di region lain.</summary>
+        private void ApplyEruptionSky()
+        {
+            var env = EnvironmentDirector.Instance;
+            if (env == null || phase == DisasterPhase.Idle || current.type != DisasterType.Eruption) return;
+            float remote = Balance != null ? Balance.environment.eruptionRemoteWeight : 0.35f;
+            env.PushEventLayer(EnvEventId.Eruption, playerRegion == RegionType.Volcano ? 1f : remote);
         }
 
         private void EnterActive(DisasterData data, bool isRestore)
@@ -191,8 +221,10 @@ namespace SurvivalIsland
 
             if (!isRestore && current.type == DisasterType.Eruption && Bal != null)
             {
-                // TODO #90: RemoteBaseSimulation.QueueDisasterDamage(Volcano, Explosion, fireballStructureDamage,
-                //           eruptionOffscreenHits * scale, onlyWood: false) saat pemain di luar Region 1.
+                // Pemain di luar Region 1: base di sana dihantam lewat RemoteBaseSimulation (#90).
+                if (playerRegion != RegionType.Volcano && RemoteBaseSimulation.Instance != null)
+                    RemoteBaseSimulation.Instance.QueueDisasterDamage(RegionType.Volcano, DamageType.Explosion, Bal.fireballStructureDamage,
+                                                                     Bal.eruptionOffscreenHits * current.scale, false);
             }
         }
 
@@ -203,7 +235,8 @@ namespace SurvivalIsland
             ReleaseOverrides();
             quakeQueue.Clear();
             pendingTree = null;
-            // TODO #22: notifikasi "Periksa kerusakan base". TODO #92: langit kembali normal.
+            // Notifikasi "Periksa kerusakan base" (#22). Langit kembali normal lewat ReleaseOverrides (#92).
+            if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.disaster_aftermath", NotificationKind.Warning);
         }
 
         private void FinishDisaster()
@@ -235,7 +268,8 @@ namespace SurvivalIsland
         {
             // Bobot langit dan Fireball ikut berubah di tengah bencana (tabel "Cakupan").
             playerRegion = e.to;
-            // TODO #92: ubah bobot lapisan Eruption (1 di Region 1, 0,35 di region lain).
+            // Bobot lapisan Eruption ikut region pemain (#92).
+            if (phase == DisasterPhase.Warning || phase == DisasterPhase.Active) ApplyEruptionSky();
         }
 
         private void ApplyOverrides()
@@ -246,8 +280,14 @@ namespace SurvivalIsland
                 spawnOverride = SpawnManager.Instance.PushOverride(new SpawnOverride { suspendAnimals = true });
                 spawnOverrideActive = true;
             }
-            // TODO #115: Badai Tropis -> RegionalWeather.PushOverride({ semua region, Storm, Blizzard }). Ini juga menaikkan
-            // air (#91) dan memadamkan api (#44).
+            // Badai Tropis (#115): Storm di semua region, Blizzard di Region 3. Ini juga menaikkan air (#91) dan memadamkan api (#44).
+            if (current.type == DisasterType.TropicalStorm && !weatherOverride.IsValid && RegionalWeather.Instance != null)
+            {
+                byte all = (byte)((1 << (int)RegionType.Volcano) | (1 << (int)RegionType.Amazon) | (1 << (int)RegionType.Snow) | (1 << (int)RegionType.Logistic));
+                weatherOverride = RegionalWeather.Instance.PushOverride(new WeatherOverride(all, WeatherType.Storm, WeatherType.Blizzard));
+            }
+            // Langit merah erupsi, termasuk setelah load (#92).
+            ApplyEruptionSky();
         }
 
         private void ReleaseOverrides()
@@ -257,7 +297,14 @@ namespace SurvivalIsland
                 if (SpawnManager.Instance != null) SpawnManager.Instance.PopOverride(spawnOverride);
                 spawnOverrideActive = false;
             }
-            // TODO #115: RegionalWeather.PopOverride. TODO #92: EnvironmentDirector.PopEventLayer(Eruption).
+            // Lepas override cuaca badai (#115) dan langit merah (#92).
+            if (weatherOverride.IsValid)
+            {
+                if (RegionalWeather.Instance != null) RegionalWeather.Instance.PopOverride(weatherOverride);
+                weatherOverride = default;
+            }
+            if (current.type == DisasterType.Eruption && EnvironmentDirector.Instance != null)
+                EnvironmentDirector.Instance.PopEventLayer(EnvEventId.Eruption);
         }
 
         // ---------------------------------------------------------------- Per frame
@@ -377,7 +424,10 @@ namespace SurvivalIsland
 
         private void QuakePulse(DisasterBalance b, int pulses)
         {
-            // TODO #24: CameraShake.Play(CameraShakeKind.Earthquake, scale), dan suara gemuruh.
+            // Getaran kamera gempa (#24), skala mengikuti skala bencana, dan suara gemuruh (#114) dari DisasterData.pulseClip.
+            CameraShake.Play(CameraShakeKind.Earthquake, current.scale);
+            var data = GetData(current.type);
+            if (data != null && data.pulseClip != null) AudioManager.Instance?.PlaySFX(data.pulseClip);
             float ratio = current.scale >= 2 ? b.quakeDamageRatioScale2 : b.quakeDamageRatio;
             quakeRatioPerPulse = ratio / pulses;
 
@@ -388,8 +438,17 @@ namespace SurvivalIsland
 
             if (pulsesDone == 0)
             {
-                // TODO #90: untuk tiap region yang tidak dimuat, RemoteBaseSimulation.QueueDisasterDamage(region, Structural,
-                //           quakeRemoteDamagePerHit, quakeRemoteHits * scale, onlyWood: true).
+                // Region yang tidak dimuat menerima damage gempa lewat RemoteBaseSimulation (#90).
+                var remote = RemoteBaseSimulation.Instance;
+                if (remote != null && RegionStreaming.Instance != null)
+                {
+                    for (int r = 0; r <= (int)RegionType.Logistic; r++)
+                    {
+                        var region = (RegionType)r;
+                        if (RegionStreaming.IsRegionLoaded(region)) continue;
+                        remote.QueueDisasterDamage(region, DamageType.Structural, b.quakeRemoteDamagePerHit, b.quakeRemoteHits * current.scale, true);
+                    }
+                }
             }
         }
 
@@ -504,7 +563,8 @@ namespace SurvivalIsland
             tree.ForceDeplete(true);
             Fireball.ApplyBlastDamage(pos, b.treeFallRadius, b.treeFallDamage, b.treeFallDamage, b.treeFallStructureDamage,
                                       "TreeFall", false);
-            // TODO #15: VFXManager "Fx_TreeFall".
+            // Efek pohon tumbang lewat VFXManager (#15).
+            if (VFXManager.Instance != null) VFXManager.Instance.Play("Fx_TreeFall", pos, Quaternion.identity);
         }
 
         // ---------------------------------------------------------------- ISaveable (bagian 4 "Save saat bencana")

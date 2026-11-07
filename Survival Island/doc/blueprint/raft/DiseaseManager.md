@@ -234,3 +234,12 @@ overlay.alpha = isPoisoned ? Mathf.Lerp(0f, overlayMaxAlpha, t) : 0f;
 17. Simpan saat keracunan dengan sisa 1 jam game, keluar, lalu lanjutkan. **Hasil:** sisa tetap 1 jam game, dan kedipan kembali.
 18. Aktifkan `reduceFlashing`. **Hasil:** warna hijau tetap, tanpa kedipan.
 19. Mati, lalu mulai run baru. **Hasil:** tidak ada penyakit, dan overlay kosong.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- File: `Assets/LOGIC/raft/DiseaseManager.cs` (`DiseaseType`, `DiseaseEffectTable`, `DiseaseManager`), `DiseaseOverlay.cs`. `DiseaseCure` tetap di `raft/DiseaseCure.cs`. Event `DiseaseChangedEvent` di `Core_Logic/GameEvents.GrupG.cs`.
+- `DiseaseEffectTable` berisi empat field `StatusEffectData` (satu per penyakit), diisi di Inspector.
+- Durasi dan damage per detik dari `GameBalanceConfig.disease` ditulis ke salinan runtime aset (`Instantiate`) di `Awake`, supaya aset di disk tidak berubah. Saat load, `StatusEffectManager` memulihkan efek dari database aset aslinya, jadi nilai di aset sebaiknya sama dengan config.
+- `OnRestoreFinished` melepas bit penyakit yang efeknya tidak ikut pulih, supaya `activeMask` tidak menggantung.
+- Panggilan dari `ItemUseSystem` (`CanUseMedicine`, `OnConsumed`) masih berupa TODO di kode lama; baris penggantinya dicatat di laporan.
+- `reduceFlashing` dibaca dari `LocalizationManager.Instance.Accessibility`.

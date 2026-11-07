@@ -8,11 +8,11 @@ namespace SurvivalIsland
     ///
     /// - Sistem membaca angka lewat GameManager.Instance.Balance.&lt;bagian&gt;.&lt;nama&gt;, bukan menulis angka sendiri.
     /// - GameManager memakai SALINAN aset (Instantiate) per run, jadi DevConsole bisa mengubah angka tanpa mengubah aset asli.
-    /// - Kelas tiap bagian ada di GameBalanceSections.cs. Bagian yang belum dipakai Langkah 1 masih kosong (TODO);
-    ///   Langkah pemiliknya mengisi field-nya sesuai tabel "Bagian config per sistem" di blueprint.
+    /// - Kelas tiap bagian ada di GameBalanceSections.cs (partial). Field tiap bagian diisi Langkah pemiliknya sesuai tabel
+    ///   "Bagian config per sistem" di blueprint, di deklarasi partial bagian akhir file itu.
     /// </summary>
     [CreateAssetMenu(menuName = "Survival/Game Balance Config", fileName = "GameBalanceConfig")]
-    public class GameBalanceConfig : ScriptableObject
+    public partial class GameBalanceConfig : ScriptableObject
     {
         // ---------------------------------------------------------------- Angka inti (GameBalanceConfig.md bagian 2)
         public TimeBalance time = new TimeBalance();

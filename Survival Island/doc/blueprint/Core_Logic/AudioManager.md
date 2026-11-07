@@ -83,3 +83,12 @@
 4. Mati saat suara latar berjalan, lalu mulai run baru. **Hasil:** suara dunia berhenti saat reset, dan tidak ada suara ganda.
 5. Putar adegan #99. **Hasil:** suara dunia turun, musik adegan masuk, lalu kembali setelah selesai.
 6. Tunggu fajar. **Hasil:** `AudioManager` tidak mengganti musik. Pergantian dilakukan `CombatMusicDirector`.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Assets/LOGIC/Core_Logic/AudioManager.cs`. Tidak ada config baru; `SetPausedMix` membaca `ui.pauseAudioFadeSeconds`.
+- Volume ke mixer: blueprint tidak menyebut nama parameternya, jadi dipakai parameter terekspos `Master_Vol`, `Music_Vol`, dan `SFX_Vol` (nama bisa diganti di Inspector), dikonversi ke dB (0 menjadi -80 dB). Kalau `Master_Vol` tidak ada di mixer, volume dikalikan di sumber (`PlaySFX` seperti teks blueprint, dan volume `bgmSource`). Kalau ada, pengali di sumber menjadi 1 supaya volume tidak dikali dua kali.
+- `SetCinematicMix` memakai snapshot ketiga opsional `cinematicSnapshot`. Snapshot `Paused` didahulukan kalau jeda dan adegan aktif bersamaan.
+- `StopWorldAudio`: `AmbientAudio`, `CombatMusicDirector`, dan `PooledAudioSource` belum ada (TODO).
+- Isi TODO (sistem pendukung): `PlaySFXAt(AudioClip, Vector3, float volumeMultiplier = 1)`: suara 3D sekali putar lewat `PooledAudioSource.PlayAt` (pool `Audio_OneShot3D`) dan grup mixer `sfxSource`. Kalau pool tidak ada, klip diputar 2D lewat `PlaySFX`. Dipakai `ResourceNode`, `PlayerShove`, dan `LuckyMachine`.
+- **Keputusan developer (7 November 2026):** Untuk alarm kapal (`ShipHazardManager`) ditambah `public AudioMixerGroup WarningGroup` (grup keluaran `warningSource`) dan `public float SfxSourceScale` (pengali volume SFX untuk `AudioSource` milik sistem lain; 1 kalau mixer menerapkan volume). Tidak ada sumber atau klip baru di `AudioManager`.

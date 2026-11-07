@@ -163,3 +163,14 @@ Lucky Machine tidak punya pop-up, karena mesin itu sengaja menjadi kejutan pemai
 12. Jalankan `setday 10` lewat `DevConsole`, lalu tunggu jam 12:00. **Hasil:** `blood_moon` tampil sekali. Pada Blood Moon berikutnya tidak tampil lagi.
 13. Lewati malam pertama, lalu tunggu malam kedua. **Hasil:** `first_stealth` tampil sekali.
 14. Pegang `Throw_Rock`. **Hasil:** `first_throwable` tampil sekali, dan tidak tampil lagi untuk barang lempar lain.
+
+## Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Core_Logic/TutorialManager.cs`, `TutorialHint.cs`, dan `TutorialHintPanel.cs`. Belum diuji di Unity. Aset `TutorialHint` (19+ pop-up pada tabel) belum dibuat; tempatnya `Resources/TutorialHints`.
+
+- Token `{action:Interact}` diganti oleh `TutorialManager` lewat `InputManager.GetBindingDisplay`. Token `{input:Interact}` milik `LocalizationManager` juga berfungsi, karena sudah diganti oleh `LocalizationManager.Get`.
+- `textKey` dipakai kalau `LocalizationManager.Has(textKey)`; kalau tidak, `fallbackText`.
+- `first_build` hanya untuk `BuildModeChangedEvent.mode == Build`. `first_tree` dan `first_rock` hanya untuk `byPlayer == true`.
+- `first_stealth`: `NightfallEvent` saat `first_night` sudah ada di `seen`. `first_day`: `DaybreakEvent` saat `first_night` sudah ada di `seen`.
+- Antrean penuh: pop-up baru dengan prioritas tidak lebih tinggi dari yang terendah di antrean langsung dibuang.
+- `ResetSeen()` tersedia untuk tombol "Ulang tutorial" di `SettingsPanel`.

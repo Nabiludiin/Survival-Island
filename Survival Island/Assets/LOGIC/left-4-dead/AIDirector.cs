@@ -47,8 +47,9 @@ namespace SurvivalIsland
     /// Siklus empat tahap dan angka kurva adalah usulan disetujui developer (#85). Director menentukan berapa banyak dan
     /// seberapa beringas; SpawnManager menentukan jenis dan tempat.
     /// Catatan Langkah 5: malam dibaca dari HourChangedEvent (DayPhaseTracker), bukan NightfallEvent (Langkah 4).
-    /// Belum diimplementasikan (TODO): isHeld saat tidur (#67), isOverridden saat Blood Moon (#50), RequestCampCounter (#94),
-    /// pengali jumlah dari DifficultyProfile (field belum diberi nama).
+    /// isHeld mengikuti SleepStateChangedEvent (#67). isOverridden diatur HordeManager lewat SetOverridden saat Blood Moon (#50).
+    /// RequestCampCounter (#94) dipanggil AITraversal. Jumlah mob dikali DifficultyProfile.enemyCountMultiplier
+    /// (keputusan developer 7 November 2026).
     /// </summary>
     public class AIDirector : MonoBehaviour, ISaveable
     {
@@ -89,6 +90,7 @@ namespace SurvivalIsland
             EventChannel<PlayerDamagedEvent>.Raised += HandlePlayerDamaged;
             EventChannel<PlayerPinnedEvent>.Raised += HandlePinned;
             EventChannel<EnemyKilledEvent>.Raised += HandleEnemyKilled;
+            EventChannel<SleepStateChangedEvent>.Raised += HandleSleep;
             if (WorldStateSave.Instance != null) WorldStateSave.Instance.Register(this);
             wasNight = false;
             if (DayPhaseTracker.IsNight) HandleNightfall();
@@ -100,8 +102,12 @@ namespace SurvivalIsland
             EventChannel<PlayerDamagedEvent>.Raised -= HandlePlayerDamaged;
             EventChannel<PlayerPinnedEvent>.Raised -= HandlePinned;
             EventChannel<EnemyKilledEvent>.Raised -= HandleEnemyKilled;
+            EventChannel<SleepStateChangedEvent>.Raised -= HandleSleep;
             if (WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
         }
+
+        // AIDirector.md: selama tidur anggaran dan tahap ditahan (#67).
+        private void HandleSleep(SleepStateChangedEvent e) => isHeld = e.isSleeping;
 
         private void HandleHour(HourChangedEvent e)
         {
@@ -191,7 +197,9 @@ namespace SurvivalIsland
             if (spawn.AliveLarge >= b.holdMobLargeCount) { heldSeconds += dt; return; }
             // 2-3.
             float grow = 1f + Mathf.Min(heldSeconds / Mathf.Max(0.01f, b.heldGrowthSeconds), 1f) * b.heldGrowthMax;
-            float difficultyCount = 1f;   // TODO: DifficultyProfile.enemyCountMultiplier belum diberi nama di GameBalanceConfig
+            // Keputusan developer (7 November 2026): jumlah mob dikali DifficultyProfile.enemyCountMultiplier.
+            var diff = DifficultyProfile.Active;
+            float difficultyCount = diff != null ? diff.enemyCountMultiplier : 1f;
             int want = Mathf.RoundToInt(Threat.mobSize * RegionMultiplier(b) * difficultyCount * grow);
             // 4.
             int count = Mathf.Min(want, Mathf.Min(Threat.maxAlive - spawn.AliveZombies, Threat.nightBudget - spawnedTonight));
@@ -315,6 +323,23 @@ namespace SurvivalIsland
             int accepted = spawn.RequestWave(in r);
             spawnedTonight += accepted;
             return accepted;
+        }
+
+        /// <summary>
+        /// Pembalas berkemah (#94, AIDirector.md "Fungsi publik"): gelombang dengan forcedEnemyId. Boleh saat Relax dan tidak
+        /// memakai nightBudget (spawnedTonight tidak bertambah). Pengali pasca hari ke-60 tetap berlaku.
+        /// </summary>
+        public int RequestCampCounter(string enemyId, int count)
+        {
+            var spawn = SpawnManager.Instance;
+            if (spawn == null || count <= 0 || string.IsNullOrEmpty(enemyId)) return 0;
+            int day = GameManager.Instance != null ? GameManager.Instance.currentDay : 1;
+            var r = new WaveRequest
+            {
+                count = count, maxLarge = int.MaxValue, specialShare = 1f, modifiers = GetPostTargetModifiers(day),
+                reason = "CampCounter", forcedEnemyId = enemyId, origin = null
+            };
+            return spawn.RequestWave(in r);
         }
 
         /// <summary>Hanya dari SpawnManager.Despawn (Stuck, OffNavMesh, TooFar, RegionUnloaded) dan slot gagal.</summary>

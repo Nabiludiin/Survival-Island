@@ -202,3 +202,16 @@ Saat siang, zombie sarang memakai `NavMeshAgent.areaMask` yang hanya memuat Area
 16. Tunggu `NightfallEvent` di luar gudang desa Region 4, lalu bangunkan penghuninya. **Hasil:** tidak ada zombie standar yang keluar dari ruangan, dan horde Region 4 hanya berisi Zombie Desa.
 17. Bangunkan zombie sarang di dalam gua, lalu majukan jam melewati fajar saat ia masih mengejar di dalam zona. **Hasil:** tidak terbakar, dan `areaMask` kembali hanya `Interior`.
 18. Biarkan zombie yang dilepas saat malam tetap di luar gua sampai fajar. **Hasil:** terbakar seperti zombie horde, dan jumlah sarang terisi ulang.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `ZombieLair.cs`, `InteriorZone.cs`, `LairNest.cs`, `LairRegistry.cs`, dan `LairData.cs` di `Assets/LOGIC/left-4-dead/`. Config `lair` ada di `Core_Logic/GameBalance.GrupF.cs`, dengan tambahan `nestHP` 300 dan `registryTickSeconds` 1 sesuai teks bagian 2.
+- `RegionStateStore` (#88) belum ada. Karena itu, `ZombieLair` mendaftar langsung ke `WorldStateSave` dengan `SaveId` `lair_<lairId>` dan `LoadOrder` 140, sama seperti `LuckyMachine`. Ganti cara ini saat #88 sudah ada.
+- `EnemyAI` belum punya field `lair` dan `EnterDormant(lair)`. Rujukan zombie ke sarang disimpan di `LairRegistry` (`GetLair`, `IsLairZombie`, dan `IsShelteredLairZombie`). `areaMask` diatur `ZombieLair` setelah `EnemyAI.EnterDormant()`.
+- `Died` dan `Damaged` didengar per slot zombie. Delegate-nya dibuat sekali di `Awake`.
+- Zombie yang kehilangan target, atau selesai menunggu di pintu, langsung kembali `Dormant` sambil berjalan ke titik tidurnya. Pemicu bangun tetap berlaku selama ia berjalan.
+- Zombie yang dilepas saat malam belum masuk daftar `SpawnManager`, karena belum ada API pengambilalihan. Jatah yang belum muncul diminta lewat `SpawnManager.RequestBurst` di pintu keluar terdekat.
+- `LairNest` memakai `LairData.nestHP` kalau nilainya lebih dari 0. Selain itu, `LairNest` memakai `lair.nestHP`.
+- `FlashlightController` dan #98 belum ada, jadi cahaya dibaca dari `TorchController` yang menyala.
+- `lootCollected` tidak disimpan di sini. Loot tetap milik `LootSpawnerSystem` (#103).
+- Pendengar `InteriorZoneChangedEvent` (`EnvironmentDirector`, `RegionalWeather`, dan `WarmthSystem`) masih berupa TODO di kode lama.

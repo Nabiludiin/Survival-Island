@@ -221,3 +221,14 @@ Contoh baris awal `id`:
 12. Ulangi satu kategori berkali-kali dengan jeda dipendekkan. **Hasil:** baris tidak berulang sebelum semua terpakai.
 13. Jeda saat NPC baru saja berbicara. **Hasil:** tidak ada ucapan baru, dan jeda tidak berkurang.
 14. Biarkan NPC berada jauh dari pemain. **Hasil:** ucapan tidak tampil.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Island_Logic/LoreCollectibles.cs` (beserta `LoreArchiveFile`), `LoreEntry.cs`, `LorePoint.cs`, `LoreReaderPanel.cs`, `BarkSet.cs` (beserta `BarkLine` dan `BarkCategory`), dan `NPCBarks.cs`. Belum diuji di Unity.
+
+- **`lore_archive.json`** ditulis di `Application.persistentDataPath` lewat file sementara, lalu dipindah. File rusak dianggap kosong dan dicatat.
+- **Petunjuk:** jumlah petunjuk `PartLocation` dihitung dari `grantedHints`, dan dibatasi `lore.maxPartHintsPerRun`.
+- **`LorePoint`** tidak menyimpan apa pun (`saveId` kosong). Prompt dipilih dari `prompt.read`, `prompt.listen`, dan `prompt.read_again`.
+- **`LoreReaderPanel`** memakai `AudioSource` sendiri dengan `ignoreListenerPause`. Rekaman diputar di `OnFocusGained`, dan berhenti di `OnClosed`.
+- **`NPCBarks`:** sapaan karena jarak dihitung dari waktu terakhir pemain keluar `greetRadius`, dan NPC baru tidak langsung menyapa. `ZombieIncoming` dari `NightfallEvent` dicatat per NPC dan dipakai pada giliran NPC itu. Pemeriksaan zombie memakai `EnemyInstance.IsZombie` dan `EnemyAI.IsActiveThreat`. Baris dipilih dengan `UnityEngine.Random`, karena ucapan tidak memengaruhi isi dunia.
+- **Belum ada:** tab `Arsip` di `DiaryArchivePanel` dan tampilan arsip di `MainMenuController` (kode lama). Datanya tersedia lewat `GetKnownEntries`, `CountEntries`, `OpenReader`, dan `LoreArchiveFile.Load()`.

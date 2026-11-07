@@ -162,3 +162,10 @@ Tanpa query fisika. Garis pandang diperiksa pemanggil, misalnya Zombie Lumut (#2
 13. Diterkam Jaguar dengan senter menyala. **Hasil:** lampu tetap menyala dan baterai tetap berkurang.
 14. Ubah `flashlight.drainPerSec` ke 1 lewat `DevConsole`. **Hasil:** isi berkurang 1 per detik.
 15. Bandingkan nilai keterlihatan di malam Region 2 dengan senter mati dan menyala. **Hasil:** nilai naik sesuai rumus `LightSourceSystem.md`, yang memakai `flashlightVisibilityBonus` (0,3).
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Island_Logic/FlashlightController.cs`. Config `GameBalanceConfig.flashlight` di `GameBalance.GrupE.cs`.
+- Tambahan static `IsActiveLit` dan `ActiveInstance`, dibaca `LightSourceSystem` (bonus keterlihatan dan pilihan senter untuk baterai).
+- `Awake` menandai `LightSource` prefab sebagai `isHeld = true` dan `isFlashlight = true` (field baru di `LightSource`, supaya `GetLightLevelAt` dan bayangan tidak menghitung senter).
+- Belum diuji di Unity.

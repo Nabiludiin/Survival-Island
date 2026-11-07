@@ -220,3 +220,12 @@ Tier memberi air dan makanan lebih dulu pada pekan awal, karena pemain masih mem
 14. `setday 70`, lalu berada di dekat kargo pada malam hari. **Hasil:** 12 zombie muncul, dengan HP 1,2 kali dan damage 1,1 kali. Ulangi pada siang hari. **Hasil:** jumlah hewan tidak berubah.
 15. Pada hari ke-14 pukul 03:00, simpan, keluar, lalu lanjutkan dan tunggu fajar. **Hasil:** kargo hari ke-14 tetap datang sekali.
 16. Simpan pada hari ke-7 pukul 10:00 setelah kargo datang, lalu lanjutkan. **Hasil:** tidak ada kiriman kedua, walaupun `DaybreakEvent` dikirim ulang.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Island_Logic/BeachSupplyManager.cs` (`BeachCrateTier`, `BeachDeliveryState`), `BeachSupplyPoint.cs`, `BeachCrate.cs`. Config `GameBalanceConfig.beachSupply` di `GameBalance.GrupE.cs`, tambahan `ambushSpawnRadius` (25), `pointNavSampleDistance` (2), `pointClearRadius` (1,5), dan `fallbackSpacing` (1,5) dari angka di teks.
+- `CompassSystem` (#30) belum ada: penanda kompas TODO.
+- Isi pertama kargo pertama: kalau hasil tabel bukan air bersih atau makanan kaleng, diganti salah satunya (jumlah 2, sesuai tabel isi), dipilih dari aliran yang sama sehingga tetap deterministik.
+- Pemeriksaan tambahan saat pemain di `tideZone` berjalan sekali per detik di `Update`.
+- `DebugDeliver(day)` untuk `DevConsole`.
+- Belum diuji di Unity.

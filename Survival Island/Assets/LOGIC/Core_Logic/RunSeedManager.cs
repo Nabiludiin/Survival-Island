@@ -9,12 +9,13 @@ namespace SurvivalIsland
     ///
     /// Urutan bootstrap ke-15. Sistem gameplay tidak boleh memakai UnityEngine.Random untuk hal yang memengaruhi permainan.
     ///
-    /// Belum diimplementasikan di Langkah 1 (butuh data dari Langkah lain):
-    /// - Isi BuildLayout (suku cadang #69, NPC kapal #76, jadwal bencana #70) dan RunLayoutValidator.
-    ///   Keduanya butuh RunLayoutSources (PartSpawnPointTable, daftar NPC, DisasterData) yang belum ada.
-    ///   Untuk sementara BuildLayout mengembalikan susunan kosong dan pemeriksaan selalu lolos.
-    /// - EnsureDisasterScheduleThrough (DisasterScheduler, Langkah 7).
-    /// - Alat Editor RunSeedAudit.
+    /// Keputusan developer (7 November 2026): BuildLayout, RunLayoutSources, dan RunLayoutValidator ditulis di sistem pendukung.
+    /// - BuildLayout adalah fungsi statis murni dari seed dan RunLayoutSources: suku cadang (#69), NPC kapal (#76), dan blok
+    ///   pertama jadwal bencana (#70). Pemeriksaan lewat RunLayoutValidator, percobaan ulang sampai maxSeedRerolls, lalu
+    ///   RunLayoutSources.safeLayout.
+    /// - Kompatibilitas: kalau layoutSources kosong di Inspector, perilaku lama tetap jalan dengan peringatan (hanya jadwal
+    ///   bencana dari field disasterData lama, tanpa pemeriksaan). HeavyItemSystem lalu memilih titik sendiri.
+    /// - Alat Editor RunSeedAudit: menu konteks di aset RunLayoutSources.
     /// </summary>
     public class RunSeedManager : MonoBehaviour, IBootstrapService
     {
@@ -37,10 +38,30 @@ namespace SurvivalIsland
         /// <summary>Run ini memakai safeLayout karena semua seed gagal.</summary>
         public bool UsedFallbackLayout { get; private set; }
 
-        // Ditambahkan Langkah 7 (#70): sumber DisasterData untuk jadwal bencana. Pengganti sementara
-        // RunLayoutSources.disasterData sampai RunLayoutSources ditulis (RunSeedManager.md bagian 1).
-        [Tooltip("Aset DisasterData (Eruption, Earthquake, TropicalStorm). Pindah ke RunLayoutSources saat ada.")]
+        [Tooltip("Sumber susunan run (#89): PartSpawnPointTable, NPC kapal, DisasterData, spawner kapal, safeLayout.")]
+        [SerializeField] private RunLayoutSources layoutSources;
+
+        // Ditambahkan Langkah 7 (#70). Sekarang hanya cadangan: dipakai kalau layoutSources kosong atau
+        // layoutSources.disasterData kosong, supaya aset lama tetap jalan.
+        [Tooltip("Cadangan lama. Utamakan RunLayoutSources.disasterData.")]
         [SerializeField] private DisasterData[] disasterData = Array.Empty<DisasterData>();
+
+        private static readonly RunSeedBalance FallbackRunSeed = new RunSeedBalance();
+        private static readonly RegionBalance FallbackRegion = new RegionBalance();
+
+        /// <summary>Sumber susunan run. null berarti perilaku lama (lihat ringkasan kelas).</summary>
+        public RunLayoutSources LayoutSources => layoutSources;
+
+        /// <summary>DisasterData yang dipakai jadwal: RunLayoutSources.disasterData, atau field lama kalau kosong.</summary>
+        public DisasterData[] DisasterDataSource => layoutSources != null && layoutSources.disasterData != null && layoutSources.disasterData.Length > 0
+            ? layoutSources.disasterData : disasterData;
+
+        /// <summary>DisasterData dari sumber; cadangan field lama RunSeedManager.Instance (dipakai juga RunLayoutValidator).</summary>
+        public static DisasterData[] ResolveDisasterData(RunLayoutSources sources)
+        {
+            if (sources != null && sources.disasterData != null && sources.disasterData.Length > 0) return sources.disasterData;
+            return Instance != null ? Instance.disasterData : Array.Empty<DisasterData>();
+        }
 
         private RandomStream[] sequential = Array.Empty<RandomStream>();
         private uint forcedNextSeed;
@@ -139,6 +160,15 @@ namespace SurvivalIsland
         }
 
         /// <summary>
+        /// Aliran berkunci untuk seed tertentu, bukan CurrentSeed. Dipakai RunLayoutValidator (syarat 4) saat seed calon
+        /// belum ditetapkan. Hasilnya sama persis dengan Fork(id, key) setelah CurrentSeed = seed.
+        /// </summary>
+        public static RandomStream ForkForSeed(uint seed, RandomStreamId id, string key)
+        {
+            return new RandomStream(DeriveSeed(seed, id, Fnv1a64(key)));
+        }
+
+        /// <summary>
         /// Aliran berurutan. Pemanggil WAJIB memakai "ref var s = ref RunSeedManager.Instance.GetStream(id);",
         /// karena menyalin ke variabel biasa membuat status tidak maju.
         /// </summary>
@@ -198,54 +228,161 @@ namespace SurvivalIsland
         private RunLayout ResolveLayout(ref uint seed, bool isForced)
         {
             UsedFallbackLayout = false;
-            int maxRerolls = MaxSeedRerolls();
+            var sources = layoutSources;
 
+            // Kompatibilitas: tanpa RunLayoutSources, perilaku lama (jadwal bencana saja, tanpa pemeriksaan).
+            if (sources == null)
+            {
+                Debug.LogWarning("[RunSeedManager] layoutSources belum diisi di Inspector. Suku cadang dipilih HeavyItemSystem, " +
+                                 "NPC kapal tidak muncul, dan susunan tidak diperiksa (#89).", this);
+                return BuildLayout(seed, null, disasterData);
+            }
+
+            uint originalSeed = seed;
+            int maxRerolls = MaxSeedRerolls();
+            string failure = null;
             for (int attempt = 0; attempt <= maxRerolls; attempt++)
             {
-                RunLayout layout = BuildLayout(seed);
-                if (ValidateLayout(layout, seed, out string failure))
+                // 1. Bangun dan periksa.
+                RunLayout layout = BuildLayout(seed, sources, DisasterDataSource);
+                if (RunLayoutValidator.Validate(layout, seed, sources, out failure))
                     return layout;
 
+                // 2. Seed dari DevConsole dipakai apa adanya, karena tujuannya mengulang bug.
                 if (isForced)
                 {
-                    // Seed dari DevConsole dipakai apa adanya, karena tujuannya mengulang bug.
                     Debug.LogWarning($"[RunSeedManager] Seed paksa {FormatSeed(seed)} gagal pemeriksaan ({failure}). Tetap dipakai.");
                     return layout;
                 }
 
+                // 3. Seed yang lolos adalah seed yang ditampilkan, jadi mengulangnya langsung memberi susunan sama.
+                Debug.Log($"[RunSeedManager] Seed {FormatSeed(seed)} gagal ({failure}). Mencoba seed berikutnya.");
                 seed = DeriveNextSeed(seed);
             }
 
-            // Semua gagal: pakai safeLayout supaya pemain tetap bisa bermain.
-            Debug.LogError("[RunSeedManager] Semua seed gagal pemeriksaan. Memakai safeLayout.");
+            // 4. Semua gagal: safeLayout supaya pemain tetap bisa bermain. Tafsiran: seed awal tetap ditampilkan, supaya
+            // memasukkan seed itu lewat DevConsole mengulang rantai percobaan yang sama. Aliran acak memakai seed itu juga.
+            seed = originalSeed;
             UsedFallbackLayout = true;
-            // TODO (RunLayoutSources belum ada): ganti dengan RunLayoutSources.safeLayout.
-            return new RunLayout();
+            Debug.LogError($"[RunSeedManager] Semua seed gagal pemeriksaan (terakhir: {failure}). Memakai safeLayout.", this);
+            var safe = sources.CloneSafeLayout();
+            if (safe.disasterScheduleThroughDay <= 0)
+            {
+                // Tafsiran: safeLayout tanpa jadwal diisi blok pertama dari seed. DisasterScheduler sudah menaati syarat 6.
+                int block = ScheduleBlockDays();
+                var s = new RandomStream(DeriveSeed(seed, RandomStreamId.Disaster, 0UL));
+                DisasterScheduler.Build(ref s, DisasterDataSource, 1, block, null, out var schedule);
+                safe.disasterSchedule = schedule;
+                safe.disasterScheduleThroughDay = block;
+            }
+            return safe;
         }
 
         /// <summary>
-        /// Fungsi murni: hasil hanya ditentukan seed dan RunLayoutSources.
-        /// TODO Langkah 6/7: isi suku cadang (#69), NPC kapal (#76), dan blok jadwal bencana pertama (#70)
-        /// setelah RunLayoutSources, PartSpawnPointTable, dan DisasterData tersedia.
+        /// Fungsi murni (RunSeedManager.md "Membangun susunan run yang valid"): hasil hanya ditentukan seed dan sumber, tanpa
+        /// membaca scene. Aliran memakai seed parameter (bukan CurrentSeed), karena dipanggil sebelum seed ditetapkan.
+        /// DeriveSeed(seed, id, 0) sama dengan Fork(id, 0) setelah CurrentSeed = seed.
+        /// sources null = perilaku lama: hanya jadwal bencana dari disasters.
         /// </summary>
-        private RunLayout BuildLayout(uint seed)
+        public static RunLayout BuildLayout(uint seed, RunLayoutSources sources, DisasterData[] disasters)
         {
             var layout = new RunLayout();
-            // Langkah 7 (#70): blok pertama jadwal bencana, hari 1 sampai scheduleBlockDays, lewat Fork(Disaster, 0).
-            // Memakai seed parameter (bukan CurrentSeed), karena BuildLayout dipanggil sebelum seed ditetapkan.
+
+            if (sources != null)
+            {
+                // 1. Suku cadang: Fork(PartLocation, 0), Shuffle, ambil helicopterPartCount titik yang memenuhi jarak minimal.
+                int partCount = Mathf.Max(0, RegionBal.helicopterPartCount);
+                var ps = new RandomStream(DeriveSeed(seed, RandomStreamId.PartLocation, 0UL));
+                var picked = new int[partCount];
+                int filled = PickPartPoints(sources.partSpawnPoints, partCount, RunSeedBal.minPartPointSpacing, ref ps, picked);
+                // Titik kurang: hasil dipotong, dan syarat 1 menolaknya (percobaan seed lain, lalu safeLayout).
+                if (filled < partCount) Array.Resize(ref picked, filled);
+                layout.partPointByPart = picked;
+
+                // 2. NPC: Fork(NPC, 0), pilih NPC dari daftar #76, pasangkan ke titik kapal buatan tangan.
+                var ns = new RandomStream(DeriveSeed(seed, RandomStreamId.NPC, 0UL));
+                PickShipNpcs(sources, ref ns, out layout.shipNpcIds, out layout.shipNpcPointByNpc);
+            }
+
+            // 3. Bencana: blok pertama, hari 1 sampai scheduleBlockDays, lewat Fork(Disaster, 0) (Langkah 7, #70).
             int block = ScheduleBlockDays();
             var s = new RandomStream(DeriveSeed(seed, RandomStreamId.Disaster, 0UL));
-            DisasterScheduler.Build(ref s, disasterData, 1, block, null, out var schedule);
+            DisasterScheduler.Build(ref s, disasters, 1, block, null, out var schedule);
             layout.disasterSchedule = schedule;
             layout.disasterScheduleThroughDay = block;
             return layout;
         }
 
-        /// <summary>TODO Langkah 6/7: RunLayoutValidator.Validate (6 syarat di RunSeedManager.md).</summary>
-        private static bool ValidateLayout(RunLayout layout, uint seed, out string failure)
+        /// <summary>
+        /// Pemilihan titik suku cadang (BuildLayout langkah 1). Shuffle semua indeks, lalu ambil titik sah (isReachable)
+        /// yang berjarak minimal minSpacing dari titik terpilih sebelumnya. Mengembalikan jumlah titik yang terisi.
+        /// Dipakai juga cadangan HeavyItemSystem saat layoutSources kosong, supaya aturannya hanya ada di satu tempat.
+        /// </summary>
+        public static int PickPartPoints(PartSpawnPointTable table, int count, float minSpacing, ref RandomStream s, int[] result)
         {
-            failure = null;
-            return layout != null;
+            int n = table != null ? table.Count : 0;
+            if (result == null || count <= 0 || n == 0) return 0;
+            var order = new int[n];
+            for (int i = 0; i < n; i++) order[i] = i;
+            s.Shuffle(order);
+
+            float minSq = minSpacing * minSpacing;
+            int filled = 0;
+            for (int k = 0; k < n && filled < count && filled < result.Length; k++)
+            {
+                int p = order[k];
+                if (!table.IsValidIndex(p)) continue;   // Syarat 2: titik isReachable = false tidak dipakai
+                bool farEnough = true;
+                for (int j = 0; j < filled; j++)
+                    if ((table.points[result[j]].position - table.points[p].position).sqrMagnitude < minSq) { farEnough = false; break; }
+                if (farEnough) result[filled++] = p;
+            }
+            return filled;
+        }
+
+        /// <summary>
+        /// Jumlah NPC kapal per run: runSeed.shipNpcCount, dibatasi jumlah NPC di sumber. Tafsiran sementara (pertanyaan ke
+        /// developer): nilai awal 3 = semua NPC #76, jadi yang berubah tiap run adalah posisinya.
+        /// </summary>
+        public static int ShipNpcTargetCount(RunLayoutSources sources)
+        {
+            if (sources == null || sources.shipNpcs == null) return 0;
+            int valid = 0;
+            for (int i = 0; i < sources.shipNpcs.Length; i++)
+                if (sources.shipNpcs[i] != null && !string.IsNullOrEmpty(sources.shipNpcs[i].npcId)) valid++;
+            return Mathf.Clamp(RunSeedBal.shipNpcCount, 0, valid);
+        }
+
+        private static void PickShipNpcs(RunLayoutSources sources, ref RandomStream s, out string[] ids, out int[] points)
+        {
+            var npcs = sources.shipNpcs ?? Array.Empty<NPCData>();
+            var pts = sources.shipNpcPoints ?? Array.Empty<ShipNpcPointInfo>();
+            int target = ShipNpcTargetCount(sources);
+
+            // Urutan aliran tetap: acak NPC dulu, lalu titik.
+            var npcOrder = new int[npcs.Length];
+            for (int i = 0; i < npcOrder.Length; i++) npcOrder[i] = i;
+            s.Shuffle(npcOrder);
+            var pointOrder = new int[pts.Length];
+            for (int i = 0; i < pointOrder.Length; i++) pointOrder[i] = i;
+            s.Shuffle(pointOrder);
+
+            float maxWalk = RunSeedBal.maxShipNpcWalkSeconds;
+            var idList = new System.Collections.Generic.List<string>(target);
+            var pointList = new System.Collections.Generic.List<int>(target);
+            int nextPoint = 0;
+            for (int k = 0; k < npcOrder.Length && idList.Count < target; k++)
+            {
+                var data = npcs[npcOrder[k]];
+                if (data == null || string.IsNullOrEmpty(data.npcId) || idList.Contains(data.npcId)) continue;
+                // Titik yang gagal syarat 5 dilewati. Titik kurang: NPC dipotong, dan syarat 5 menolak susunan ini.
+                while (nextPoint < pointOrder.Length && !RunLayoutValidator.IsShipNpcPointUsable(pts[pointOrder[nextPoint]], maxWalk)) nextPoint++;
+                if (nextPoint >= pointOrder.Length) break;
+                idList.Add(data.npcId);
+                pointList.Add(pointOrder[nextPoint++]);
+            }
+            ids = idList.ToArray();
+            points = pointList.ToArray();
         }
 
         /// <summary>
@@ -267,7 +404,7 @@ namespace SurvivalIsland
                 int toDay = layout.disasterScheduleThroughDay + block;
                 int blockIndex = layout.disasterScheduleThroughDay / block;
                 var s = Fork(RandomStreamId.Disaster, blockIndex);
-                DisasterScheduler.Build(ref s, disasterData, fromDay, toDay, layout.disasterSchedule, out var added);
+                DisasterScheduler.Build(ref s, DisasterDataSource, fromDay, toDay, layout.disasterSchedule, out var added);
                 if (added.Length > 0)
                 {
                     var merged = new DisasterScheduleEntry[layout.disasterSchedule.Length + added.Length];
@@ -290,6 +427,9 @@ namespace SurvivalIsland
             var gm = GameManager.Instance;
             return gm != null && gm.Balance != null ? gm.Balance.runSeed.maxSeedRerolls : 0;
         }
+
+        private static RunSeedBalance RunSeedBal => GameManager.CurrentBalance != null ? GameManager.CurrentBalance.runSeed : FallbackRunSeed;
+        private static RegionBalance RegionBal => GameManager.CurrentBalance != null ? GameManager.CurrentBalance.region : FallbackRegion;
 
         // ---------------------------------------------------------------- Save dan load
 

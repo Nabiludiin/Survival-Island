@@ -253,3 +253,7 @@ Kode: `Survival Island/Assets/LOGIC/Core_Logic/CraftingRecipe.cs`, `RecipeDataba
 - **`CraftingPanel`:** tampilan sederhana berupa daftar baris (`Button` + `TMP_Text`) dan daftar antrean dengan tombol batal. Nama memakai `displayNameKey` apa adanya sampai #104 ada. Tab Perbaiki (#113) belum ada.
 - **Belum ada (TODO):** notifikasi #22 (`Resep baru`, `Inventori penuh, hasil jatuh`, alasan tolak), SFX (#16), validasi Editor `ProgressionSafety` (#116), dan aset resep inti (dibuat di Unity).
 - Belum diuji di Unity.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Basis kelas sekarang `IslandInteractable` (#17). `promptKey` dan `highlight` milik kelas dasar (nama field sama, jadi isian prefab lama tetap terbaca); `Reset` mengisi `prompt.crafting_station`. `saveId` dibiarkan kosong.

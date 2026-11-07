@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SurvivalIsland
@@ -23,9 +24,32 @@ namespace SurvivalIsland
 
         public Vector3 VacuumPoint => vacuumPoint != null ? vacuumPoint.position : transform.position;
 
+        /// <summary>Kandang yang aktif di scene. Dibaca IsInsideAnyCage tanpa query fisika.</summary>
+        private static readonly List<LuckyMachineCage> active = new List<LuckyMachineCage>(4);
+        private Collider area;
+
         private void Awake()
         {
             if (machine == null) machine = GetComponentInParent<LuckyMachine>();
+            area = GetComponent<Collider>();
+        }
+
+        private void OnEnable() { if (!active.Contains(this)) active.Add(this); }
+        private void OnDisable() { active.Remove(this); }
+
+        /// <summary>
+        /// true kalau posisi berada di dalam trigger salah satu kandang. Dipakai SpecialZombieAI.TickLargeStuck: musuh boleh
+        /// diam di dalam kandang, jadi pengaman macet dilewati di sana (SpecialZombieAI.md, #72).
+        /// </summary>
+        public static bool IsInsideAnyCage(Vector3 position)
+        {
+            for (int i = 0; i < active.Count; i++)
+            {
+                var c = active[i];
+                if (c == null || c.area == null || !c.area.enabled) continue;
+                if (c.area.bounds.Contains(position) && (c.area.ClosestPoint(position) - position).sqrMagnitude < 0.0001f) return true;
+            }
+            return false;
         }
 
         private void OnTriggerEnter(Collider other)

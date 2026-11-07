@@ -6,8 +6,8 @@ namespace SurvivalIsland
     /// Viewmodel palu (Tool_Hammer). Meneruskan klik kiri sesuai mode palu, dan klik kanan membuka BuildMenu.
     /// Blueprint: raft/BuildMenu.md "Klik kiri palu" dan tabel input menu radial (#79).
     ///
-    /// Belum ada di Langkah 4 (TODO #47, BuildingIntegrity): mode Repair (TryRepairSwing) dan Upgrade.
-    /// Hitung tahan Upgrade sudah disiapkan sama dengan Demolish, tetapi belum memanggil apa pun.
+    /// Mode Repair dan Upgrade diteruskan ke BuildingIntegrity (#47): TryRepairSwing dan TickUpgrade.
+    /// Hitung tahan Demolish tetap di sini; tahan Upgrade dihitung BuildingIntegrity.
     /// </summary>
     public class HammerEquippable : EquippableBehaviour
     {
@@ -21,6 +21,8 @@ namespace SurvivalIsland
         {
             // Hologram hilang dan hitung tahan batal. Pilihan terakhir tetap diingat BuildManager.
             if (BuildManager.Instance != null) BuildManager.Instance.HideGhost();
+            // Tahan upgrade yang sedang berjalan ikut batal (#47).
+            if (BuildingIntegrity.Instance != null) BuildingIntegrity.Instance.TickUpgrade(ActionPhase.Released);
             CancelHold();
             base.OnUnequip();
         }
@@ -35,9 +37,13 @@ namespace SurvivalIsland
                     if (phase == ActionPhase.Pressed) bm.TryExecuteBuild();
                     break;
                 case HammerMode.Repair:
-                    // TODO #47: BuildingIntegrity.TryRepairSwing(), diulang sesuai jeda ayunan saat ditahan.
+                    // Ayunan perbaikan (#47), diulang sesuai jeda ayunan saat ditahan.
+                    if (BuildingIntegrity.Instance != null && phase != ActionPhase.Released) BuildingIntegrity.Instance.TryRepairSwing();
                     break;
                 case HammerMode.Upgrade:
+                    // Tahan untuk upgrade (#47), dihitung BuildingIntegrity.
+                    if (BuildingIntegrity.Instance != null) BuildingIntegrity.Instance.TickUpgrade(phase);
+                    break;
                 case HammerMode.Demolish:
                     TickHold(phase, bm.Mode);
                     break;
@@ -63,7 +69,8 @@ namespace SurvivalIsland
                 holdTarget = aimed;
                 holdTimer = 0f;
                 holding = aimed != null;
-                // TODO HUD: tampilkan registry.PreviewCollapse(aimed) sebelum bongkar.
+                // Jumlah struktur yang ikut runtuh ditampilkan sebelum bongkar (BuildMenu.md, PreviewCollapse).
+                HUDManager.Instance?.ShowDemolishPreview(aimed != null ? registry.PreviewCollapse(aimed) : 0);
                 return;
             }
             if (!holding || holdTarget == null) return;
@@ -77,15 +84,17 @@ namespace SurvivalIsland
             {
                 if (registry.TryDemolish(holdTarget))
                 {
-                    // TODO #113: durabilitas palu -= build.hammerDecayPerDemolish.
+                    // Durabilitas palu -= build.hammerDecayPerDemolish (#113).
+                    var eq = EquipmentManager.Instance;
+                    if (eq != null) DurabilitySystem.ApplyWear(eq.ActiveInstance, Balance != null ? Balance.build.hammerDecayPerDemolish : 1f);
                 }
             }
-            // TODO #47: mode Upgrade memanggil BuildingIntegrity setelah tahan selesai.
             CancelHold();
         }
 
         private void CancelHold()
         {
+            if (holding || holdTarget != null) HUDManager.Instance?.ShowDemolishPreview(0);
             holding = false;
             holdTimer = 0f;
             holdTarget = null;

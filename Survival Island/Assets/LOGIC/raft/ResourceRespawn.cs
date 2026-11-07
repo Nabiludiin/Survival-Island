@@ -12,8 +12,9 @@ namespace SurvivalIsland
     /// Usulan disetujui: node hanya tumbuh kalau pemain lebih dari regrowMinPlayerDistance dan radius
     /// regrowClearRadius bebas bangunan, pemain, NPC, dan Heavy Item (PhysicsMasks.RegrowBlock).
     ///
-    /// Belum ada di Langkah 4 (TODO): CoconutPickup dan StonePickup (#43, #116, butuh PickupInteractable #17),
-    /// CountActiveStones dan ForceRegrowStones (#116), ResourceAuditWindow (Editor).
+    /// CoconutPickup dan StonePickup (dasar RegrowablePickup) mendaftar lewat MarkDepleted seperti node.
+    /// CountActiveStones dan ForceRegrowStones (#116) menghitung semua PickupInteractable dengan item Mat_Stone, termasuk
+    /// StonePickup, supaya batu kecil lama di scene tetap terhitung. Belum ada (TODO): ResourceAuditWindow (Editor).
     /// </summary>
     [DisallowMultipleComponent]
     public class ResourceRespawn : MonoBehaviour
@@ -60,6 +61,45 @@ namespace SurvivalIsland
         public void Forget(IRegrowable node)
         {
             depleted.Remove(node);
+        }
+
+        // ---------------------------------------------------------------- Batu kecil (#116)
+
+        /// <summary>itemID batu kecil. Sama dengan ProgressionSafety.StoneId.</summary>
+        private const string StoneItemId = "Mat_Stone";
+
+        /// <summary>PickupInteractable batu kecil (Mat_Stone). Juga dipakai perintah clearstones (ProgressionSafety).</summary>
+        public static bool IsSmallStone(PickupInteractable p) => p != null && p.Item != null && p.Item.itemID == StoneItemId;
+
+        /// <summary>Batu kecil yang masih bisa diambil di region itu (ResourceRespawn.md, dibaca ProgressionSafety #116).</summary>
+        public int CountActiveStones(RegionType region)
+        {
+            var all = FindObjectsByType<PickupInteractable>(FindObjectsSortMode.None);
+            int n = 0;
+            for (int i = 0; i < all.Length; i++)
+                if (IsSmallStone(all[i]) && all[i].IsAvailable && RegionStreaming.RegionOf(all[i].transform.position) == region) n++;
+            return n;
+        }
+
+        /// <summary>
+        /// Pengaman ProgressionSafety (#116): tumbuhkan lagi batu kecil yang sudah diambil di region itu sampai jumlah
+        /// aktif mencapai minimum. Mengembalikan jumlah batu yang ditumbuhkan. Tidak memunculkan objek baru.
+        /// </summary>
+        public int ForceRegrowStones(RegionType region, int minimum)
+        {
+            int need = minimum - CountActiveStones(region);
+            if (need <= 0) return 0;
+            var all = FindObjectsByType<PickupInteractable>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            int grown = 0;
+            for (int i = 0; i < all.Length && grown < need; i++)
+            {
+                var p = all[i];
+                if (!IsSmallStone(p) || !p.IsConsumed) continue;
+                if (RegionStreaming.RegionOf(p.transform.position) != region) continue;
+                p.Regrow();
+                grown++;
+            }
+            return grown;
         }
 
         private void HandleHour(HourChangedEvent e)

@@ -74,8 +74,9 @@ namespace SurvivalIsland
 
             // AISensory.md: saat diam, event tidak dikirim supaya tidak ada beban tanpa guna.
             if (!moving) return;
+            // Tidur (#67): langkah tidak mengirim suara. Dibaca dari nilai sticky SleepStateChangedEvent.
+            if (EventChannel<SleepStateChangedEvent>.HasLast && EventChannel<SleepStateChangedEvent>.Last.isSleeping) return;
             Emit(radius, NoiseSourceKind.Movement);
-            // TODO #67: berhenti saat tidur lewat SleepStateChangedEvent setelah SleepSystem ditulis.
         }
     }
 }

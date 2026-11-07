@@ -64,12 +64,25 @@ namespace SurvivalIsland
                 seedText.text = hasSeed ? $"Seed {seeds.CurrentSeedText} · v{Application.version}" : string.Empty;
             }
 
-            // TODO (LocalStatsManager #57 belum ditulis): zombie dibunuh, tembakan meleset, tanda [CHEAT].
-            // Sampai saat itu baris disembunyikan, sesuai aturan "kalau tidak tersedia" di UIManager.md.
+            // Statistik run dari LocalStatsManager.CurrentRun (#57): zombie dibunuh dan tembakan meleset, tanda [CHEAT]
+            // kalau isTainted. Baris disembunyikan kalau LocalStatsManager tidak ada (UIManager.md).
             if (statsText != null)
             {
-                statsText.text = string.Empty;
-                statsText.gameObject.SetActive(false);
+                var run = LocalStatsManager.Instance != null ? LocalStatsManager.Instance.CurrentRun : null;
+                if (run == null)
+                {
+                    statsText.text = string.Empty;
+                    statsText.gameObject.SetActive(false);
+                }
+                else
+                {
+                    var loc = LocalizationManager.Instance;
+                    string line = loc != null
+                        ? loc.Format("ui.endscreen.stats", "zombies", run.zombiesKilled.ToString(), "missed", run.shotsMissed.ToString())
+                        : $"Zombie dibunuh {run.zombiesKilled} · Tembakan meleset {run.shotsMissed}";
+                    statsText.text = run.isTainted ? line + " [CHEAT]" : line;
+                    statsText.gameObject.SetActive(true);
+                }
             }
         }
 

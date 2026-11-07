@@ -14,12 +14,8 @@ namespace SurvivalIsland
     /// Objek dari pool (ShipLoot_Generic / ShipNpc_Generic). Data diisi lewat Setup setelah SpawnFromPool, bukan di OnSpawned.
     /// Layer Interactable, collider bukan trigger (#87).
     ///
-    /// Belum diimplementasikan (ditandai TODO):
-    /// - Setup(NPCData): NPCData (#76) belum ditulis dan bergantung pada NPCSkill/WeaponData/BarkSet. Jalur NPC
-    ///   (IsSubmergedNpc, berat dari data) sudah ada, tinggal mengisi kind/npcData saat NPCData tersedia.
-    /// - LocalizationManager (#104): teks prompt sementara memakai displayNameKey apa adanya.
-    /// - VFXManager "VFX_ShipPickup" dan suara ambil (AudioManager).
-    /// - Alat Editor ShipLootAudit.
+    /// Setup(NPCData) (#76), teks prompt lewat LocalizationManager (#104), serta efek VFX_ShipPickup dan suara ambil
+    /// (VFXManager, AudioManager) sudah tersambung. Belum ada (TODO): alat Editor ShipLootAudit.
     /// </summary>
     public class ShipInteractable : MonoBehaviour, IInteractable, IPoolable
     {
@@ -38,7 +34,7 @@ namespace SurvivalIsland
         [SerializeField] private AudioClip pickupClip;
         [SerializeField] private AudioClip npcGrabClip;
 
-        /// <summary>Klip untuk AudioManager saat sudah ditulis (TODO di Interact).</summary>
+        /// <summary>Klip ambil, diputar lewat AudioManager di Interact.</summary>
         public AudioClip PickupClip => pickupClip;
         public AudioClip NpcGrabClip => npcGrabClip;
 
@@ -51,6 +47,7 @@ namespace SurvivalIsland
         private int weightCost;
         private int pickupAmount;
         private ItemData itemData;
+        private NPCData npcData;
         private bool isSetUp;
         private bool isTaken;
         private bool isHovered;
@@ -129,19 +126,45 @@ namespace SurvivalIsland
             BuildPromptCache();
         }
 
-        // TODO #76 (NPCData belum ditulis): public void Setup(NPCData npc)
-        //   1. npc == null: peringatan, ReturnSelf.
-        //   2. kind = NPC, npcData = npc, ItemID = npc.npcId.
-        //   3. weightCost = Mathf.Max(1, npc.weight), pickupAmount = 1.
-        //   4. BuildPromptCache() dengan kunci prompt.rescue.
+        /// <summary>Dipanggil LifeboatExtraction.SpawnShipNpcs tepat setelah SpawnFromPool (ShipInteractable.md, #76).</summary>
+        public void Setup(NPCData npc)
+        {
+            if (npc == null)
+            {
+                Debug.LogWarning("[ShipInteractable] Setup dengan NPCData kosong. Objek dikembalikan ke pool.", this);
+                ReturnSelf();
+                return;
+            }
+
+            kind = ShipInteractableKind.NPC;
+            npcData = npc;
+            ItemID = npc.npcId;
+            weightCost = Mathf.Max(1, npc.weight);
+            pickupAmount = 1;
+
+            isSetUp = true;
+            BuildPromptCache();
+        }
 
         private void BuildPromptCache()
         {
-            // TODO #104 (LocalizationManager belum ditulis): loc.Format("prompt.grab"/"prompt.rescue", "name", loc.Get(displayNameKey))
-            //      dan loc.Get("prompt.handsFull"). Sementara memakai teks bawaan dan displayNameKey apa adanya.
-            string name = itemData != null && !string.IsNullOrEmpty(itemData.displayNameKey) ? itemData.displayNameKey : ItemID;
-            promptNormal = (kind == ShipInteractableKind.NPC ? "Selamatkan " : "Ambil ") + name;
-            promptFull = "Tangan penuh. Setor ke Sekoci";
+            // Teks lewat LocalizationManager (#104). Tanpa LocalizationManager, kunci nama dipakai apa adanya.
+            var loc = LocalizationManager.Instance;
+            string nameKey = kind == ShipInteractableKind.NPC
+                ? (npcData != null ? npcData.displayNameKey : null)
+                : (itemData != null ? itemData.displayNameKey : null);
+            if (string.IsNullOrEmpty(nameKey)) nameKey = ItemID;
+            string promptKey = kind == ShipInteractableKind.NPC ? "prompt.rescue" : "prompt.grab";
+            if (loc != null)
+            {
+                promptNormal = loc.Format(promptKey, "name", loc.Get(nameKey));
+                promptFull = loc.Get("prompt.handsFull");
+            }
+            else
+            {
+                promptNormal = (kind == ShipInteractableKind.NPC ? "Selamatkan " : "Ambil ") + nameKey;
+                promptFull = "Tangan penuh. Setor ke Sekoci";
+            }
         }
 
         // ---------------------------------------------------------------- IInteractable
@@ -182,9 +205,13 @@ namespace SurvivalIsland
             if (!ctx.Inventory.AddShipHandItem(ItemID, weightCost, pickupAmount)) return false;
             isTaken = true;
 
-            // TODO (VFXManager, AudioManager belum ditulis):
-            //   Barang: VFXManager.Instance.Play("VFX_ShipPickup", transform.position, Quaternion.identity) dan PlaySFX(pickupClip).
-            //   NPC: PlaySFX(npcGrabClip), tanpa partikel.
+            // Barang: efek VFX_ShipPickup dan suara ambil. NPC: suara saja, tanpa partikel (ShipInteractable.md).
+            if (kind == ShipInteractableKind.NPC) AudioManager.Instance?.PlaySFX(npcGrabClip);
+            else
+            {
+                VFXManager.Instance?.Play("VFX_ShipPickup", transform.position, Quaternion.identity);
+                AudioManager.Instance?.PlaySFX(pickupClip);
+            }
 
             // NPC yang dibawa hilang dari dunia. HUD menampilkan ikonnya lewat ShipHandChangedEvent.
             // NPCRescuedEvent baru dikirim saat disetor (LifeboatExtraction.DepositHand).
@@ -237,6 +264,7 @@ namespace SurvivalIsland
         public void OnReturned()
         {
             itemData = null;
+            npcData = null;
             ItemID = string.Empty;
             kind = ShipInteractableKind.Item;
             weightCost = 0;

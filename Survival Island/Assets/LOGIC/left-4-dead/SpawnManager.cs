@@ -26,11 +26,13 @@ namespace SurvivalIsland
     /// Claude.md Tahap 6: semua musuh dari ObjectPooler, satu jalur kembali (Despawn).
     /// Jumlah zombie malam ditentukan AIDirector (#27) lewat RequestWave; hewan siang diisi TickSpawn.
     ///
-    /// Catatan Langkah 5 (sistem pendukung belum ada, ditandai TODO):
-    /// - RegionStreaming (#88): syarat GetRegionAt/IsLoaded dan RegionLoadStateChangedEvent dilewati.
-    /// - BaseNavigation.IsInsideBase (#78) dan InteriorZone (#112): syarat base/sarang dilewati.
-    /// - HidingSpot/VillageZombieHiding (#63) dan BushSpawnPoint (#25): Zombie Desa dan Lumut memakai FindSpawnPoint biasa.
-    /// - SleepStateChangedEvent (#67), LairClearedEvent (#112), PopulateHidingSpots: belum ada pengirimnya.
+    /// Catatan Langkah 5 (sistem pendukung; yang belum disambung ditandai TODO):
+    /// - RegionStreaming (#88): syarat GetRegionAt/IsLoaded dipakai. RegionLoadStateChangedEvent Unloading memanggil
+    ///   DespawnRegion, dan Loaded (Logistic, siang) memanggil PopulateHidingSpots.
+    /// - BaseNavigation.IsInsideBase (#78), InteriorZone (#112), dan LairRegistry (#112) sudah dipakai.
+    /// - Zombie Desa (hidesFromSun) naik dari HidingSpot.FindEmergeSpot lewat VillageZombieHiding.SpawnEmerging (#63).
+    ///   Zombie Lumut (useBushPoints) muncul di BushSpawnPoint yang lolos syarat jarak dan pandangan (#25).
+    /// - Tidur dari SleepStateChangedEvent (#67). LairClearedEvent (#112) belum dipakai.
     /// - Malam dibaca dari HourChangedEvent (DayPhaseTracker), bukan NightfallEvent (Langkah 4).
     /// </summary>
     public class SpawnManager : MonoBehaviour
@@ -173,11 +175,15 @@ namespace SurvivalIsland
             EventChannel<HourChangedEvent>.Raised += HandleHour;
             EventChannel<RegionChangedEvent>.Raised += HandleRegion;
             EventChannel<RunEndedEvent>.Raised += HandleRunEnded;
+            EventChannel<SleepStateChangedEvent>.Raised += HandleSleep;   // #67
+            EventChannel<RegionLoadStateChangedEvent>.Raised += HandleRegionLoadState;   // #88
             // Event sticky: setelah load, mulai dari kosong dengan region dan waktu terakhir.
             if (EventChannel<RegionChangedEvent>.HasLast) activeRegion = EventChannel<RegionChangedEvent>.Last.to;
             isNight = DayPhaseTracker.IsNight;
             spawnLoop = StartCoroutine(SpawnLoop());
             watchdogLoop = StartCoroutine(WatchdogLoop());
+            // Setelah load atau run baru pada siang hari, titik sembunyi diisi ulang (SunlightExposure.md "Permadeath dan save").
+            StartCoroutine(InitialPopulate());
         }
 
         private void OnDisable()
@@ -185,6 +191,8 @@ namespace SurvivalIsland
             EventChannel<HourChangedEvent>.Raised -= HandleHour;
             EventChannel<RegionChangedEvent>.Raised -= HandleRegion;
             EventChannel<RunEndedEvent>.Raised -= HandleRunEnded;
+            EventChannel<SleepStateChangedEvent>.Raised -= HandleSleep;
+            EventChannel<RegionLoadStateChangedEvent>.Raised -= HandleRegionLoadState;
             StopAllCoroutines();
             spawnLoop = watchdogLoop = sweepRoutine = null;
         }
@@ -198,6 +206,13 @@ namespace SurvivalIsland
             {
                 // Fajar: zombie di luar ruangan dibakar SunlightExposure (#63). Mayat zombie langsung memudar (#95).
                 CorpseBudget.FadeAllZombies();
+                // Zombie Desa disiapkan Submerged kalau Region 4 dimuat (#63).
+                PopulateHidingSpots();
+            }
+            else
+            {
+                // Senja: Zombie Desa yang akan naik dilaporkan ke AIDirector (#27, SunlightExposure.md).
+                SunlightExposure.ReportEmergence();
             }
             // Malam: hewan pergi sendiri lewat WildlifeAI (FleeToDen).
             ScheduleSweep();
@@ -216,8 +231,103 @@ namespace SurvivalIsland
             queue.Clear();
         }
 
+        private void HandleRegionLoadState(RegionLoadStateChangedEvent e)
+        {
+            // SpawnManager.md "Siklus": Unloading = DespawnRegion pada frame yang sama. Loaded Logistic siang = isi titik.
+            if (e.state == RegionLoadState.Unloading) DespawnRegion(e.region);
+            else if (e.state == RegionLoadState.Loaded && e.region == RegionType.Logistic && !isNight) PopulateHidingSpots();
+        }
+
+        /// <summary>
+        /// Region dilepas (#88): semua musuh dengan GetRegionAt(posisi) == region dikembalikan, walaupun sedang mengejar,
+        /// termasuk Zombie Desa yang Submerged. HP dan state tidak disimpan. Tanpa RegionStreaming, tidak ada yang dilepas.
+        /// </summary>
+        public void DespawnRegion(RegionType region)
+        {
+            var rs = RegionStreaming.Instance;
+            if (rs == null) return;
+            for (int i = activeEnemies.Count - 1; i >= 0; i--)
+            {
+                var e = activeEnemies[i];
+                if (e == null) { activeEnemies.RemoveAt(i); continue; }
+                if (rs.GetRegionAt(e.transform.position) == region) Despawn(e.gameObject, DespawnReason.RegionUnloaded);
+            }
+        }
+
+        // ---------------------------------------------------------------- Zombie Desa (#63)
+
+        private IEnumerator InitialPopulate()
+        {
+            yield return null;   // Tunggu HidingSpot dan ObjectPooler aktif
+            if (!isNight) PopulateHidingSpots();
+        }
+
+        /// <summary>
+        /// SunlightExposure.md "Mengisi titik saat siang": Zombie Desa dimunculkan langsung Submerged sampai jumlah penghuni
+        /// semua HidingSpot mencapai sunlight.daySubmergedCount. Dipanggil saat fajar dan saat Region 4 dimuat siang hari.
+        /// </summary>
+        public void PopulateHidingSpots()
+        {
+            var sb = GameManager.CurrentBalance != null ? GameManager.CurrentBalance.sunlight : null;
+            var spots = HidingSpot.All;
+            if (sb == null || spots.Count == 0 || RunSeedManager.Instance == null || ObjectPooler.Instance == null) return;
+            if (!RegionStreaming.IsRegionLoaded(RegionType.Logistic)) return;
+            var data = FindHidingZombieData();
+            if (data == null) return;
+            ref var rng = ref RunSeedManager.Instance.GetStream(RandomStreamId.Enemy);
+            // Tiap putaran menambah satu penghuni, jadi paling banyak daySubmergedCount putaran.
+            for (int n = 0; n < sb.daySubmergedCount && HidingSpot.TotalOccupants < sb.daySubmergedCount; n++)
+            {
+                // Titik dengan tempat kosong, mulai dari indeks acak supaya penghuni tersebar.
+                HidingSpot spot = null;
+                int start = rng.Range(0, spots.Count);
+                for (int k = 0; k < spots.Count; k++)
+                {
+                    var s = spots[(start + k) % spots.Count];
+                    if (s != null && s.HasRoom) { spot = s; break; }
+                }
+                if (spot == null) break;
+                var e = SpawnOne(data, spot.EntryPosition, ref rng);
+                if (e == null) break;   // Pool habis, atau gagal NavMesh
+                var hiding = e.GetComponent<VillageZombieHiding>();
+                if (hiding == null || !hiding.SpawnSubmerged(spot))
+                {
+                    if (hiding == null) Debug.LogError($"[SpawnManager] Prefab '{data.enemyId}' (hidesFromSun) tidak punya VillageZombieHiding.", e);
+                    Despawn(e.gameObject, DespawnReason.Debug);
+                    break;
+                }
+            }
+        }
+
+        /// <summary>Data zombie hidesFromSun dari tabel Logistic, atau tabel lain kalau tidak ada.</summary>
+        private EnemyData FindHidingZombieData()
+        {
+            int logistic = (int)RegionType.Logistic;
+            if (tables != null && logistic < tables.Length)
+            {
+                var found = FindHidingIn(tables[logistic]);
+                if (found != null) return found;
+            }
+            if (tables == null) return null;
+            for (int t = 0; t < tables.Length; t++)
+            {
+                var found = FindHidingIn(tables[t]);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        private static EnemyData FindHidingIn(RegionSpawnTable table)
+        {
+            if (table == null || table.nightEntries == null) return null;
+            foreach (var en in table.nightEntries)
+                if (en.enemy is ZombieData zd && zd.hidesFromSun) return zd;
+            return null;
+        }
+
         /// <summary>SleepSystem (#67): tick tidak memunculkan musuh baru selama tidur. RequestAmbush tetap jalan.</summary>
         public void SetSleeping(bool value) => isSleeping = value;
+        private void HandleSleep(SleepStateChangedEvent e) => isSleeping = e.isSleeping;
 
         private void ScheduleSweep()
         {
@@ -241,7 +351,8 @@ namespace SurvivalIsland
             {
                 var e = activeEnemies[i];
                 if (e == null || e.IsDormantCounted || e.IsCarcass || e.IsFromOverride || !e.Health.IsAlive) continue;
-                // TODO #112: lewati zombie sarang di dalam InteriorZone (EnemyAI.lair).
+                // Zombie sarang di dalam InteriorZone tidak dikembalikan saat siang (#112).
+                if (e.AI != null && LairRegistry.IsShelteredLairZombie(e.AI)) continue;
                 if (e.AI != null && e.AI.IsBurning) continue;
                 bool wrong = isNight ? e.IsAnimal : e.IsZombie;
                 if (wrong && !IsVisible(e.transform.position)) Despawn(e.gameObject, DespawnReason.Debug);
@@ -363,8 +474,9 @@ namespace SurvivalIsland
             if (isSleeping) return 0;
             var b = Bal;
             if (b == null) return 0;
-            // TODO #112: kalikan (1 - regionBudgetReduction[activeRegion]) setelah ZombieLair ada.
-            int count = Mathf.Min(r.count, CurrentZombieCap - AliveZombies - queue.Count);
+            // Sarang yang hancur mengurangi anggaran horde region ini (#112, usulan 3).
+            int wanted = Mathf.RoundToInt(r.count * (1f - LairRegistry.GetBudgetReduction(activeRegion)));
+            int count = Mathf.Min(wanted, CurrentZombieCap - AliveZombies - queue.Count);
             if (count <= 0) return 0;
             specialsThisWave = 0;
             largeThisWave = AliveLarge;
@@ -434,8 +546,23 @@ namespace SurvivalIsland
             if (idx < 0) idx = PickEntry(entries, ref rng, slot.maxLarge, slot.specialShare);
             if (idx < 0) return false;
             var entry = entries[idx];
-            // TODO #63/#25: Zombie Desa memakai HidingSpot.FindEmergeSpot, Lumut memakai BushSpawnPoint.
-            if (!FindSpawnPoint(ref rng, slot.origin, slot.radius, slot.ignoreView, out var point)) return false;
+            Vector3 point;
+            HidingSpot emergeSpot = null;
+            if (entry.enemy is ZombieData zd && zd.hidesFromSun)
+            {
+                // Zombie Desa (#63): tidak memakai FindSpawnPoint. Tidak ada titik = slot gagal seperti FindSpawnPoint gagal.
+                var player = PlayerTargetable.Instance;
+                if (player == null) return false;
+                emergeSpot = HidingSpot.FindEmergeSpot(player.Position);
+                if (emergeSpot == null) { failedPoints++; return false; }
+                point = emergeSpot.EntryPosition;
+            }
+            else if (entry.useBushPoints)
+            {
+                // Zombie Lumut (#25): titik semak yang lolos syarat jarak dan pandangan, lalu MossBehavior mulai Dormant.
+                if (!FindBushPoint(ref rng, slot.origin, slot.radius, slot.ignoreView, out point)) return false;
+            }
+            else if (!FindSpawnPoint(ref rng, slot.origin, slot.radius, slot.ignoreView, out point)) return false;
             var e = SpawnOne(entry.enemy, point, ref rng);
             if (e == null) return false;
             if (entry.isSpecial) specialsThisWave++;
@@ -446,6 +573,13 @@ namespace SurvivalIsland
             if (e.AI != null) e.AI.ApplyWaveModifiers(in slot.modifiers);
             var sensory = e.GetComponent<AISensory>();
             if (slot.forceAware && sensory != null && PlayerTargetable.Instance != null) sensory.ForceAware(PlayerTargetable.Instance.Position);
+            // Zombie Desa selalu naik dari air atau lumpur (SunlightExposure.md "Spawn malam").
+            if (emergeSpot != null)
+            {
+                var hiding = e.GetComponent<VillageZombieHiding>();
+                if (hiding != null) hiding.SpawnEmerging(emergeSpot);
+                else Debug.LogError($"[SpawnManager] Prefab '{entry.enemy.enemyId}' (hidesFromSun) tidak punya VillageZombieHiding.", e);
+            }
             return true;
         }
 
@@ -527,20 +661,61 @@ namespace SurvivalIsland
                 float dist = rng.Range(minD, maxD);
                 Vector3 dir = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
                 Vector3 candidate = center + dir * dist;
-                // 3. NavMesh.
-                if (!NavMesh.SamplePosition(candidate, out var hit, b.sampleRadius, NavMesh.AllAreas)) { failedPoints++; continue; }
-                // 4. Jarak ulang.
-                float d2 = Vector3.Distance(hit.position, center);
-                if (d2 < minD * 0.9f || d2 > maxD * 1.1f) { failedPoints++; continue; }
-                // 5. TODO #88: RegionStreaming.GetRegionAt(hit.position) == activeRegion dan IsLoaded.
-                // 6. Pandangan: syarat tidak pernah dilonggarkan.
-                if (!ignoreView && IsVisible(hit.position)) { failedPoints++; continue; }
-                // 7. TODO #78/#112: tolak di dalam base dan InteriorZone.
-                // 8. Sesak.
-                if (PhysicsQuery.OverlapSphere(hit.position + Vector3.up, 1f, PhysicsMasks.BuildOverlap, crowdBuffer) > 0) { failedPoints++; continue; }
-                point = hit.position;
-                return true;
+                if (AcceptPoint(candidate, center, minD, maxD, ignoreView, b, out point)) return true;
+                failedPoints++;
             }
+            return false;
+        }
+
+        /// <summary>Langkah 3 sampai 8 FindSpawnPoint, dipakai juga titik semak Lumut.</summary>
+        private bool AcceptPoint(Vector3 candidate, Vector3 center, float minD, float maxD, bool ignoreView, SpawnBalance b, out Vector3 point)
+        {
+            point = default;
+            // 3. NavMesh.
+            if (!NavMesh.SamplePosition(candidate, out var hit, b.sampleRadius, NavMesh.AllAreas)) return false;
+            // 4. Jarak ulang.
+            float d2 = Vector3.Distance(hit.position, center);
+            if (d2 < minD * 0.9f || d2 > maxD * 1.1f) return false;
+            // 5. Titik harus di region aktif yang sudah dimuat (#88). Tanpa RegionStreaming syarat ini lolos.
+            if (RegionStreaming.Instance != null
+                && (RegionStreaming.Instance.GetRegionAt(hit.position) != activeRegion || !RegionStreaming.Instance.IsLoaded(activeRegion)))
+                return false;
+            // 6. Pandangan: syarat tidak pernah dilonggarkan.
+            if (!ignoreView && IsVisible(hit.position)) return false;
+            // 7. Tolak di dalam InteriorZone (#112) dan di dalam base (#78).
+            if (InteriorZone.Contains(hit.position) || (BaseNavigation.Instance != null && BaseNavigation.Instance.IsInsideBase(hit.position)))
+                return false;
+            // 8. Sesak.
+            if (PhysicsQuery.OverlapSphere(hit.position + Vector3.up, 1f, PhysicsMasks.BuildOverlap, crowdBuffer) > 0) return false;
+            point = hit.position;
+            return true;
+        }
+
+        /// <summary>
+        /// Zombie Lumut (SpawnManager.md, #25): BushSpawnPoint yang memenuhi syarat jarak dan pandangan FindSpawnPoint
+        /// (langkah 2 sampai 8), dipilih dari indeks acak. Tafsiran: tanpa titik semak yang lolos, slot gagal seperti
+        /// FindSpawnPoint gagal (tidak jatuh ke titik biasa), supaya Lumut selalu muncul di semak.
+        /// </summary>
+        private bool FindBushPoint(ref RandomStream rng, Vector3? origin, float ringRadius, bool ignoreView, out Vector3 point)
+        {
+            point = default;
+            var b = Bal;
+            var player = PlayerTargetable.Instance;
+            var bushes = BushSpawnPoint.All;
+            if (b == null || bushes.Count == 0 || (player == null && !origin.HasValue)) { failedPoints++; return false; }
+            Vector3 center = origin ?? player.Position;
+            float minD = ringRadius > 0f ? ringRadius * 0.5f : b.minDistance;
+            float maxD = ringRadius > 0f ? ringRadius : b.maxDistance;
+            int start = rng.Range(0, bushes.Count);
+            for (int k = 0; k < bushes.Count; k++)
+            {
+                var bush = bushes[(start + k) % bushes.Count];
+                if (bush == null) continue;
+                float d = Vector3.Distance(bush.Position, center);
+                if (d < minD || d > maxD) continue;
+                if (AcceptPoint(bush.Position, center, minD, maxD, ignoreView, b, out point)) return true;
+            }
+            failedPoints++;
             return false;
         }
 
@@ -613,7 +788,7 @@ namespace SurvivalIsland
                     if (s == AIState.AttackPlayer || s == AIState.AttackBuilding || s == AIState.BurnToAshes || s == AIState.Dying
                         || s == AIState.SeekHiding || s == AIState.Emerging || s == AIState.Dormant) continue;
                 }
-                if (e.Wildlife != null && e.Wildlife.State == AnimalState.Attack) continue;
+                if (e.Wildlife != null && (e.Wildlife.State == AnimalState.Attack || e.Wildlife.IsOnPerch)) continue;   // Jaguar di perch: agen sengaja mati
 
                 bool visible = IsVisible(e.transform.position);
                 if (!e.IsCulled)
@@ -658,15 +833,8 @@ namespace SurvivalIsland
         {
             var player = PlayerTargetable.Instance;
             if (player == null || ObjectPooler.Instance == null || RunSeedManager.Instance == null) return;
-            EnemyData data = null;
-            for (int t = 0; t < tables.Length && data == null; t++)
-            {
-                if (tables[t] == null) continue;
-                foreach (var en in tables[t].dayEntries) if (en.enemy != null && en.enemy.enemyId == enemyId) { data = en.enemy; break; }
-                if (data != null) break;
-                foreach (var en in tables[t].nightEntries) if (en.enemy != null && en.enemy.enemyId == enemyId) { data = en.enemy; break; }
-            }
-            if (data == null) { Debug.LogWarning($"[SpawnManager] enemyId '{enemyId}' tidak ada di tabel mana pun."); return; }
+            var data = FindDebugData(enemyId);
+            if (data == null) return;
             var cam = FirstPersonCamera.Instance != null ? FirstPersonCamera.Instance.WorldCamera : null;
             Vector3 fwd = cam != null ? cam.transform.forward : player.transform.forward;
             fwd.y = 0f;
@@ -677,6 +845,41 @@ namespace SurvivalIsland
                 if (!NavMesh.SamplePosition(p, out var hit, 6f, NavMesh.AllAreas)) continue;
                 if (SpawnOne(data, hit.position, ref rng) == null) break;
             }
+        }
+
+        /// <summary>
+        /// Uji stres HordeCrowdManager (perintah stress, #93/#56): count musuh dibagi rata melingkari pemain pada radius.
+        /// Mengembalikan jumlah yang benar-benar muncul.
+        /// </summary>
+        public int DebugSpawnRing(string enemyId, int count, float radius)
+        {
+            var player = PlayerTargetable.Instance;
+            if (player == null || ObjectPooler.Instance == null || RunSeedManager.Instance == null || count <= 0) return 0;
+            var data = FindDebugData(enemyId);
+            if (data == null) return 0;
+            ref var rng = ref RunSeedManager.Instance.GetStream(RandomStreamId.Enemy);
+            int spawned = 0;
+            for (int i = 0; i < count; i++)
+            {
+                float angle = i * Mathf.PI * 2f / count;
+                Vector3 p = player.Position + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
+                if (!NavMesh.SamplePosition(p, out var hit, 6f, NavMesh.AllAreas)) continue;
+                if (SpawnOne(data, hit.position, ref rng) == null) break;
+                spawned++;
+            }
+            return spawned;
+        }
+
+        private EnemyData FindDebugData(string enemyId)
+        {
+            for (int t = 0; t < tables.Length; t++)
+            {
+                if (tables[t] == null) continue;
+                foreach (var en in tables[t].dayEntries) if (en.enemy != null && en.enemy.enemyId == enemyId) return en.enemy;
+                foreach (var en in tables[t].nightEntries) if (en.enemy != null && en.enemy.enemyId == enemyId) return en.enemy;
+            }
+            Debug.LogWarning($"[SpawnManager] enemyId '{enemyId}' tidak ada di tabel mana pun.");
+            return null;
         }
 
         public void DebugReturnAll()

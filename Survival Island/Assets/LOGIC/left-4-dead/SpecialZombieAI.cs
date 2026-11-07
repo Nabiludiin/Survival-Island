@@ -47,12 +47,14 @@ namespace SurvivalIsland
 
         /// <summary>
         /// Pengaman macet varian besar (SpecialZombieAI.md): minta target baru, lalu kembali ke pool tanpa drop.
-        /// Tidak berjalan saat AttackBuilding. TODO #72: lewati di dalam kandang Lucky Machine.
+        /// Tidak berjalan saat AttackBuilding atau di dalam kandang Lucky Machine (#72).
         /// </summary>
         protected void TickLargeStuck(float dt)
         {
             var b = Bal;
             if (b == null || zombie == null || !zombie.isLarge || ai.CurrentState == AIState.AttackBuilding) return;
+            // Musuh memang boleh diam di dalam kandang Lucky Machine (SpecialZombieAI.md, #72): penghitung direset.
+            if (LuckyMachineCage.IsInsideAnyCage(transform.position)) { unseenTimer = 0f; slowTimer = 0f; return; }
             bool seen = ai.Sensory != null ? ai.Sensory.CanSeePlayer : CanSeePlayer();
             unseenTimer = seen ? 0f : unseenTimer + dt;
             bool slow = ai.CurrentState == AIState.Chase && ai.Agent != null && ai.Agent.velocity.sqrMagnitude < 0.04f;

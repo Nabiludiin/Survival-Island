@@ -10,12 +10,14 @@ namespace SurvivalIsland
     /// Sisa bakar disimpan sebagai rasio di ItemInstance.durability. EquipmentManager mematikan objek ini saat obor disimpan,
     /// jadi durasi yang berjalan saat obor disimpan otomatis (kapak, Heavy Item) dihitung dari Time.time saat dipegang lagi.
     ///
-    /// Belum ada (TODO): LightSource isHeld (#98), partikel api lewat VFXManager (#15), notifikasi #22.
+    /// LightSource isHeld (#98) dan notifikasi (#22) sudah disambung. Belum ada (TODO): partikel api lewat VFXManager (#15).
     /// </summary>
     public class TorchController : EquippableBehaviour
     {
         [SerializeField] private Light torchLight;
         [SerializeField] private ParticleSystem flame;
+        [Tooltip("LightSource obor (#98), isHeld = true. Kosong = dicari di anak.")]
+        [SerializeField] private LightSource lightSource;
 
         private float burnRemaining;
         private float rainTimer;
@@ -28,6 +30,7 @@ namespace SurvivalIsland
 
         private void Awake()
         {
+            if (lightSource == null) lightSource = GetComponentInChildren<LightSource>(true);
             SetVisual(false);
         }
 
@@ -51,13 +54,14 @@ namespace SurvivalIsland
                 }
             }
 
-            // 1. Terlalu basah. TODO #22: notifikasi "Terlalu basah".
+            // 1. Terlalu basah: notifikasi "Terlalu basah" (#22).
             if (!CanLight())
             {
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.torch_wet", NotificationKind.Warning);
                 Extinguish();
                 return;
             }
-            // 2-3. Menyalakan ulang gratis selama durasi masih ada. TODO #98: LightSource isHeld = true.
+            // 2-3. Menyalakan ulang gratis selama durasi masih ada. LightSource ikut menyala lewat SetVisual (#98).
             IsLit = true;
             rainTimer = 0f;
             SetVisual(true);
@@ -136,7 +140,8 @@ namespace SurvivalIsland
 
         private void BurnOut()
         {
-            // Obor habis: item hilang. TODO #22: notifikasi.
+            // Obor habis: item hilang, dengan notifikasi (#22).
+            if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.torch_burnt_out", NotificationKind.Info);
             var inst = CurrentInstance;
             IsLit = false;
             SetVisual(false);
@@ -155,6 +160,8 @@ namespace SurvivalIsland
         private void SetVisual(bool on)
         {
             if (torchLight != null) torchLight.enabled = on;
+            // Obor pegang memakai LightSource isHeld (#98); tidak dihitung dalam tarikan cahaya.
+            if (lightSource != null) { lightSource.isHeld = true; lightSource.SetLit(on); }
             if (flame != null)
             {
                 if (on) flame.Play(true);

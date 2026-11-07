@@ -226,3 +226,13 @@ Pohon kelapa berada di Region 1 dan Region 2. Buahnya memakai `PickupInteractabl
 15. Simpan saat isi 3, keluar, lalu lanjutkan. **Hasil:** isi 3.
 16. Hancurkan penampung lewat `DevConsole`. **Hasil:** terlepas dari daftar, dan tick berikutnya tanpa error.
 17. Mati, lalu mulai run baru. **Hasil:** tidak ada penampung.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- File: `Assets/LOGIC/raft/HydrationSystem.cs`, `RainwaterCollector.cs`, `WaterSourcePoint.cs`. Angka di `Core_Logic/GameBalance.GrupG.cs`.
+- `IslandInteractable` (#17) belum ada, jadi `RainwaterCollector` dan `WaterSourcePoint` menerapkan `IInteractable` langsung (pola `CraftingStation`).
+- `RainwaterCollector` mendaftar ke `HydrationSystem` di `Start` dan `OnRestoreFinished`, lalu melepas diri di `OnDestroy`. Data (`storedPortions`, `homeRegion`) ditulis ke `StructureRecord.extraJson` lewat `ISaveable` di prefab.
+- `RegionStreaming.GetRegionAt` (#88) belum ada: `homeRegion` diisi `ZoneTracker.Active` saat dibangun, lalu ikut disimpan.
+- Tafsiran prompt `Tertutup atap`: alasan `Locked` hanya dipakai kalau penampung tertutup atap dan kosong. Kalau masih berisi, prompt tetap `Ambil Air (n)` (sesuai "isi yang sudah ada tetap bisa diambil").
+- Peringatan hologram `Tertutup atap` saat membangun belum ada (milik `BuildManager`).
+- `SurvivalStats` (kode lama) masih memakai angka 0 untuk regenerasi saat `Thirst` nol. Config `hydration.dehydratedStaminaRegenMultiplier` sudah ditambahkan; baris penggantinya dicatat di laporan.

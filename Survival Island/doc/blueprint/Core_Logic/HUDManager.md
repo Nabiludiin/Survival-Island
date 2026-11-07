@@ -109,3 +109,16 @@
 12. Pasang satu suku cadang, lalu nyalakan mesin. **Hasil:** `Suku cadang 1 / 5`, lalu hitung mundur `Mesin memanas` saat pemanasan.
 13. Picu `MajorDisasterStartedEvent` di dekat Lucky Machine. **Hasil:** hitung mundur 30 detik tampil dan berhenti saat jeda.
 14. Menyelam, lalu masuk Region 3. **Hasil:** bar napas tampil saat `breathRatio < 1`, dan bar suhu tampil di Region 3.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Assets/LOGIC/Core_Logic/HUDManager.cs`, `HotbarView.cs` (dari `EquipmentManager.md`), dan `StatusEffectBar.cs` (dari `StatusEffectManager.md`). Teks memakai `TMP_Text`.
+- Belum tersambung karena pengirimnya belum ada: `ThrowableChangedEvent` (#96), `ActiveObjectiveChangedEvent` (#81), `SwimStateChangedEvent` (#13), dan `RegionStreaming.IsStalled` (#88). Bagian itu disembunyikan dan ditandai TODO.
+- Teks lewat `LocalizationManager` dengan kunci `hud.daysLeft` (`{n}`), `hud.dayLimitPassed`, `hud.parts` (`{installed}`, `{total}`), `hud.engineWarmup` (`{time}`), dan `hud.luckyFree` (`{time}`). Kalau kunci belum ada di tabel, dipakai teks Indonesia cadangan.
+- Tafsiran sederhana: teks peluru hanya tampil saat item di tangan punya `weaponData`. Penanda sekoci tampil selama berat tangan lebih dari 0. Garis area aman tampil selama `LifeboatExtraction.State == Scavenge`. Hitung mundur mesin dihitung HUD sendiri dari `secondsLeft`, seperti mode gratis Lucky Machine.
+- Ambang tampilan (infeksi merah di atas 80, suhu 100/50) dan warna berupa field Inspector, karena tata letak dan warna masih usulan.
+- `HotbarView` juga digambar ulang saat `DurabilityStateChangedEvent` dan `HeavyItemChangedEvent`.
+- `InputBindingsChangedEvent`: meminta ulang prompt butuh `PlayerInteractor` membuang cache `lastActionText` (TODO di kode lama).
+- Isi TODO (sistem pendukung): `HandleBindings` tidak perlu melakukan apa pun: `PlayerInteractor` mendengar `InputBindingsChangedEvent` sendiri, membuang cache, lalu memanggil `ShowInteraction` lagi.
+- Isi TODO (sistem pendukung): Fase 1: `SetLifeboatHighlighted(bool)` (penanda sekoci sejak sirene; tetap tampil saat berat tangan > 0) dan `ShowLifeboatContents(int items, int npcs)` dengan elemen opsional `lifeboatContentsText`, kunci `hud.lifeboat_contents` (cadangan "Sekoci: {items} barang, {npcs} NPC").
+- Isi TODO (sistem pendukung): Bangun (#79): elemen opsional `buildHintText`, `ShowBuildHint(string)`, `ShowBuildError(PlacementError)` (kunci `build.error.<PlacementError>`), dan `ShowDemolishPreview(int)` (kunci `hud.demolish_preview`, cadangan "Ikut runtuh: {n}").

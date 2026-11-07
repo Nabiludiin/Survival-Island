@@ -304,3 +304,12 @@ Fungsi `GameManager.SaveFase1Loot(List<Item>)` diganti `SaveShipOutcome`. `ShipT
 - `GameBalanceConfig.infection.startingVaccineDoses` (2) ditambahkan lebih dulu oleh Langkah 2. Field `infection` lain tetap milik Langkah 4.
 - **Kontrak dengan Langkah 3:** `Apply` langkah 3 memakai `SurvivalStats.ApplyArrivalState(hp, infection)`, arah pandang memakai `FirstPersonCamera.LookAt(lookTarget.position)`, dan `Apply` langkah 5 memakai nilai kembali `CarryCapacity.ApplyShipLoot` (daftar sisa). Ketiganya usulan nama dari Langkah 3. Sisa barang belum dimunculkan sebagai `WorldItem`, karena `WorldItemManager` (#66) belum ada, jadi baru dicatat sebagai peringatan.
 - Sirene pra-game, SFX setor, penanda sekoci, dan garis area aman di HUD belum ditulis (TODO).
+
+## 8. Catatan Implementasi (Sistem pendukung)
+
+- **Keputusan developer (7 November 2026):** `NPCData` di ShipPhase diambil dari daftar `npcDatabase` di Inspector `LifeboatExtraction`, berisi aset yang sama dengan `NPCRoster.database`. Titik NPC diambil dari `shipNpcPoints[RunLayout.shipNpcPointByNpc[i]]` (indeks `i` kalau data titik kosong). `SpawnShipNpcs` memanggil `SpawnFromPool<ShipInteractable>("ShipNpc_Generic", ...)` lalu `Setup(npcData)`.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Pra-game langkah 5: `HUDManager.SetLifeboatHighlighted(true)` saat sirene. Tafsiran: tanda tetap menyala sampai scene diganti. Setor langkah 3: `HUDManager.ShowLifeboatContents(total amount barang, jumlah NPC)`.
+- **Keputusan developer (7 November 2026):** `shipNpcIds` dan `shipNpcPointByNpc` sekarang diisi `RunSeedManager.BuildLayout` dari `RunLayoutSources` (#89). `FindNpcData` mencari di `npcDatabase`, lalu di `RunLayoutSources.shipNpcs`. Kalau `layoutSources` kosong, kapal tetap tanpa NPC dengan peringatan. Di Editor ada peringatan kalau jumlah `RunLayoutSources.shipNpcPoints` berbeda dari `shipNpcPoints`. Getter baru `ShipNpcPoints` dibaca menu Editor `RunLayoutSources`.

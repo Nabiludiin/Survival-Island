@@ -13,11 +13,12 @@ namespace SurvivalIsland
     /// GDD bagian 3: Fase 1, Base Item, prioritas barang dan NPC, dan kembali ke Fase 1 saat kalah.
     /// Sekoci, aturan setor, dan akibat gagal adalah usulan yang disetujui developer (#85).
     ///
-    /// Belum diimplementasikan (ditandai TODO):
-    /// - SpawnShipNpcs: NPCData (#76) dan ShipInteractable.Setup(NPCData) belum ada. Daftar korban tetap dihitung dari
-    ///   RunSeedManager.CurrentLayout.shipNpcIds.
-    /// - Sirene pra-game dan SFX setor (AudioManager), penanda sekoci di HUD dan garis area aman sejak T=15 (HUDManager).
-    /// - Teks prompt lewat LocalizationManager (#104).
+    /// Catatan implementasi:
+    /// - SpawnShipNpcs: keputusan developer (sistem pendukung): NPCData di ShipPhase diambil dari daftar npcDatabase di
+    ///   Inspector (aset yang sama dengan NPCRoster), dan titik dari shipNpcPoints sesuai RunLayout.shipNpcPointByNpc.
+    /// Penanda sekoci di HUD sejak sirene (HUDManager.SetLifeboatHighlighted) dan isi sekoci setelah setor
+    /// (HUDManager.ShowLifeboatContents) sudah tersambung.
+    /// Sirene pra-game dan SFX setor lewat AudioManager, teks prompt lewat LocalizationManager (#104).
     /// </summary>
     public class LifeboatExtraction : MonoBehaviour, IInteractable
     {
@@ -26,8 +27,18 @@ namespace SurvivalIsland
         public static LifeboatExtraction Instance { get; private set; }
 
         [SerializeField] private Transform safePoint;
+        [Tooltip("Keputusan developer: aset NPCData yang sama dengan NPCRoster.database, dicari lewat npcId.")]
+        [SerializeField] private NPCData[] npcDatabase = new NPCData[0];
+        [Tooltip("Titik NPC di kapal. Indeks dari RunLayout.shipNpcPointByNpc (#89).")]
+        [SerializeField] private Transform[] shipNpcPoints = new Transform[0];
         [SerializeField] private RunSummaryPanel runSummaryPanel;
         [SerializeField] private InteractHighlight highlight;
+
+        [Header("Suara (AudioManager)")]
+        [Tooltip("Sirene pada jeda pra-game (ship.sirenAtSeconds).")]
+        [SerializeField] private AudioClip sirenClip;
+        [Tooltip("SFX saat barang disetor ke sekoci.")]
+        [SerializeField] private AudioClip depositClip;
 
         [Header("Pemain dan sistem scene")]
         [SerializeField] private ShipPlayerController playerController;
@@ -109,7 +120,9 @@ namespace SurvivalIsland
                 if (!sirenPlayed && elapsed >= ship.sirenAtSeconds)
                 {
                     sirenPlayed = true;
-                    // TODO (AudioManager, HUDManager belum ditulis): mainkan sirene dan tandai sekoci di HUD.
+                    // Sirene lewat grup Warning, lalu sekoci ditandai di HUD (langkah 5).
+                    AudioManager.Instance?.PlayWarning(sirenClip);
+                    HUDManager.Instance?.SetLifeboatHighlighted(true);
                 }
                 if (RunEnding) yield break;
                 yield return null;
@@ -134,11 +147,57 @@ namespace SurvivalIsland
 
         private void SpawnShipNpcs()
         {
-            // TODO #76 (NPCData belum ditulis): untuk tiap npcId di RunSeedManager.Instance.CurrentLayout.shipNpcIds,
-            //   ambil titik dari shipNpcPointByNpc, lalu
-            //   ObjectPooler.Instance.SpawnFromPool<ShipInteractable>("ShipNpc_Generic", titik.position, titik.rotation)
-            //   dan langsung Setup(npcData). Data tidak diisi di OnSpawned.
+            // LifeboatExtraction.md "Penempatan": NPC dari RunSeedManager.CurrentLayout.shipNpcIds di titik shipNpcPointByNpc.
+            // Data langsung diisi lewat Setup(npcData), bukan di OnSpawned.
+            var layout = RunSeedManager.Instance != null ? RunSeedManager.Instance.CurrentLayout : null;
+            var pooler = ObjectPooler.Instance;
+            if (layout == null || layout.shipNpcIds == null || pooler == null) return;
+
+            // Kompatibilitas (#89): tanpa RunLayoutSources, BuildLayout tidak memilih NPC, jadi kapal tetap tanpa NPC seperti sebelumnya.
+            var sources = RunSeedManager.Instance.LayoutSources;
+            if (sources == null && layout.shipNpcIds.Length == 0)
+                Debug.LogWarning("[LifeboatExtraction] RunSeedManager.layoutSources kosong, jadi tidak ada NPC kapal di run ini.", this);
+#if UNITY_EDITOR
+            if (sources != null && sources.shipNpcPoints != null && sources.shipNpcPoints.Length != shipNpcPoints.Length)
+                Debug.LogWarning($"[LifeboatExtraction] RunLayoutSources.shipNpcPoints ({sources.shipNpcPoints.Length}) tidak sama dengan " +
+                                 $"shipNpcPoints ({shipNpcPoints.Length}). Jalankan menu \"Salin data kapal\" di aset RunLayoutSources.", this);
+#endif
+            for (int i = 0; i < layout.shipNpcIds.Length; i++)
+            {
+                var data = FindNpcData(layout.shipNpcIds[i]);
+                if (data == null)
+                {
+                    Debug.LogWarning($"[LifeboatExtraction] NPCData '{layout.shipNpcIds[i]}' tidak ada di npcDatabase.", this);
+                    continue;
+                }
+                int point = layout.shipNpcPointByNpc != null && i < layout.shipNpcPointByNpc.Length ? layout.shipNpcPointByNpc[i] : i;
+                if (point < 0 || point >= shipNpcPoints.Length || shipNpcPoints[point] == null)
+                {
+                    Debug.LogWarning($"[LifeboatExtraction] Titik NPC {point} untuk '{data.npcId}' tidak ada di shipNpcPoints.", this);
+                    continue;
+                }
+                var t = shipNpcPoints[point];
+                var npc = pooler.SpawnFromPool<ShipInteractable>("ShipNpc_Generic", t.position, t.rotation);
+                if (npc != null) npc.Setup(data);
+            }
         }
+
+        private NPCData FindNpcData(string npcId)
+        {
+            if (string.IsNullOrEmpty(npcId)) return null;
+            if (npcDatabase != null)
+                for (int i = 0; i < npcDatabase.Length; i++)
+                    if (npcDatabase[i] != null && npcDatabase[i].npcId == npcId) return npcDatabase[i];
+            // Cadangan (#89): NPC yang dipilih BuildLayout berasal dari RunLayoutSources.shipNpcs (aset yang sama).
+            var sources = RunSeedManager.Instance != null ? RunSeedManager.Instance.LayoutSources : null;
+            if (sources != null && sources.shipNpcs != null)
+                for (int i = 0; i < sources.shipNpcs.Length; i++)
+                    if (sources.shipNpcs[i] != null && sources.shipNpcs[i].npcId == npcId) return sources.shipNpcs[i];
+            return null;
+        }
+
+        /// <summary>Titik NPC kapal, dibaca menu Editor RunLayoutSources untuk mengukur syarat 5 (#89).</summary>
+        public IReadOnlyList<Transform> ShipNpcPoints => shipNpcPoints;
 
         // ---------------------------------------------------------------- IInteractable (sekoci)
 
@@ -149,8 +208,8 @@ namespace SurvivalIsland
 
         public string GetPrompt()
         {
-            // TODO #104: kunci teks lewat LocalizationManager.
-            return HandWeight() > 0 ? "Setor Barang" : "Tahan untuk Berangkat";
+            // Kunci teks #104: "Setor Barang" / "Tahan untuk Berangkat".
+            return UIManager.Localize(HandWeight() > 0 ? "prompt.lifeboat_deposit" : "prompt.lifeboat_depart");
         }
 
         public InteractBlockReason CanInteract(in InteractContext ctx)
@@ -208,7 +267,11 @@ namespace SurvivalIsland
             }
 
             inv.ClearShipHand();
-            // TODO (AudioManager, HUDManager belum ditulis): SFX setor dan isi sekoci di HUD.
+            AudioManager.Instance?.PlaySFX(depositClip);
+            // Langkah setor 3: isi sekoci di HUD.
+            int itemTotal = 0;
+            for (int i = 0; i < depositedItems.Count; i++) itemTotal += depositedItems[i].amount;
+            HUDManager.Instance?.ShowLifeboatContents(itemTotal, rescuedNpcIds.Count);
         }
 
         private void AddDeposited(string itemId, int amount)

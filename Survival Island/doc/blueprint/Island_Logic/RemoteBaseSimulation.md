@@ -256,3 +256,15 @@ Gunakan `DevConsole` untuk mengatur hari dan teleport.
 13. Jeda game saat serangan. **Hasil:** HP tidak berubah.
 14. Mati saat rencana berjalan, lalu mulai run baru. **Hasil:** tidak ada rencana tersisa.
 15. `setday 200`, lalu tinggalkan base saat malam. **Hasil:** serangan tetap dihitung, dan kekuatan dasar berhenti di 2550.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Island_Logic/RemoteBaseSimulation.cs` (beserta `BaseCluster` dan `RaidPlan`). Belum diuji di Unity.
+
+- **Daftar struktur:** `StructureRegistry` tidak punya daftar publik, jadi cluster dibangun dari `FindObjectsByType<StructureNode>(FindObjectsInactive.Include)` saat senja, setelah struktur berubah (ditandai kotor), dan saat load.
+- **Pemilahan:** dinding dan pintu dikenali dari tag `BaseWall` dan `BaseDoor` (pada objek atau collider anak). Tier dibaca dari `StructureIntegrityInfo` (#47). Jebakan adalah struktur dengan `BaseTrap` tanpa `CampfireManager`.
+- **Tambahan `RaidPlan`:** `center`, `region`, `wallMaxHpTotal`, `hitCarry`, dan `wallsLost`. `center` dipakai untuk mencari cluster lagi kalau `structureId` terkecil hancur.
+- **NPC penjaga** juga mencakup state `TakeCover`, karena NPC base berada di `TakeCover` saat malam. Tanpa itu, tidak ada penjaga saat serangan.
+- **Blood Moon:** dibaca dari `BloodMoonStartedEvent` atau `HordeManager.IsBloodMoonDay(day)`, supaya urutan event senja tidak berpengaruh.
+- **Jam di luar rentang serangan:** jam sebelum 12 dianggap sudah lewat `raidEndHour`, dan jam sesudahnya dianggap belum mulai.
+- **Pesan:** `notif.base_raid_started` (`{region}`) dan `notif.base_raid_report` (`{lost}`, `{injured}`). Nama region dari kunci `region.<nama>.name` kalau ada.

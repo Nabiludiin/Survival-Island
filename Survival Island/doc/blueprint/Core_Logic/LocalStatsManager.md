@@ -198,3 +198,14 @@ File ini terpisah dari `survival_save.json`. `WorldStateSave.DeleteRunSave()` ti
 11. Keluar ke menu, lalu Lanjutkan. **Hasil:** `currentRun.zombiesKilled` tetap.
 12. Run Baru saat ada run berjalan. **Hasil:** `totalZombiesKilled` menerima angka run lama, dan `totalRuns` tidak bertambah.
 13. Hari ke-20 mati, lalu run berikutnya hari ke-5 mati. **Hasil:** `longestDaySurvived` tetap 20.
+
+## Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Core_Logic/LocalStatsManager.cs` (berisi `RunCounters`, `DeathCount`, `LocalStatsData`) dan `StatsPanel.cs` (panel `Stats`). Belum diuji di Unity.
+
+- Metrik "Kargo dibuka" di tabel tidak punya field di data. Ditambah `RunCounters.cratesOpened` dan `LocalStatsData.totalCratesOpened`. `npcsRescued` juga dijumlahkan ke `totalNpcsRescued`, supaya `CommitCounters` tidak membuang angka.
+- Penghitung hanya bertambah saat `RunStartedEvent.HasLast` dan `currentRun.isCommitted == false`.
+- Tanda cheat disalin ke `currentRun.isTainted` setiap frame selama run berjalan dan saat `Flush`, karena `DevConsole.ResetForNewRun` mengembalikan `IsRunTainted` ke `false` sebelum `RunStartedEvent` berikutnya. Penanda `GameManager.wasTainted` dari save juga dibaca.
+- Seri penyebab kematian: entri yang baru bertambah dipindah ke akhir `deaths`, jadi seri dimenangkan yang terakhir terjadi.
+- `File.Replace` yang tidak didukung platform diganti salin ke `.bak`, hapus, lalu `File.Move`.
+- `StatsPanel` memakai kunci `gameover.<DeathReason>` untuk nama penyebab, sama dengan layar `GameOver`.

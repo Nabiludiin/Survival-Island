@@ -227,3 +227,12 @@ Belum diuji di Unity, karena proyek Unity belum dibuat.
 14. Lapar nol selama 30 detik. **Hasil:** HP turun tanpa getaran.
 15. Pakai `shake Explosion 1` 20 kali dalam 1 detik. **Hasil:** tidak ada error, dan cooldown mengurangi jumlah getaran.
 16. Buka Profiler selama 60 detik sambil menembak. **Hasil:** catat alokasi GC dari Cinemachine di lembar playtest. Kode `CameraShake` sendiri tidak mengalokasi.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `CameraShake.cs` dan `CameraShakeProfile.cs` (enum `CameraShakeKind`, `ShakeChannel`, struct `CameraShakePreset`). Config di `GameBalance.FondasiA.cs`.
+- Cinemachine 3.x (namespace `Unity.Cinemachine`): nama kelas sama dengan blueprint. Properti definisi yang dipakai: `ImpulseDefinition.ImpulseChannel`, `ImpulseShape`, `ImpulseDuration`, dan `ImpulseType = Uniform` (tanpa dissipation, karena jarak dihitung sendiri). Pembacaan memakai `CinemachineImpulseManager.Instance.GetImpulseAt(pos, false, mask, out pos, out rot)`, `IgnoreTimeScale`, dan `Clear()`. Sudah lolos kompilasi terhadap `Unity.Cinemachine.dll` proyek, belum diuji di Unity.
+- Sinyal dianggap ruang lokal kamera: `PlayDirectional` mengubah arah dunia ke lokal `WorldCamera` lewat `InverseTransformDirection`.
+- `sources` yang kosong dibuat otomatis (`AddComponent`) di objek ini saat `Awake`, satu per jenis yang punya preset.
+- Arah dasar preset: tabel blueprint tidak memberi nilai. `CameraShakeProfile.Reset()` memakai `(0,3; 1; 0)` untuk `GunFire` (sisi x diacak) dan `Vector3.down` (bawaan Cinemachine) untuk lainnya; disetel lewat playtest.
+- Perintah `shake` milik `DevConsole` belum ada (TODO).

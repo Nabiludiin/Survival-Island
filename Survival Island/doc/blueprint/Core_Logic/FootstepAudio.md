@@ -197,3 +197,11 @@ Belum diuji di Unity, karena proyek Unity belum dibuat.
 13. Dengarkan 20 langkah di satu permukaan. **Hasil:** klip yang sama tidak terdengar dua kali berturut-turut.
 14. Kosongkan baris `Salju`, lalu berjalan di salju. **Hasil:** memakai `Tanah`, dan Editor mencatat peringatan.
 15. Buka Profiler selama 60 detik sambil berjalan. **Hasil:** tidak ada alokasi GC dari `FootstepAudio`.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Core_Logic/FootstepAudio.cs`, `SurfaceAudioSet.cs` (beserta `SurfaceAudioEntry`). Belum diuji di Unity.
+
+- **Tafsiran:** baris `SurfaceAudioEntry` dengan `volume` 0 (belum diisi di Inspector) dianggap bernilai 1, sesuai "Nilai awal 1".
+- **Tafsiran:** larik `lookup` berukuran jumlah nilai `SurfaceType`. Baris tanpa klip diisi dari `Tanah`, dengan peringatan hanya di Editor.
+- **Angka di teks blueprint yang dipindah ke config:** `footstep.landingVolumeMin/Max` 0,5/1,3 dari `PlayLanding`.

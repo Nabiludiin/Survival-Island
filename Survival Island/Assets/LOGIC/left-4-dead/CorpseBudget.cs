@@ -46,6 +46,8 @@ namespace SurvivalIsland
         /// <summary>DaybreakEvent: semua mayat zombie langsung memudar (dipanggil SpawnManager).</summary>
         public static void FadeAllZombies()
         {
+            // Malam selesai: batas drop zombie (#103) mulai dari 0 lagi.
+            EnemyHitReaction.dropsThisNight = 0;
             for (int i = 0; i < corpses.Count; i++)
             {
                 var c = corpses[i];
@@ -57,6 +59,7 @@ namespace SurvivalIsland
         {
             corpses.Clear();
             activeRagdolls = 0;
+            EnemyHitReaction.dropsThisNight = 0;
         }
     }
 }

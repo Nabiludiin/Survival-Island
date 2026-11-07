@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SurvivalIsland
@@ -10,9 +11,8 @@ namespace SurvivalIsland
     /// Memakai API Langkah 3: SurvivalStats.ApplyArrivalState, FirstPersonCamera.LookAt, ItemDatabase.Get,
     /// dan CarryCapacity.ApplyShipLoot (mengembalikan sisa).
     ///
-    /// Belum diimplementasikan (ditandai TODO):
-    /// - Sisa barang yang tidak muat sebagai WorldItem di overflowOrigin (WorldItemManager #66, overflow CarryCapacity).
-    /// - NPCRoster.SpawnRescued (#76).
+    /// Sisa barang yang tidak muat menjadi WorldItem di overflowOrigin (WorldItemManager #66), dan NPC yang diselamatkan
+    /// muncul lewat NPCRoster.SpawnRescued (#76).
     /// </summary>
     public class IslandArrival : MonoBehaviour
     {
@@ -88,14 +88,14 @@ namespace SurvivalIsland
             if (carryCapacity != null)
             {
                 var overflow = carryCapacity.ApplyShipLoot(gm.savedShipLoot);
-                // TODO #66 (WorldItemManager belum ditulis): sisa menjadi WorldItem di overflowOrigin (despawns: false),
-                //      berjarak carry.overflowSpacing. Sementara hanya dicatat supaya tidak hilang diam-diam.
-                if (overflow != null && overflow.Count > 0)
-                    Debug.LogWarning($"[IslandArrival] {overflow.Count} jenis barang kapal tidak muat dan belum dimunculkan di pantai.", this);
+                // Sisa menjadi WorldItem di overflowOrigin (despawns: false), berjarak carry.overflowSpacing (CarryCapacity.md).
+                if (overflow != null && overflow.Count > 0) SpawnOverflow(inv, overflow);
             }
             else Debug.LogError("[IslandArrival] CarryCapacity tidak ditemukan. Barang kapal tidak diterapkan.", this);
 
-            // 6. TODO #76 (NPCRoster belum ditulis): NPCRoster.Instance.SpawnRescued(outcome.rescuedNpcIds, npcOrigin).
+            // 6. NPC yang disetor ke sekoci muncul di pantai (#76).
+            if (NPCRoster.Instance != null && outcome != null)
+                NPCRoster.Instance.SpawnRescued(outcome.rescuedNpcIds, npcOrigin != null ? npcOrigin.position : transform.position);
 
             // 7. Kosongkan savedShipLoot dan tandai sudah tiba (GameManager.MarkArrivedOnIsland).
             gm.MarkArrivedOnIsland();
@@ -140,6 +140,27 @@ namespace SurvivalIsland
                     dir.y = 0f;
                     if (dir.sqrMagnitude > 0.0001f) player.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
                 }
+            }
+        }
+
+        /// <summary>Barang kapal yang tidak muat: satu WorldItem per jenis, berbaris di overflowOrigin. Tidak hilang otomatis.</summary>
+        private void SpawnOverflow(InventoryManager inv, List<SavedItemData> overflow)
+        {
+            var manager = WorldItemManager.Instance;
+            if (manager == null || inv == null)
+            {
+                Debug.LogWarning($"[IslandArrival] {overflow.Count} jenis barang kapal tidak muat, dan WorldItemManager tidak ada.", this);
+                return;
+            }
+            var b = GameManager.CurrentBalance;
+            float spacing = b != null ? b.carry.overflowSpacing : 0.6f;
+            Transform origin = overflowOrigin != null ? overflowOrigin : transform;
+            for (int i = 0; i < overflow.Count; i++)
+            {
+                var data = ItemDatabase.Get(overflow[i].itemId);
+                if (data == null || overflow[i].amount <= 0) continue;
+                Vector3 pos = origin.position + origin.right * (spacing * i);
+                manager.Spawn(inv.CreateInstance(data), overflow[i].amount, pos, false);
             }
         }
 

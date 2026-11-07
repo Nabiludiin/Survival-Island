@@ -12,8 +12,8 @@ namespace SurvivalIsland
     ///
     /// Penyimpangan sementara (dicatat di blueprint, "Catatan Implementasi (Langkah 7)"):
     /// - IslandInteractable (#17) belum ditulis, jadi kelas ini menerapkan IInteractable langsung (pola CraftingStation).
-    /// - RegionStateStore (#88) belum ditulis, jadi status mesin didaftarkan langsung ke WorldStateSave dengan
-    ///   saveId dari SaveIdTag. Ganti ke RegionStateStore saat #88 ada.
+    /// - Status mesin (saveId dari SaveIdTag) lewat RegionStateStore (#88, RegionSaveRouting). Tanpa RegionStreaming
+    ///   (scene uji), jalur cadangan WorldStateSave.Register.
     /// </summary>
     [RequireComponent(typeof(SaveIdTag))]
     public class LuckyMachine : MonoBehaviour, IInteractable, ISaveable
@@ -27,6 +27,14 @@ namespace SurvivalIsland
         [SerializeField] private GameObject storedSpinLight;
         [Tooltip("Efek listrik statis saat mode gratis.")]
         [SerializeField] private GameObject freeWindowFx;
+        [Header("Suara (#114). Boleh kosong.")]
+        [Tooltip("Suara 3D saat musuh tersedot ke kandang (LuckyMachine.md \"Vakum\").")]
+        [SerializeField] private AudioClip vacuumClip;
+        [Tooltip("Bunyi tiap detik pada freeWindowWarnSeconds terakhir mode gratis.")]
+        [SerializeField] private AudioClip freeWindowWarnClip;
+        [Tooltip("Kedipan freeWindowFx pada detik-detik terakhir (tampilan, bukan angka gameplay).")]
+        [SerializeField] private float freeWindowBlinkHz = 3f;
+
         [Tooltip("Pengganti modifier yang lebih lemah dari modifier terpasang (LuckyMachine.md \"Hadiah ganda\"), mis. lucky_ammo.")]
         [SerializeField] private LuckyRewardData duplicateModifierFallback;
 
@@ -43,6 +51,7 @@ namespace SurvivalIsland
         private bool spinPaidFromStored;
         private bool spinPaidFromFree;
         private float gateReopenLeft;
+        private int lastWarnSecond = -1;   // Detik terakhir yang sudah berbunyi pada akhir mode gratis
 
         private struct Vacuum
         {
@@ -60,6 +69,7 @@ namespace SurvivalIsland
         private static float[] weightArray = new float[16];
 
         private SaveIdTag saveTag;
+        private bool registeredForSave;
 
         private LuckyMachineBalance Bal => GameManager.CurrentBalance != null ? GameManager.CurrentBalance.luckyMachine : null;
 
@@ -91,7 +101,7 @@ namespace SurvivalIsland
         private void OnEnable()
         {
             EventChannel<MajorDisasterStartedEvent>.Raised += HandleMajorDisaster;
-            if (WorldStateSave.Instance != null) WorldStateSave.Instance.Register(this);
+            registeredForSave = RegionSaveRouting.Register(this, this);
             ApplyVisuals();
         }
 
@@ -101,7 +111,7 @@ namespace SurvivalIsland
             // Region dilepas saat vakum: semua vakum langsung selesai, supaya hitungan tidak hilang (bagian 4).
             for (int i = vacuums.Count - 1; i >= 0; i--) FinishSacrifice(vacuums[i]);
             vacuums.Clear();
-            if (WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
+            RegionSaveRouting.Unregister(this, ref registeredForSave);
         }
 
         private void EnsureQuotaArray()
@@ -159,7 +169,8 @@ namespace SurvivalIsland
                 startPos = inst.transform.position,
                 startScale = inst.transform.localScale
             });
-            // TODO #15/#114: partikel dan suara vakum lewat VFXManager dan AudioManager.
+            // Suara vakum 3D lewat AudioManager (#114). Partikel vakum belum ada di katalog VFXManager (TODO #15).
+            AudioManager.Instance?.PlaySFXAt(vacuumClip, inst.transform.position);
         }
 
         private void TickVacuums(float dt, LuckyMachineBalance bal)
@@ -216,7 +227,8 @@ namespace SurvivalIsland
             {
                 quotaProgress[v.quotaIndex] = 0;
                 storedSpins++;
-                // TODO #22: notifikasi "Lucky Machine siap diputar".
+                // Notifikasi "Lucky Machine siap diputar" (#22).
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.lucky_ready", NotificationKind.Objective);
             }
 
             // 5. Tabungan penuh: gerbang tertutup sampai pemain memutar (keputusan 5).
@@ -282,7 +294,8 @@ namespace SurvivalIsland
             if (freeWindowRemaining > 0f)
             {
                 freeWindowRemaining -= dt;
-                // TODO #114: lima detik terakhir berkedip dan berbunyi.
+                // LuckyMachine.md "Indikator waktu": lima detik terakhir berkedip dan berbunyi.
+                TickFreeWindowWarning(bal);
                 if (freeWindowRemaining <= 0f) EndFreeWindow();
             }
 
@@ -395,8 +408,8 @@ namespace SurvivalIsland
                 case LuckyRewardKind.WeaponModifier: granted = GrantModifier(r); break;
                 case LuckyRewardKind.Skin: GrantSkin(r); break;
                 case LuckyRewardKind.PermanentBuff:
-                    // TODO #20: StatusEffectManager.Instance.Apply(r.buff, "lucky_machine"), Permanent, Intensify, maxStacks 3.
-                    Debug.LogWarning($"[LuckyMachine] Buff {r.rewardId} belum diterapkan: StatusEffectManager (#20) belum ditulis.");
+                    // Buff permanen lewat StatusEffectManager (#20). Permanent, Intensify, dan maxStacks diatur di aset StatusEffectData.
+                    granted = StatusEffectManager.Instance != null && StatusEffectManager.Instance.Apply(r.buff, "lucky_machine");
                     break;
             }
             if (!granted) return;
@@ -493,6 +506,20 @@ namespace SurvivalIsland
             }
         }
 
+        private void TickFreeWindowWarning(LuckyMachineBalance bal)
+        {
+            if (freeWindowRemaining <= 0f || freeWindowRemaining > bal.freeWindowWarnSeconds) { lastWarnSecond = -1; return; }
+            // Bunyi sekali tiap detik penuh (5, 4, 3, 2, 1).
+            int second = Mathf.CeilToInt(freeWindowRemaining);
+            if (second != lastWarnSecond)
+            {
+                lastWarnSecond = second;
+                AudioManager.Instance?.PlaySFXAt(freeWindowWarnClip, transform.position);
+            }
+            if (freeWindowFx != null)
+                freeWindowFx.SetActive(Mathf.Repeat(freeWindowRemaining * freeWindowBlinkHz, 1f) >= 0.5f);
+        }
+
         private void ApplyVisuals()
         {
             if (storedSpinLight != null) storedSpinLight.SetActive(storedSpins > 0);
@@ -504,7 +531,7 @@ namespace SurvivalIsland
 
         public bool IsAvailable => isActiveAndEnabled;
         public float HoldSeconds => 0f;
-        public string GetPrompt() => "Lucky Machine";   // TODO #104: kunci teks LocalizationManager
+        public string GetPrompt() { var loc = LocalizationManager.Instance; return loc != null && loc.Has("prompt.lucky_machine") ? loc.Get("prompt.lucky_machine") : "Lucky Machine"; }   // #104
 
         public InteractBlockReason CanInteract(in InteractContext ctx)
         {

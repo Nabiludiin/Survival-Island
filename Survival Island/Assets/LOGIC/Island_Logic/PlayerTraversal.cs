@@ -13,8 +13,8 @@ namespace SurvivalIsland
     /// dan barang berat. Mekanik dan angka adalah usulan yang disetujui developer (#85).
     ///
     /// Prioritas mode: Locked, Swimming, Climbing, Sliding, Crouching, lalu Ground.
-    /// Belum ada di Langkah 3 (TODO): SurfaceDetection.GetSurfaceAt (#86, Langkah 4; permukaan tetap Tanah sampai ada),
-    /// NoiseEmitter.EmitLanding (#49, Langkah 5).
+    /// Permukaan dibaca dari SurfaceDetection.GetSurfaceAt (#86).
+    /// NoiseEmitter.EmitLanding (#49) dipanggil saat mendarat.
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
     public class PlayerTraversal : MonoBehaviour
@@ -350,7 +350,12 @@ namespace SurvivalIsland
             // 5. Dip kecil juga tampil pada pendaratan biasa.
             float impact01 = Mathf.InverseLerp(3f, t.fallLethalSpeed, peak);
             if (impact01 > 0f && FirstPersonCamera.Instance != null) FirstPersonCamera.Instance.PlayLandingDip(impact01);
-            // 6. TODO Langkah 5 (#49): NoiseEmitter.EmitLanding(impact01).
+            // 6. Suara mendarat (#49, #101). NoiseEmitter ada di objek pemain (atau anaknya).
+            if (impact01 > 0f)
+            {
+                var noise = GetComponentInChildren<NoiseEmitter>();
+                if (noise != null) noise.EmitLanding(impact01);
+            }
         }
 
         private float FallMultiplier(TraversalBalance t)

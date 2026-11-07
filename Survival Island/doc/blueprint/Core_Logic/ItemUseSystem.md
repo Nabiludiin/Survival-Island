@@ -374,3 +374,14 @@ Kode: `Survival Island/Assets/LOGIC/Core_Logic/ItemUseSystem.cs`, `ItemInstance.
 
 - `CurrentTotalGameHours()` memakai `DayNightDirector.Instance.TotalGameHours` kalau ada.
 - `TryUse` memanggil `InfectionSystem.CanUseMedicine`, dan `CompleteUse` memanggil `InfectionSystem.ApplyMedicine` untuk item dengan `infectionDelta` negatif. Tanpa `InfectionSystem`, perilaku Langkah 3 tetap berjalan.
+
+## 9. Catatan Implementasi (Sistem pendukung, #88)
+
+- `WorldItem` punya `sourceSpawner`, `sourcePointIndex` (dikosongkan `OnReturned`), dan `homeRegion`. `TryPickUp` memanggil `sourceSpawner.UpdateRemaining`/`MarkTaken`. Tambahan `PlaceAt(pos, rot)` dan `EnterWater()` (isi lama `OnTriggerEnter`, dipakai juga `SweepBelow`).
+- `WorldItemManager.CaptureRegion(region, store, releasing)` dan `RestoreRegion(region, store)`: dipanggil `RegionStreaming.CaptureRegion`/`RestoreRegion`, bukan dari event langsung, supaya urutannya pasti (satu frame setelah `Unloading`, dan sebelum event `Loaded`). Parameter `releasing` dan `store` ditambahkan: saat save, objek tidak boleh dikembalikan ke pool. Satu entri per region dengan kunci `world_items`, berisi `ItemInstance` lengkap, jumlah, posisi, rotasi, `despawns`, dan `despawnAtGameHour` (jam absolut). Entri selalu ditulis (juga kosong) saat dicatat, dan dihapus setelah dipulihkan.
+- Region item dihitung ulang dari posisi saat dicatat (`GetRegionAt`), karena item bisa terdorong melewati batas.
+- Item dengan `sourceSpawner` dilewati, karena statusnya dicatat `LootSpawnerSystem`.
+- `SpawnOrStore(...)`: kalau region di posisi itu tidak dimuat, data item langsung ditulis ke `RegionStateStore` (peti hancur di base yang ditinggal, `StorageChest.md`).
+- `SweepBelow(zone, waterY, safe)` mengikuti tabel `TideManager.md`: item `Despawns` memakai aturan air, item lain pindah ke `TideSafePoint` terdekat dengan notifikasi `notif.tide_items_moved` sekali per panggilan. Tanpa titik aman, item dibiarkan.
+- Jalur cadangan tanpa `RegionStreaming`: `WorldItemManager` adalah `ISaveable` `world_items` berisi semua item lepas, dimunculkan di `OnRestoreFinished`.
+- Belum: "item di bawah `RegionRecord.bounds` dikembalikan ke posisi jatuhnya". Belum diuji di Unity.

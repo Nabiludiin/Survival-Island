@@ -280,3 +280,8 @@ Penyimpangan sementara, karena sistem pendukung belum ditulis:
 - **Pemeriksaan perlindungan Fireball:** `PhysicsQuery.Raycast` dari 0,5 m di atas titik benturan ke pusat bounds collider target dengan `PhysicsMasks.AIVision`. Kalau yang kena bukan target atau anaknya, target terlindung. Pohon tumbang tidak memeriksa perlindungan, dan damage-nya rata (`treeFallDamage`).
 - Angka tambahan: `fireballDropHeight` (60, tinggi raycast dan awal jatuh) dan `treeFallMarkerSeconds` (2, lama penanda pohon).
 - Belum diimplementasikan (TODO di kode): `NotificationManager` (#22), subtitle dan `AudioManager` (#104, #114), `EnvironmentDirector` langit merah (#92), `RegionalWeather` override badai (#115), `RemoteBaseSimulation` (#90), `CameraShake` (#24), `FireSystem` (#97), `VFXManager` (#15), dan `RegionLoadStateChangedEvent` (#88). Yang sudah berjalan: jadwal, tahap, `MajorDisasterStartedEvent`, Fireball, gempa, badai, pohon tumbang, save, dan override `SpawnManager` (hewan berhenti saat erupsi).
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): Gempa langkah 1: suara gemuruh tiap denyut dari field baru `DisasterData.pulseClip` lewat `AudioManager.PlaySFX` (2D, karena gempa terasa di mana-mana). `activeLoop` masih belum diputar (AudioManager belum punya sumber loop).
+- **Keputusan developer (7 November 2026):** Sumber `DisasterData[]` jadwal pindah ke `RunLayoutSources.disasterData` (#89), dengan cadangan field lama `RunSeedManager.disasterData`. `DisasterManager.GetData` memakai field sendiri kalau diisi, dan `RunSeedManager.DisasterDataSource` kalau kosong.

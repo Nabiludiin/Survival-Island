@@ -222,3 +222,12 @@ Setelah jeda, state kembali `Idle`. Semua perubahan state menerbitkan `FishingSt
 15. Paksa `Rain`, ulangi tes 5. **Hasil:** waktu gigit menjadi 10,2 sampai 25,5 detik.
 16. Save saat `Waiting`, lalu load. **Hasil:** kail di tangan dengan state `Idle`.
 17. Ukur 10 sesi di lembar playtest. **Hasil:** rata-rata 1 porsi sekitar 60 detik.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- File: `Assets/LOGIC/raft/FishingSystem.cs` (enum, `IKailCastInterceptor`, `FishingSystem`), `WaterBody.cs` (dengan `WaterKind`), `FishingTensionHUD.cs`. Event di `GameEvents.GrupG.cs`.
+- `RegisterInterceptor` dan `UnregisterInterceptor` bersifat statis, karena `DebrisRetrieval` adalah singleton scene dan viewmodel Kail bisa dibuat setelahnya.
+- Tambahan `SetInterceptTarget(Transform)` supaya benang tergambar ke barang yang dikait (#106).
+- Pelampung dilepas dari viewmodel saat dilempar supaya diam di air, lalu dikembalikan saat sesi berakhir. Pelampung perlu berada di layer dunia, bukan `PlayerViewmodel`.
+- `lureRegion` memakai `ZoneTracker.Active` sampai `RegionStreaming.GetRegionAt` (#88) ada.
+- Selama `Intercepted`, jarak tarik diatur `DebrisRetrieval` (`pullMaxDistance`), bukan `leashDistance`.

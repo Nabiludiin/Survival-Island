@@ -31,12 +31,19 @@ namespace SurvivalIsland
         public string bodyKey;      // diary.ch<chapter>.body (#104)
         public DiaryReward[] rewards = Array.Empty<DiaryReward>();
 
-        [Header("Sementara sampai LocalizationManager (#104)")]
+        [Header("Cadangan kalau kunci belum ada di tabel LocalizationManager (#104)")]
         public string fallbackTitle;
         [TextArea(6, 20)] public string fallbackBody;
 
-        // TODO #104: ganti dengan LocalizationManager.Get(titleKey) dan LocalizationManager.Get(bodyKey).
-        public string ResolveTitle() => !string.IsNullOrEmpty(fallbackTitle) ? fallbackTitle : titleKey;
-        public string ResolveBody() => !string.IsNullOrEmpty(fallbackBody) ? fallbackBody : bodyKey;
+        // Teks dari LocalizationManager (#104). Kunci yang belum ada memakai teks cadangan, lalu kunci mentah.
+        public string ResolveTitle() => Resolve(titleKey, fallbackTitle);
+        public string ResolveBody() => Resolve(bodyKey, fallbackBody);
+
+        private static string Resolve(string key, string fallback)
+        {
+            var loc = LocalizationManager.Instance;
+            if (loc != null && loc.Has(key)) return loc.Get(key);
+            return !string.IsNullOrEmpty(fallback) ? fallback : key;
+        }
     }
 }

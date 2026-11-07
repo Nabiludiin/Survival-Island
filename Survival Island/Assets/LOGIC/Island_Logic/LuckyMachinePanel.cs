@@ -71,7 +71,7 @@ namespace SurvivalIsland
         {
             Refresh();
             if (resultText != null && m != null && !m.IsSpinning && m.LastReward != null)
-                resultText.text = m.LastReward.rewardId;   // TODO #104: nama hadiah lewat LocalizationManager
+                resultText.text = Text("lucky.reward." + m.LastReward.rewardId, m.LastReward.rewardId);   // Nama hadiah lewat LocalizationManager (#104)
         }
 
         private void HandleSpinClicked()
@@ -120,6 +120,13 @@ namespace SurvivalIsland
             float left = machine.FreeWindowRemaining;
             freeWindowText.text = left > 0f ? "Gratis: " + Mathf.CeilToInt(left) + " detik" : string.Empty;
             if (spinButton != null) spinButton.interactable = machine.CanSpin;
+        }
+
+        /// <summary>Teks dari LocalizationManager (#104); teks bawaan kalau kunci belum ada di tabel.</summary>
+        private static string Text(string key, string fallback)
+        {
+            var loc = LocalizationManager.Instance;
+            return loc != null && loc.Has(key) ? loc.Get(key) : fallback;
         }
     }
 }

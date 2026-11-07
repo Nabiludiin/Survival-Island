@@ -61,8 +61,8 @@ namespace SurvivalIsland
     /// Blueprint: Island_Logic/EnvironmentProfile.md (#92). GDD bagian 5 (suasana tiap region, Region 2 gelap meski siang)
     /// dan bagian 3 (siang dan malam, langit merah Blood Moon). Urutan gabungan usulan disetujui: region, jam, cuaca, event, interior.
     ///
-    /// Belum ada (TODO): InteriorZoneChangedEvent dan lightProfile (#112), SettingsManager.brightness (#19, sementara 1),
-    /// PostProcessController.SetRegionProfile (#23).
+    /// Interior dari InteriorZoneChangedEvent dan InteriorZone.LightProfile (#112), SettingsManager.brightness (#19), dan
+    /// PostProcessController.SetRegionProfile (#23) sudah disambung.
     /// </summary>
     public class EnvironmentDirector : MonoBehaviour
     {
@@ -98,6 +98,10 @@ namespace SurvivalIsland
         // Event
         private readonly float[] eventTarget = new float[EventCount];
         private readonly float[] eventWeight = new float[EventCount];
+        // Interior (#112)
+        private RegionEnvironmentProfile interiorProfile;
+        private bool interiorDark;
+        private float interiorT, interiorTarget;
         // Partikel region
         private GameObject particleNow, particleOld;
         private string particleNowTag, particleOldTag;
@@ -126,7 +130,8 @@ namespace SurvivalIsland
         {
             EventChannel<RegionChangedEvent>.Raised += HandleRegionChanged;
             EventChannel<WeatherChangedEvent>.Raised += HandleWeatherChanged;
-            // TODO #112: EventChannel<InteriorZoneChangedEvent>.Raised += HandleInterior.
+            EventChannel<InteriorZoneChangedEvent>.Raised += HandleInterior;   // #112
+            if (EventChannel<InteriorZoneChangedEvent>.HasLast) { HandleInterior(EventChannel<InteriorZoneChangedEvent>.Last); interiorT = interiorTarget; }
 
             // Ketiganya sticky. Load: semua T langsung 1 supaya tidak ada transisi saat layar baru terbuka.
             if (EventChannel<RegionChangedEvent>.HasLast) activeRegion = EventChannel<RegionChangedEvent>.Last.to;
@@ -140,6 +145,7 @@ namespace SurvivalIsland
         {
             EventChannel<RegionChangedEvent>.Raised -= HandleRegionChanged;
             EventChannel<WeatherChangedEvent>.Raised -= HandleWeatherChanged;
+            EventChannel<InteriorZoneChangedEvent>.Raised -= HandleInterior;
             ReturnParticle(ref particleNow, particleNowTag);
             ReturnParticle(ref particleOld, particleOldTag);
         }
@@ -164,8 +170,27 @@ namespace SurvivalIsland
             var w = RegionalWeather.Instance != null ? RegionalWeather.Instance.GetWeather(activeRegion) : weatherTo;
             if (w != weatherTo) BeginWeather(w);
             if (first) snapNext = true;
-            // 4. Partikel. 5. TODO #23: PostProcessController.Instance.SetRegionProfile(profile.postProfile, regionBlendSeconds).
+            // 4. Partikel. 5. Profil post-process region (#23); event pertama (load) tanpa transisi.
             SwapParticles(Profile(activeRegion), first);
+            var pp = PostProcessController.Instance;
+            if (pp != null)
+            {
+                var prof = Profile(activeRegion);
+                float blend = first || Balance == null ? 0f : Balance.environment.regionBlendSeconds;
+                pp.SetRegionProfile(prof != null ? prof.postProfile as UnityEngine.Rendering.VolumeProfile : null, blend);
+            }
+        }
+
+        /// <summary>InteriorZone (#112): masuk = lerp ke lightProfile zona; isDark = matahari 0. Keluar = kembali.</summary>
+        private void HandleInterior(InteriorZoneChangedEvent e)
+        {
+            interiorTarget = e.isInside ? 1f : 0f;
+            if (!e.isInside) return;
+            interiorDark = e.isDark;
+            interiorProfile = null;
+            var zones = InteriorZone.Active;
+            for (int i = 0; i < zones.Count; i++)
+                if (zones[i] != null && zones[i].ZoneId == e.zoneId) { interiorProfile = zones[i].LightProfile; break; }
         }
 
         private void HandleWeatherChanged(WeatherChangedEvent e)
@@ -214,6 +239,7 @@ namespace SurvivalIsland
                 eventWeight[i] = Mathf.MoveTowards(eventWeight[i], eventTarget[i], dt / Mathf.Max(0.01f, secs));
             }
             UpdateParticleFade(dt / Mathf.Max(0.01f, env.regionBlendSeconds));
+            interiorT = Mathf.MoveTowards(interiorT, interiorTarget, dt / Mathf.Max(0.01f, env.interiorBlendSeconds));
 
             applyTimer -= dt;
             if (applyTimer > 0f && !snapNext) return;
@@ -292,9 +318,15 @@ namespace SurvivalIsland
                 s.sunColor = Color.Lerp(s.sunColor, layer.sunColor, k);
             }
 
-            // 5. TODO #112: interior (lerp ke lightProfile, matahari 0 kalau isDark).
+            // 5. Interior (#112): lerp ke lightProfile, matahari 0 kalau isDark.
+            if (interiorT > 0f)
+            {
+                if (interiorProfile != null) s = Lerp(s, FromProfile(interiorProfile), interiorT);
+                if (interiorDark) s.sunIntensity *= 1f - interiorT;
+            }
 
-            // 6. Batas. TODO #19: ambient dikali SettingsManager.Instance.brightness sebelum dibatasi.
+            // 6. Batas. Ambient dikali SettingsManager.brightness (#19) sebelum dibatasi.
+            if (SettingsManager.Instance != null) s.ambient *= SettingsManager.Instance.brightness;
             s.fogDensity = Mathf.Min(s.fogDensity, env.maxFogDensity);
             float minLum = profile != null && profile.minAmbientLuminance > 0f ? profile.minAmbientLuminance : env.defaultMinAmbientLuminance;
             s.ambient = RaiseToLuminance(s.ambient, minLum);

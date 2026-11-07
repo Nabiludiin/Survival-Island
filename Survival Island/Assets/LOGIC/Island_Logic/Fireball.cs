@@ -79,8 +79,15 @@ namespace SurvivalIsland
                 }
             }
 
-            // TODO #15: VFXManager.Play("Fx_FireballImpact", titik). TODO #24: CameraShake.PlayAt(FireballImpact, titik).
-            // TODO #97: FireSystem.Instance.SpawnFireArea(titik, fire.fireballAreaRadius, ...), setelah FireSystem ditulis.
+            // Efek dan getaran di titik jatuh (#15, #24).
+            if (VFXManager.Instance != null) VFXManager.Instance.Play("Fx_FireballImpact", targetPos, Quaternion.identity);
+            CameraShake.PlayAt(CameraShakeKind.FireballImpact, targetPos);
+            // Area api Fireball (#97): bukan buatan pemain, dan memotong NavMesh (FireSystem.md usulan 4).
+            if (bal != null && FireSystem.Instance != null)
+            {
+                var f = bal.fire;
+                FireSystem.Instance.SpawnFireArea(targetPos, f.fireballAreaRadius, f.fireballAreaSeconds, f.fireballDamagePerSec, false, true);
+            }
 
             ReturnSelf();
         }

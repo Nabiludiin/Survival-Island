@@ -145,7 +145,8 @@ namespace SurvivalIsland
             {
                 State = RescueState.Ready;
                 warmupLeft = 0f;
-                // TODO #22: notifikasi "Mesin mati".
+                // Notifikasi "Mesin mati" (#22).
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.engine_stopped", NotificationKind.Warning);
                 EventChannel<HelicopterEngineChangedEvent>.Publish(new HelicopterEngineChangedEvent(State, 0f));
                 return;
             }
@@ -181,11 +182,24 @@ namespace SurvivalIsland
             // 2.
             State = RescueState.Departed;
             EventChannel<HelicopterEngineChangedEvent>.Publish(new HelicopterEngineChangedEvent(State, 0f));
-            // 3. TODO #99: NarrativeSequencer.Instance.PrepareEnding(BuildEndingContext()). Konteks: aliveNpcCount dari
-            //    NPCRoster.GetAliveNpcIds (#76), lostOnShipCount dari gm.shipOutcome.lostNpcIds, rescuedCount, dan day.
+            // 3. Konteks ending untuk NarrativeSequencer (#99): NPC hidup (#76), NPC selamat dan hilang di kapal, dan hari.
+            if (NarrativeSequencer.Instance != null) NarrativeSequencer.Instance.PrepareEnding(BuildEndingContext(gm));
             // 4. hasEscaped = true, RunEndedEvent { Won, None }. RunLifecycle melanjutkan alur akhir (#82).
             gm.TriggerWinSequence();
             return true;
+        }
+
+        private static EndingContext BuildEndingContext(GameManager gm)
+        {
+            var roster = NPCRoster.Instance;
+            var ship = gm.shipOutcome;
+            return new EndingContext
+            {
+                aliveNpcCount = roster != null ? roster.GetAliveNpcIds().Count : 0,
+                rescuedCount = ship != null && ship.rescuedNpcIds != null ? ship.rescuedNpcIds.Count : 0,
+                lostOnShipCount = ship != null && ship.lostNpcIds != null ? ship.lostNpcIds.Count : 0,
+                day = gm.currentDay
+            };
         }
 
         // ---------------------------------------------------------------- Hari target (usulan, tidak mengubah syarat menang)
@@ -195,7 +209,8 @@ namespace SurvivalIsland
             if (e.isReplay) return;
             if (e.newDay == GameManager.TargetDay && !targetDayAnnounced)
             {
-                // TODO #22: notifikasi kritis "Hari ke-60. Setelah malam ini, zombie akan semakin kuat".
+                // Notifikasi kritis (#22): "Hari ke-60. Setelah malam ini, zombie akan semakin kuat".
+                if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.target_day", NotificationKind.Danger);
                 targetDayAnnounced = true;
             }
         }
@@ -211,7 +226,8 @@ namespace SurvivalIsland
         private void HandleDayLimitPassed(DayLimitPassedEvent e)
         {
             // GDD bagian 3: tidak ada batas waktu kabur. Perakitan dan lepas landas tetap berjalan setelah hari ke-60.
-            // TODO #22: notifikasi kritis "Hari ke-60 terlewat. Zombie semakin kuat, tetapi helikopter masih bisa kabur".
+            // Notifikasi kritis (#22): "Hari ke-60 terlewat. Zombie semakin kuat, tetapi helikopter masih bisa kabur".
+            if (NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.day_limit_passed", NotificationKind.Danger);
         }
 
         private void HandleRunEnded(RunEndedEvent e)

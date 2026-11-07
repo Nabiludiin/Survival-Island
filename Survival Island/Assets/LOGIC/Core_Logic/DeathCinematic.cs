@@ -120,7 +120,11 @@ namespace SurvivalIsland
                 if (bodyRig == null && (style == DeathStyle.Ragdoll || style == DeathStyle.Collapse || style == DeathStyle.Sink))
                     style = DeathStyle.Blackout;
 
-                // 3. TODO #23/#114: tampilkan profile.screenTint lewat PostProcessController, mainkan profile.sting, turunkan musik.
+                // 3. Sting lewat grup Warning (#52). Musik dunia sudah turun: CombatMusicDirector mendengar
+                //    CinematicStateChangedEvent di atas (#114).
+                // Warna layar profil lewat PostProcessController (#23). Alpha 0 (nilai awal Color.clear) = tanpa warna.
+                PostProcessController.Instance?.SetScreenTint(profile.screenTint);
+                if (profile.sting != null) AudioManager.Instance?.PlayWarning(profile.sting);
 
                 // 4.
                 DisableController();

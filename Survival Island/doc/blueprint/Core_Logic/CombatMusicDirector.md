@@ -258,3 +258,21 @@ Musuh tetap terdengar dari balik dinding, tetapi teredam. Pemain tetap tahu arah
 14. Mulai adegan dengan `keepMusic = false`. **Hasil:** musik hilang dalam 1 detik, lalu kembali setelah adegan selesai.
 15. Zombie kembali ke pool saat fajar sambil bersuara, lalu dipakai ulang. **Hasil:** tidak ada suara lama, dan filter kembali 22000 Hz.
 16. Mati saat `Peak`, lalu mulai run baru. **Hasil:** musik memudar, dan run baru mulai dari `Calm` dengan `Active` kosong.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+Kode: `Assets/LOGIC/Core_Logic/CombatMusicDirector.cs` (beserta `MusicTier`), `MusicSet.cs`, `EnemyCueSet.cs`, `ThreatAudioEmitter.cs` (beserta `ThreatCueKind`). Belum diuji di Unity.
+
+- **Tafsiran:** `PlayStinger` memutar lewat `AudioManager.PlayWarning`, karena sumber grup `Warning` sudah dimiliki `AudioManager` dan ikut berhenti saat jeda.
+- **Tafsiran:** tingkat `Alert` memutar `Calm` pada `alertCalmVolume` (0,5). Blueprint hanya menyebut "lebih pelan"; nilai ini usulan dan bisa disetel.
+- **Tafsiran:** suara kerumunan memakai semua emitter `IsEngaged` (bukan hanya dalam `nearRadius`), dengan volume `jumlah / crowdBedFullEngaged` (usulan 24).
+- **Tafsiran:** `CinematicStateChangedEvent` belum punya field `isMuted`. Emitter berhenti meminta suara selama `isPlaying`, dan stem turun ke 0 kalau `keepMusic == false`.
+- **Tafsiran:** peredaman bencana ditulis sebagai pengali volume stem (dari `disasterMusicDuckDb`), bukan parameter mixer baru. Volume pemain tetap lewat grup mixer.
+- **Tafsiran:** saat musuh kembali ke pool, suara dihentikan langsung, karena objek mati dan fade 0,05 detik tidak bisa berjalan. Fade 0,05 detik tetap dipakai saat suara digantikan.
+- **Tafsiran:** emitter yang sedang bersuara hanya diganti suara barunya sendiri kalau prioritasnya sama atau lebih tinggi.
+- **Belum dikerjakan:** napas Zombie Lumut dalam 6 m saat `Dormant` milik prefab #25 (`MossBehavior`), bukan komponen ini.
+- **Angka di teks blueprint yang dipindah ke config** (`GameBalance.GrupC1.cs`): `evaluateIntervalSeconds` 0,25, `phaseFloor*` (tabel `PhaseFloor`), `largeThreatWeight` 3, `calmDayNightFadeSeconds` 10, `scheduleLeadSeconds` 0,1, `emitterTicksPerFrame` 16, `tellPriorityBonus` 2, `voiceStealFadeSeconds` 0,05, `sameClipMinSeconds` 0,15, `cinematicFadeOutSeconds` 1, `cinematicFadeInSeconds` 2, `runEndFadeSeconds` 2, `loadStingerSuppressSeconds` 2, `cueMinDistance` 2, `cueSpread` 60.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Isi TODO (sistem pendukung): `ThreatAudioEmitter.PlayAlertTell()`: pembungkus `PlayTell` dengan klip acak `alertClips` (UnityEngine.Random, suara tampilan). Dipakai `WildlifeAI` dan `TribalBehavior`.

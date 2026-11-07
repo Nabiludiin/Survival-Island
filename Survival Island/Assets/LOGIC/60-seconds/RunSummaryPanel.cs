@@ -44,7 +44,7 @@ namespace SurvivalIsland
             if (flow == null) return;
             var outcome = flow.LastOutcome;
 
-            if (titleText != null) titleText.text = "Sekoci Diturunkan";   // TODO #104: kunci teks
+            if (titleText != null) titleText.text = UIManager.Localize("ui.runSummary.title");   // Kunci teks #104: "Sekoci Diturunkan"
 
             if (itemsText != null)
             {

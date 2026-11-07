@@ -7,11 +7,11 @@ namespace SurvivalIsland
     /// Blueprint: Island_Logic/IslandInteractable.md bagian 2 (#17). Claude.md Pilar 1: raycast dari tengah kamera
     /// dengan LayerMask Interactable, tekan E untuk mengambil loot atau NPC.
     ///
-    /// Belum diimplementasikan (sistemnya belum ditulis, ditandai TODO):
-    /// - HUDManager.ShowInteraction/HideInteraction/SetInteractionProgress. Sementara prompt jadi dibaca lewat CurrentPrompt.
-    /// - LocalizationManager kunci prompt.format. Sementara format "[{tombol}] {aksi}" ditulis di FormatPrompt.
-    /// - NotificationManager (#22) dan suara tolak saat CanInteract menolak.
-    /// - Batal tahan saat PlayerDamagedEvent (event milik Langkah 3/5 belum ada).
+    /// Sistem pendukung yang disambung:
+    /// - HUDManager.ShowInteraction/HideInteraction/SetInteractionProgress (prompt jadi juga tetap ada di CurrentPrompt).
+    /// - LocalizationManager kunci prompt.format (#104), cadangan "[{tombol}] {aksi}" di FormatPrompt.
+    /// - NotificationManager (#22) dan suara tolak (AudioManager) saat CanInteract menolak.
+    /// - Batal tahan saat PlayerDamagedEvent.
     /// IsCarryingHeavyItem dibaca dari HeavyItemSystem.IsCarrying (disambungkan Langkah 6, #69).
     /// </summary>
     public class PlayerInteractor : MonoBehaviour
@@ -22,6 +22,8 @@ namespace SurvivalIsland
         [SerializeField] private Transform cameraTransform;
         [Tooltip("Untuk cek kecepatan pemain saat interaksi tahan. Boleh kosong.")]
         [SerializeField] private CharacterController characterController;
+        [Tooltip("Suara saat interaksi ditolak (#22). Boleh kosong.")]
+        [SerializeField] private AudioClip rejectClip;
 
         public IInteractable Current { get; private set; }
         public bool IsEnabled { get; private set; } = true;
@@ -54,9 +56,46 @@ namespace SurvivalIsland
             if (cameraTransform == null) Debug.LogError("[PlayerInteractor] cameraTransform kosong.", this);
         }
 
+        private void OnEnable()
+        {
+            EventChannel<PlayerDamagedEvent>.Raised += HandleDamaged;
+            EventChannel<InputBindingsChangedEvent>.Raised += HandleBindingsChanged;
+        }
+
         private void OnDisable()
         {
+            EventChannel<PlayerDamagedEvent>.Raised -= HandleDamaged;
+            EventChannel<InputBindingsChangedEvent>.Raised -= HandleBindingsChanged;
             ClearTarget();
+        }
+
+        // Kena serangan membatalkan interaksi tahan.
+        private void HandleDamaged(PlayerDamagedEvent e)
+        {
+            if (holdTimer > 0f) ResetHold();
+        }
+
+        // Tombol berganti: teks prompt dibangun ulang dengan nama tombol baru.
+        private void HandleBindingsChanged(InputBindingsChangedEvent e)
+        {
+            lastActionText = null;
+            RefreshPrompt();
+        }
+
+        /// <summary>Notifikasi alasan penolakan (#22) dan suara tolak.</summary>
+        private void NotifyBlocked(InteractBlockReason reason)
+        {
+            if (AudioManager.Instance != null && rejectClip != null) AudioManager.Instance.PlaySFX(rejectClip);
+            var nm = NotificationManager.Instance;
+            if (nm == null) return;
+            switch (reason)
+            {
+                case InteractBlockReason.InventoryFull: nm.Show("notif.inventory_full", NotificationKind.Warning); break;         // "Inventori penuh"
+                case InteractBlockReason.HandsFull:
+                case InteractBlockReason.CarryingHeavyItem: nm.Show("notif.hands_full", NotificationKind.Warning); break;         // "Tangan penuh"
+                case InteractBlockReason.MissingTool: nm.Show("notif.need_tool", NotificationKind.Warning); break;                // "Butuh alat lain"
+                case InteractBlockReason.Locked: nm.Show("notif.locked", NotificationKind.Info); break;                           // "Terkunci"
+            }
         }
 
         /// <summary>Dipanggil ShipPlayerController (level kontrol), #110, dan #101. false membersihkan target dan prompt.</summary>
@@ -157,7 +196,7 @@ namespace SurvivalIsland
             }
 
             // Interaksi tahan batal kalau pemain berlari atau terlalu jauh.
-            // TODO (Langkah 3/5): batal juga saat PlayerDamagedEvent terkirim.
+            // Batal juga saat PlayerDamagedEvent terkirim (HandleDamaged).
             if (characterController != null && characterController.velocity.magnitude > cfg.moveCancelSpeed)
             {
                 ResetHold();
@@ -166,7 +205,7 @@ namespace SurvivalIsland
 
             holdTimer += Time.deltaTime;
             HoldProgress = Mathf.Clamp01(holdTimer / hold);
-            // TODO (HUDManager belum ditulis): HUDManager.Instance.SetInteractionProgress(HoldProgress).
+            if (HUDManager.Instance != null) HUDManager.Instance.SetInteractionProgress(HoldProgress);
             if (holdTimer >= hold)
             {
                 TryInteract(cfg);
@@ -191,9 +230,10 @@ namespace SurvivalIsland
                 }
             }
 
-            // 2. Ditolak: TODO #22 notifikasi sesuai alasan, dan suara tolak.
+            // 2. Ditolak: notifikasi sesuai alasan (#22) dan suara tolak.
             var ctx = BuildContext();
-            if (Current.CanInteract(ctx) != InteractBlockReason.None) return;
+            var block = Current.CanInteract(ctx);
+            if (block != InteractBlockReason.None) { NotifyBlocked(block); return; }
 
             // 3-4. Simpan ID sebelum Interact, karena target pool bisa langsung kembali ke pool.
             string targetId = GetTargetId(Current);
@@ -234,7 +274,7 @@ namespace SurvivalIsland
                 {
                     CurrentPrompt = string.Empty;
                     lastActionText = null;
-                    // TODO (HUDManager belum ditulis): HUDManager.Instance.HideInteraction().
+                    if (HUDManager.Instance != null) HUDManager.Instance.HideInteraction();
                 }
                 return;
             }
@@ -244,18 +284,22 @@ namespace SurvivalIsland
             if (ReferenceEquals(action, lastActionText)) return;
             lastActionText = action;
             CurrentPrompt = string.IsNullOrEmpty(action) ? string.Empty : FormatPrompt(action);
-            // TODO (HUDManager belum ditulis): HUDManager.Instance.ShowInteraction(CurrentPrompt).
+            if (HUDManager.Instance != null) HUDManager.Instance.ShowInteraction(CurrentPrompt);
         }
 
         private static string FormatPrompt(string action)
         {
-            // TODO #104: ganti dengan LocalizationManager kunci prompt.format ("[{input:Interact}] {action}").
+            // Format dari LocalizationManager kunci prompt.format ("[{input:Interact}] {action}", #104). Cadangan di bawah.
+            var loc = LocalizationManager.Instance;
+            if (loc != null && loc.Has("prompt.format")) return loc.Format("prompt.format", "action", action);
             string key = InputManager.Instance != null ? InputManager.Instance.GetBindingDisplay(GameInputAction.Interact) : "E";
             return "[" + key + "] " + action;
         }
 
         private void ResetHold()
         {
+            // Cincin HUD hanya dikosongkan kalau sebelumnya terisi, supaya tidak dipanggil tiap frame.
+            if (HoldProgress > 0f && HUDManager.Instance != null) HUDManager.Instance.SetInteractionProgress(0f);
             holdTimer = 0f;
             HoldProgress = 0f;
         }

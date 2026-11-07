@@ -203,3 +203,12 @@ Air dangkal tidak menyelamatkan pemain dari damage jatuh.
 11. Lepas `Region4_Village` saat pemain di sungai lewat `DevConsole`. **Hasil:** mode kembali `None`, tanpa error.
 12. Simpan di darat, lalu muat di dalam air lewat `teleport`. **Hasil:** mode `Swimming` dalam 0,1 detik.
 13. Jeda saat tenggelam. **Hasil:** HP dan napas berhenti, lalu berlanjut setelah jeda.
+
+## 7. Catatan Implementasi (Sistem pendukung)
+
+- Kode: `Island_Logic/SwimmingController.cs` (enum `WaterMode`), `WaterVolume.cs`. Config `GameBalanceConfig.swimming` di `GameBalance.GrupE.cs`, tambahan `breathPublishHz` (4).
+- `WaterKind` sudah ada di `WaterBody` (#55). `WaterVolume` memakai `[RequireComponent(WaterBody)]` dan membaca jenis air dari sana. `SurfaceY` adalah puncak bounds trigger.
+- Gerak dasar tidak diduplikasi: `PlayerTraversal` memegang mode `Swimming`, kecepatan dari `IslandPlayerController.SpeedMultiplier`, dan kelas ini hanya memanggil `CharacterController.Move` saat `Swimming`.
+- `PlayerPinnedEvent` tidak didengar langsung: saat diterkam `PlayerTraversal.Mode` menjadi `Locked`, jadi `TickSwim` berhenti dan napas tetap berjalan.
+- Arah renang mendatar memakai arah hadap (yaw) pemain, sama dengan `IslandPlayerController`.
+- Belum diuji di Unity.

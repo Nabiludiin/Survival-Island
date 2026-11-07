@@ -45,8 +45,9 @@ namespace SurvivalIsland
             }
             unique.Clear();
             uniqueColliders.Clear();
-            // TODO #96/#70: EnvironmentalHazard.NotifyExplosion(center, radius, info.byPlayer) untuk tong berantai,
-            // setelah EnvironmentalHazard ditulis.
+            // Tong di dalam radius ikut bersumbu, supaya Bom Rakitan (#96) dan Fireball (#70) memicu ledakan berantai.
+            // Aman dipanggil dua kali: tong yang sudah bersumbu diabaikan.
+            EnvironmentalHazard.NotifyExplosion(center, radius, info.byPlayer);
         }
     }
 }

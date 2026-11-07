@@ -235,3 +235,16 @@ Rekaman di `LoreReader` (#100) menjeda game, jadi teksnya tampil di panel itu da
 11. Setel `cameraShakeScale` 0 dan matikan head bob. **Hasil:** getaran dan head bob berhenti, dan tembakan tetap normal.
 12. Hapus `a11y.flashWarningSeen`, lalu jalankan. **Hasil:** peringatan muncul sekali. Pilih **Kurangi kilatan**, lalu picu erupsi. **Hasil:** langit berubah perlahan.
 13. Mati, lalu mulai run baru. **Hasil:** bahasa dan pilihan aksesibilitas tetap sama.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `LocalizationManager.cs` (juga `AccessibilityOptions` dan kelas statis `FlashGuard`), `LocalizationTable.cs` (dengan menu konteks "Impor CSV..."), `LocalizedText.cs`, `SubtitlePresenter.cs`, `GhostStatusIcon.cs`, `LocalizationAuditWindow.cs` (menu Survival > Localization > Audit). Event `AccessibilityChangedEvent`, `SubtitleRequestedEvent`, dan enum `SubtitleSourceKind` di `GameEvents.FondasiA.cs`. Config di `GameBalance.FondasiA.cs`.
+- Urutan bootstrap mengikuti `RunLifecycle.md` (ke-7), bukan "langkah 5" di bagian 1.
+- `ResetForNewRun` menerbitkan ulang `LocaleChangedEvent` dan `AccessibilityChangedEvent`, karena `GameEventRegistry.ClearAll` menghapus nilai sticky.
+- `Get` mengembalikan `#key#` di Editor dan kunci mentah di build lain. Teks bertoken `{input:...}` di-cache per kunci; teks lain tidak perlu cache.
+- Kunci PlayerPrefs: `settings.locale`, `a11y.textScale`, `a11y.cameraShakeScale`, `a11y.reduceFlashing`, `a11y.subtitlesEnabled`, `a11y.showSpeakerName`, `a11y.flashWarningSeen`.
+- Peringatan kilatan: `TryShowFlashWarning()` dipanggil `MainMenuController`. Ya = Lanjut, Tidak atau Esc = Kurangi kilatan. Kunci: `ui.flash_warning.title`, `ui.flash_warning`, `ui.flash_warning.continue`, `ui.flash_warning.reduce`.
+- `FlashGuard.Allow()` selalu membatasi sampai `maxFlashesPerSecond` (waktu tak terskala); `FlashGuard.ReduceFlashing` membaca pilihan pemain.
+- `SubtitlePresenter` menyalin `rowTemplate` sekali sampai `subtitleMaxRows`; baris yang diganti dipilih dari prioritas terendah, lalu yang paling lama kalau seri.
+- `GhostStatusIcon.SetStatus(PlacementError)` siap dipanggil `BuildManager`. Material garis miring dan ikon pada highlight #17/#55 belum dikerjakan (milik sistemnya).
+- `LocalizationAuditWindow`: "tidak terpakai" dicari sebagai teks kunci utuh di `.cs`, `.asset`, `.prefab`, dan `.unity`, jadi kunci yang dirakit kode bisa terlapor. Bagian ini petunjuk dan tidak menggagalkan pemeriksaan.

@@ -254,3 +254,13 @@ GDD bagian 6 menyebut gempa merusak base yang dindingnya belum di-upgrade. `Disa
 15. Simpan dengan dinding batu ber-HP 60 persen, keluar, lalu lanjutkan. **Hasil:** tier, HP, dan tampilan sama, tanpa efek retak saat load.
 16. Mati, lalu mulai run baru. **Hasil:** tidak ada bangunan lama.
 17. Pukul satu dinding di base 200 struktur sambil membuka Profiler. **Hasil:** hanya satu `StructureVisual` bekerja, tanpa alokasi GC.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- Kode: `BuildingIntegrity.cs`, `StructureVisual.cs`, dan `StructureIntegrityInfo.cs` di `Assets/LOGIC/raft/`. Config `integrity` ada di `Core_Logic/GameBalance.GrupF.cs`. Event `StructureRepairedEvent` dan `StructureUpgradedEvent` ada di `Core_Logic/GameEvents.GrupF.cs`.
+- `BuildableData` (kode Langkah 4) bukan `partial` dan belum boleh diubah. Karena itu, field `tier`, `upgradeTo`, `upgradeCost`, `repairItemId`, `repairCostPerSwing`, `survivesEarthquake`, dan `damageVisuals` ditaruh di komponen `StructureIntegrityInfo` pada prefab struktur. Field itu dibaca lewat `StructureIntegrityInfo.For(data)`. `DisasterManager` (#70) memakai `StructureIntegrityInfo.SurvivesEarthquake(data)`.
+- `StructureRegistry.ReplaceInstance` dan `Find` belum ada. Penggantian prefab ditulis di `BuildingIntegrity.ReplaceInstance` dengan memakai `Register` dan `StructureNode.Setup`. Pencarian memakai `TryGetById`.
+- Bidikan memakai raycast sendiri dengan `repairRange`, karena `StructureRegistry.TryGetAimedStructure` memakai `maxBuildDistance`.
+- `NPCRoster.GetSkillMultiplier` (#76) belum ada, jadi pengali Crafter bernilai 1.
+- `StructureVisual` memainkan efek hanya saat tahap turun karena damage pada frame itu. Dengan begitu, `Initialize` saat load tidak memicu efek.
+- `HammerEquippable` (kode Langkah 4) belum memanggil `TryRepairSwing` dan `TickUpgrade`.

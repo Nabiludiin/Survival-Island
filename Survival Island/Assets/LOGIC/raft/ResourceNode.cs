@@ -11,17 +11,17 @@ namespace SurvivalIsland
     /// Node tidak pernah di-Destroy: saat habis hanya berganti status dan visual, sehingga tunggul tetap ber-collider.
     ///
     /// Catatan implementasi (Langkah 4):
-    /// - RegionStreaming dan RegionStateStore (#88) belum ada, jadi region node diisi lewat field region di Inspector,
-    ///   dan node mendaftar langsung ke WorldStateSave (LoadOrder 0). TODO #88: pindah ke RegionStateStore.
-    /// - Belum ada (TODO): VFXManager.Play (#15), AudioManager (#16, sementara AudioSource opsional di node),
-    ///   NotificationManager "Butuh alat lain" (#22), NoiseEmitter.Emit(harvestNoiseRadius, NoiseSourceKind.Tool) (#49, Langkah 5),
-    ///   Flammable (#97).
+    /// - Region node dari RegionSceneRoot induk, status lewat RegionStateStore (#88, RegionSaveRouting). Tanpa RegionStreaming
+    ///   (scene uji): region dari Inspector, dan node mendaftar ke WorldStateSave (LoadOrder 0) sebagai jalur cadangan.
+    /// - VFXManager.Play (#15), NotificationManager "Butuh alat lain" (#22), dan NoiseEmitter (#49) sudah disambung.
+    ///   Suara 3D lewat AudioManager.PlaySFXAt (pool PooledAudioSource); AudioSource di node hanya cadangan kalau
+    ///   AudioManager tidak ada. Api (#97): Flammable di prefab pohon memanggil ForceDeplete(false) saat selesai terbakar.
     /// </summary>
     [DisallowMultipleComponent]
     public class ResourceNode : MonoBehaviour, ISaveable, IRegrowable
     {
         [SerializeField] private ResourceNodeData data;
-        [Tooltip("Region node ini. Sementara diisi tangan sampai RegionStreaming (#88) ada.")]
+        [Tooltip("Region node ini. Dibaca dari RegionSceneRoot induk kalau ada (#88); isian ini untuk scene uji.")]
         [SerializeField] private RegionType region = RegionType.Volcano;
         [SerializeField] private GameObject standingVisual;
         [SerializeField] private GameObject depletedVisual;
@@ -42,6 +42,7 @@ namespace SurvivalIsland
 
         private int currentHits;
         private SaveIdTag saveTag;
+        private bool registeredForSave;
         private float shakeTimer;
         private Quaternion visualBaseRotation;
 
@@ -53,6 +54,8 @@ namespace SurvivalIsland
         private void Awake()
         {
             saveTag = GetComponent<SaveIdTag>();
+            // Region dari RegionSceneRoot induk (#88). Isian Inspector hanya untuk scene uji tanpa RegionSceneRoot.
+            if (RegionSceneRoot.TryGetRegionOf(this, out var r)) region = r;
             if (colliders == null || colliders.Length == 0) colliders = GetComponents<Collider>();
             currentHits = data != null ? data.maxHits : 1;
             if (standingVisual != null) visualBaseRotation = standingVisual.transform.localRotation;
@@ -61,14 +64,15 @@ namespace SurvivalIsland
 
         private void OnEnable()
         {
-            if (WorldStateSave.Instance != null && saveTag != null) WorldStateSave.Instance.Register(this);
+            // Objek region: RegionStateStore (#88). Tanpa RegionStreaming: jalur cadangan WorldStateSave (RegionSaveRouting).
+            if (saveTag != null) registeredForSave = RegionSaveRouting.Register(this, this);
             // Node habis yang dimuat ulang ikut jadwal tumbuh lagi.
             if (IsDepleted && ResourceRespawn.Instance != null) ResourceRespawn.Instance.MarkDepleted(this);
         }
 
         private void OnDisable()
         {
-            if (WorldStateSave.Instance != null) WorldStateSave.Instance.Unregister(this);
+            RegionSaveRouting.Unregister(this, ref registeredForSave);
             if (ResourceRespawn.Instance != null) ResourceRespawn.Instance.Forget(this);
         }
 
@@ -105,13 +109,19 @@ namespace SurvivalIsland
             if (damage <= 0)
             {
                 PlaySound(rejectSound);
-                // TODO #22: NotificationManager "Butuh alat lain" ("Butuh Pisau" untuk Node_SapTree).
+                // Notifikasi "Butuh alat lain" (#22).
+                if (byPlayer && NotificationManager.Instance != null) NotificationManager.Instance.Show("notif.need_tool", NotificationKind.Warning);
                 return HitResult.Rejected;
             }
 
             // 3. Kurangi pukulan, lalu efek, suara, dan goyangan.
             currentHits -= damage;
-            // TODO #15: VFXManager.Instance.Play(data.HitVfxTag, hitPoint, Quaternion.LookRotation(hitPoint - transform.position)).
+            // Efek pukulan lewat VFXManager (#15).
+            if (VFXManager.Instance != null && !string.IsNullOrEmpty(data.HitVfxTag))
+            {
+                Vector3 away = hitPoint - transform.position;
+                VFXManager.Instance.Play(data.HitVfxTag, hitPoint, away.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(away) : Quaternion.identity);
+            }
             PlaySound(hitSound);
             shakeTimer = shakeSeconds;
 
@@ -120,7 +130,8 @@ namespace SurvivalIsland
             EventChannel<ResourceNodeHitEvent>.Publish(new ResourceNodeHitEvent(data.nodeType, willDeplete, byPlayer));
             if (byPlayer)
             {
-                // TODO #49 (Langkah 5): NoiseEmitter.Emit(Balance.resource.harvestNoiseRadius, NoiseSourceKind.Tool).
+                // Suara panen memancing hewan penjaga (#49, #61).
+                NoiseEmitter.Emit(hitPoint, Balance != null ? Balance.resource.harvestNoiseRadius : 10f, NoiseSourceKind.Tool);
             }
 
             // 5. Habis.
@@ -139,7 +150,7 @@ namespace SurvivalIsland
             if (withDrops && data.dropItem != null)
             {
                 GetDropRange(out int min, out int max);
-                int total = stream.Range(min, max + 1);
+                int total = ApplyHarvestYield(stream.Range(min, max + 1));
                 SpawnDrops(total, ref stream);
             }
 
@@ -173,6 +184,18 @@ namespace SurvivalIsland
             if (data.nodeType == NodeType.Tree) { min = Balance.resource.treeDropMin; max = Balance.resource.treeDropMax; }
             else if (data.nodeType == NodeType.Rock) { min = Balance.resource.rockDropMin; max = Balance.resource.rockDropMax; }
             if (max < min) max = min;
+        }
+
+        /// <summary>
+        /// Keputusan developer (7 November 2026): hasil panen dikali DifficultyProfile.harvestYieldMultiplier,
+        /// dibulatkan, dan minimal 1 kalau hasil asli lebih dari 0.
+        /// </summary>
+        private static int ApplyHarvestYield(int raw)
+        {
+            if (raw <= 0) return raw;
+            var diff = DifficultyProfile.Active;
+            if (diff == null) return raw;
+            return Mathf.Max(1, Mathf.RoundToInt(raw * diff.harvestYieldMultiplier));
         }
 
         /// <summary>Item jatuh dibagi per dropChunkSize, diambil dari pool WorldItem_Generic (bukan Instantiate).</summary>
@@ -228,8 +251,11 @@ namespace SurvivalIsland
 
         private void PlaySound(AudioClip clip)
         {
-            // TODO #16: AudioManager.Instance.PlaySFXAt(clip, transform.position). Sementara AudioSource opsional.
-            if (clip != null && audioSource != null) audioSource.PlayOneShot(clip);
+            if (clip == null) return;
+            // Suara 3D di posisi node (#16). AudioSource opsional di node dipakai hanya kalau AudioManager tidak ada.
+            var audio = AudioManager.Instance;
+            if (audio != null) audio.PlaySFXAt(clip, transform.position);
+            else if (audioSource != null) audioSource.PlayOneShot(clip);
         }
 
         // ---------------------------------------------------------------- Simpan dan muat (#80)
