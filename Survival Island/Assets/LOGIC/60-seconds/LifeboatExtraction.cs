@@ -152,6 +152,16 @@ namespace SurvivalIsland
             var layout = RunSeedManager.Instance != null ? RunSeedManager.Instance.CurrentLayout : null;
             var pooler = ObjectPooler.Instance;
             if (layout == null || layout.shipNpcIds == null || pooler == null) return;
+
+            // Kompatibilitas (#89): tanpa RunLayoutSources, BuildLayout tidak memilih NPC, jadi kapal tetap tanpa NPC seperti sebelumnya.
+            var sources = RunSeedManager.Instance.LayoutSources;
+            if (sources == null && layout.shipNpcIds.Length == 0)
+                Debug.LogWarning("[LifeboatExtraction] RunSeedManager.layoutSources kosong, jadi tidak ada NPC kapal di run ini.", this);
+#if UNITY_EDITOR
+            if (sources != null && sources.shipNpcPoints != null && sources.shipNpcPoints.Length != shipNpcPoints.Length)
+                Debug.LogWarning($"[LifeboatExtraction] RunLayoutSources.shipNpcPoints ({sources.shipNpcPoints.Length}) tidak sama dengan " +
+                                 $"shipNpcPoints ({shipNpcPoints.Length}). Jalankan menu \"Salin data kapal\" di aset RunLayoutSources.", this);
+#endif
             for (int i = 0; i < layout.shipNpcIds.Length; i++)
             {
                 var data = FindNpcData(layout.shipNpcIds[i]);
@@ -174,11 +184,20 @@ namespace SurvivalIsland
 
         private NPCData FindNpcData(string npcId)
         {
-            if (string.IsNullOrEmpty(npcId) || npcDatabase == null) return null;
-            for (int i = 0; i < npcDatabase.Length; i++)
-                if (npcDatabase[i] != null && npcDatabase[i].npcId == npcId) return npcDatabase[i];
+            if (string.IsNullOrEmpty(npcId)) return null;
+            if (npcDatabase != null)
+                for (int i = 0; i < npcDatabase.Length; i++)
+                    if (npcDatabase[i] != null && npcDatabase[i].npcId == npcId) return npcDatabase[i];
+            // Cadangan (#89): NPC yang dipilih BuildLayout berasal dari RunLayoutSources.shipNpcs (aset yang sama).
+            var sources = RunSeedManager.Instance != null ? RunSeedManager.Instance.LayoutSources : null;
+            if (sources != null && sources.shipNpcs != null)
+                for (int i = 0; i < sources.shipNpcs.Length; i++)
+                    if (sources.shipNpcs[i] != null && sources.shipNpcs[i].npcId == npcId) return sources.shipNpcs[i];
             return null;
         }
+
+        /// <summary>Titik NPC kapal, dibaca menu Editor RunLayoutSources untuk mengukur syarat 5 (#89).</summary>
+        public IReadOnlyList<Transform> ShipNpcPoints => shipNpcPoints;
 
         // ---------------------------------------------------------------- IInteractable (sekoci)
 

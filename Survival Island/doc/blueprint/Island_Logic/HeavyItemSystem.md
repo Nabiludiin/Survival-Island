@@ -259,3 +259,5 @@ Barang yang tergeletak di dalam trigger juga terpasang, sehingga pemain tidak di
 
 - Isi TODO (sistem pendukung): Debu saat dijatuhkan (selain `Water`) lewat `VFXManager.Play(dropDustTag)`. Tafsiran tag: `VFX_ImpactDust` dari katalog (field Inspector).
 - Isi TODO (sistem pendukung): `SweepBelow(Bounds, float waterY, TideSafePoint[])` dipanggil `TideManager.StepCollider`: barang `Lying` di bawah air dalam zona dipindah ke `TideSafePoint` terdekat, dengan notifikasi `notif.part_returned` sekali.
+- **Keputusan developer (7 November 2026):** `RunSeedManager.BuildLayout` sekarang mengisi `partPointByPart` (#89). Pemilihan cadangan di `HeavyItemSystem` dihapus; kalau layout kosong atau tidak sah (`RunLayoutSources` belum diisi, scene uji, save lama), cadangan tetap jalan dengan peringatan lewat `RunSeedManager.PickPartPoints` dengan `Fork(PartLocation, 0)`, sehingga aturannya hanya di satu tempat. Tanpa `RunSeedManager` dipakai `RandomStream(0)`.
+- `Awake` memakai `RunLayoutSources.partSpawnPoints` kalau field `spawnPoints` kosong, dan memberi peringatan kalau keduanya aset berbeda (indeks layout menunjuk tabel sumber).

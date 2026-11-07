@@ -32,8 +32,9 @@ namespace SurvivalIsland
     /// Ketiganya mendengar HeavyItemChangedEvent (Langkah 3), jadi file mereka tidak diubah.
     ///
     /// Penyimpangan sementara (Catatan Implementasi Langkah 6 di blueprint):
-    /// - RunSeedManager.BuildLayout masih kosong (#89). Kalau CurrentLayout.partPointByPart kurang, titik dipilih di sini
-    ///   dengan aturan yang sama (Fork PartLocation 0, Shuffle, minPartPointSpacing).
+    /// - #89 (keputusan developer 7 November 2026): titik dibaca dari RunSeedManager.CurrentLayout.partPointByPart, yang diisi
+    ///   BuildLayout dan diperiksa RunLayoutValidator. Kalau layout kosong atau tidak sah (RunLayoutSources belum diisi), cadangan
+    ///   lama tetap jalan dengan peringatan lewat RunSeedManager.PickPartPoints (aturan yang sama, satu tempat).
     /// - RegionStreaming (#88): barang Lying hanya aktif kalau regionnya Loaded (RegionLoadStateChangedEvent), dan
     ///   RecoveryTick memeriksa batas bawah RegionRecord.bounds. Tanpa RegionStreaming (scene uji), semua barang aktif.
     ///   Data barang tetap di world_parts (manager IslandPhase), bukan RegionStateStore.
@@ -88,6 +89,14 @@ namespace SurvivalIsland
         private void Awake()
         {
             Instance = this;
+            // #89: tabel titik harus sama dengan RunLayoutSources.partSpawnPoints, karena partPointByPart berisi indeks tabel itu.
+            var sources = RunSeedManager.Instance != null ? RunSeedManager.Instance.LayoutSources : null;
+            if (sources != null && sources.partSpawnPoints != null)
+            {
+                if (spawnPoints == null) spawnPoints = sources.partSpawnPoints;
+                else if (spawnPoints != sources.partSpawnPoints)
+                    Debug.LogWarning("[HeavyItemSystem] spawnPoints berbeda dari RunLayoutSources.partSpawnPoints. Indeks layout bisa salah.", this);
+            }
         }
 
         private void OnEnable()
@@ -184,30 +193,15 @@ namespace SurvivalIsland
                 if (layoutOk) return result;
             }
 
-            // Cadangan sementara (#89 belum mengisi BuildLayout): Fork(PartLocation, 0), Shuffle, jarak minimal.
-            int n = spawnPoints != null ? spawnPoints.Count : 0;
-            var order = new int[n];
-            for (int i = 0; i < n; i++) order[i] = i;
-            if (RunSeedManager.Instance != null && n > 1)
-            {
-                var s = RunSeedManager.Instance.Fork(RandomStreamId.PartLocation, 0);
-                s.Shuffle(order);
-            }
+            // Cadangan kompatibilitas (#89): BuildLayout kini mengisi partPointByPart. Jalur ini hanya untuk
+            // RunSeedManager.layoutSources kosong, scene uji tanpa RunSeedManager, atau save lama yang titiknya tidak sah.
+            // Aturan pemilihan tidak lagi ditulis di sini: memakai RunSeedManager.PickPartPoints dengan Fork(PartLocation, 0).
+            Debug.LogWarning("[HeavyItemSystem] CurrentLayout.partPointByPart kosong atau tidak sah (RunLayoutSources belum diisi?). " +
+                             "Titik dipilih dengan cadangan lama.", this);
+            // Scene uji tanpa RunSeedManager: aliran tetap dari seed 0, jadi hasilnya tetap sama tiap kali dicoba.
+            var s = RunSeedManager.Instance != null ? RunSeedManager.Instance.Fork(RandomStreamId.PartLocation, 0) : new RandomStream(0UL);
             float minSpacing = Balance != null ? Balance.runSeed.minPartPointSpacing : 30f;
-            int filled = 0;
-            for (int k = 0; k < n && filled < count; k++)
-            {
-                int p = order[k];
-                if (!spawnPoints.IsValidIndex(p)) continue;
-                bool farEnough = true;
-                for (int j = 0; j < filled; j++)
-                    if ((spawnPoints.points[result[j]].position - spawnPoints.points[p].position).sqrMagnitude < minSpacing * minSpacing)
-                    {
-                        farEnough = false;
-                        break;
-                    }
-                if (farEnough) result[filled++] = p;
-            }
+            int filled = RunSeedManager.PickPartPoints(spawnPoints, count, minSpacing, ref s, result);
             if (filled < count)
             {
                 Debug.LogError($"[HeavyItemSystem] Titik suku cadang tidak cukup ({filled} / {count}). Sisa barang memakai titik pertama yang sah.");

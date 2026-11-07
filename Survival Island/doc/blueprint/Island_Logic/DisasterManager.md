@@ -284,3 +284,4 @@ Penyimpangan sementara, karena sistem pendukung belum ditulis:
 ## Catatan Implementasi (Sistem pendukung)
 
 - Isi TODO (sistem pendukung): Gempa langkah 1: suara gemuruh tiap denyut dari field baru `DisasterData.pulseClip` lewat `AudioManager.PlaySFX` (2D, karena gempa terasa di mana-mana). `activeLoop` masih belum diputar (AudioManager belum punya sumber loop).
+- **Keputusan developer (7 November 2026):** Sumber `DisasterData[]` jadwal pindah ke `RunLayoutSources.disasterData` (#89), dengan cadangan field lama `RunSeedManager.disasterData`. `DisasterManager.GetData` memakai field sendiri kalau diisi, dan `RunSeedManager.DisasterDataSource` kalau kosong.

@@ -22,7 +22,7 @@ namespace SurvivalIsland
 
         public static DisasterManager Instance { get; private set; }
 
-        [Tooltip("Aset DisasterData yang sama dengan RunSeedManager.disasterData. Dipakai untuk durasi tahap.")]
+        [Tooltip("Aset DisasterData yang sama dengan RunLayoutSources.disasterData. Kosong = memakai sumber RunSeedManager.")]
         [SerializeField] private DisasterData[] disasterData = Array.Empty<DisasterData>();
 
         // ---------------------------------------------------------------- Status (API di DisasterManager.md bagian 2)
@@ -134,9 +134,13 @@ namespace SurvivalIsland
 
         private DisasterData GetData(DisasterType type)
         {
-            if (disasterData == null) return null;
-            for (int i = 0; i < disasterData.Length; i++)
-                if (disasterData[i] != null && disasterData[i].type == type) return disasterData[i];
+            // Field sendiri diutamakan (aset lama). Kosong: sumber jadwal yang sama dengan RunSeedManager (#89).
+            var list = disasterData != null && disasterData.Length > 0
+                ? disasterData
+                : (RunSeedManager.Instance != null ? RunSeedManager.Instance.DisasterDataSource : null);
+            if (list == null) return null;
+            for (int i = 0; i < list.Length; i++)
+                if (list[i] != null && list[i].type == type) return list[i];
             return null;
         }
 

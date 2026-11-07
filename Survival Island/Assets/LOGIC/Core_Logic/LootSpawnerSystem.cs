@@ -72,6 +72,8 @@ namespace SurvivalIsland
         public RegionType HomeRegion => homeRegion;
         public LootTable Table => table;
         public IReadOnlyList<LootPointState> States => states;
+        /// <summary>Definisi titik, dibaca menu Editor RunLayoutSources untuk menyalin spawner kapal (#89).</summary>
+        public IReadOnlyList<LootPointDef> SpawnPointDefs => spawnPoints;
 
         private static bool IsShipPhase =>
             GameManager.Instance != null && GameManager.Instance.currentPhase == GamePhase.SinkingShip;
@@ -232,34 +234,60 @@ namespace SurvivalIsland
             itemId = string.Empty;
             amount = 0;
             if (def == null) return false;
+            return RollPointCore(def.kind, def.guaranteedItems, table, spawnerId, pointIndex, streamId, day, false, 0u, out itemId, out amount);
+        }
+
+        /// <summary>
+        /// Sama dengan RollPoint, tetapi untuk seed tertentu dan tanpa LootPointDef (tanpa Transform). Dipakai RunLayoutValidator
+        /// syarat 4 lewat RunLayoutSources.shipLootSpawners, sebelum seed calon ditetapkan (#89). Hasil sama persis dengan
+        /// RollPoint saat CurrentSeed = seed.
+        /// </summary>
+        public static bool RollPointForSeed(LootPointKind kind, ItemStack[] guaranteedItems, LootTable table, string spawnerId,
+                                            int pointIndex, RandomStreamId streamId, int day, uint seed,
+                                            out string itemId, out int amount)
+        {
+            return RollPointCore(kind, guaranteedItems, table, spawnerId, pointIndex, streamId, day, true, seed, out itemId, out amount);
+        }
+
+        private static bool RollPointCore(LootPointKind kind, ItemStack[] guaranteedItems, LootTable table, string spawnerId,
+                                          int pointIndex, RandomStreamId streamId, int day, bool useSeed, uint seed,
+                                          out string itemId, out int amount)
+        {
+            itemId = string.Empty;
+            amount = 0;
 
             // 2. Isi tetap: titik ini tidak bisa kosong (RegionLootTable.md, "Isi tetap").
-            if (def.guaranteedItems != null && def.guaranteedItems.Length > 0 && def.guaranteedItems[0].item != null)
+            if (guaranteedItems != null && guaranteedItems.Length > 0 && guaranteedItems[0].item != null)
             {
-                itemId = def.guaranteedItems[0].item.itemID;
-                amount = Mathf.Max(1, def.guaranteedItems[0].amount);
+                itemId = guaranteedItems[0].item.itemID;
+                amount = Mathf.Max(1, guaranteedItems[0].amount);
                 return true;
             }
 
             // 1. Aliran berkunci per titik.
-            if (RunSeedManager.Instance == null)
+            RandomStream s;
+            if (useSeed) s = RunSeedManager.ForkForSeed(seed, streamId, spawnerId + "/" + pointIndex);
+            else
             {
-                Debug.LogWarning("[LootSpawnerSystem] RunSeedManager belum ada. Titik dibiarkan kosong.");
-                return false;
+                if (RunSeedManager.Instance == null)
+                {
+                    Debug.LogWarning("[LootSpawnerSystem] RunSeedManager belum ada. Titik dibiarkan kosong.");
+                    return false;
+                }
+                s = RunSeedManager.Instance.Fork(streamId, spawnerId + "/" + pointIndex);
             }
-            var s = RunSeedManager.Instance.Fork(streamId, spawnerId + "/" + pointIndex);
 
             // 3. Peluang kosong. Usulan disetujui developer: 50 persen biasa, 25 persen gudang (#85).
             var bal = GameManager.CurrentBalance;
             float emptyChance = 0f;
             if (bal != null)
-                emptyChance = (def.kind & LootPointKind.Warehouse) != 0 ? bal.loot.warehouseEmptyChance : bal.runSeed.lootPointEmptyChance;
+                emptyChance = (kind & LootPointKind.Warehouse) != 0 ? bal.loot.warehouseEmptyChance : bal.runSeed.lootPointEmptyChance;
             if (s.NextFloat01() < emptyChance) return false;
 
             // 4.
-            if (!RegionLootTable.TryRoll(table, def.kind, day, ref s, out ItemData item, out amount))
+            if (!RegionLootTable.TryRoll(table, kind, day, ref s, out ItemData item, out amount))
             {
-                Debug.LogWarning($"[LootSpawnerSystem] {spawnerId}/{pointIndex}: tabel {(table != null ? table.name : "kosong")} tidak punya isi untuk {def.kind}.");
+                Debug.LogWarning($"[LootSpawnerSystem] {spawnerId}/{pointIndex}: tabel {(table != null ? table.name : "kosong")} tidak punya isi untuk {kind}.");
                 return false;
             }
 

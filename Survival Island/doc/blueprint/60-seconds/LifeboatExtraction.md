@@ -312,3 +312,4 @@ Fungsi `GameManager.SaveFase1Loot(List<Item>)` diganti `SaveShipOutcome`. `ShipT
 ## Catatan Implementasi (Sistem pendukung)
 
 - Isi TODO (sistem pendukung): Pra-game langkah 5: `HUDManager.SetLifeboatHighlighted(true)` saat sirene. Tafsiran: tanda tetap menyala sampai scene diganti. Setor langkah 3: `HUDManager.ShowLifeboatContents(total amount barang, jumlah NPC)`.
+- **Keputusan developer (7 November 2026):** `shipNpcIds` dan `shipNpcPointByNpc` sekarang diisi `RunSeedManager.BuildLayout` dari `RunLayoutSources` (#89). `FindNpcData` mencari di `npcDatabase`, lalu di `RunLayoutSources.shipNpcs`. Kalau `layoutSources` kosong, kapal tetap tanpa NPC dengan peringatan. Di Editor ada peringatan kalau jumlah `RunLayoutSources.shipNpcPoints` berbeda dari `shipNpcPoints`. Getter baru `ShipNpcPoints` dibaca menu Editor `RunLayoutSources`.

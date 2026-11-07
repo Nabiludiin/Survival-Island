@@ -247,3 +247,4 @@ Dipanggil `RegionStreaming.CaptureRegion` satu frame setelah `Unloading`, dan ol
 - Lokasi kapal atau pulau dibaca dari `GameManager.currentPhase` (`SinkingShip` = kapal).
 - `UpdateRemaining(i, 0)` diperlakukan sebagai `MarkTaken(i)`.
 - `spawnerId` otomatis memakai awalan `ship` kalau `table.location == Ship`, selain itu `r<1-4>` dari `homeRegion`.
+- **Keputusan developer (7 November 2026):** Isi `RollPoint` dipindah ke `RollPointCore`. Fungsi baru `RollPointForSeed(kind, guaranteedItems, table, spawnerId, pointIndex, streamId, day, seed, ...)` dipakai `RunLayoutValidator` syarat 4 untuk seed calon, dengan hasil sama persis seperti `RollPoint` (#89). Getter baru `SpawnPointDefs` dibaca menu Editor `RunLayoutSources`.

@@ -27,13 +27,23 @@ namespace SurvivalIsland
         public bool IsValidIndex(int i) => points != null && i >= 0 && i < points.Length && points[i].isReachable;
 
 #if UNITY_EDITOR
-        /// <summary>Pemeriksaan Editor: isReachable = ada NavMesh dalam 2 meter. Jalankan saat scene region terbuka.</summary>
+        /// <summary>
+        /// Pemeriksaan Editor: isReachable = ada NavMesh dalam 2 meter, dan tidak terendam saat pasang tertinggi
+        /// (RunSeedManager.md syarat 2, #91). Jalankan saat scene region terbuka. Pasang hanya diperiksa kalau ada
+        /// TideManager di scene yang terbuka: titik di dalam TideZone dan di bawah MaxWaterY dianggap terendam.
+        /// </summary>
         [ContextMenu("Periksa isReachable dengan NavMesh")]
         private void CheckReachable()
         {
             if (points == null) return;
+            var tide = FindFirstObjectByType<TideManager>();
             for (int i = 0; i < points.Length; i++)
-                points[i].isReachable = UnityEngine.AI.NavMesh.SamplePosition(points[i].position, out _, 2f, UnityEngine.AI.NavMesh.AllAreas);
+            {
+                var p = points[i].position;
+                bool ok = UnityEngine.AI.NavMesh.SamplePosition(p, out _, 2f, UnityEngine.AI.NavMesh.AllAreas);
+                if (ok && tide != null && tide.TideZone.Contains(p) && p.y < tide.MaxWaterY) ok = false;
+                points[i].isReachable = ok;
+            }
             UnityEditor.EditorUtility.SetDirty(this);
         }
 #endif
