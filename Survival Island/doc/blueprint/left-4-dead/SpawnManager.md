@@ -327,3 +327,4 @@ Kode: `left-4-dead/SpawnManager.cs` (`DespawnReason`, `SpawnOverride`, `SpawnOve
   - Saat malam tiba, `SunlightExposure.ReportEmergence()` dipanggil.
   - `RegionLoadStateChangedEvent` sekarang didengar. `Unloading` memanggil `DespawnRegion(region)` (publik): semua musuh dengan `RegionStreaming.GetRegionAt(posisi) == region` dikembalikan dengan `RegionUnloaded`, termasuk yang mengejar dan yang `Submerged`. Tanpa `RegionStreaming`, tidak ada yang dilepas.
   - Pengaman macet melewati hewan dengan `WildlifeAI.IsOnPerch` (langkah 1).
+- **Keputusan developer (7 November 2026, putaran ketiga):** kalau tidak ada `BushSpawnPoint` yang lolos syarat, slot Zombie Lumut batal; tidak pindah ke titik spawn biasa.

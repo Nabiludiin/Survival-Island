@@ -53,6 +53,12 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Kelompok zombie jauh (#93) | Jalur bersama per sel ditulis sekarang, dengan angka `crowd.cluster*` dari `HordeCrowdManager.md` |
 | Tafsiran sistem pendukung yang disetujui | Tanda sekoci di HUD menyala sampai scene diganti. `showHitMarkers` mematikan Hit Marker dan Kill Marker, indikator arah damage tetap. Debu barang berat jatuh memakai `VFX_ImpactDust`. Tanpa `ResourceRespawn`, keluar dari tersangkut melapor `Blocked` |
 | Sistem berblueprint yang ditulis sekarang | `VillageZombieHiding`/`HidingSpot` (#63), `BushSpawnPoint`, `AmbushPerch`, `RunLayoutSources` dan validatornya |
+| NPC kapal per run | Selalu 3 (medis, tukang, koki). Seed hanya mengacak titiknya |
+| Syarat bekal kapal | Dihitung per objek. Makanan, peluru, dan minuman dikenali dari data item yang ada, tanpa daftar itemID tetap |
+| Zombie Desa terlambat bersembunyi | Langsung terbakar saat fajar, dengan jeda acak |
+| Zombie Lumut tanpa titik semak | Slot batal, tidak pindah ke titik spawn biasa |
+| Perch Jaguar | Hanya perch dalam `wanderRadius` dari `homePoint`. Saat malam, dilukai di perch, atau perch hilang, Jaguar langsung dipindah ke kaki pohon. Trigger animasi `Climb` resmi |
+| Gagak naik setelah menukik | Durasi sama dengan menukik (`crowDiveSeconds`) |
 
 ## Usulan yang menjadi nilai awal, per issue
 

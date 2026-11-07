@@ -270,3 +270,4 @@ Kode: `left-4-dead/SunlightExposure.cs`.
 - **`ForceAware` saat naik** memakai `stealth.huntHintRadius` x 2.
 - **Region 4 dilepas:** `HidingSpot.OnDisable` mengosongkan penghuni dan rujukan titik di zombie (`NotifySpotLost`). Zombienya dikembalikan `SpawnManager.DespawnRegion` (ditulis bersamaan, lihat `SpawnManager.md`).
 - `HidingSpot.FindAvailable` mengukur jarak ke `entryPoint`, sedangkan `FindEmergeSpot` mengukur jarak ke posisi titik.
+- **Keputusan developer (7 November 2026, putaran ketiga):** Zombie Desa yang belum `Submerged` saat fajar melepas tempatnya lalu langsung terbakar dengan jeda acak (skenario tes 8), tanpa menunggu batas 60 detik di tempat tertutup.

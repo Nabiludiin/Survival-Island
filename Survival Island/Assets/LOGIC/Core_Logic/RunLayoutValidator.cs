@@ -138,11 +138,44 @@ namespace SurvivalIsland
                     if (!LootSpawnerSystem.RollPointForSeed(pt.kind, pt.guaranteedItems, sp.table, sp.spawnerId, i,
                                                             RandomStreamId.ShipLoot, 1, seed, out string itemId, out _))
                         continue;
-                    if (RunLayoutSources.Contains(sources.foodItemIds, itemId)) food++;
-                    if (RunLayoutSources.Contains(sources.ammoItemIds, itemId)) ammo++;
-                    if (RunLayoutSources.Contains(sources.drinkItemIds, itemId)) drink++;
+                    // Keputusan developer: satu titik kapal yang terisi dihitung satu objek, berapa pun shipPickupAmount-nya.
+                    switch (ClassifySupply(itemId))
+                    {
+                        case ShipSupplyKind.Food: food++; break;
+                        case ShipSupplyKind.Ammo: ammo++; break;
+                        case ShipSupplyKind.Drink: drink++; break;
+                    }
                 }
             }
+        }
+
+        public enum ShipSupplyKind { None, Food, Ammo, Drink }
+
+        /// <summary>
+        /// Keputusan developer (7 November 2026): jenis bekal dikenali dari data item yang sudah ada, bukan daftar itemID.
+        /// - Peluru: itemID yang dipakai sebagai WeaponData.ammoItemId oleh senjata api mana pun di ItemDatabase.
+        /// - Makanan: item Consumable dengan hungerDelta lebih besar dari 0 dan tidak lebih kecil dari thirstDelta.
+        /// - Minuman: item Consumable dengan thirstDelta lebih besar dari 0 dan lebih besar dari hungerDelta.
+        /// </summary>
+        public static ShipSupplyKind ClassifySupply(string itemId)
+        {
+            if (string.IsNullOrEmpty(itemId)) return ShipSupplyKind.None;
+            if (IsAmmoId(itemId)) return ShipSupplyKind.Ammo;
+            var d = ItemDatabase.Get(itemId);
+            if (d == null || !(d.type == ItemType.Consumable || d.isConsumable)) return ShipSupplyKind.None;
+            if (d.hungerDelta > 0f && d.hungerDelta >= d.thirstDelta) return ShipSupplyKind.Food;
+            if (d.thirstDelta > 0f && d.thirstDelta > d.hungerDelta) return ShipSupplyKind.Drink;
+            return ShipSupplyKind.None;
+        }
+
+        private static bool IsAmmoId(string itemId)
+        {
+            foreach (var id in ItemDatabase.AllIds)
+            {
+                var w = ItemDatabase.Get(id);
+                if (w != null && w.weaponData != null && w.weaponData.ammoItemId == itemId) return true;
+            }
+            return false;
         }
 
         private static bool CheckShipLoot(uint seed, RunLayoutSources sources, out string failure)

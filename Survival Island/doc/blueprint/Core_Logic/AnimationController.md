@@ -195,3 +195,4 @@ Kode: `Assets/LOGIC/Core_Logic/AnimationController.cs` (beserta `AnimIds`), `Pla
 - **Tafsiran:** `referenceSpeed` diisi pada sampel pertama setelah keluar dari pool, karena urutan `OnSpawned` antar komponen tidak dijamin.
 - **Keputusan developer:** trigger `Shove` ditambahkan untuk animasi dorong tangan. `PlayerShove` memanggil `Arms.Play(AnimIds.Shove)` saat dorongan dimulai. Animator controller `AC_PlayerArms` perlu parameter trigger `Shove`.
 - **Belum dikerjakan:** `PlayReload` butuh panjang klip reload; `GunController` belum punya data itu.
+- **Keputusan developer (7 November 2026, putaran ketiga):** trigger `Climb` (`AnimIds.Climb`) resmi untuk Jaguar naik ke perch (`AmbushPerch`, #61). Animator controller `AC_AnimalBase` (Jaguar) perlu parameter trigger `Climb`.

@@ -22,6 +22,8 @@ namespace SurvivalIsland
         public static readonly int Emerge = Animator.StringToHash("Emerge");
         public static readonly int Dormant = Animator.StringToHash("Dormant");
         public static readonly int Alert = Animator.StringToHash("Alert");
+        // Keputusan developer (7 November 2026): Jaguar naik ke perch (AmbushPerch, #61).
+        public static readonly int Climb = Animator.StringToHash("Climb");
         // Nilai AttackData.animTrigger yang dipakai musuh.
         public static readonly int Attack = Animator.StringToHash("Attack");
         public static readonly int Bite = Animator.StringToHash("Bite");

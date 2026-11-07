@@ -64,12 +64,8 @@ namespace SurvivalIsland
         [Header("Bekal kapal, syarat 4")]
         [Tooltip("Salinan semua LootSpawnerSystem di ShipPhase. Isi lewat menu konteks saat ShipPhase terbuka.")]
         public ShipLootSpawnerSource[] shipLootSpawners = Array.Empty<ShipLootSpawnerSource>();
-        [Tooltip("itemID yang dihitung sebagai makanan (minShipFoodItems).")]
-        public string[] foodItemIds = { "Food_Can" };
-        [Tooltip("itemID yang dihitung sebagai peluru (minShipAmmoItems).")]
-        public string[] ammoItemIds = { "Ammo_9mm" };
-        [Tooltip("itemID yang dihitung sebagai minuman (minShipDrinkItems).")]
-        public string[] drinkItemIds = { "Drink_CleanWater" };
+        // Keputusan developer (7 November 2026): makanan, peluru, dan minuman dikenali dari data item yang ada
+        // (RunLayoutValidator.ClassifySupply), tanpa daftar itemID tetap di aset ini.
 
         [Header("Cadangan")]
         [Tooltip("Dipakai kalau semua seed gagal. Jadwal bencana boleh kosong: diisi dari seed saat dipakai.")]

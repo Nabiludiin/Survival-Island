@@ -58,7 +58,6 @@ namespace SurvivalIsland
 
         // Sergapan Jaguar dari pohon (AmbushPerch, WildlifeAI.md "Terkaman Jaguar")
         // Trigger animator naik pohon. Belum ada di AnimIds (AnimationController.md), jadi di-hash di sini.
-        private static readonly int ClimbHash = Animator.StringToHash("Climb");
         private Animator animator;
         private AmbushPerch perch;      // Perch yang sedang dituju atau ditempati (satu penghuni)
         private bool onPerch;           // Di cabang: agen mati
@@ -398,7 +397,7 @@ namespace SurvivalIsland
             perchTimer = 0f;
             // Tafsiran: posisi langsung dipindah ke cabang, gerak naiknya diserahkan ke klip animasi "Climb".
             transform.SetPositionAndRotation(perch.PerchPosition, perch.PerchRotation);
-            if (animator != null && animator.isActiveAndEnabled) animator.SetTrigger(ClimbHash);
+            if (animator != null && animator.isActiveAndEnabled) animator.SetTrigger(AnimIds.Climb);
         }
 
         private void TickPerch(WildlifeBalance b, float tick)
