@@ -5614,6 +5614,76 @@ MonoBehaviour:
     size: 128
     overflow: 1
     maxSize: 512
+  - tag: zombie_tribal
+    prefab: {fileID: 5128629858680979405, guid: a8315b512949ea84bba7d41c5aa2c171, type: 3}
+    size: 12
+    overflow: 0
+    maxSize: 0
+  - tag: zombie_lumut
+    prefab: {fileID: 9183993141565274924, guid: f145ad6383f8c364ab6f8a819670ac6f, type: 3}
+    size: 12
+    overflow: 0
+    maxSize: 0
+  - tag: zombie_militer
+    prefab: {fileID: 1537007757520970833, guid: 4876fe4611bb89a4fab3caf2c51210e4, type: 3}
+    size: 12
+    overflow: 0
+    maxSize: 0
+  - tag: zombie_beku
+    prefab: {fileID: 2749123729699025326, guid: 5a6375d9dfc64ac4d9b8f0fb320e9bc7, type: 3}
+    size: 12
+    overflow: 0
+    maxSize: 0
+  - tag: zombie_desa
+    prefab: {fileID: 652214418910078358, guid: 85bd20074d8ab3b4f80135349dca081d, type: 3}
+    size: 30
+    overflow: 0
+    maxSize: 0
+  - tag: hewan_serigala
+    prefab: {fileID: 7845425647051695906, guid: 36d6920110f194e4a9e8e582db011358, type: 3}
+    size: 8
+    overflow: 0
+    maxSize: 0
+  - tag: hewan_babi
+    prefab: {fileID: 1565027954591227082, guid: c45d7bd371c99ab47b76d8affbbf2e42, type: 3}
+    size: 4
+    overflow: 0
+    maxSize: 0
+  - tag: hewan_jaguar
+    prefab: {fileID: 4309769020305249203, guid: fe3b17b99c8f640439bc87b7b36492c1, type: 3}
+    size: 4
+    overflow: 0
+    maxSize: 0
+  - tag: hewan_ular
+    prefab: {fileID: 7020918547161668223, guid: 970ee2f4eecab94458c7fb09013e1b9b, type: 3}
+    size: 4
+    overflow: 0
+    maxSize: 0
+  - tag: hewan_beruang
+    prefab: {fileID: 634825863401195439, guid: 9c26f4e99c370c14e86de94c7e2b8383, type: 3}
+    size: 4
+    overflow: 0
+    maxSize: 0
+  - tag: hewan_serigala_salju
+    prefab: {fileID: 8832711400855421257, guid: 5f7dd57098cc8ff44af4149d1c2be590, type: 3}
+    size: 8
+    overflow: 0
+    maxSize: 0
+  - tag: hewan_anjing
+    prefab: {fileID: 5019439188912380196, guid: 85ac2f2726b925945a117e1499ae57c5, type: 3}
+    size: 8
+    overflow: 0
+    maxSize: 0
+  - tag: hewan_gagak
+    prefab: {fileID: 3713237080896466846, guid: 6bd0ee0b5482b9e49b6a15b42b70af15, type: 3}
+    size: 16
+    overflow: 0
+    maxSize: 0
+  - tag: Tribal_Snare
+    prefab: {fileID: 3738363105062885748, guid: 327e96de9055c7e49b4f2ef6d129d5fc, type: 3}
+    size: 6
+    overflow: 0
+    maxSize: 0
 --- !u!1 &3752783440837993212
 GameObject:
   m_ObjectHideFlags: 0

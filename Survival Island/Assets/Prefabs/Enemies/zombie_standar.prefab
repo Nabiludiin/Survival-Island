@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 612388595482888469}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.65, z: 0}
+  m_LocalPosition: {x: 0, y: 1.6199999, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -52,7 +52,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.3, y: 0.3, z: 0.3}
+  m_Size: {x: 0.315, y: 0.315, z: 0.315}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6709562542944792269
 MonoBehaviour:
@@ -78,7 +78,7 @@ GameObject:
   - component: {fileID: 5552618529359452404}
   - component: {fileID: 1188084358241214575}
   - component: {fileID: 7203034285738576503}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -133,7 +133,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 65bad68ab77ccec4e9aa0a4241477cf1, type: 2}
+  - {fileID: 2100000, guid: b420f9e90e819104aac9da49f46f69ce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -169,9 +169,12 @@ GameObject:
   - component: {fileID: 6711552628180977561}
   - component: {fileID: 442644795010073615}
   - component: {fileID: 8382593914777311260}
-  - component: {fileID: 583715360137775927}
-  - component: {fileID: 5895930293879507075}
   - component: {fileID: 380790694970412723}
+  - component: {fileID: 2532899915173666722}
+  - component: {fileID: 5895930293879507075}
+  - component: {fileID: 583715360137775927}
+  - component: {fileID: 387530394633697032}
+  - component: {fileID: 2424709286979908006}
   - component: {fileID: 6809865831080126631}
   m_Layer: 10
   m_Name: zombie_standar
@@ -194,9 +197,10 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5552618529359452404}
-  - {fileID: 3425535266410081880}
   - {fileID: 3207444972119854534}
+  - {fileID: 3425535266410081880}
   - {fileID: 8725828966087953694}
+  - {fileID: 2792447219184524428}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &6711552628180977561
@@ -257,34 +261,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.EnemyHealth
   data: {fileID: 11400000, guid: a2c005cdcd8942f4c9e051693010c4cf, type: 2}
---- !u!114 &583715360137775927
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7949650959433980712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f720e35e13fe45c494756febb9193994, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.EnemyAttack
-  animator: {fileID: 0}
-  telegraphSource: {fileID: 0}
---- !u!114 &5895930293879507075
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7949650959433980712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ed6be2cb3dd45b8af108dd8af43f5ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.AISensory
-  eyePoint: {fileID: 0}
-  eyeHeight: 1.6
 --- !u!114 &380790694970412723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -303,6 +279,82 @@ MonoBehaviour:
   IsCulled: 0
   culledAgentWasEnabled: 0
   culledAnimatorWasEnabled: 0
+--- !u!114 &2532899915173666722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7949650959433980712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71a89f10e01d456295ce5c8ae19f1aa6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.EnemyHitReaction
+  animator: {fileID: 0}
+  bodyCapsule: {fileID: 6711552628180977561}
+  renderers:
+  - {fileID: 7203034285738576503}
+--- !u!114 &5895930293879507075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7949650959433980712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ed6be2cb3dd45b8af108dd8af43f5ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.AISensory
+  eyePoint: {fileID: 2792447219184524428}
+  eyeHeight: 1.6
+--- !u!114 &583715360137775927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7949650959433980712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f720e35e13fe45c494756febb9193994, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.EnemyAttack
+  animator: {fileID: 0}
+  telegraphSource: {fileID: 0}
+--- !u!114 &387530394633697032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7949650959433980712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 035400e7e68548c39fa7efcb9f56deec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.SunlightExposure
+  burnEffect: {fileID: 0}
+  animator: {fileID: 0}
+  headHeight: 2
+--- !u!114 &2424709286979908006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7949650959433980712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 666baf42c125d004f816b5152884adc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.TraversalAgent
+  rockAttack: {fileID: 0}
+  throwPoint: {fileID: 0}
+  animator: {fileID: 0}
+  climbBool: Climbing
+  throwTrigger: Throw
 --- !u!114 &6809865831080126631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -342,7 +394,7 @@ Transform:
   m_GameObject: {fileID: 8367432992193116317}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.3, z: 0}
+  m_LocalPosition: {x: 0, y: 0.324, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -367,7 +419,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.5, y: 0.6, z: 0.35}
+  m_Size: {x: 0.48999998, y: 0.63, z: 0.35}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &243673693682125537
 MonoBehaviour:
@@ -409,7 +461,7 @@ Transform:
   m_GameObject: {fileID: 8430969210877963780}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 0.99, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -434,7 +486,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.6, y: 0.9, z: 0.4}
+  m_Size: {x: 0.63, y: 0.80999994, z: 0.42000002}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1570770488709481312
 MonoBehaviour:
@@ -449,3 +501,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.HitboxModifier
   bodyPart: 1
+--- !u!1 &8440442524519409370
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2792447219184524428}
+  m_Layer: 0
+  m_Name: Eye
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2792447219184524428
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8440442524519409370}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.6199999, z: 0.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1195740596160260586}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

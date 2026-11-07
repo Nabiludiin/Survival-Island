@@ -396,6 +396,7 @@ GameObject:
   - component: {fileID: 1565748433720867075}
   - component: {fileID: 7352699261203912231}
   - component: {fileID: 6058219827019461429}
+  - component: {fileID: 7329952993263745596}
   m_Layer: 8
   m_Name: Player_Ship
   m_TagString: Player
@@ -552,6 +553,20 @@ MonoBehaviour:
   interactor: {fileID: 5086703200395383605}
   fpCamera: {fileID: 4693485087464860440}
   shove: {fileID: 7836610638216423985}
+--- !u!114 &7329952993263745596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7840023056629237373}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da11277fb01948d190c3d44102a7e9be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.PlayerTargetable
+  aimPoint: {fileID: 0}
+  aimHeight: 1.2
 --- !u!1 &8500890781637097759
 GameObject:
   m_ObjectHideFlags: 0

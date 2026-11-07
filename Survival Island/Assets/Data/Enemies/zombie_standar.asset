@@ -16,8 +16,8 @@ MonoBehaviour:
   maxHP: 50
   moveSpeed: 4
   resistances: []
-  primaryAttack: {fileID: 11400000, guid: f32dd349d933d014e94859134ac237f7, type: 2}
-  threatProfile: {fileID: 0}
+  primaryAttack: {fileID: 11400000, guid: 724824c394a71c5468d2ffef9738c1f8, type: 2}
+  threatProfile: {fileID: 11400000, guid: 24dc14564068d294092d42acfa07ecfb, type: 2}
   canAttackBuildings: 1
   isLarge: 0
   immuneToTrapSlow: 0
@@ -27,8 +27,8 @@ MonoBehaviour:
   canBeKnockedBack: 1
   knockbackMultiplier: 1
   leavesCarcass: 0
-  dropTable: {fileID: 0}
-  dropChance: 0
+  dropTable: {fileID: 11400000, guid: eeda36cc88c68b0459076786392a601b, type: 2}
+  dropChance: 0.08
   kind: 0
   secondaryAttack: {fileID: 0}
   hidesFromSun: 0

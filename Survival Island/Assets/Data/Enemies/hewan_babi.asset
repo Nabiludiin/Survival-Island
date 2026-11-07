@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f587be3366ae415e8107da8a93d14e2d, type: 3}
+  m_Name: hewan_babi
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.AnimalData
+  enemyId: hewan_babi
+  maxHP: 90
+  moveSpeed: 4
+  resistances: []
+  primaryAttack: {fileID: 11400000, guid: 3d6c909a45a91514092fef23ccbc0021, type: 2}
+  threatProfile: {fileID: 11400000, guid: c94468e034655814f9fe12b82bda5e30, type: 2}
+  canAttackBuildings: 0
+  isLarge: 0
+  immuneToTrapSlow: 0
+  traversalMask: -1
+  poise: 25
+  canBeStaggered: 1
+  canBeKnockedBack: 1
+  knockbackMultiplier: 1
+  leavesCarcass: 1
+  dropTable: {fileID: 0}
+  dropChance: 0
+  wanderSpeed: 2
+  chaseSpeed: 6.5
+  aggroRadius: 12
+  leashDistance: 20
+  wanderRadius: 15
+  attackKind: 3
+  harvest:
+  - item: {fileID: 11400000, guid: 759050235e5c7884e99773a55bf5f06e, type: 2}
+    min: 3
+    max: 3
+  - item: {fileID: 11400000, guid: 5b6d89b4e882cfa46a253316e7bf4a43, type: 2}
+    min: 1
+    max: 1

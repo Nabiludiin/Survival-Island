@@ -170,6 +170,9 @@ namespace SurvivalIsland.EditorTools
 
         private static ZombieData CreateZombieData()
         {
+            // Sejak menu Langkah 5, zombie_standar dimiliki Langkah5Setup. Kalau sudah ada, jangan ditimpa.
+            var existing = AssetDatabase.LoadAssetAtPath<ZombieData>($"{EnemyDataFolder}/zombie_standar.asset");
+            if (existing != null && existing.primaryAttack != null && AssetDatabase.GetAssetPath(existing.primaryAttack).Contains("/Attacks/")) return existing;
             // SpecialZombieAI.md: zombie_standar HP 50, kecepatan 4, damage 15, infeksi 5 (sama dengan nilai awal kelas).
             var attack = LoadOrCreate<AttackData>($"{EnemyDataFolder}/Zombie_Standard_Hit.asset");
             attack.attackId = "Zombie_Standard_Hit";
@@ -265,6 +268,9 @@ namespace SurvivalIsland.EditorTools
 
         private static GameObject BuildZombiePrefab(ZombieData data)
         {
+            // Prefab lengkap dari menu Langkah 5 (EnemyHitReaction dll.) tidak ditimpa versi kapal yang lebih sederhana.
+            var existing = AssetDatabase.LoadAssetAtPath<GameObject>($"{EnemyPrefabFolder}/zombie_standar.prefab");
+            if (existing != null && existing.GetComponent<EnemyHitReaction>() != null) return existing;
             // Zombie standar greybox: NavMeshAgent wajib (Claude.md Pilar 3), tag Zombie, layer Enemy, hitbox EnemyHitbox.
             var go = new GameObject("zombie_standar");
             go.layer = Layer(PhysicsMasks.EnemyLayer);

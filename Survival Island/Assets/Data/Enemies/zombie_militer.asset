@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14b6d092f62f4c2dbb23be36de9cafc4, type: 3}
+  m_Name: zombie_militer
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.ZombieData
+  enemyId: zombie_militer
+  maxHP: 300
+  moveSpeed: 3
+  resistances:
+  - type: 0
+    bodyPart: 1
+    anyBodyPart: 0
+    multiplier: 0.35
+  - type: 0
+    bodyPart: 2
+    anyBodyPart: 0
+    multiplier: 0.5
+  - type: 0
+    bodyPart: 0
+    anyBodyPart: 0
+    multiplier: 1
+  - type: 1
+    bodyPart: 0
+    anyBodyPart: 1
+    multiplier: 0.8
+  - type: 3
+    bodyPart: 0
+    anyBodyPart: 1
+    multiplier: 1
+  - type: 2
+    bodyPart: 0
+    anyBodyPart: 1
+    multiplier: 1
+  primaryAttack: {fileID: 11400000, guid: 6c49c10feba846c4d85885321d61870f, type: 2}
+  threatProfile: {fileID: 11400000, guid: 24dc14564068d294092d42acfa07ecfb, type: 2}
+  canAttackBuildings: 1
+  isLarge: 1
+  immuneToTrapSlow: 1
+  traversalMask: -1
+  poise: 90
+  canBeStaggered: 1
+  canBeKnockedBack: 0
+  knockbackMultiplier: 0
+  leavesCarcass: 0
+  dropTable: {fileID: 11400000, guid: 3e06f5d64a846464b88a4fec896f6d56, type: 2}
+  dropChance: 0.4
+  kind: 0
+  secondaryAttack: {fileID: 11400000, guid: 91bc169b89d12584c9fbc0fa9c254394, type: 2}
+  hidesFromSun: 0
+  sightMultiplier: 1
+  hearingMultiplier: 1

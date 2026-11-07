@@ -166,7 +166,7 @@ Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Lan
 | **2** | Fase 1: `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | `60-seconds/` | Diuji di Unity: ShipPhase greybox sampai IslandPhase (NPC kapal dan mati di kapal belum diuji) |
 | **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Diuji di Unity: tiba di pantai, inventori, hotbar, WorldItem (makan/minum dan pertarungan belum diuji) |
 | **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Diuji di Unity: jam, panen, crafting, bangun, dan restriksi pantai (menu B, demolish, dan tumbuh ulang belum diuji) |
-| **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
+| **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/`, `Core_Logic/` | Diuji di Unity: zombie standar (terbakar, mengendap, mengejar, menyerang), hitbox, serigala dan babi (varian khusus, terkam, Blood Moon belum diuji) |
 | **6** | `ZoneManager`, frostbite, jembatan kayu, barang berat, `WeatherManager` | `Island_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **7** | *Sudden Event*, `LuckyMachine`, `DiaryManager`, alur menang dan kalah | `Island_Logic/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 
@@ -303,7 +303,57 @@ Langkah 5 (Pilar 3 "L4D"): AI musuh `NavMeshAgent`, spawn siang dan malam, gunpl
 
 `BaseNavigation` (#78, diganti pemeriksaan jalur sementara), `AITraversal` (#94), `ZombieLair` (#112), `VillageZombieHiding`/`HidingSpot` (#63), `BushSpawnPoint` (#25), `RegionStreaming` (#88), `HordeManager` Blood Moon (#50), `DurabilitySystem`/`WeaponStatCalculator` (#113), `VFXManager` (#15), `AnimationController` (#12), `NPCGunUser` (#76), `DetectionMeterUI`, drop `LootTable` (#103), `AmbushPerch` dan Gagak terbang (#61). Semuanya ditandai TODO di kode dan dicatat di bagian "Catatan Implementasi (Langkah 5)" pada blueprint terkait. `ShipHazardManager` (Langkah 2) belum memanggil `EnemyAI.SetTarget`/`WakeUp`, jadi zombie kapal belum mengejar.
 
-### Penyiapan di Unity untuk Langkah 5 (belum dilakukan)
+### Penyiapan di Unity untuk Langkah 5 (sudah dilakukan untuk IslandPhase greybox)
+
+Dibuat lewat menu **Survival Island > Setup > Langkah 5 - Musuh dan Senjata** (`Assets/Editor/Langkah5Setup.cs`, boleh dijalankan ulang). Urutan menu: 1, 2, 3, 4, lalu 5. Menu 2 dan 3 membangun ulang scene, jadi menu 4 dan 5 perlu dijalankan lagi sesudahnya. Isinya:
+
+- **Data:**
+  - 17 `AttackData` (`Assets/Data/Enemies/Attacks`). Tiga aset lengkap dan varian zombie mengikuti `EnemyAttack.md`. Serangan hewan memakai nama `Animal_<enemyId>` dan hanya mengisi damage (ditambah Poison dan jangkauan 1,5 untuk ular).
+  - 6 `ZombieData`, termasuk resistansi militer.
+  - 8 `AnimalData` beserta hasil kulitnya (daging dan kulit).
+  - `Threat_Zombie` dan `Threat_Animal`.
+  - 6 `LootTable` `Drop_Zombie_*`.
+  - 4 `RegionSpawnTable` (`Assets/Data/Spawn`).
+  - Item baru `Food_RawMeat` (`ItemUseSystem.md`).
+- **Prefab (`Assets/Prefabs/Enemies`):** 6 zombie, 8 hewan, dan `Tribal_Snare`.
+  - Zombie memakai `EnemyAI`, `EnemyHealth`, `EnemyAttack`, `EnemyHitReaction`, `AISensory`, `SunlightExposure`, `TraversalAgent`, `EnemyInstance`, dan perilaku khusus varian.
+  - Hewan memakai `WildlifeAI` dan `AnimalCarcass`.
+  - Semuanya punya 3 hitbox `EnemyHitbox`.
+  - `zombie_standar` sekarang dimiliki menu ini. Menu Langkah 2 tidak lagi menimpanya.
+- **Pool:** 15 tag di `PersistentRoot`, dengan ukuran dari `ObjectPooler.md`.
+- **Pemain:**
+  - `Player_Island` mendapat `PlayerTargetable`, `PlayerPinnedState`, `PlayerShove`, dan `NoiseEmitter` (`isPlayerMovement`).
+  - `Player_Ship` mendapat `PlayerTargetable`.
+- **Scene:**
+  - `IslandPhase` mendapat `SpawnManager`, `AITraversal`, `AIDirector`, `ThreatSystem`, `AISensoryHub`, `HordeCrowdManager`, `AttackCoordinator`, dan NavMesh pulau yang dibake (`IslandPhase_NavMesh.asset`).
+  - `ShipPhase` mendapat `HordeCrowdManager` dan `AttackCoordinator`.
+
+**Hasil uji Play Mode (7 November 2026, `IslandPhase`):**
+- Zombie yang muncul siang hari langsung terbakar (`BurnToAshes`).
+- Malam hari (`DebugSetTime(22)`), zombie yang membelakangi pemain diam tetap `Unaware` (mengendap). Setelah melihat pemain, zombie menjadi `Suspicious`, lalu `Aware`, lalu mengejar dan menyerang. HP pemain turun 15 per pukulan dan infeksi naik 5.
+- Tembakan 30 ke kepala membunuh zombie (50 HP). Tembakan ke badan memberi 30 damage dan `Stagger`.
+- Saat HP pemain habis, run masuk `Ending`, lalu `AwaitingChoice`, lalu kembali ke `ShipPhase` setelah Coba Lagi.
+- Siang hari, `SpawnManager` memunculkan babi sendiri. Serigala menyerang dan babi mengejar.
+- Error yang tersisa hanya `AudioMixer` kosong.
+
+Catatan uji: `UIFocusStack` membuka Menu Jeda setiap kali jendela Unity kehilangan fokus (keputusan #85). Saat Unity dikendalikan dari luar, game sering terjeda.
+
+Belum diuji:
+- Varian zombie khusus (tribal, lumut, militer, beku, desa).
+- Jaguar menerkam (`PlayerPinnedState`).
+- Menguliti hewan.
+- Horde Blood Moon.
+- `GunController` lewat klik kiri.
+- Panel Game Over sendiri (sempat terlewat karena klik dari jendela Game).
+
+Data yang belum ada di blueprint dan perlu dikonfirmasi developer:
+- Nama aset serangan hewan, serta semua field selain damage.
+- `traversalMask` (sementara `AllAreas`, karena area NavMesh traversal #94 belum dibuat).
+- `minDay`, `maxAlive`, dan `isSpecial` di tabel spawn.
+- Poise dan knockback hewan selain beruang.
+- `leavesCarcass` hewan yang tidak tertulis (sementara true kalau punya hasil kulit).
+
+Daftar penyiapan dari blueprint:
 
 1. Scene `IslandPhase`: satu objek manager berisi `SpawnManager` (isi 4 aset **Create > Survival > Region Spawn Table** sesuai tabel GDD bagian 5), `AIDirector`, `ThreatSystem`, `AISensoryHub`, `HordeCrowdManager`, dan `AttackCoordinator`. `NavMeshSurface` di-bake untuk pulau. `ShipPhase` cukup `HordeCrowdManager` dan `AttackCoordinator`.
 2. Prefab pemain Fase 2: tambahkan `PlayerTargetable`, `PlayerPinnedState`, `PlayerShove`, dan `NoiseEmitter` (`isPlayerMovement = true`). Prefab pemain kapal: `PlayerTargetable`.

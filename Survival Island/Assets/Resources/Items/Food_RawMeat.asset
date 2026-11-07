@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b21117a400dffa340baa2922bed92235, type: 3}
+  m_Name: Food_RawMeat
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.ItemData
+  itemID: Food_RawMeat
+  displayNameKey: 
+  icon: {fileID: 0}
+  prefab: {fileID: 0}
+  type: 1
+  healAmount: 0
+  weaponDamage: 0
+  weaponData: {fileID: 0}
+  maxStack: 5
+  hungerDelta: 15
+  thirstDelta: 0
+  infectionDelta: 0
+  useSeconds: 2
+  restoreSeconds: 20
+  isConsumable: 1
+  isDroppable: 1
+  isCoreItem: 0
+  maxDurability: -1
+  spoilHours: 12
+  poisonChance: 0.5
+  curesDiseases: 0
+  fuelSeconds: 0
+  appliesEffectId: 
+  isRepairable: 0
+  repairCost: []
+  repairStation: 1
+  worldMesh: {fileID: 0}
+  worldMaterial: {fileID: 0}
+  equipPrefab: {fileID: 0}
+  handUse: 0
+  bagBonusSlots: 0
+  shipWeight: 1
+  shipPickupAmount: 1
+  toolClass: 0
+  isWarmClothing: 0

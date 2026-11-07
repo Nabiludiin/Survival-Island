@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 070f457fc666435cab39bdf123ec0ee7, type: 3}
+  m_Name: Spawn_Amazon
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.RegionSpawnTable
+  region: 1
+  dayEntries:
+  - enemy: {fileID: 11400000, guid: 19a143bf3fe26224f95b16a868214fa6, type: 2}
+    weight: 40
+    minDay: 0
+    maxAlive: 0
+    groupMin: 1
+    groupMax: 1
+    isSpecial: 0
+    useBushPoints: 0
+  - enemy: {fileID: 11400000, guid: 9b52872f81c4119459b203a55c77f806, type: 2}
+    weight: 60
+    minDay: 0
+    maxAlive: 0
+    groupMin: 1
+    groupMax: 1
+    isSpecial: 0
+    useBushPoints: 0
+  nightEntries:
+  - enemy: {fileID: 11400000, guid: a2c005cdcd8942f4c9e051693010c4cf, type: 2}
+    weight: 50
+    minDay: 0
+    maxAlive: 0
+    groupMin: 1
+    groupMax: 1
+    isSpecial: 0
+    useBushPoints: 0
+  - enemy: {fileID: 11400000, guid: 897c38ce793fa824da75c8e7fab59784, type: 2}
+    weight: 30
+    minDay: 0
+    maxAlive: 0
+    groupMin: 1
+    groupMax: 1
+    isSpecial: 0
+    useBushPoints: 0
+  - enemy: {fileID: 11400000, guid: b9733a158b1e8ca418f2a5cad90e135d, type: 2}
+    weight: 20
+    minDay: 0
+    maxAlive: 0
+    groupMin: 1
+    groupMax: 1
+    isSpecial: 0
+    useBushPoints: 1
+  campCounterEnemyId: zombie_tribal

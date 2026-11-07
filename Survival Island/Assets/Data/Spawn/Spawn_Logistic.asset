@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 070f457fc666435cab39bdf123ec0ee7, type: 3}
+  m_Name: Spawn_Logistic
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.RegionSpawnTable
+  region: 3
+  dayEntries:
+  - enemy: {fileID: 11400000, guid: 32199639d01c9a249b71db905402d3fa, type: 2}
+    weight: 60
+    minDay: 0
+    maxAlive: 0
+    groupMin: 2
+    groupMax: 4
+    isSpecial: 0
+    useBushPoints: 0
+  - enemy: {fileID: 11400000, guid: 1e9f07529a483164fa100e53b9617e27, type: 2}
+    weight: 40
+    minDay: 0
+    maxAlive: 0
+    groupMin: 5
+    groupMax: 8
+    isSpecial: 0
+    useBushPoints: 0
+  nightEntries:
+  - enemy: {fileID: 11400000, guid: 86b9131f43a052f43a61fbba418605a6, type: 2}
+    weight: 100
+    minDay: 0
+    maxAlive: 0
+    groupMin: 1
+    groupMax: 1
+    isSpecial: 0
+    useBushPoints: 0
+  campCounterEnemyId: zombie_desa

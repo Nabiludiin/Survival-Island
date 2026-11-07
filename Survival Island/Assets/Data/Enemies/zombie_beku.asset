@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14b6d092f62f4c2dbb23be36de9cafc4, type: 3}
+  m_Name: zombie_beku
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.ZombieData
+  enemyId: zombie_beku
+  maxHP: 60
+  moveSpeed: 3.5
+  resistances: []
+  primaryAttack: {fileID: 11400000, guid: 5629df07a03c4444a9f5abb1518ff151, type: 2}
+  threatProfile: {fileID: 11400000, guid: 24dc14564068d294092d42acfa07ecfb, type: 2}
+  canAttackBuildings: 1
+  isLarge: 0
+  immuneToTrapSlow: 0
+  traversalMask: -1
+  poise: 25
+  canBeStaggered: 1
+  canBeKnockedBack: 1
+  knockbackMultiplier: 1
+  leavesCarcass: 0
+  dropTable: {fileID: 11400000, guid: 29387384c4f21c141a691405e08b2595, type: 2}
+  dropChance: 0.08
+  kind: 0
+  secondaryAttack: {fileID: 0}
+  hidesFromSun: 0
+  sightMultiplier: 1
+  hearingMultiplier: 1

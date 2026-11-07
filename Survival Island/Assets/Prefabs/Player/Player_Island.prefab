@@ -20,6 +20,10 @@ GameObject:
   - component: {fileID: 420448853105228704}
   - component: {fileID: 1235761728896406564}
   - component: {fileID: 6913827590546823085}
+  - component: {fileID: 7550350127569318365}
+  - component: {fileID: 6357531684194945642}
+  - component: {fileID: 4395970867223689362}
+  - component: {fileID: 8399155474262091718}
   m_Layer: 8
   m_Name: Player_Island
   m_TagString: Player
@@ -222,6 +226,58 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.InfectionSystem
   stats: {fileID: 2334969100669098655}
+--- !u!114 &7550350127569318365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74956369538108119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da11277fb01948d190c3d44102a7e9be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.PlayerTargetable
+  aimPoint: {fileID: 0}
+  aimHeight: 1.2
+--- !u!114 &6357531684194945642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74956369538108119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f73499166ec4469ebdccafb416c5e8e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.PlayerPinnedState
+--- !u!114 &4395970867223689362
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74956369538108119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3a7106ec85940e788202670b4bf7e86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.PlayerShove
+  shoveFailClip: {fileID: 0}
+--- !u!114 &8399155474262091718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74956369538108119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c214bb14da7749629f0fd87a54b9e585, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.NoiseEmitter
+  isPlayerMovement: 1
 --- !u!1 &1547270341276526745
 GameObject:
   m_ObjectHideFlags: 0
