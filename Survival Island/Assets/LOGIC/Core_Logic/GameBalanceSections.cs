@@ -98,7 +98,22 @@ namespace SurvivalIsland
         public float hungerMultiplier = 1f;
         public float thirstMultiplier = 1f;
         public float enemyDamageMultiplier = 1f;
-        // TODO: pengali jumlah musuh dan hasil panen disebut di blueprint tanpa nama field. Diberi nama oleh Langkah pemakainya.
+        // Keputusan developer (7 November 2026): nama field pengali jumlah musuh dan hasil panen.
+        public float enemyCountMultiplier = 1f;      // Dipakai AIDirector (jumlah mob per gelombang)
+        public float harvestYieldMultiplier = 1f;    // Dipakai ResourceNode (hasil panen)
+
+        /// <summary>
+        /// Profil kesulitan yang sedang berlaku. Aturan pilih profil belum ada, jadi profil pertama dipakai
+        /// (sama dengan cara SurvivalStats sejak Langkah 3). Null kalau config belum ada.
+        /// </summary>
+        public static DifficultyProfile Active
+        {
+            get
+            {
+                var bal = GameManager.CurrentBalance;
+                return bal != null && bal.difficulties != null && bal.difficulties.Length > 0 ? bal.difficulties[0] : null;
+            }
+        }
     }
 
     // ---------------------------------------------------------------- Bagian yang dipakai Langkah 1
@@ -368,6 +383,10 @@ namespace SurvivalIsland
         public float shoveKnockback = 3f;
         public float shoveStaggerSeconds = 1.5f;
         public float shoveCooldownSeconds = 1.5f;
+        // Keputusan developer (7 November 2026): alarm kapal loop sejak awal Fase 1, volume naik saat AlarmUp (T=45).
+        public float alarmBaseVolume = 0.5f;
+        public float alarmRaisedVolume = 1f;
+        public float alarmRaiseSeconds = 1f;
     }
 
     /// <summary>Bagian infection (#64). Field-nya di deklarasi partial bagian akhir file ini (GameBalanceConfig.md).</summary>
@@ -799,6 +818,7 @@ namespace SurvivalIsland
     {
         public float tickSeconds = 0.25f;
         public float alertSeconds = 1.5f;
+        public float alertCueRepeatSeconds = 2f;    // Keputusan developer (7 November 2026): suara tanda Alert diulang
         public float crouchAggroMultiplier = 0.6f;
         public float noiseAggroMultiplier = 0.5f;
         public float targetSampleRadius = 2f;
@@ -899,6 +919,8 @@ namespace SurvivalIsland
         public float tribalProjectileSpeed = 18f;
         public float tribalCooldownSeconds = 10f;
         public float tribalPullSpeed = 2f;
+        public float tribalPullFadeSeconds = 0.25f;           // Durasi tiap dorongan tarikan (AddExternalVelocity, #101)
+        public float tribalWindupCueRepeatSeconds = 2f;       // Keputusan developer (7 November 2026): suara windup diulang
         public float tribalDamagePerSec = 5f;
         public float tribalReleaseDamage = 40f;     // Keputusan developer (USULAN_TERBUKA.md)
         public float tribalBreakDistance = 18f;
@@ -1003,6 +1025,11 @@ namespace SurvivalIsland
         public int goodAvoidanceCount = 8;
         public int overlapBufferSize = 16;
         public int pathfindingIterationsPerFrame = 150;
+        // Kelompok zombie jauh (#93, keputusan developer 7 November 2026): titik tujuan bersama per sel.
+        public float clusterUpdateSeconds = 1f;
+        public float clusterCellSize = 8f;
+        public float clusterMinDistance = 15f;
+        public float clusterWaypointLookahead = 12f;
         // Catatan Langkah 5: angka pemeriksaan terhalang sementara, menyalin nilai baseNav di BaseNavigation.md (#78).
         // EnemyAI memakai jalur sementara ini sampai BaseNavigation (Langkah 4) digabung. Setelah itu baca baseNav.
         public float fallbackSpawnGraceSeconds = 2f;

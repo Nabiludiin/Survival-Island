@@ -668,15 +668,8 @@ namespace SurvivalIsland
         {
             var player = PlayerTargetable.Instance;
             if (player == null || ObjectPooler.Instance == null || RunSeedManager.Instance == null) return;
-            EnemyData data = null;
-            for (int t = 0; t < tables.Length && data == null; t++)
-            {
-                if (tables[t] == null) continue;
-                foreach (var en in tables[t].dayEntries) if (en.enemy != null && en.enemy.enemyId == enemyId) { data = en.enemy; break; }
-                if (data != null) break;
-                foreach (var en in tables[t].nightEntries) if (en.enemy != null && en.enemy.enemyId == enemyId) { data = en.enemy; break; }
-            }
-            if (data == null) { Debug.LogWarning($"[SpawnManager] enemyId '{enemyId}' tidak ada di tabel mana pun."); return; }
+            var data = FindDebugData(enemyId);
+            if (data == null) return;
             var cam = FirstPersonCamera.Instance != null ? FirstPersonCamera.Instance.WorldCamera : null;
             Vector3 fwd = cam != null ? cam.transform.forward : player.transform.forward;
             fwd.y = 0f;
@@ -687,6 +680,41 @@ namespace SurvivalIsland
                 if (!NavMesh.SamplePosition(p, out var hit, 6f, NavMesh.AllAreas)) continue;
                 if (SpawnOne(data, hit.position, ref rng) == null) break;
             }
+        }
+
+        /// <summary>
+        /// Uji stres HordeCrowdManager (perintah stress, #93/#56): count musuh dibagi rata melingkari pemain pada radius.
+        /// Mengembalikan jumlah yang benar-benar muncul.
+        /// </summary>
+        public int DebugSpawnRing(string enemyId, int count, float radius)
+        {
+            var player = PlayerTargetable.Instance;
+            if (player == null || ObjectPooler.Instance == null || RunSeedManager.Instance == null || count <= 0) return 0;
+            var data = FindDebugData(enemyId);
+            if (data == null) return 0;
+            ref var rng = ref RunSeedManager.Instance.GetStream(RandomStreamId.Enemy);
+            int spawned = 0;
+            for (int i = 0; i < count; i++)
+            {
+                float angle = i * Mathf.PI * 2f / count;
+                Vector3 p = player.Position + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
+                if (!NavMesh.SamplePosition(p, out var hit, 6f, NavMesh.AllAreas)) continue;
+                if (SpawnOne(data, hit.position, ref rng) == null) break;
+                spawned++;
+            }
+            return spawned;
+        }
+
+        private EnemyData FindDebugData(string enemyId)
+        {
+            for (int t = 0; t < tables.Length; t++)
+            {
+                if (tables[t] == null) continue;
+                foreach (var en in tables[t].dayEntries) if (en.enemy != null && en.enemy.enemyId == enemyId) return en.enemy;
+                foreach (var en in tables[t].nightEntries) if (en.enemy != null && en.enemy.enemyId == enemyId) return en.enemy;
+            }
+            Debug.LogWarning($"[SpawnManager] enemyId '{enemyId}' tidak ada di tabel mana pun.");
+            return null;
         }
 
         public void DebugReturnAll()

@@ -292,7 +292,7 @@ Pemeriksaan tidak berjalan saat `AttackBuilding` atau di dalam kandang Lucky Mac
 Kode: `left-4-dead/ZombieData.cs` (`SpecialZombieKind`), `EnemyData.cs`, `SpecialZombieAI.cs`, `TribalBehavior.cs`, `TribalSnare.cs`, `MossBehavior.cs`, `MilitaryBehavior.cs`, `FrozenBehavior.cs`, `VillageBehavior.cs`.
 
 - `EnemyData.dropTable` belum ada, karena `LootTable` (#103) belum ditulis.
-- **Tribal:** tarikan pemain memakai `IslandPlayerController.Teleport` bertahap, karena controller belum punya API dorongan luar. Jerat memakai pool `Tribal_Snare`.
+- **Tribal:** tarikan pemain memakai `IslandPlayerController.Teleport` bertahap, karena controller belum punya API dorongan luar. (Diganti keputusan developer 7 November 2026, lihat di bawah.) Jerat memakai pool `Tribal_Snare`.
 - **Lumut:** sorotan senter dan tingkat cahaya (#98) masih TODO.
 - **Beku:** `WarmthSystem.ApplyColdBurst` (#65, Langkah 6) masih TODO.
 - Pengaman macet varian besar ada di kelas dasar (`TickLargeStuck`), dipanggil `MilitaryBehavior`.
@@ -301,3 +301,5 @@ Kode: `left-4-dead/ZombieData.cs` (`SpecialZombieKind`), `EnemyData.cs`, `Specia
 
 - Isi TODO (sistem pendukung): Zombie Tribal: windup memanggil `ThreatAudioEmitter.PlayAlertTell()` (klip `alertClips` di `EnemyCueSet`, tafsiran tanpa klip baru).
 - Isi TODO (sistem pendukung): `TickLargeStuck` dilewati (dan penghitungnya direset) selama `LuckyMachineCage.IsInsideAnyCage(posisi)`.
+- **Keputusan developer (7 November 2026):** Tarikan Tribal (TODO #101) memakai `IslandPlayerController.AddExternalVelocity(arah ke Tribal * kecepatan, durasi)`, menggantikan `Teleport` bertahap. Kecepatan = `Min(tribalPullSpeed, (jarak - 1,5) / dt)` supaya tidak melewati jarak 1,5 m; durasi = `Max(specialZombie.tribalPullFadeSeconds, 2 * dt)` (field teknis baru 0,25) supaya tarikan tidak putus saat `CrowdTick` jarang. Dorongan dihapus saat pemain lepas atau Tribal kembali ke pool.
+- **Keputusan developer (7 November 2026):** Suara windup Zombie Tribal diulang selama windup berlangsung, dengan jeda `specialZombie.tribalWindupCueRepeatSeconds` (2 detik), lewat `ThreatAudioEmitter.PlayAlertTell()`. Dengan `tribalWindupSeconds` 1,2 detik, nilai awal ini hanya memutar satu suara; pengulangan baru terdengar kalau windup lebih panjang dari jeda.

@@ -316,3 +316,7 @@ Kode: `left-4-dead/SpawnManager.cs` (`DespawnReason`, `SpawnOverride`, `SpawnOve
 - `RegionStreaming` (#88), `BaseNavigation.IsInsideBase` (#78), `InteriorZone`/`LairClearedEvent` (#112), `SleepStateChangedEvent` (#67), dan `PopulateHidingSpots` belum ada. Syarat itu dilewati dan ditandai TODO. `SetSleeping(bool)` disiapkan untuk #67.
 - **Zombie Desa dan Lumut** memakai `FindSpawnPoint` biasa, karena `HidingSpot` (#63) dan `BushSpawnPoint` (#25) belum ditulis. Lumut tetap mulai `Dormant` lewat `MossBehavior`.
 - `SweepWrongPhase` memakai `DespawnReason.Debug`, karena tabel alasan tidak punya alasan khusus untuk sapu bersih.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- **Keputusan developer (7 November 2026):** Untuk perintah `stress` (#93/#56) ditambah `public int DebugSpawnRing(string enemyId, int count, float radius)`: musuh dibagi rata melingkari pemain, posisi di-`SamplePosition`, lewat `SpawnOne` biasa. Pencarian `EnemyData` dipisah ke `FindDebugData`, dipakai juga `DebugSpawn`.

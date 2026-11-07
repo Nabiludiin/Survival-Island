@@ -309,15 +309,9 @@ namespace SurvivalIsland
                 && !hpRegenBlocked;
         }
 
-        private static DifficultyProfile Difficulty
-        {
-            get
-            {
-                // Catatan implementasi (Langkah 3): profil kesulitan aktif belum punya aturan pilih. Profil pertama dipakai.
-                var bal = Balance;
-                return bal != null && bal.difficulties != null && bal.difficulties.Length > 0 ? bal.difficulties[0] : null;
-            }
-        }
+        // Catatan implementasi (Langkah 3): profil kesulitan aktif belum punya aturan pilih. Profil pertama dipakai
+        // (sekarang lewat DifficultyProfile.Active supaya AIDirector dan ResourceNode memakai cara yang sama).
+        private static DifficultyProfile Difficulty => DifficultyProfile.Active;
 
         // ---------------------------------------------------------------- Damage (#59)
 

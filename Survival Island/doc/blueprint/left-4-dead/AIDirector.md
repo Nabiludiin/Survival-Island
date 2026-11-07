@@ -256,3 +256,4 @@ Kode: `left-4-dead/AIDirector.cs` (`DirectorPhase`, `ThreatKey`, `WaveModifiers`
 ## Catatan Implementasi (Sistem pendukung)
 
 - Isi TODO (sistem pendukung): `RequestCampCounter(string enemyId, int count)` sudah ada: `WaveRequest` dengan `forcedEnemyId`, `GetPostTargetModifiers(hari)`, tanpa menambah `spawnedTonight`, dan boleh saat Relax.
+- **Keputusan developer (7 November 2026):** Jumlah mob di `TrySpawnMob` dikali `DifficultyProfile.enemyCountMultiplier` (profil aktif lewat `DifficultyProfile.Active`), bersama pengali region dan pertumbuhan tertahan, sebelum dibatasi `maxAlive` dan `nightBudget`. Tafsiran: pengali dipasang di satu tempat ini saja; `SpawnManager`, permintaan Blood Moon, dan `RequestCampCounter` tidak dikali lagi.

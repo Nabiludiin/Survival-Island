@@ -113,3 +113,7 @@ Kode: `Survival Island/Assets/LOGIC/Island_Logic/IslandPlayerController.cs`.
 
 - `Teleport` sekarang memanggil `ZoneManager.ResyncAll(position)` setelah posisi baru dipasang (satu baris, `ZoneManager.md`). TODO Langkah 3 di atas sudah selesai.
 - Efek Heavy Item tidak berubah: Sprint dan Jump tetap dimatikan lewat `HeavyItemChangedEvent`, dan `HeavyItemSystem` memasang `SpeedModifierId.HeavyItem`. `RegionalWeather` memasang `SpeedModifierId.Weather`.
+
+## Catatan Implementasi (Sistem pendukung)
+
+- **Keputusan developer (7 November 2026):** `public void AddExternalVelocity(Vector3 extraVelocity, float durationSeconds)`: kecepatan tambahan yang memudar linier ke 0 selama durasi, ditambahkan ke `controller.Move`. Dorongan juga berlaku saat mode `PlayerTraversal` tidak mengizinkan gerak tanah (misalnya `Locked` saat ditahan jerat Tribal), karena itulah pemakai pertamanya. Tafsiran: panggilan baru menggantikan dorongan yang sedang berjalan (tidak ditumpuk), supaya pemanggil per tick tidak membuat kecepatan terus bertambah. `ClearExternalVelocity()` menghapusnya; dipanggil `Teleport`, `PlayerDiedEvent`, `OnDisable`, dan `TribalBehavior` saat pemain lepas.

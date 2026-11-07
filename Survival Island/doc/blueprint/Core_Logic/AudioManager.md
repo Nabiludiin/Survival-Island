@@ -91,3 +91,4 @@
 - `SetCinematicMix` memakai snapshot ketiga opsional `cinematicSnapshot`. Snapshot `Paused` didahulukan kalau jeda dan adegan aktif bersamaan.
 - `StopWorldAudio`: `AmbientAudio`, `CombatMusicDirector`, dan `PooledAudioSource` belum ada (TODO).
 - Isi TODO (sistem pendukung): `PlaySFXAt(AudioClip, Vector3, float volumeMultiplier = 1)`: suara 3D sekali putar lewat `PooledAudioSource.PlayAt` (pool `Audio_OneShot3D`) dan grup mixer `sfxSource`. Kalau pool tidak ada, klip diputar 2D lewat `PlaySFX`. Dipakai `ResourceNode`, `PlayerShove`, dan `LuckyMachine`.
+- **Keputusan developer (7 November 2026):** Untuk alarm kapal (`ShipHazardManager`) ditambah `public AudioMixerGroup WarningGroup` (grup keluaran `warningSource`) dan `public float SfxSourceScale` (pengali volume SFX untuk `AudioSource` milik sistem lain; 1 kalau mixer menerapkan volume). Tidak ada sumber atau klip baru di `AudioManager`.

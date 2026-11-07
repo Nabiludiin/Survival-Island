@@ -292,4 +292,5 @@ Kode: `left-4-dead/WildlifeAI.cs` (`AnimalState`), `AnimalData.cs` (`AnimalAttac
 
 ## Catatan Implementasi (Sistem pendukung)
 
-- Isi TODO (sistem pendukung): Suara tanda (#114): masuk `Alert` dan awal serangan khusus (terkam/seruduk) memanggil `ThreatAudioEmitter.PlayAlertTell()`, yaitu `PlayTell` dengan klip acak `EnemyCueSet.alertClips`. Tafsiran: klip diputar sekali saat masuk state, bukan diulang selama `alertSeconds`.
+- Isi TODO (sistem pendukung): Suara tanda (#114): masuk `Alert` dan awal serangan khusus (terkam/seruduk) memanggil `ThreatAudioEmitter.PlayAlertTell()`, yaitu `PlayTell` dengan klip acak `EnemyCueSet.alertClips`. Tafsiran: klip diputar sekali saat masuk state, bukan diulang selama `alertSeconds`. (Diganti keputusan developer 7 November 2026, lihat di bawah.)
+- **Keputusan developer (7 November 2026):** Suara tanda hewan diulang selama state `Alert` berlangsung, dengan jeda `wildlife.alertCueRepeatSeconds` (2 detik), lewat `ThreatAudioEmitter.PlayAlertTell()`. Ini menggantikan tafsiran "diputar sekali saat masuk state". Suara pertama tetap saat masuk `Alert`. Dengan `alertSeconds` 1,5 detik, nilai awal ini hanya memutar satu suara kecuali `Alert` diperpanjang.

@@ -43,6 +43,7 @@ namespace SurvivalIsland
         private float stateTimer;
         private float wanderWaitUntil;
         private float reaggroUntil;
+        private float nextAlertCueAt;   // Ulang suara tanda selama Alert (keputusan developer 7 November 2026)
         private float pathCheckTimer;
         private float unreachableTimer;
         private float specialCooldownUntil;
@@ -145,8 +146,10 @@ namespace SurvivalIsland
                 case AnimalState.Wander: ApplyStateSpeed(data.wanderSpeed); break;
                 case AnimalState.Alert:
                     ApplyStateSpeed(0f);
-                    // Bersuara saat masuk Alert (WildlifeAI.md tabel state, #114). Klip diputar sekali, panjangnya dari aset.
+                    // Bersuara saat masuk Alert (WildlifeAI.md tabel state, #114), lalu diulang tiap alertCueRepeatSeconds
+                    // selama Alert (keputusan developer 7 November 2026, lihat TickAlert).
                     if (emitter != null) emitter.PlayAlertTell();
+                    nextAlertCueAt = Time.time + b.alertCueRepeatSeconds;
                     break;
                 case AnimalState.Chase: chaseStartPoint = transform.position; unreachableTimer = 0f; ApplyStateSpeed(data.chaseSpeed); break;
                 case AnimalState.ReturnToTerritory:
@@ -215,6 +218,12 @@ namespace SurvivalIsland
             Vector3 to = t.Position - transform.position; to.y = 0f;
             if (to.sqrMagnitude > 0.001f) transform.rotation = Quaternion.LookRotation(to);
             if (agent.isOnNavMesh) agent.ResetPath();
+            // Keputusan developer (7 November 2026): suara tanda diulang selama Alert berlangsung.
+            if (emitter != null && b.alertCueRepeatSeconds > 0f && Time.time >= nextAlertCueAt)
+            {
+                emitter.PlayAlertTell();
+                nextAlertCueAt = Time.time + b.alertCueRepeatSeconds;
+            }
             if (stateTimer < b.alertSeconds) return;
             if ((t.Position - transform.position).sqrMagnitude > data.aggroRadius * data.aggroRadius * 1.5f) { SetState(AnimalState.Wander); return; }
             SetState(AnimalState.Chase);

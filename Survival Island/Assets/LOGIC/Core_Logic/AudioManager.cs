@@ -43,6 +43,12 @@ namespace SurvivalIsland
         /// <summary>Mixer yang dipakai AmbientAudio (#52) dan CombatMusicDirector (#114).</summary>
         public AudioMixer Mixer => mixer;
 
+        /// <summary>Grup Warning (#52), diambil dari warningSource. Dipakai sumber loop milik sistem lain, misalnya alarm kapal.</summary>
+        public AudioMixerGroup WarningGroup => warningSource != null ? warningSource.outputAudioMixerGroup : null;
+
+        /// <summary>Pengali volume SFX untuk AudioSource milik sistem lain. 1 kalau mixer sudah menerapkan volume.</summary>
+        public float SfxSourceScale => SfxScale;
+
         private bool mixerAppliesVolume;   // true kalau parameter volume ada di mixer
         private bool isPausedMix, isCinematicMix;
         private Coroutine musicRoutine;

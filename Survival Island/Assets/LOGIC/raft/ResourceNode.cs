@@ -150,7 +150,7 @@ namespace SurvivalIsland
             if (withDrops && data.dropItem != null)
             {
                 GetDropRange(out int min, out int max);
-                int total = stream.Range(min, max + 1);
+                int total = ApplyHarvestYield(stream.Range(min, max + 1));
                 SpawnDrops(total, ref stream);
             }
 
@@ -184,6 +184,18 @@ namespace SurvivalIsland
             if (data.nodeType == NodeType.Tree) { min = Balance.resource.treeDropMin; max = Balance.resource.treeDropMax; }
             else if (data.nodeType == NodeType.Rock) { min = Balance.resource.rockDropMin; max = Balance.resource.rockDropMax; }
             if (max < min) max = min;
+        }
+
+        /// <summary>
+        /// Keputusan developer (7 November 2026): hasil panen dikali DifficultyProfile.harvestYieldMultiplier,
+        /// dibulatkan, dan minimal 1 kalau hasil asli lebih dari 0.
+        /// </summary>
+        private static int ApplyHarvestYield(int raw)
+        {
+            if (raw <= 0) return raw;
+            var diff = DifficultyProfile.Active;
+            if (diff == null) return raw;
+            return Mathf.Max(1, Mathf.RoundToInt(raw * diff.harvestYieldMultiplier));
         }
 
         /// <summary>Item jatuh dibagi per dropChunkSize, diambil dari pool WorldItem_Generic (bukan Instantiate).</summary>

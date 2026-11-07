@@ -48,8 +48,8 @@ namespace SurvivalIsland
     /// seberapa beringas; SpawnManager menentukan jenis dan tempat.
     /// Catatan Langkah 5: malam dibaca dari HourChangedEvent (DayPhaseTracker), bukan NightfallEvent (Langkah 4).
     /// isHeld mengikuti SleepStateChangedEvent (#67). isOverridden diatur HordeManager lewat SetOverridden saat Blood Moon (#50).
-    /// RequestCampCounter (#94) dipanggil AITraversal. Belum diimplementasikan (TODO): pengali jumlah dari DifficultyProfile
-    /// (field belum diberi nama).
+    /// RequestCampCounter (#94) dipanggil AITraversal. Jumlah mob dikali DifficultyProfile.enemyCountMultiplier
+    /// (keputusan developer 7 November 2026).
     /// </summary>
     public class AIDirector : MonoBehaviour, ISaveable
     {
@@ -197,7 +197,9 @@ namespace SurvivalIsland
             if (spawn.AliveLarge >= b.holdMobLargeCount) { heldSeconds += dt; return; }
             // 2-3.
             float grow = 1f + Mathf.Min(heldSeconds / Mathf.Max(0.01f, b.heldGrowthSeconds), 1f) * b.heldGrowthMax;
-            float difficultyCount = 1f;   // TODO: DifficultyProfile.enemyCountMultiplier belum diberi nama di GameBalanceConfig
+            // Keputusan developer (7 November 2026): jumlah mob dikali DifficultyProfile.enemyCountMultiplier.
+            var diff = DifficultyProfile.Active;
+            float difficultyCount = diff != null ? diff.enemyCountMultiplier : 1f;
             int want = Mathf.RoundToInt(Threat.mobSize * RegionMultiplier(b) * difficultyCount * grow);
             // 4.
             int count = Mathf.Min(want, Mathf.Min(Threat.maxAlive - spawn.AliveZombies, Threat.nightBudget - spawnedTonight));

@@ -9,8 +9,11 @@ namespace SurvivalIsland
     public class ShipZombiePoint : MonoBehaviour
     {
         [SerializeField] private string groupId;
+        [Tooltip("Keputusan developer (7 November 2026): zombie yang tidur di titik ini langsung bangun saat alarm T=45 (AlarmUp).")]
+        [SerializeField] private bool wakeOnAlarm;
 
         public string GroupId => groupId;
+        public bool WakeOnAlarm => wakeOnAlarm;
 
         private void OnDrawGizmos()
         {

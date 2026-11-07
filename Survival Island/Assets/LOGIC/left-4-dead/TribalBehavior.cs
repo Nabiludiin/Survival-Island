@@ -8,8 +8,8 @@ namespace SurvivalIsland
     /// Cara lepas: damage dari pemain >= tribalReleaseDamage (40, keputusan developer), aksi #110 (termasuk Pisau),
     /// Tribal mati, jarak > tribalBreakDistance, atau garis pandang terputus lebih dari 1 detik.
     /// Jerat diambil dari ObjectPooler dengan tag "Tribal_Snare".
-    /// Catatan Langkah 5: tarikan pemain memakai IslandPlayerController.Teleport bertahap, karena controller belum punya
-    /// API gaya luar. TODO #101: ganti dengan API dorongan eksternal kalau ditambahkan.
+    /// Tarikan pemain memakai IslandPlayerController.AddExternalVelocity (#101, keputusan developer 7 November 2026),
+    /// menggantikan Teleport bertahap dari Langkah 5. Suara windup diulang tiap tribalWindupCueRepeatSeconds.
     /// </summary>
     public class TribalBehavior : SpecialZombieAI, IPinAttacker
     {
@@ -26,6 +26,7 @@ namespace SurvivalIsland
         private float damageSincePin;
         private float blockedTimer;
         private float holdDamageTimer;
+        private float windupCueTimer;
         private TribalSnare activeSnare;
         private ThreatAudioEmitter emitter;   // Suara peringatan windup (#114). Boleh tidak ada.
 
@@ -73,11 +74,19 @@ namespace SurvivalIsland
                     // 2. Windup: berhenti, mengayun, dan suara peringatan lewat ThreatAudioEmitter (#114).
                     step = SnareStep.Windup;
                     if (emitter != null) emitter.PlayAlertTell();
+                    windupCueTimer = b.tribalWindupCueRepeatSeconds;
                     stepTimer = b.tribalWindupSeconds;
                     if (agent.isOnNavMesh) agent.isStopped = true;
                     return true;
                 case SnareStep.Windup:
                     stepTimer -= dt;
+                    // Keputusan developer (7 November 2026): suara windup diulang selama windup berlangsung.
+                    windupCueTimer -= dt;
+                    if (windupCueTimer <= 0f && b.tribalWindupCueRepeatSeconds > 0f)
+                    {
+                        if (emitter != null) emitter.PlayAlertTell();
+                        windupCueTimer = b.tribalWindupCueRepeatSeconds;
+                    }
                     if (stepTimer > 0f) return true;
                     // 3. Jerat mengarah ke posisi pemain saat windup berakhir, jadi bisa dihindari ke samping.
                     Vector3 from = throwPoint != null ? throwPoint.position : transform.position + Vector3.up * 1.5f;
@@ -126,11 +135,19 @@ namespace SurvivalIsland
             if (blockedTimer > 1f) { ReleasePin(PinReleaseReason.AttackerGone); return; }
 
             // 5. Tarik pemain dan beri damage + infeksi dari secondaryAttack.
+            // #101 (keputusan developer 7 November 2026): tarikan lewat AddExternalVelocity. Dipanggil tiap tick, jadi
+            // dorongan baru menggantikan yang lama; kecepatan dibatasi supaya tidak melewati jarak 1,5 m.
             var pc = IslandPlayerController.Instance;
-            if (pc != null && d > 1.5f)
+            if (pc != null)
             {
                 Vector3 dir = transform.position - player.Position; dir.y = 0f;
-                pc.Teleport(player.Position + dir.normalized * Mathf.Min(b.tribalPullSpeed * dt, d - 1.5f));
+                if (d > 1.5f && dir.sqrMagnitude > 0.0001f)
+                {
+                    float speed = Mathf.Min(b.tribalPullSpeed, (d - 1.5f) / Mathf.Max(dt, 0.0001f));
+                    // Durasi minimal dua tick, supaya tarikan tidak putus kalau CrowdTick jarang (agen jauh).
+                    pc.AddExternalVelocity(dir.normalized * speed, Mathf.Max(b.tribalPullFadeSeconds, dt * 2f));
+                }
+                else pc.ClearExternalVelocity();
             }
             holdDamageTimer -= dt;
             if (holdDamageTimer <= 0f && player.Damageable != null)
@@ -160,9 +177,16 @@ namespace SurvivalIsland
 
         private void EndCooldown(SpecialZombieBalance b)
         {
+            if (step == SnareStep.Holding) StopPull();
             step = SnareStep.Ready;
             cooldownUntil = Time.time + (b != null ? b.tribalCooldownSeconds : 10f);
             if (ai.Agent != null && ai.Agent.enabled && ai.Agent.isOnNavMesh) ai.Agent.isStopped = false;
+        }
+
+        /// <summary>Tarikan berhenti saat pemain lepas, supaya sisa dorongan tidak terus menyeret pemain.</summary>
+        private static void StopPull()
+        {
+            if (IslandPlayerController.Instance != null) IslandPlayerController.Instance.ClearExternalVelocity();
         }
 
         private void ReturnSnare()
@@ -183,6 +207,7 @@ namespace SurvivalIsland
         {
             if (PlayerPinnedState.Instance != null) PlayerPinnedState.Instance.ReleaseByAttacker(this, PinReleaseReason.AttackerGone);
             ReturnSnare();
+            if (step == SnareStep.Holding) StopPull();
             step = SnareStep.Ready;
         }
     }

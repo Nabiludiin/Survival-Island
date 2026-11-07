@@ -11,10 +11,13 @@ namespace SurvivalIsland
     /// adalah usulan yang disetujui developer sebagai nilai awal (#85).
     ///
     /// Perilaku zombie (#75 "Zombie di kapal"): muncul Dormant, bangun lewat EnemyAI.WakeUp kalau pemain dalam
-    /// zombieAggroRadius dan terlihat, atau saat dimunculkan bersama alarm T=45 (tafsiran, lihat Catatan Implementasi);
+    /// zombieAggroRadius dan terlihat, atau saat AlarmUp kalau titiknya mencentang ShipZombiePoint.wakeOnAlarm
+    /// (keputusan developer 7 November 2026);
     /// kembali Dormant setelah zombieStuckSeconds tanpa jalur lengkap; zombie mati (EnemyHealth.IsAlive) keluar dari daftar.
     /// Gigitan Zombie_Ship_Bite adalah aset AttackData di ZombieData, bukan kode di sini.
-    /// Belum diimplementasikan (TODO): volume alarm kapal (AudioManager belum punya kanal alarm), efek basah layar (#23).
+    /// Alarm kapal: satu AudioSource loop sejak Begin dengan volume alarmBaseVolume, naik ke alarmRaisedVolume saat AlarmUp,
+    /// berhenti di StopAll (keputusan developer 7 November 2026).
+    /// Belum diimplementasikan (TODO): efek basah layar (#23).
     /// CameraShake.Play (#24) dan suara air guncangan akhir (AudioManager) sudah tersambung.
     /// - Alat Editor ShipRouteAudit.
     /// </summary>
@@ -39,6 +42,8 @@ namespace SurvivalIsland
         [SerializeField] private ShipSwaySource swaySource;
         [Tooltip("Suara air saat guncangan akhir (FinalShudder).")]
         [SerializeField] private AudioClip finalShudderClip;
+        [Tooltip("Sumber alarm kapal (klip loop diisi di Inspector). Keluar ke grup Warning AudioManager kalau grupnya kosong.")]
+        [SerializeField] private AudioSource alarmSource;
 
         [Header("Pemain")]
         [SerializeField] private ShipPlayerController playerController;
@@ -51,12 +56,17 @@ namespace SurvivalIsland
         public bool FinalShudderPlayed { get; private set; }
 
         private readonly List<GameObject> activeZombies = new List<GameObject>(8);
+        private readonly List<ShipZombiePoint> activeZombiePoints = new List<ShipZombiePoint>(8);   // Sejajar activeZombies
         private readonly Dictionary<int, float> stuckTimers = new Dictionary<int, float>(8);   // instanceID -> detik macet
         private int nextEntryIndex;
         private int swayStage;
         private float zombieTickTimer;
         private bool lastDrowning;
         private bool warnedMissingPool;
+        private bool alarmRaised;
+        private float alarmVolume;          // Volume alarm sebelum pengali SFX
+        private float alarmRaiseFrom;       // Volume saat AlarmUp, awal kenaikan
+        private float alarmRaiseElapsed;
 
         private static ShipHazardBalance Hazard
         {
@@ -109,6 +119,7 @@ namespace SurvivalIsland
             FinalShudderPlayed = false;
             WaterLevel = FirstWaterLevel();
             zombieTickTimer = 0f;
+            StartAlarm();
         }
 
         /// <summary>Dipanggil LifeboatExtraction (hasil) dan saat RunEndedEvent. Air berhenti, zombie berhenti.</summary>
@@ -118,6 +129,7 @@ namespace SurvivalIsland
             IsRunning = false;
             if (playerController != null) playerController.SetShipMoveModifiers(1f, 1f, Vector3.zero);
             SetDrowning(false);
+            StopAlarm();
             // Serangan zombie berhenti: target dilepas (membatalkan serangan) lalu EnemyAI masuk Dormant.
             for (int i = 0; i < activeZombies.Count; i++)
             {
@@ -135,11 +147,59 @@ namespace SurvivalIsland
             stuckTimers.Clear();
         }
 
+        // ---------------------------------------------------------------- Alarm kapal
+
+        // Keputusan developer (7 November 2026): alarm diputar loop sejak awal Fase 1 dengan volume dasar.
+        private void StartAlarm()
+        {
+            alarmRaised = false;
+            alarmRaiseElapsed = 0f;
+            alarmVolume = Hazard.alarmBaseVolume;
+            if (alarmSource == null) return;
+            if (alarmSource.outputAudioMixerGroup == null && AudioManager.Instance != null)
+                alarmSource.outputAudioMixerGroup = AudioManager.Instance.WarningGroup;
+            alarmSource.loop = true;
+            ApplyAlarmVolume();
+            if (alarmSource.clip != null && !alarmSource.isPlaying) alarmSource.Play();
+        }
+
+        private void StopAlarm()
+        {
+            alarmRaised = false;
+            if (alarmSource != null) alarmSource.Stop();
+        }
+
+        /// <summary>AlarmUp: volume naik linier ke alarmRaisedVolume selama alarmRaiseSeconds.</summary>
+        private void RaiseAlarm()
+        {
+            alarmRaised = true;
+            alarmRaiseFrom = alarmVolume;
+            alarmRaiseElapsed = 0f;
+        }
+
+        private void TickAlarm()
+        {
+            if (!alarmRaised) return;
+            var hz = Hazard;
+            alarmRaiseElapsed += Time.deltaTime;
+            float k = hz.alarmRaiseSeconds > 0f ? Mathf.Clamp01(alarmRaiseElapsed / hz.alarmRaiseSeconds) : 1f;
+            alarmVolume = Mathf.Lerp(alarmRaiseFrom, hz.alarmRaisedVolume, k);
+            ApplyAlarmVolume();
+        }
+
+        private void ApplyAlarmVolume()
+        {
+            if (alarmSource == null) return;
+            float scale = AudioManager.Instance != null ? AudioManager.Instance.SfxSourceScale : 1f;
+            alarmSource.volume = alarmVolume * scale;
+        }
+
         // ---------------------------------------------------------------- Per frame
 
         private void Update()
         {
             if (!IsRunning || schedule == null) return;
+            TickAlarm();
             var timer = ShipTimerManager.Instance;
             if (timer == null) return;
 
@@ -175,8 +235,9 @@ namespace SurvivalIsland
             switch (entry.kind)
             {
                 case ShipHazardKind.AlarmUp:
-                    // README 60-seconds: T=45 alarm kapal semakin keras.
-                    // TODO(AudioManager): naikkan volume alarm kapal. AudioManager belum punya kanal atau fungsi alarm.
+                    // README 60-seconds: T=45 alarm kapal semakin keras (keputusan developer 7 November 2026).
+                    RaiseAlarm();
+                    WakeAlarmZombies();
                     break;
                 case ShipHazardKind.CameraShake:
                     // README 60-seconds: T=30 kamera mulai bergetar.
@@ -185,7 +246,7 @@ namespace SurvivalIsland
                     else Debug.LogWarning($"[ShipHazardManager] CameraShakeKind '{entry.targetId}' tidak dikenal.", this);
                     break;
                 case ShipHazardKind.SpawnZombies:
-                    SpawnZombies(entry.targetId, entry.value, IsAlarmTime(entry.atSecondsLeft));
+                    SpawnZombies(entry.targetId, entry.value);
                     break;
                 case ShipHazardKind.CollapseWarning:
                     { var c = FindCorridor(entry.targetId); if (c != null) c.Warn(); }
@@ -316,17 +377,25 @@ namespace SurvivalIsland
 
         // ---------------------------------------------------------------- Zombie
 
-        /// <summary>true kalau jadwal punya entri AlarmUp pada waktu yang sama (grup yang dibangunkan suara alarm T=45).</summary>
-        private bool IsAlarmTime(float atSecondsLeft)
+        /// <summary>
+        /// Keputusan developer (7 November 2026): saat AlarmUp, zombie yang masih tidur di titik wakeOnAlarm langsung bangun
+        /// dan mengejar. Zombie lain tetap tidur sampai pemain dekat dan terlihat.
+        /// </summary>
+        private void WakeAlarmZombies()
         {
-            var entries = schedule != null ? schedule.entries : null;
-            if (entries == null) return false;
-            for (int i = 0; i < entries.Length; i++)
-                if (entries[i].kind == ShipHazardKind.AlarmUp && Mathf.Approximately(entries[i].atSecondsLeft, atSecondsLeft)) return true;
-            return false;
+            var p = Player;
+            if (p == null) return;
+            for (int i = 0; i < activeZombies.Count; i++)
+            {
+                var z = activeZombies[i];
+                var point = activeZombiePoints[i];
+                if (z == null || !z.activeInHierarchy || point == null || !point.WakeOnAlarm) continue;
+                var ai = z.GetComponent<EnemyAI>();
+                if (ai != null && ai.CurrentState == AIState.Dormant) ai.WakeUp(p);
+            }
         }
 
-        private void SpawnZombies(string groupId, int count, bool wakeOnSpawn)
+        private void SpawnZombies(string groupId, int count)
         {
             var pooler = ObjectPooler.Instance;
             if (pooler == null || zombiePoints == null || count <= 0) return;
@@ -368,16 +437,18 @@ namespace SurvivalIsland
                     }
                     agent.speed = hz.zombieMoveSpeed;
                 }
-                // Target lewat EnemyAI langsung, karena ThreatSystem tidak ada di ShipPhase (#109). Zombie muncul tidur,
-                // kecuali grup yang dimunculkan bersama alarm T=45.
+                // Target lewat EnemyAI langsung, karena ThreatSystem tidak ada di ShipPhase (#109). Zombie muncul tidur.
+                // Tafsiran: alarm terus berbunyi keras setelah AlarmUp, jadi zombie yang muncul sesudahnya di titik
+                // wakeOnAlarm juga langsung bangun (tidak bergantung urutan entri pada detik yang sama).
                 var ai = zombie.GetComponent<EnemyAI>();
                 if (ai != null)
                 {
-                    if (wakeOnSpawn && p != null) ai.WakeUp(p);
+                    if (alarmRaised && point.WakeOnAlarm && p != null) ai.WakeUp(p);
                     else ai.EnterDormant();
                 }
                 stuckTimers.Remove(zombie.GetInstanceID());
                 activeZombies.Add(zombie);
+                activeZombiePoints.Add(point);
                 spawned++;
             }
         }
@@ -454,6 +525,7 @@ namespace SurvivalIsland
             var z = activeZombies[index];
             if (z != null) stuckTimers.Remove(z.GetInstanceID());
             activeZombies.RemoveAt(index);
+            activeZombiePoints.RemoveAt(index);
         }
 
         private void ReturnZombie(int index)
