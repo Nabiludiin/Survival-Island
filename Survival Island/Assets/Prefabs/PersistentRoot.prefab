@@ -5714,6 +5714,16 @@ MonoBehaviour:
     size: 2
     overflow: 0
     maxSize: 0
+  - tag: Hazard_Fireball
+    prefab: {fileID: 6981437629379312404, guid: 72f413290d3e4b6458dee17cd4144ebb, type: 3}
+    size: 8
+    overflow: 0
+    maxSize: 0
+  - tag: Hazard_ImpactMarker
+    prefab: {fileID: 5055612496977865434, guid: ea6fd15e9e5315c488460cf435134a21, type: 3}
+    size: 8
+    overflow: 0
+    maxSize: 0
 --- !u!1 &3752783440837993212
 GameObject:
   m_ObjectHideFlags: 0
@@ -10958,7 +10968,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.RunSeedManager
   layoutSources: {fileID: 0}
-  disasterData: []
+  disasterData:
+  - {fileID: 11400000, guid: ebd1414e1b51c9748b30e726c1ddb141, type: 2}
+  - {fileID: 11400000, guid: 5bb6c7467d9538447b798785281b4bf5, type: 2}
+  - {fileID: 11400000, guid: 79986f3e68f7b3946b1977c4032a5afa, type: 2}
 --- !u!1 &6816386008234352778
 GameObject:
   m_ObjectHideFlags: 0

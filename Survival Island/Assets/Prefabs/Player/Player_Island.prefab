@@ -25,6 +25,7 @@ GameObject:
   - component: {fileID: 1196106430516782707}
   - component: {fileID: 1863548329346872318}
   - component: {fileID: 6325273904927900860}
+  - component: {fileID: 7015765881162645101}
   m_Layer: 8
   m_Name: Player_Island
   m_TagString: Player
@@ -292,6 +293,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.WarmthSystem
   traversal: {fileID: 0}
+--- !u!114 &7015765881162645101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74956369538108119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de4cee9652414db4846cc767cf3665c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.DeathCinematic
+  profiles: []
+  bodyRig: {fileID: 0}
+  bodyAnimator: {fileID: 0}
+  focusBone: {fileID: 0}
+  cameraRig: {fileID: 6104641871863406711}
+  disableOnDeath: []
 --- !u!1 &1547270341276526745
 GameObject:
   m_ObjectHideFlags: 0

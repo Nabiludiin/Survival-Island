@@ -397,6 +397,7 @@ GameObject:
   - component: {fileID: 7352699261203912231}
   - component: {fileID: 6058219827019461429}
   - component: {fileID: 7329952993263745596}
+  - component: {fileID: 964925148285587143}
   m_Layer: 8
   m_Name: Player_Ship
   m_TagString: Player
@@ -567,6 +568,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.PlayerTargetable
   aimPoint: {fileID: 0}
   aimHeight: 1.2
+--- !u!114 &964925148285587143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7840023056629237373}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de4cee9652414db4846cc767cf3665c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.DeathCinematic
+  profiles: []
+  bodyRig: {fileID: 0}
+  bodyAnimator: {fileID: 0}
+  focusBone: {fileID: 0}
+  cameraRig: {fileID: 7397120557524090510}
+  disableOnDeath: []
 --- !u!1 &8500890781637097759
 GameObject:
   m_ObjectHideFlags: 0

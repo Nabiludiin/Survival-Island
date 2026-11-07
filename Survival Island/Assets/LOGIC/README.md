@@ -168,7 +168,7 @@ Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Lan
 | **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Diuji di Unity: jam, panen, crafting, bangun, dan restriksi pantai (menu B, demolish, dan tumbuh ulang belum diuji) |
 | **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/`, `Core_Logic/` | Diuji di Unity: zombie standar (terbakar, mengendap, mengejar, menyerang), hitbox, serigala dan babi (varian khusus, terkam, Blood Moon belum diuji) |
 | **6** | `ZoneManager`, frostbite, jembatan kayu, barang berat, `WeatherManager` | `Island_Logic/` | Diuji di Unity: zona, cuaca, jembatan S1, gerbang S2/S3, angkat barang berat, frostbite (obor, pakaian, jatuh jurang belum diuji) |
-| **7** | *Sudden Event*, `LuckyMachine`, `DiaryManager`, alur menang dan kalah | `Island_Logic/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
+| **7** | *Sudden Event*, `LuckyMachine`, `DiaryManager`, alur menang dan kalah | `Island_Logic/`, `Core_Logic/` | Diuji di Unity: Diary bab 1, erupsi, Lucky Machine (korban, mode gratis, hadiah), pasang suku cadang, lepas landas dan layar menang (gempa, badai, sinematik mati belum diuji) |
 
 Isi kolom **Status** dengan salah satu: `Belum dimulai`, `Sedang ditulis`, `Ditulis, belum diuji di Unity`, atau `Diuji di Unity`. Jangan menulis `Diuji di Unity` sebelum *script* benar-benar dijalankan di Unity.
 
@@ -488,7 +488,52 @@ Langkah 7: *Sudden Event* (`DisasterManager`, Fireball Region 1 dari `ObjectPool
 
 `ObjectiveManager` (#81, sumber bab terbuka dan buku Diary), `NarrativeSequencer` (#99, ending menang), `StatusEffectManager` (#20, buff permanen), `RegionStateStore` (#88, sementara mesin langsung `Register` ke `WorldStateSave`), `IslandInteractable` (#17), `HordeManager` (#50), `NotificationManager` (#22), `LocalizationManager` (#104), `AudioManager` (#114), `CameraShake` (#24), `VFXManager` (#15), `EnvironmentDirector` (#92), `RegionalWeather` (#115), `RemoteBaseSimulation` (#90), `FireSystem` (#97), `BuildingIntegrity` (`survivesEarthquake`, #47), dan `NPCRoster` (#76). Semuanya ditandai TODO di kode dan dicatat di bagian "Catatan Implementasi (Langkah 7)" pada blueprint terkait.
 
-### Penyiapan di Unity untuk Langkah 7 (belum dilakukan)
+### Penyiapan di Unity untuk Langkah 7 (sudah dilakukan untuk IslandPhase greybox)
+
+Dibuat lewat menu **Survival Island > Setup > Langkah 7 - Event dan Akhir** (`Assets/Editor/Langkah7Setup.cs`, jalankan setelah menu 6). Isinya:
+
+- **Bencana:** `Disaster_Eruption`, `Disaster_Earthquake`, dan `Disaster_TropicalStorm` (`Assets/Data/Disasters`, angka `DisasterManager.md`). Ketiganya diisi ke `RunSeedManager.disasterData` di `PersistentRoot` dan ke `DisasterManager`. Pool `Hazard_Fireball` dan `Hazard_ImpactMarker` masing-masing 8.
+- **Lucky Machine:**
+  - 4 `LuckyMachineData` dengan kuota per region, dan 9 `LuckyRewardData` yang dipakai bersama oleh semua mesin. Bobot per hadiah memakai nilai awal 1, karena bobot tier ada di config.
+  - 3 `WeaponModifierData` di `Resources/WeaponModifiers`, dan buff `Buff_LuckyHP` serta `Buff_LuckyStamina`.
+  - Item `Reward_LaserPistol` (`WD_Reward_LaserPistol`, memakai viewmodel Pistol) dan `Reward_FireAxe` (memakai viewmodel Kapak).
+  - Mesin greybox per region beserta kandang (trigger `ZoneTrigger` 6 x 4 x 4 m), gerbang `NavMeshObstacle`, dan `vacuumPoint`. Letak R3 (350, 2050) dari blueprint. Letak R1, R2, dan R4 greybox, karena dokumen menunggu #88.
+- **Diary dan tujuan:**
+  - `Diary_Ch1` sampai `Ch3`. Isinya hanya kunci teks, karena isi teks belum ditulis di dokumen mana pun.
+  - 8 `ObjectiveData`. Penandanya memakai seam, jembatan, dan helipad dari `IslandLayout`.
+  - `DiaryBook` greybox dekat pantai pendaratan. Letak shelter tidak tertulis.
+  - `ObjectiveManager`, `DiaryManager`, dan panel `Diary`, `DiaryArchive`, `LuckyMachine`. Ketiga panel aktif dengan alpha 0.
+- **Penyelamatan:**
+  - `HelicopterFrame` di helipad dengan 5 visual suku cadang, `PartInstallZone` (radius 4), dan `CockpitInteractable`.
+  - `RescueEventManager` di `IslandPhase`.
+  - `DeathCinematic` di `Player_Island` dan `Player_Ship`. Tanpa `PlayerBodyRig`, gayanya menjadi Blackout.
+- **Urutan eksekusi `RescueEventManager` = -50.** Menurut blueprint, `HelicopterFrame` ada di scene `Region3_Snow` yang dimuat belakangan. Di scene greybox tunggal, `OnEnable` rangka bisa berjalan sebelum `Awake` manager, sehingga pendaftaran rangka hilang dan mesin langsung mati.
+
+**Hasil uji Play Mode (7 November 2026, `IslandPhase`):**
+- **Diary:** `ObjectiveManager.InteractBook` membuka bab 1. `DiaryPanel` tampil dan menjeda game (`timeScale` 0), dan `Kit_Campfire` x1 diberikan.
+- **Erupsi:** `ForceStart(Eruption)` masuk Warning 30 detik, lalu Active, dan Fireball jatuh.
+- **Lucky Machine:** 3 serigala dikorbankan ke kandang Region 1, sehingga `StoredSpins` menjadi 1. Bencana besar membuka mode gratis 30 detik. Putaran gratis menghasilkan `lucky_fireaxe` (S), yang muncul sebagai WorldItem.
+- **Helikopter:** 5 suku cadang yang diletakkan di helipad terpasang lewat `PartInstallZone`, visualnya muncul, dan status menjadi `Ready`. Setelah `StartEngine` dan pemanasan, statusnya `ReadyToLift`, lalu `LiftOff` membuat `hasEscaped` true dan run masuk `Ending`. Layar menang tampil, lalu tombol Coba Lagi tertekan dan run kembali ke `ShipPhase`.
+- **Error:** yang tersisa hanya `AudioMixer` kosong.
+
+**Perlu dicek developer secara manual:** selama uji yang dikendalikan dari luar, tombol yang dipilih otomatis (Run Baru, Lanjutkan, Statistik, Coba Lagi) beberapa kali tertekan sendiri sesaat setelah panel tampil. Dugaannya, ini event Submit dari Input System saat fokus jendela Unity berpindah. Belum terbukti, dan perlu dicoba dengan bermain langsung.
+
+Belum diuji:
+- Gempa dan Badai Tropis.
+- Hadiah lain (buff, modifier, skin).
+- Arsip Diary dan bab 2 dan 3 lewat buku.
+- Panel Lucky Machine lewat E.
+- `DeathCinematic`.
+- Narasi ending (`NarrativeScene` x7 belum dibuat karena isi beat tidak tertulis; alur menang tetap jalan tanpanya).
+
+Data yang belum ada di dokumen:
+- Isi teks Diary, tujuan, dan narasi.
+- Letak Lucky Machine R1, R2, dan R4, serta shelter atau buku.
+- Damage dan viewmodel Kapak Api.
+- Bobot per hadiah.
+- `DeathProfile` (pesan, warna, suara).
+
+Daftar penyiapan dari blueprint:
 
 1. Aset **Create > Survival > Disaster Data** untuk `Eruption`, `Earthquake`, dan `TropicalStorm` (nilai di `DisasterManager.md`), lalu isi ke `RunSeedManager.disasterData` di `PersistentRoot` dan ke `DisasterManager.disasterData`.
 2. Scene `IslandPhase`: objek manager berisi `DisasterManager`, `LuckyRewardLedger`, `RescueEventManager`, dan `DiaryManager` (isi `diaryPanel` dan `archivePanel`). Canvas: `DiaryPanel` (id `Diary`) dan `DiaryArchivePanel` (id `DiaryArchive`) dengan `pausesTime`, `releasesCursor`, `blocksGameplayInput`, dan `closableByEsc`; `LuckyMachinePanel` (id `LuckyMachine`) sama tetapi tanpa `pausesTime`. Objek panel aktif saat scene dimuat, supaya `Awake` mengisi `Instance`.

@@ -376,7 +376,7 @@ namespace SurvivalIsland.EditorTools
             // RegionStreaming.md: tepi region selain seam ditutup tebing, gunung, atau laut. Sudut (0-1000, 0-1000) tebing.
             var root = new GameObject("Cliffs").transform;
             root.SetParent(world, false);
-            float h = WallHeight, t = 4f, S = IslandLayout.RegionSize;
+            float h = WallHeight, t = 4f;
             void Wall(string n, Vector3 a, Vector3 b)
             {
                 Vector3 c = (a + b) / 2f; c.y = h / 2f;

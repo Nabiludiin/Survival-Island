@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05d9a116df3346f68be2a297dbed1e53, type: 3}
+  m_Name: Disaster_TropicalStorm
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.DisasterData
+  type: 2
+  dailyChance: 0.07
+  cooldownDays: 6
+  minDay: 2
+  majorMinScale: 2
+  scale2Chance: 0.3
+  warningSeconds: 20
+  activeSeconds: 240
+  activeSecondsScale2: 300
+  aftermathSeconds: 30
+  startHourMin: 8
+  startHourMax: 14
+  warningClip: {fileID: 0}
+  activeLoop: {fileID: 0}
+  pulseClip: {fileID: 0}

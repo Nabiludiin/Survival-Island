@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f83e4e2e9ce44e9b5daba3694887ca7, type: 3}
+  m_Name: WD_Reward_LaserPistol
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.WeaponData
+  fireMode: 0
+  damage: 60
+  secondsBetweenShots: 0.35
+  magazineSize: 8
+  startingMagazine: 8
+  ammoItemId: 
+  reloadSeconds: 3
+  maxRange: 80
+  spreadBase: 0.2
+  spreadMoving: 1
+  spreadPerShot: 0.3
+  spreadMax: 3
+  spreadRecoverPerSec: 6
+  recoilPitch: 0.6
+  recoilYaw: 0.2
+  noiseRadius: 20
+  wearPerShot: 0
+  muzzleFlashTag: VFX_LaserMuzzle
+  impactTag: VFX_LaserImpact
+  cameraShakeScale: 1
