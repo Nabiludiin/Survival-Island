@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b83e592739f66489431887f3432eab, type: 3}
+  m_Name: Loot_Ship
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.LootTable
+  tableId: Loot_Ship
+  location: 1
+  entries:
+  - item: {fileID: 11400000, guid: adfeba210d8574f47bdd9b9288bde894, type: 2}
+    weight: 30
+    minAmount: 1
+    maxAmount: 1
+    kinds: 15
+    minDay: 0
+    isRare: 0
+  - item: {fileID: 11400000, guid: 387a5c214d933284687d61350b57119e, type: 2}
+    weight: 25
+    minAmount: 1
+    maxAmount: 1
+    kinds: 15
+    minDay: 0
+    isRare: 0
+  - item: {fileID: 11400000, guid: dec23f9f4683a4448ab7d31b45df92c8, type: 2}
+    weight: 20
+    minAmount: 1
+    maxAmount: 1
+    kinds: 15
+    minDay: 0
+    isRare: 0
+  - item: {fileID: 11400000, guid: e9db1c2b182ad584bbdaf506dc75d01e, type: 2}
+    weight: 12
+    minAmount: 1
+    maxAmount: 1
+    kinds: 15
+    minDay: 0
+    isRare: 0
+  - item: {fileID: 11400000, guid: 2eebd72ce7f15f641b1f6b05263be146, type: 2}
+    weight: 5
+    minAmount: 1
+    maxAmount: 1
+    kinds: 15
+    minDay: 0
+    isRare: 1
+  - item: {fileID: 11400000, guid: 7f0074686d23aff4ab147cf3a8262541, type: 2}
+    weight: 4
+    minAmount: 1
+    maxAmount: 1
+    kinds: 15
+    minDay: 0
+    isRare: 1
+  - item: {fileID: 11400000, guid: 0634a52a55679764b8d9d45179e3091d, type: 2}
+    weight: 5
+    minAmount: 1
+    maxAmount: 1
+    kinds: 15
+    minDay: 0
+    isRare: 0

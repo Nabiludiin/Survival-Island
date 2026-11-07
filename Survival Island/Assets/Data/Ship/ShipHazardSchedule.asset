@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec761a0709552e34eb3a156107c8f36a, type: 3}
+  m_Name: ShipHazardSchedule
+  m_EditorClassIdentifier: SurvivalIsland::SurvivalIsland.ShipHazardSchedule
+  entries:
+  - atSecondsLeft: 60
+    kind: 5
+    targetId: 
+    value: 0
+  - atSecondsLeft: 60
+    kind: 2
+    targetId: lower_start
+    value: 3
+  - atSecondsLeft: 60
+    kind: 2
+    targetId: mid_start
+    value: 1
+  - atSecondsLeft: 45
+    kind: 0
+    targetId: 
+    value: 0
+  - atSecondsLeft: 45
+    kind: 5
+    targetId: 
+    value: 1
+  - atSecondsLeft: 45
+    kind: 2
+    targetId: mid_45
+    value: 2
+  - atSecondsLeft: 33
+    kind: 3
+    targetId: Corridor_MidPort
+    value: 0
+  - atSecondsLeft: 30
+    kind: 1
+    targetId: ShipRumble
+    value: 0
+  - atSecondsLeft: 30
+    kind: 5
+    targetId: 
+    value: 2
+  - atSecondsLeft: 30
+    kind: 4
+    targetId: Corridor_MidPort
+    value: 0
+  - atSecondsLeft: 30
+    kind: 2
+    targetId: lower_30
+    value: 2
+  - atSecondsLeft: 18
+    kind: 3
+    targetId: Stair_LowerAft
+    value: 0
+  - atSecondsLeft: 15
+    kind: 5
+    targetId: 
+    value: 3
+  - atSecondsLeft: 15
+    kind: 4
+    targetId: Stair_LowerAft
+    value: 0
+  - atSecondsLeft: 15
+    kind: 2
+    targetId: mid_15
+    value: 2
+  - atSecondsLeft: 0
+    kind: 6
+    targetId: 
+    value: 0
+  waterKeyframes:
+  - atSecondsLeft: 60
+    level: -1
+  - atSecondsLeft: 30
+    level: 0
+  - atSecondsLeft: 15
+    level: 1.1
+  - atSecondsLeft: 5
+    level: 4
+  - atSecondsLeft: 0
+    level: 4.6

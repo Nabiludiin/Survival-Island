@@ -60,7 +60,7 @@ Penyimpangan kecil dari blueprint dicatat di bagian "Catatan Implementasi (Langk
 
 ### Penyiapan di Unity untuk Langkah 1 (sudah dilakukan)
 
-Sudah dibuat lewat menu **Survival Island > Setup > TMP Essential Resources** lalu **Survival Island > Setup > Langkah 1 - Fondasi** (`Assets/Editor/Langkah1Setup.cs`, boleh dijalankan ulang). Hasilnya `Assets/Data/GameBalanceConfig.asset`, `Assets/Prefabs/PersistentRoot.prefab` (9 layanan yang sudah ada kodenya, urutan sesuai `RunLifecycle.md`, ditambah `SurfaceDetection` setelah `ObjectPooler`), scene `Bootstrap`, dan scene `MainMenu`. Panel memakai UI polos sementara. Diuji di Play Mode (7 November 2026): Bootstrap → MainMenu → **Run Baru** → `ShipPhase` dengan state `InShip` dan seed terbentuk, tanpa error. Pause, layar akhir, dan dialog konfirmasi belum diuji.
+Sudah dibuat lewat menu **Survival Island > Setup > TMP Essential Resources** lalu **Survival Island > Setup > Langkah 1 - Fondasi** (`Assets/Editor/Langkah1Setup.cs`, boleh dijalankan ulang). Hasilnya `Assets/Data/GameBalanceConfig.asset`, `Assets/Prefabs/PersistentRoot.prefab` (sejak sistem pendukung digabung: 19 service sesuai `RunLifecycle.md`, ditambah `SurfaceDetection` setelah `ObjectPooler`; lihat "Tambahan untuk `PersistentRoot`"), scene `Bootstrap`, dan scene `MainMenu`. Panel memakai UI polos sementara. Diuji di Play Mode (7 November 2026): Bootstrap → MainMenu → **Run Baru** → `ShipPhase` dengan state `InShip` dan seed terbentuk, tanpa error. Pause, layar akhir, dan dialog konfirmasi belum diuji.
 
 1. Buat layer 8 sampai 23 sesuai `PhysicsLayers.md` di **Project Settings > Tags and Layers**. `PhysicsMasks` mencatat kesalahan untuk layer yang belum ada.
 2. Buat aset **Create > Survival > Game Balance Config**, lalu isi ke `GameManager.balanceAsset`.
@@ -82,7 +82,26 @@ Tambahan kecil di file Langkah 1: event `InteractedEvent`, `ShipHandChangedEvent
 
 Langkah 2 memanggil kelas Langkah 3 (`InventoryManager`, `ItemData`, `ItemDatabase`, `InputManager`, `FirstPersonCamera`, `ICameraOffsetSource`, `SurvivalStats`, `CarryCapacity`) dengan nama dan signature dari blueprint. Kode Langkah 2 baru bisa dikompilasi setelah kode Langkah 3 digabung. Bagian yang belum diimplementasikan dicatat di "Catatan Implementasi (Langkah 2)" pada blueprint terkait dan ditandai TODO di kode.
 
-### Penyiapan di Unity untuk Langkah 2 (belum dilakukan)
+### Penyiapan di Unity untuk Langkah 2 (sudah dilakukan untuk ShipPhase)
+
+Dibuat lewat menu **Survival Island > Setup > Langkah 2 - ShipPhase** (`Assets/Editor/Langkah2Setup.cs`, boleh dijalankan ulang, jalankan setelah menu Langkah 1). Nomor 1 sampai 3 di bawah sudah dibuat. Nomor 4 (`IslandArrival` di `IslandPhase`) belum, karena butuh pemain Fase 2 dan `ItemData` item inti dari penyiapan Langkah 3. Isinya:
+
+- **Data:** 7 `ItemData` isi `Loot_Ship` di `Assets/Resources/Items/` (`Food_Can`, `Ammo_9mm`, `Drink_CleanWater`, `Med_Bandage`, `Med_Medkit`, `Med_Vaccine`, `Item_Battery`). Angka diambil dari `ItemUseSystem.md`, `ShipInteractable.md`, `CarryCapacity.md`, dan `RegionLootTable.md`. Ada juga `Assets/Data/Ship/Loot_Ship.asset`, `ShipHazardSchedule.asset` (diisi lewat "Isi jadwal awal"), `Assets/Data/Enemies/zombie_standar.asset` dan `Zombie_Standard_Hit.asset`.
+- **Prefab:** `Assets/Prefabs/Ship/Player_Ship` (rig `FirstPersonCamera`, `ViewmodelCamera` Overlay di Camera Stack, `CameraShake` di rig, `InventoryManager`, `CarryCapacity`), `ShipLoot_Generic`, `ShipNpc_Generic`, dan `Assets/Prefabs/Enemies/zombie_standar` (`NavMeshAgent`, `EnemyAI`, `EnemyHealth`, `EnemyAttack`, `AISensory`, 3 hitbox `EnemyHitbox`).
+- **Pool di `PersistentRoot`:** `ShipLoot_Generic` (12, jumlah titik loot), `ShipNpc_Generic` (3), `zombie_standar` (50). Menu Langkah 1 sekarang mempertahankan pool yang sudah terdaftar.
+- **Scene `ShipPhase`:** geladak greybox tiga dek (Y 0, 4, 8) yang miring tetap `shipHazard.staticTiltDegrees`, `NavMeshSurface` yang sudah dibake (`Assets/Scenes/ShipPhase_NavMesh.asset`), koridor `Corridor_MidPort` dan `Stair_LowerAft`, tangga `Stair_LowerFore`, `lowerDeckBarrier`, 10 `ShipZombiePoint` (`mid_45` memakai `wakeOnAlarm`), 12 titik `LootSpawnerSystem`, 3 titik NPC, sekoci di dek atas (`LifeboatExtraction`, `InteractHighlight`), `RunSummaryPanel`, HUD polos (`HUDManager`), dan `ShipTimerManager`. Bentuk geladak dan letak titik hanya greybox, bukan desain level final.
+
+**Hasil uji Play Mode (7 November 2026):** Bootstrap → MainMenu → **Run Baru** → `ShipPhase`, tanpa error selain `AudioMixer` kosong.
+- Timer berjalan dari 60 setelah jeda pra-game.
+- 6 sampai 8 loot muncul dari 12 titik.
+- Pengambilan lewat `ShipInteractable.Interact` dan `PlayerInteractor` mengisi tangan sesuai `shipPickupAmount`.
+- Setor ke sekoci tercatat di HUD.
+- Koridor runtuh pada T=30 dan T=15, air naik, `lowerDeckBarrier` aktif sekitar T=13, dan zombie kapal muncul.
+- Berangkat lebih awal maupun timer habis di area aman membuka `RunSummary`. **Lanjut** memuat `IslandPhase` (`OnIsland`) dengan `savedShipLoot` terisi.
+
+Pilihan data yang tidak tertulis di blueprint: `ItemType` `Ammo_9mm` = `Material`, `Item_Battery` = `Consumable` (karena `isConsumable`), dan `Med_Bandage` memakai `maxStack` 1 (nilai awal `ItemData`, karena tidak ada di tabel). Mohon dikonfirmasi.
+
+Belum diuji: NPC kapal (butuh aset `NPCData` dan `RunLayoutSources`), zombie menyerang pemain, dan kematian di kapal. `IslandPhase` masih mencatat error `IslandArrival tidak ada` sampai penyiapan Langkah 3.
 
 1. Scene `ShipPhase`: `ShipTimerManager` (teks timer TMP, `Image` vignette, `AudioSource` detak), `ShipHazardManager` (aset **Create > Survival > Ship Hazard Schedule**, isi lewat menu konteks "Isi jadwal awal"; koridor, titik zombie, bidang air, `lowerDeckBarrier`, `ShipSwaySource`), dan objek Sekoci (layer `Interactable`, collider bukan trigger) dengan `LifeboatExtraction`, `InteractHighlight`, dan `RunSummaryPanel` (id `RunSummary`, `pausesTime`, `releasesCursor`, `blocksGameplayInput`, `isLocked`).
 2. Prefab `Player_Ship` (layer dan tag `Player`): `CharacterController` (height 1,8, radius 0,35, stepOffset 0,3, slopeLimit 45, skinWidth 0,08), `ShipPlayerController`, `PlayerInteractor` (isi `cameraTransform` dengan `WorldCamera`), `ShipShove`, `SurvivalStats`, dan rig `FirstPersonCamera`.
@@ -125,8 +144,8 @@ Langkah mengikuti tabel di `Claude.md` root (TAHAP 7). Perintahnya "Jalankan Lan
 
 | Langkah | Isi | Folder utama | Status |
 |---|---|---|---|
-| **1** | Kerangka `GameManager`, `UIManager`, `ObjectPooler`, `SaveSystem`, dan pola *State Management* inti | `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
-| **2** | Fase 1: `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | `60-seconds/` | Terkompilasi, belum diuji di Play Mode |
+| **1** | Kerangka `GameManager`, `UIManager`, `ObjectPooler`, `SaveSystem`, dan pola *State Management* inti | `Core_Logic/` | Diuji di Unity: alur Bootstrap → MainMenu → Run Baru (pause, layar akhir, dan save/lanjutkan belum diuji) |
+| **2** | Fase 1: `ShipTimerManager`, `ShipInteractable`, `ShipPlayerController` | `60-seconds/` | Diuji di Unity: ShipPhase greybox sampai IslandPhase (NPC kapal dan mati di kapal belum diuji) |
 | **3** | `IslandPlayerController`, `SurvivalStats`, `InventoryManager`, `ItemData` | `Island_Logic/`, `raft/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **4** | `DayNightDirector`, lapar dan infeksi, `BuildManager`, `ResourceNode`, `CraftingManager` | `left-4-dead/`, `raft/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
 | **5** | `EnemyAI`, spawn siang dan malam, gunplay, `MeleeCombatSystem`, `HitboxModifier` | `left-4-dead/`, `Island_Logic/`, `Core_Logic/` | Terkompilasi, belum diuji di Play Mode |
@@ -418,6 +437,16 @@ Urutan lengkap sesuai tabel "Urutan bootstrap" di `RunLifecycle.md`. Yang baru p
 19. **`NarrativeSequencer`** (usulan teknis: persisten menurut tabel masa hidup di `RunLifecycle.md`, dan punya `ResetForNewRun`)
 
 Juga di bawah `PersistentRoot`, tetapi bukan service: `SubtitlePresenter`, canvas notifikasi, `SettingsPanel` (isi `UIManager.settingsPanel`), `TutorialHintPanel`, UI `DevConsole`, dan UI `NarrativeSequencer`.
+
+**Sudah dipasang (7 November 2026)** lewat menu Langkah 1 (`Langkah1Setup.cs`):
+- Ke-19 service di atas masuk `orderedServices` sesuai urutan.
+- `AudioManager` mendapat 3 `AudioSource` (bgm, sfx, warning), dan `NarrativeSequencer` mendapat `voiceSource`.
+- UI pendukung memakai tampilan polos sementara. `SettingsPanel` hanya berisi slider dan toggle utama, tanpa tab, dropdown grafis, maupun baris rebind.
+- `MainMenu` mendapat `StatsPanel`.
+
+Diuji di Play Mode: alur Bootstrap → MainMenu → peringatan kilatan (`ConfirmDialog`) → Run Baru → `ShipPhase` berjalan tanpa error selain `[AudioManager] Rujukan 'mixer' kosong`.
+
+Belum dibuat: `AudioMixer` (tidak bisa dibuat lewat API publik, jadi perlu dibuat manual), `LocalizationTable` `id`/`en`, aset `MusicSet`/`AmbientProfile`, dan pool `VFX_*`. Semua bagian itu hanya mencatat peringatan. `MainMenuController.settingsPanel` masih kosong, karena `SettingsPanel` berada di prefab persisten, sehingga tombol Pengaturan di menu utama nonaktif.
 
 ### Komponen scene
 
