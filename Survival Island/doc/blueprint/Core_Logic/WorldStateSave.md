@@ -457,7 +457,7 @@ Kode: `WorldStateSave.cs`, `WorldStateSaveData.cs`, `ISaveable.cs`, dan `SaveIdT
 - **`QuitToMenu` saat autosave lama belum selesai setelah batas waktu:** dianggap gagal (`SaveCompletedEvent { QuitToMenu, false }`), bukan menulis bersamaan. Dua penulisan bersamaan bisa saling menimpa lewat `File.Replace`. `RunLifecycle` lalu menampilkan `ConfirmDialog`.
 - **`AppQuit` saat menulis:** kalau `writeTask.Wait` habis waktu, save `AppQuit` dibatalkan dengan log kesalahan.
 - Penulisan langsung (tanpa thread lain) hanya untuk `QuitToMenu` dan `AppQuit`. Alasan lain, termasuk `ArrivedOnIsland` dan `Manual`, memakai `Task.Run`.
-- Belum ada: `RegionStateStore`/`CaptureLoadedRegions` (#88), cek musuh di sekitar pemain, `PlayerDamagedEvent`, `VitalWarningChangedEvent`, rasio HP, `SleepSystem`, `PlayerTraversal`, `SpawnManager.RequestAmbush`, notifikasi #22, dan `SaveIdAuditWindow`. Semuanya ditandai TODO di kode.
+- Belum ada: `RegionStateStore`/`CaptureLoadedRegions` (#88), cek musuh di sekitar pemain, `PlayerDamagedEvent`, `VitalWarningChangedEvent`, rasio HP, `SleepSystem`, `PlayerTraversal`, `SpawnManager.RequestAmbush`, dan notifikasi #22. Semuanya ditandai TODO di kode. `SaveIdAuditWindow` sudah ditulis di `Assets/Editor/` (lihat catatan alat audit di bawah).
 
 ## 8. Catatan Implementasi (Sistem pendukung, #88)
 

@@ -21,7 +21,7 @@ namespace SurvivalIsland
     /// Editor dan Development Build.
     /// RegionStreaming.CaptureLoadedRegions dan RegionStateStore (regionStoreJson, #88) sudah tersambung. Tanpa RegionStreaming
     /// (scene uji), regionStoreJson kosong dan objek region memakai jalur cadangan Register (RegionSaveRouting).
-    /// Belum diimplementasikan (TODO): alat Editor SaveIdAuditWindow.
+    /// Pemeriksaan ID save ada di alat Editor SaveIdAuditWindow (Assets/Editor, menu Survival > Audit > Save ID).
     /// </summary>
     public class WorldStateSave : MonoBehaviour, IBootstrapService
     {

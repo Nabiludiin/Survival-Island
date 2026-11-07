@@ -702,3 +702,28 @@ Dicatat di `doc/USULAN_TERBUKA.md` (Keputusan utama) dan blueprint terkait.
 - **Kelompok zombie jauh (#93):** jalur bersama per sel di `HordeCrowdManager`, perintah `crowdstat`, `stress`, `crowdai`.
 - **`RunLayoutSources` dan `RunLayoutValidator` (#89):** buat aset **Survival > Run Layout Sources**, isi ke `RunSeedManager.layoutSources`, lalu isi `partSpawnPoints`, `shipNpcs`, dan `disasterData`. Jalankan menu "Salin data kapal dari scene ShipPhase yang terbuka", "Periksa isReachable" pada `PartSpawnPointTable`, isi `safeLayout`, lalu "Periksa safeLayout" dan "RunSeedAudit". Sebelum itu, semua seed gagal pemeriksaan dan run memakai `safeLayout`. Tanpa aset ini, perilaku lama tetap jalan dengan peringatan.
 - **Zombie Desa, Lumut, Jaguar, Gagak:** file baru `left-4-dead/HidingSpot.cs`, `VillageZombieHiding.cs`, `BushSpawnPoint.cs`, `AmbushPerch.cs`, `CrowFlock.cs`. Prefab `zombie_desa` mendapat `VillageZombieHiding` (Animator: bool `Dormant`, trigger `Emerge`). `Region4_Village` mendapat `HidingSpot` (kapasitas total minimal 30). `Region2_Amazon` mendapat `BushSpawnPoint` (entri `zombie_lumut` diberi `useBushPoints = true`) dan `AmbushPerch`. Animator Jaguar perlu trigger `Climb`.
+
+## 🧩 Ditambahkan: alat audit Editor (7 November 2026)
+
+Empat jendela pemeriksa data di `Assets/Editor/` (assembly `SurvivalIsland.Editor`), di menu **Survival > Audit**. Hasilnya tampil di jendela dan dicatat ke Console. Semua alat memindai scene di `Assets/Scenes`. Scene yang belum terbuka dibuka additive lalu ditutup lagi, dan Unity meminta perubahan disimpan dulu.
+
+| File | Menu | Blueprint | Yang diperiksa |
+|---|---|---|---|
+| `SaveIdAuditWindow.cs` | Save ID | `WorldStateSave.md` "ID stabil" (#80), `LootSpawnerSystem.md` (#89, #91) | `saveId` kosong, ID ganda, `ISaveable` yang butuh `SaveIdTag` tetapi tidak punya, `spawnerId` kosong atau ganda, dan titik loot pulau di bawah air pasang tertinggi. Tombol "Perbaiki" membuat ulang ID kosong dan ganda, lalu menyimpan scene |
+| `ShipLootAudit.cs` | Ship Loot | `ShipInteractable.md` "Pemeriksaan data di Editor" | `shipWeight` dan `NPCData.weight` di antara 1 dan `ship.handCapacity`, `shipPickupAmount` minimal 1, `worldMesh`, dan kunci nama di `LocalizationTable` |
+| `ResourceAuditWindow.cs` | Resource | `ResourceRespawn.md` "Kepadatan per region" (#73) | Jumlah pohon, batu besar, jamur, dan pohon getah per region dibanding `resource.minNodesPerRegion` |
+| `TechTreeAuditWindow.cs` | Tech Tree | `TechTreeManager.md` "Validasi Editor" (#34) | `nodeId` unik, `requiredNodeId`, rantai berputar, `triggerKey`, `techNodeId` resep, `unlockNodeId` bangunan, dan urutan array `nodes` |
+
+`AuditWindowBase.cs` (tampilan jendela) dan `AuditUtil.cs` (config, aset, dan pemindaian scene) dipakai bersama.
+
+**Kelompok ID:** `ShipPhase`, `Bootstrap`, dan `MainMenu` masing-masing berdiri sendiri. Scene lain dianggap bagian pulau, jadi ID-nya harus unik antar-scene.
+
+**Batas air pasang:** `lowWaterY + (1 + stormSurgeLevel) * (highWaterY - lowWaterY)`, sama dengan `TideManager.MaxWaterY`. Nilai awalnya 2,00.
+
+**Diuji di Unity (7 November 2026, lewat Unity MCP):** keempat alat dikompilasi tanpa error dan dijalankan dari menu pada proyek saat ini.
+- **Save ID:** lulus. 38 ID di 4 scene, tanpa ID kosong, ID ganda, atau titik di bawah air pasang.
+- **Ship Loot:** 7 masalah. Ketujuh barang `Loot_Ship` (`Food_Can`, `Ammo_9mm`, `Drink_CleanWater`, `Med_Bandage`, `Med_Medkit`, `Med_Vaccine`, `Item_Battery`) belum punya `worldMesh`. Belum ada aset `NPCData`, dan belum ada `LocalizationTable`, jadi kunci teks tidak diperiksa.
+- **Resource:** 10 masalah. Region 1 baru punya 6 dari 120 pohon dan 3 dari 40 batu besar. Region 2 sampai 4 belum punya node, karena peta greybox menunggu #88.
+- **Tech Tree:** lulus, karena belum ada aset `TechNodeData` (12 resep, 12 bangunan, 1 `TechTreeManager`). `CheckNodes` diuji dengan node di memori: `nodeId` ganda, `triggerKey` salah, prasyarat hilang, dan rantai berputar tertangkap.
+
+**Belum diuji:** tombol "Perbaiki ID kosong dan ganda" dan laporan ID ganda pada scene sungguhan. Keduanya butuh scene yang diubah dan disimpan, jadi tidak dijalankan pada scene proyek.

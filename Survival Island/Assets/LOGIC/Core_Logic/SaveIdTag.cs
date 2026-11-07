@@ -7,8 +7,8 @@ namespace SurvivalIsland
     /// Format: &lt;region&gt;_&lt;jenis&gt;_&lt;8 karakter&gt;, contoh r1_tree_a3f9c21b. Nama dan posisi objek boleh berubah, ID tetap.
     /// Blueprint: Core_Logic/WorldStateSave.md bagian "ID stabil" (#80).
     ///
-    /// Belum ditulis di Langkah 1: deteksi ID bentrok saat objek diduplikasi, dan alat Editor SaveIdAuditWindow.
-    /// Keduanya alat Editor yang dipakai saat scene region dibuat (#88).
+    /// ID kosong dan ID bentrok (mis. objek diduplikasi) dilaporkan dan bisa dibuat ulang lewat SaveIdAuditWindow
+    /// (menu Survival > Audit > Save ID). Jalankan saat scene region dibuat (#88).
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class SaveIdTag : MonoBehaviour

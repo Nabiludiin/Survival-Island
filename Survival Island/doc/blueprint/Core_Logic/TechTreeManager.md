@@ -173,5 +173,5 @@ Daftar node kecil, jadi pencarian linear cukup dan tidak menghasilkan garbage.
 Kode: `Survival Island/Assets/LOGIC/Core_Logic/TechTreeManager.cs`, `TechNodeData.cs` (`TechUnlockTrigger`).
 
 - Isi pohon masih menunggu developer, jadi belum ada aset `TechNodeData` yang wajib dibuat. `nodes` boleh kosong.
-- **Belum ada (TODO):** `AudioManager.PlaySFX(unlockClip)` (#16) dan validasi Editor (ID unik, rantai berputar, `triggerKey`).
+- **Belum ada (TODO):** `AudioManager.PlaySFX(unlockClip)` (#16). Validasi Editor sudah ditulis sebagai `TechTreeAuditWindow` di `Assets/Editor/` (menu Survival > Audit > Tech Tree), ditambah petunjuk node anak yang ditaruh sebelum prasyaratnya di array `nodes`.
 - Belum diuji di Unity.

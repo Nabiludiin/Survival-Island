@@ -14,7 +14,7 @@ namespace SurvivalIsland
     ///
     /// CoconutPickup dan StonePickup (dasar RegrowablePickup) mendaftar lewat MarkDepleted seperti node.
     /// CountActiveStones dan ForceRegrowStones (#116) menghitung semua PickupInteractable dengan item Mat_Stone, termasuk
-    /// StonePickup, supaya batu kecil lama di scene tetap terhitung. Belum ada (TODO): ResourceAuditWindow (Editor).
+    /// StonePickup, supaya batu kecil lama di scene tetap terhitung. Kepadatan node per region diperiksa alat Editor ResourceAuditWindow (menu Survival > Audit > Resource).
     /// </summary>
     [DisallowMultipleComponent]
     public class ResourceRespawn : MonoBehaviour

@@ -473,7 +473,7 @@ namespace SurvivalIsland
                 else if (!hasGuaranteed && !table.HasEntryFor(def.kind))
                     Debug.LogWarning($"[LootSpawnerSystem] {spawnerId}: tabel {table.name} tidak punya entri untuk {def.kind} (titik {i}).", this);
             }
-            // TODO(SaveIdAuditWindow #80): pemeriksaan spawnerId bentrok antar-objek, dan tinggi titik di atas batas pasang (#91).
+            // spawnerId bentrok antar-objek dan titik di bawah batas pasang (#91) diperiksa SaveIdAuditWindow (#80).
         }
 #endif
     }

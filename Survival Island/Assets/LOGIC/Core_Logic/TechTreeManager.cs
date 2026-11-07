@@ -8,7 +8,7 @@ namespace SurvivalIsland
     /// Status node tech tree. Singleton per scene di IslandPhase, bukan ISaveable: statusnya disimpan CraftingManager
     /// di entri world_recipes. Blueprint: Core_Logic/TechTreeManager.md (#34, #77, #80). Usulan, belum ada di GDD.
     ///
-    /// Belum ada di Langkah 4 (TODO): validasi Editor rantai prasyarat.
+    /// Validasi Editor ada di TechTreeAuditWindow (menu Survival > Audit > Tech Tree).
     /// </summary>
     [DisallowMultipleComponent]
     public class TechTreeManager : MonoBehaviour

@@ -15,7 +15,7 @@ namespace SurvivalIsland
     /// Layer Interactable, collider bukan trigger (#87).
     ///
     /// Setup(NPCData) (#76), teks prompt lewat LocalizationManager (#104), serta efek VFX_ShipPickup dan suara ambil
-    /// (VFXManager, AudioManager) sudah tersambung. Belum ada (TODO): alat Editor ShipLootAudit.
+    /// (VFXManager, AudioManager) sudah tersambung. Data barang kapal diperiksa alat Editor ShipLootAudit (menu Survival > Audit > Ship Loot).
     /// </summary>
     public class ShipInteractable : MonoBehaviour, IInteractable, IPoolable
     {

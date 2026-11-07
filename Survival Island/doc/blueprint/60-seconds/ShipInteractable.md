@@ -288,4 +288,4 @@ Objek pool berada di bawah `PersistentRoot`, jadi kelas ini **tidak** menyimpan 
 - `Setup(NPCData)` belum ditulis, karena `NPCData` (#76) belum ada dan bergantung pada `NPCSkill`, `WeaponData`, serta `BarkSet`. Jalur NPC lain (`IsSubmergedNpc`, berat dari data) sudah ada.
 - Teks prompt sementara memakai teks bawaan (`Ambil {displayNameKey}`, `Tangan penuh. Setor ke Sekoci`) sampai `LocalizationManager` (#104) ditulis.
 - Ditambahkan penanda `isSetUp`: objek yang belum di-`Setup` tidak tersedia, supaya objek pool kosong tidak bisa diambil.
-- Efek `VFX_ShipPickup`, suara ambil, dan `ShipLootAudit` belum ditulis (TODO).
+- Efek `VFX_ShipPickup` dan suara ambil belum ditulis (TODO). `ShipLootAudit` sudah ditulis di `Assets/Editor/ShipLootAudit.cs` (menu Survival > Audit > Ship Loot). Kunci teks baru diperiksa kalau `LocalizationTable` sudah ada.

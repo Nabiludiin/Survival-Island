@@ -266,7 +266,7 @@ Kode: `Survival Island/Assets/LOGIC/raft/ResourceNode.cs`, `ResourceNodeData.cs`
 - **`RegionNodeMinimum`** ditambahkan untuk `resource.minNodesPerRegion`. `RegionType` ditulis di `Island_Logic/RegionType.cs` (pemilik `ZoneManager`, Langkah 6) karena sudah dipakai di sini.
 - **`ResourceRespawn.Forget(node)`** dipanggil `ResourceNode.OnDisable`, sesuai "Region dilepas" di bagian 4.
 - **Tanpa `RunSeedManager`** (scene uji), `ResourceNode` memakai aliran cadangan, supaya tidak error.
-- **Belum ada (TODO):** `VFXManager.Play` (#15), `AudioManager` (#16, sementara `AudioSource` opsional di node), notifikasi `Butuh alat lain` (#22), `NoiseEmitter.Emit(..., NoiseSourceKind.Tool)` (#49, Langkah 5), `Flammable` (#97), `CoconutPickup`, `StonePickup`, `CountActiveStones`, `ForceRegrowStones` (#43, #116, butuh `PickupInteractable` #17), dan `ResourceAuditWindow`.
+- **Belum ada (TODO):** `VFXManager.Play` (#15), `AudioManager` (#16, sementara `AudioSource` opsional di node), notifikasi `Butuh alat lain` (#22), `NoiseEmitter.Emit(..., NoiseSourceKind.Tool)` (#49, Langkah 5), `Flammable` (#97), `CoconutPickup`, `StonePickup`, `CountActiveStones`, `ForceRegrowStones` (#43, #116, butuh `PickupInteractable` #17). `ResourceAuditWindow` sudah ditulis di `Assets/Editor/` (menu Survival > Audit > Resource). Jamur dan pohon getah dibedakan lewat `nodeTypeId`, karena keduanya memakai `NodeType.MedicalHerb`.
 - Belum diuji di Unity.
 
 ## Catatan Implementasi (Sistem pendukung)
