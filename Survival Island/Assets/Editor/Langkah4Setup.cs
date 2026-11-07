@@ -480,6 +480,9 @@ namespace SurvivalIsland.EditorTools
             EditorUtility.SetDirty(map);
             var source = go.AddComponent<TerrainSurfaceSource>();
             source.layerMap = map;
+            // SurfaceBakeTool membuat nama unik baru tiap bake; peta lama dihapus supaya tidak ada aset yatim.
+            foreach (var guid in AssetDatabase.FindAssets("IslandTerrain_SurfaceMap", new[] { "Assets/Scenes" }))
+                AssetDatabase.DeleteAsset(AssetDatabase.GUIDToAssetPath(guid));
             if (!SurfaceBakeTool.Bake(source)) Debug.LogError("[Langkah4Setup] Bake peta permukaan Terrain gagal.");
         }
 
