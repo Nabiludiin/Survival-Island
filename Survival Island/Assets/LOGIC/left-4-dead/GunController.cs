@@ -110,7 +110,7 @@ namespace SurvivalIsland
             // 9.
             if (fpc != null) fpc.AddRecoil(weapon.recoilPitch, Random.Range(-weapon.recoilYaw, weapon.recoilYaw));
             // 10. Tembakan memancing zombie (#49).
-            float noise = weapon.noiseRadius > 0f ? weapon.noiseRadius : (GameManager.CurrentBalance != null ? GameManager.CurrentBalance.stealth.noiseGunshot : 40f);
+            float noise = weapon.noiseRadius > 0f ? weapon.noiseRadius : (GameManager.CurrentBalance != null ? GameManager.CurrentBalance.stealth.noiseGunshot : 35f);
             NoiseEmitter.Emit(cam.transform.position, noise, NoiseSourceKind.Gunshot);
             // 11.
             PublishAmmo();

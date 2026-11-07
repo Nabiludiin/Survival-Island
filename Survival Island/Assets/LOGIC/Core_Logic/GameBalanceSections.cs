@@ -806,7 +806,7 @@ namespace SurvivalIsland
         public float noiseWalk = 8f;
         public float noiseSprint = 20f;
         public float noiseSwim = 10f;
-        public float noiseGunshot = 40f;
+        public float noiseGunshot = 35f;
         public float noiseMelee = 8f;
         public float noiseLandingMax = 15f;
         public float noiseTickSeconds = 0.5f;

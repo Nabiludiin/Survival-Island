@@ -96,7 +96,7 @@ Peluru tidak menembus objek dan tidak punya objek fisik, sesuai `PhysicsLayers.m
 7. `magazineAmmo--`, lalu `DurabilitySystem.ApplyWear(instance, wearPerShot)`.
 8. `VFXManager.Instance.Play(muzzleFlashTag, pos, rot, muzzlePoint, viewmodel: true)`, `armsAnim.Play(AnimIds.Fire)` (#12), lalu SFX.
 9. `FirstPersonCamera.AddRecoil(recoilPitch, Random.Range(-recoilYaw, recoilYaw))`.
-10. `NoiseEmitter.Emit(GameBalanceConfig.stealth.noiseGunshot, NoiseSourceKind.Gunshot)` (#49), yang menerbitkan `NoiseEmittedEvent`.
+10. `NoiseEmitter.Emit(WeaponData.noiseRadius, NoiseSourceKind.Gunshot)` (#49). Kalau `noiseRadius` bernilai 0, pakai cadangan `GameBalanceConfig.stealth.noiseGunshot` (35), yang menerbitkan `NoiseEmittedEvent`.
 11. Terbitkan `AmmoChangedEvent` dan `WeaponFiredEvent`.
 12. Kalau `magazineAmmo == 0` dan cadangan ada, atur `autoReloadTime = Time.time + autoReloadDelay`.
 
@@ -254,7 +254,7 @@ Statistik dibaca lewat `WeaponStatCalculator.Get` saat senjata dipasang (`OnEqui
 
 Kode: `left-4-dead/GunController.cs`, `GunCore.cs`, `WeaponData.cs` (`FireMode`, `WeaponStats`), dan field `ItemData.weaponData`.
 
-- **Radius suara tembakan:** blueprint memakai `stealth.noiseGunshot` (40) di langkah 10, tetapi tabel senjata punya `noiseRadius` 35 dan skenario tes 10 menyebut 35 m. Kode memakai `WeaponData.noiseRadius`, dan `noiseGunshot` hanya cadangan kalau nilainya 0. Dicatat di "Masih terbuka" (`USULAN_TERBUKA.md`).
+- **Radius suara tembakan (keputusan developer):** Pistol 35 m lewat `WeaponData.noiseRadius`. `stealth.noiseGunshot` hanya cadangan kalau nilainya 0, dan ikut bernilai 35.
 - `WeaponStatCalculator` dan `DurabilitySystem` (#113) belum ada. Statistik disalin dari `WeaponData`, dan status `Broken` serta keausan dilewati.
 - `VFXManager` (#15) belum ada. Muzzle flash memakai `ParticleSystem` di prefab viewmodel (tanpa `Instantiate`), dan efek impact masih TODO. Peluru tetap raycast tanpa objek, jadi tidak ada peluru yang di-pool.
 - `NPCGunUser` (#76) belum ditulis. `AmmoChangedEvent.reserve` bernilai -1 untuk cadangan tak terbatas (Laser Pistol).

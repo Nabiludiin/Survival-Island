@@ -478,7 +478,7 @@ MonoBehaviour:
     noiseWalk: 8
     noiseSprint: 20
     noiseSwim: 10
-    noiseGunshot: 40
+    noiseGunshot: 35
     noiseMelee: 8
     noiseLandingMax: 15
     noiseTickSeconds: 0.5

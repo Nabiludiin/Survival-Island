@@ -9,12 +9,12 @@ Developer sudah meninjau usulan dari semua blueprint. Daftar di bawah menjadi ni
 | Topik | Kondisi sekarang |
 |---|---|
 | Posisi Lucky Machine Region 1, 2, dan 4 | Bukan keputusan desain. Ditentukan saat layout peta #88, dengan syarat di `LuckyMachine.md` |
-| Radius suara tembakan Pistol (#58, #49) | `GunController.md` langkah 10 memakai `stealth.noiseGunshot` (40 m), tetapi tabel senjata memberi `noiseRadius` 35 m dan skenario tes 10 menyebut 35 m. Kode Langkah 5 memakai `WeaponData.noiseRadius` per senjata, dengan `noiseGunshot` sebagai cadangan. Perlu dipilih salah satu |
 
 ## Keputusan utama
 
 | Topik | Keputusan |
 |---|---|
+| Radius suara tembakan Pistol | 35 m lewat `WeaponData.noiseRadius`. `stealth.noiseGunshot` hanya cadangan, dan ikut bernilai 35 |
 | Zombie setelah hari ke-60 | Per hari: jumlah +2 persen, HP +2 persen, dan damage +1 persen. Batasnya 1,5x, 2x, dan 1,5x |
 | Infeksi mencapai 100 | HP turun bertahap, dan tidak mati seketika |
 | Diary | Satu buku di shelter tua, dan bab terbuka bertahap |

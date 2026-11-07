@@ -41,7 +41,7 @@
 | `GameBalanceConfig.hazard.barrelDamage` | 100 | Damage di pusat. Sedikit lebih kecil dari Bom Rakitan (120) |
 | `GameBalanceConfig.hazard.chainDelaySeconds` | 0,15 | Jeda sebelum tong lain ikut meledak |
 | `GameBalanceConfig.hazard.fireFuseSeconds` | 2 | Jeda setelah tong mulai terbakar |
-| `GameBalanceConfig.hazard.noiseRadius` | 40 | Radius suara, sama dengan tembakan dan Bom Rakitan |
+| `GameBalanceConfig.hazard.noiseRadius` | 40 | Radius suara, sama dengan Bom Rakitan |
 
 **Dihapus:** `explosionForce` dan `AddExplosionForce`. Musuh memakai `NavMeshAgent` tanpa `Rigidbody` dinamis, dan dorongan sudah diatur `EnemyHitReaction` (`explosionKnockback`). Angka lama `explosionRadius` dan `explosionDamage` di komponen pindah ke config. `Destroy(gameObject)` juga dihapus (lihat langkah 7 di `Detonate`).
 

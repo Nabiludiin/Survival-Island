@@ -56,7 +56,7 @@ public enum NoiseSourceKind : byte { Movement, Landing, Gunshot, Melee, Tool, Co
 | `huntHintSeconds` / `huntHintRadius` | 8 / 12 m | Titik perburuan malam hari |
 | `noiseIdle` / `noiseCrouchMove` / `noiseWalk` / `noiseSprint` | 0,5 / 2 / 8 / 20 m | Radius gerak pemain |
 | `noiseSwim` | 10 m | Radius saat berenang |
-| `noiseGunshot` / `noiseMelee` | 40 / 8 m | Radius serangan |
+| `noiseGunshot` / `noiseMelee` | 35 / 8 m | Radius serangan. Tembakan memakai `WeaponData.noiseRadius`, dan `noiseGunshot` hanya cadangan |
 | `noiseLandingMax` | 15 m | Radius mendarat pada `impact01 = 1` |
 | `noiseTickSeconds` | 0,5 | Jeda kirim suara gerak |
 
@@ -113,7 +113,7 @@ Kalau berubah, panggil `LevelChanged`.
 
 Saat diam, event tidak dikirim, supaya tidak ada beban tanpa guna. Saat tidur, coroutine berhenti lewat `SleepStateChangedEvent`.
 
-**Sekali waktu:** `GunController` (#58) memanggil `Emit(noiseGunshot, Gunshot)`. `MeleeCombatSystem` memanggil `Emit(noiseMelee, Melee)`. Sistem lain memakai radius dari bagiannya sendiri.
+**Sekali waktu:** `GunController` (#58) memanggil `Emit(WeaponData.noiseRadius, Gunshot)`, dengan `noiseGunshot` sebagai cadangan. `MeleeCombatSystem` memanggil `Emit(noiseMelee, Melee)`. Sistem lain memakai radius dari bagiannya sendiri.
 
 **`AISensory.HandleNoise(NoiseEmittedEvent e)`:**
 
