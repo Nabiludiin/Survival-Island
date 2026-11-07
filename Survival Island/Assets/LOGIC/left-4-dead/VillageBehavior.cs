@@ -6,7 +6,7 @@ namespace SurvivalIsland
     /// <summary>
     /// Zombie Desa: terkaman cepat tanpa menahan pemain. SpecialZombieAI.md (#25). GDD bagian 5, Region 4: sangat cepat.
     /// Pola Runner (usulan disetujui developer). Kecepatan terkaman lewat SpeedSource.Pounce, tepat villagePounceSpeed.
-    /// SeekHiding/Submerged/Emerging milik VillageZombieHiding (#63, belum ditulis).
+    /// SeekHiding/Submerged/Emerging milik VillageZombieHiding (#63), yang memanggil CancelPounce saat mulai bersembunyi.
     /// </summary>
     public class VillageBehavior : SpecialZombieAI
     {
@@ -85,6 +85,20 @@ namespace SurvivalIsland
                     return false;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Dipanggil VillageZombieHiding saat SeekHiding (#63): terkaman yang sedang berjalan dibatalkan. Selama SeekHiding
+        /// EnemyAI.CrowdTick tidak berjalan, jadi pengali Pounce tidak akan habis sendiri dan harus dihapus di sini.
+        /// </summary>
+        public void CancelPounce()
+        {
+            if (step == PounceStep.None) return;
+            ai.SetSpeedMultiplier(SpeedSource.Pounce, 1f);
+            AttackCoordinator.ReleaseStatic(GetInstanceID());
+            step = PounceStep.None;
+            var b = Bal;
+            cooldownUntil = Time.time + (b != null ? b.villagePounceCooldownSeconds : 0f);
         }
 
         public override void OnSpawned()

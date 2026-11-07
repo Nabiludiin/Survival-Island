@@ -13,9 +13,9 @@ namespace SurvivalIsland
     /// Claude.md Pilar 3: siang hari hewan buas dengan state Wander dan Chase (teritorial), memakai NavMeshAgent.
     /// Jaguar menahan pemain lewat PlayerPinnedState (GDD bagian 3, Diterkam).
     ///
-    /// Catatan Langkah 5 (TODO): Jaguar menunggu di pohon (AmbushPerch) belum ada, jadi terkaman hanya dari tanah;
-    /// Gagak terbang (baseOffset, CrowFlock) belum ada, jadi FlockDive memakai gigitan biasa; api (#97).
-    /// Suara tanda Alert dan serangan khusus lewat ThreatAudioEmitter.PlayAlertTell (#114).
+    /// Jaguar menunggu di pohon (AmbushPerch) dan menerkam dari atas; saat Chase juga menerkam dari tanah.
+    /// Gagak terbang dengan agent.baseOffset = crowCruiseHeight, dan menukik bergantian lewat token CrowFlock.
+    /// Suara tanda Alert dan serangan khusus lewat ThreatAudioEmitter.PlayAlertTell (#114). Api (#97) masih TODO.
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent), typeof(EnemyHealth))]
     public class WildlifeAI : MonoBehaviour, IPoolable, IThreatAgent, IHitReactive, IPinAttacker
@@ -56,6 +56,24 @@ namespace SurvivalIsland
         private Coroutine fsm;
         private static readonly Collider[] chargeBuffer = new Collider[8];
 
+        // Sergapan Jaguar dari pohon (AmbushPerch, WildlifeAI.md "Terkaman Jaguar")
+        // Trigger animator naik pohon. Belum ada di AnimIds (AnimationController.md), jadi di-hash di sini.
+        private static readonly int ClimbHash = Animator.StringToHash("Climb");
+        private Animator animator;
+        private AmbushPerch perch;      // Perch yang sedang dituju atau ditempati (satu penghuni)
+        private bool onPerch;           // Di cabang: agen mati
+        private bool perchTelegraph;    // Sedang memberi tanda sebelum melompat
+        private float perchTimer;
+        private Coroutine leapRoutine;  // Lompatan parabola dari cabang
+
+        // Kawanan Gagak (FlockDive)
+        private float defaultBaseOffset;
+        private bool holdsDiveToken;
+        private Coroutine diveRoutine;
+
+        /// <summary>Jaguar di perch atau sedang melompat darinya. Agen sengaja mati (SpawnManager.Watchdog, OptimizationManager).</summary>
+        public bool IsOnPerch => onPerch || leapRoutine != null;
+
         private static WildlifeBalance Bal => GameManager.CurrentBalance != null ? GameManager.CurrentBalance.wildlife : null;
 
         // ---------------------------------------------------------------- IThreatAgent
@@ -81,6 +99,8 @@ namespace SurvivalIsland
             attack = GetComponent<EnemyAttack>();
             emitter = GetComponent<ThreatAudioEmitter>();
             data = health.Data as AnimalData;
+            animator = GetComponentInChildren<Animator>();
+            defaultBaseOffset = agent.baseOffset;
             path = new NavMeshPath();
             if (data == null) Debug.LogError($"[WildlifeAI] '{name}' butuh AnimalData di EnemyHealth.", this);
         }
@@ -118,7 +138,10 @@ namespace SurvivalIsland
                 float tick = b != null ? b.tickSeconds : 0.25f;
                 yield return new WaitForSeconds(tick);
                 if (dead) yield break;
-                if (reactionPaused || b == null || data == null || !agent.enabled || !agent.isOnNavMesh) continue;
+                if (reactionPaused || b == null || data == null) continue;
+                // Jaguar di cabang: agen mati, jadi tick khusus sebelum syarat NavMesh.
+                if (onPerch) { TickPerch(b, tick); continue; }
+                if (leapRoutine != null || !agent.enabled || !agent.isOnNavMesh) continue;
                 stateTimer += tick;
                 switch (State)
                 {
@@ -137,6 +160,8 @@ namespace SurvivalIsland
 
         private void SetState(AnimalState s)
         {
+            // Jaguar yang batal menuju perch (misalnya melihat pemain di jalan) melepas tempatnya.
+            if (s != AnimalState.Wander && perch != null && !onPerch && leapRoutine == null) ReleasePerch();
             State = s;
             stateTimer = 0f;
             var b = Bal;
@@ -178,9 +203,17 @@ namespace SurvivalIsland
         {
             if (CheckAggro(b)) return;
             if (agent.pathPending) return;
+            // Jaguar menuju perch: tiba di kaki pohon, lalu naik.
+            if (perch != null)
+            {
+                if (!perch.isActiveAndEnabled) { ReleasePerch(); return; }
+                if (agent.remainingDistance <= agent.stoppingDistance + 1f) ClimbPerch();
+                return;
+            }
             if (!agent.hasPath || agent.remainingDistance < 0.5f)
             {
                 if (Time.time < wanderWaitUntil) return;
+                if (TryClaimPerch()) return;
                 // Keliling dalam wanderRadius dari homePoint, tunggu 2 sampai 6 detik. Acak ini tidak memengaruhi save.
                 Vector2 r = Random.insideUnitCircle * data.wanderRadius;
                 if (NavMesh.SamplePosition(homePoint + new Vector3(r.x, 0f, r.y), out var hit, 4f, agent.areaMask)) agent.SetDestination(hit.position);
@@ -247,6 +280,8 @@ namespace SurvivalIsland
                 if (unreachableTimer >= b.unreachableConfirmSeconds) { SetState(AnimalState.TargetUnreachable); return; }
             }
             // 4. Serangan khusus atau gigitan.
+            // Gagak: hanya menyerang lewat tukikan (jarak mendatar, karena tubuhnya setinggi crowCruiseHeight).
+            if (data.attackKind == AnimalAttackKind.FlockDive) { TryBeginDive(b, t); return; }
             float d = Vector3.Distance(transform.position, t.Position);
             if (data.attackKind == AnimalAttackKind.Pounce && Time.time >= specialCooldownUntil && d <= b.groundPounceDistance && HasLineOfSight(t.AimPoint))
             { BeginSpecial(); return; }
@@ -276,6 +311,7 @@ namespace SurvivalIsland
             }
             if (data.attackKind == AnimalAttackKind.Pounce) TickPounce(b, t);
             else if (data.attackKind == AnimalAttackKind.Charge) TickCharge(b, t);
+            else if (data.attackKind == AnimalAttackKind.FlockDive) { if (diveRoutine == null) { attackStep = 0; SetState(AnimalState.Chase); } }   // Tukikan berjalan di DiveRoutine
             else { attackStep = 0; SetState(AnimalState.Chase); }
         }
 
@@ -296,22 +332,7 @@ namespace SurvivalIsland
                     agent.SetDestination(chargeTarget);
                     break;
                 case 2:
-                    if (t != null && Vector3.Distance(transform.position, t.Position) <= b.pounceHitRadius)
-                    {
-                        var atk = data.primaryAttack;
-                        if (t.Damageable != null && atk != null)
-                            t.Damageable.TakeDamage(MakeHit(atk.damage, t));
-                        if (t.Kind == TargetKind.Player && PlayerPinnedState.Instance != null)
-                        {
-                            isPinning = true;
-                            pounceDamageTaken = 0f;
-                            pinDamageTimer = b.pinDamageInterval;
-                            if (PlayerPinnedState.Instance.TryPin(this)) { attackStep = 4; if (agent.isOnNavMesh) agent.ResetPath(); return; }
-                            isPinning = false;
-                        }
-                        EndSpecial(b.pounceCooldownSeconds);   // Ditolak: mundur, jeda ulang berjalan
-                        return;
-                    }
+                    if (TryPounceHit(b, t)) return;
                     if (stateTimer >= b.pounceSeconds) { attackStep = 3; stateTimer = 0f; ApplyStateSpeed(0f); }   // Meleset
                     break;
                 case 3:
@@ -327,6 +348,212 @@ namespace SurvivalIsland
                     }
                     break;
             }
+        }
+
+        /// <summary>
+        /// Kena pemain dalam pounceHitRadius: damage, lalu PlayerPinnedState.TryPin (#110). Ditolak: mundur, jeda ulang
+        /// berjalan. Dipakai terkaman dari tanah dan dari perch. Mengembalikan false kalau tidak kena.
+        /// </summary>
+        private bool TryPounceHit(WildlifeBalance b, ITargetable t)
+        {
+            if (t == null || Vector3.Distance(transform.position, t.Position) > b.pounceHitRadius) return false;
+            var atk = data.primaryAttack;
+            if (t.Damageable != null && atk != null)
+                t.Damageable.TakeDamage(MakeHit(atk.damage, t));
+            if (t.Kind == TargetKind.Player && PlayerPinnedState.Instance != null)
+            {
+                isPinning = true;
+                pounceDamageTaken = 0f;
+                pinDamageTimer = b.pinDamageInterval;
+                if (PlayerPinnedState.Instance.TryPin(this)) { attackStep = 4; if (agent.enabled && agent.isOnNavMesh) agent.ResetPath(); return true; }
+                isPinning = false;
+            }
+            EndSpecial(b.pounceCooldownSeconds);   // Ditolak: mundur, jeda ulang berjalan
+            return true;
+        }
+
+        // ---------------------------------------------------------------- Sergapan dari pohon (AmbushPerch)
+
+        /// <summary>Saat Wander, Jaguar menuju perch kosong terdekat. Tafsiran: hanya perch di dalam wanderRadius dari homePoint.</summary>
+        private bool TryClaimPerch()
+        {
+            if (data.attackKind != AnimalAttackKind.Pounce || Time.time < specialCooldownUntil) return false;
+            var p = AmbushPerch.FindNearestFree(transform.position, homePoint, data.wanderRadius);
+            // Perch dipakai Jaguar lain: FindNearestFree melewatinya; tidak ada perch = tetap keliling di tanah.
+            if (p == null || !p.TryOccupy(this)) return false;
+            var b = Bal;
+            if (!NavMesh.SamplePosition(p.BasePosition, out var hit, b != null ? b.targetSampleRadius : 2f, agent.areaMask)) { p.Release(this); return false; }
+            perch = p;
+            agent.SetDestination(hit.position);
+            return true;
+        }
+
+        /// <summary>Tiba di kaki pohon: agent.enabled = false, lalu naik ke cabang lewat animasi.</summary>
+        private void ClimbPerch()
+        {
+            if (agent.isOnNavMesh) agent.ResetPath();
+            agent.enabled = false;
+            onPerch = true;
+            perchTelegraph = false;
+            perchTimer = 0f;
+            // Tafsiran: posisi langsung dipindah ke cabang, gerak naiknya diserahkan ke klip animasi "Climb".
+            transform.SetPositionAndRotation(perch.PerchPosition, perch.PerchRotation);
+            if (animator != null && animator.isActiveAndEnabled) animator.SetTrigger(ClimbHash);
+        }
+
+        private void TickPerch(WildlifeBalance b, float tick)
+        {
+            if (perch == null || !perch.isActiveAndEnabled) { DropFromPerch(); return; }
+            var t = Target;
+            if (!perchTelegraph)
+            {
+                // Pemain dalam pounceTriggerRadius dan tidak terhalang: mulai tanda.
+                if (t == null || Time.time < specialCooldownUntil) return;
+                if ((t.Position - transform.position).sqrMagnitude > b.pounceTriggerRadius * b.pounceTriggerRadius) return;
+                if (!HasLineOfSight(t.AimPoint)) return;
+                CurrentTarget = t;
+                perchTelegraph = true;
+                perchTimer = 0f;
+                // Tanda selama pounceTelegraphSeconds: geraman (#114) dan daun bergoyang.
+                if (emitter != null) emitter.PlayAlertTell();
+                perch.PlayTell();
+                return;
+            }
+            perchTimer += tick;
+            if (t != null)
+            {
+                Vector3 to = t.Position - transform.position; to.y = 0f;
+                if (to.sqrMagnitude > 0.001f) transform.rotation = Quaternion.LookRotation(to);
+            }
+            if (perchTimer < b.pounceTelegraphSeconds) return;
+            if (t == null) { perchTelegraph = false; return; }
+            // Lompat menuju posisi pemain saat tanda selesai.
+            Vector3 start = transform.position;
+            Vector3 target = t.Position;
+            perch.Release(this);
+            perch = null;
+            onPerch = false;
+            perchTelegraph = false;
+            leapRoutine = StartCoroutine(LeapRoutine(start, target, b.pounceSeconds));
+        }
+
+        /// <summary>Lompat lewat kurva parabola selama pounceSeconds, lalu mendarat di NavMesh (SamplePosition + Warp).</summary>
+        private IEnumerator LeapRoutine(Vector3 start, Vector3 target, float duration)
+        {
+            // Kurva Bezier kuadrat: titik kontrol di tengah mendatar, setinggi cabang. Lompatan keluar dulu, lalu turun.
+            Vector3 control = new Vector3((start.x + target.x) * 0.5f, start.y, (start.z + target.z) * 0.5f);
+            float dur = Mathf.Max(0.05f, duration);
+            for (float t = 0f; t < dur; t += Time.deltaTime)
+            {
+                float u = t / dur;
+                float iu = 1f - u;
+                transform.position = iu * iu * start + 2f * iu * u * control + u * u * target;
+                yield return null;
+            }
+            transform.position = target;
+            leapRoutine = null;
+            var b = Bal;
+            float sample = b != null ? b.targetSampleRadius : 2f;
+            if (!NavMesh.SamplePosition(target, out var hit, sample, data != null ? data.traversalMask : NavMesh.AllAreas))
+            {
+                Despawn(DespawnReason.OffNavMesh);
+                yield break;
+            }
+            agent.enabled = true;
+            agent.Warp(hit.position);
+            if (!agent.isOnNavMesh) { Despawn(DespawnReason.OffNavMesh); yield break; }
+            agent.isStopped = false;
+            SetState(AnimalState.Attack);
+            if (b == null) { attackStep = 0; yield break; }
+            attackStep = 2;
+            if (TryPounceHit(b, Target)) yield break;
+            // Meleset: diam pounceMissStunSeconds sebagai celah, lalu jeda ulang pounceCooldownSeconds (case 3).
+            attackStep = 3;
+            stateTimer = 0f;
+            ApplyStateSpeed(0f);
+        }
+
+        /// <summary>
+        /// Turun dari perch tanpa menerkam (malam, kena damage pemain, atau perch hilang). Tafsiran: Jaguar langsung
+        /// dipindah ke kaki pohon di NavMesh.
+        /// </summary>
+        private void DropFromPerch()
+        {
+            if (leapRoutine != null) { StopCoroutine(leapRoutine); leapRoutine = null; }
+            Vector3 foot = perch != null ? perch.BasePosition : transform.position;
+            ReleasePerch();
+            onPerch = false;
+            perchTelegraph = false;
+            if (agent.enabled) return;   // Masih di tanah (baru menuju perch)
+            var bal = GameManager.CurrentBalance;
+            float sample = bal != null ? bal.spawn.sampleRadius : 6f;
+            if (!NavMesh.SamplePosition(foot, out var hit, sample, data != null ? data.traversalMask : NavMesh.AllAreas)
+                && !NavMesh.SamplePosition(transform.position, out hit, sample, NavMesh.AllAreas))
+            {
+                Despawn(DespawnReason.OffNavMesh);
+                return;
+            }
+            agent.enabled = true;
+            agent.Warp(hit.position);
+            if (!agent.isOnNavMesh) { Despawn(DespawnReason.OffNavMesh); return; }
+            agent.isStopped = false;
+        }
+
+        private void ReleasePerch()
+        {
+            if (perch != null) perch.Release(this);
+            perch = null;
+        }
+
+        // ---------------------------------------------------------------- Kawanan Gagak (FlockDive)
+
+        /// <summary>Pemegang token CrowFlock menukik ke crowDiveHeight, mematuk, lalu naik kembali dan melepas token.</summary>
+        private void TryBeginDive(WildlifeBalance b, ITargetable t)
+        {
+            var atk = data.primaryAttack;
+            if (t == null || atk == null || attack == null || attack.Phase != AttackPhase.None) return;
+            Vector3 flat = t.Position - transform.position; flat.y = 0f;
+            if (flat.sqrMagnitude > atk.range * atk.range) return;
+            if (!CrowFlock.TryAcquire(groupId, GetInstanceID(), b.maxDiversAtOnce)) return;
+            holdsDiveToken = true;
+            SetState(AnimalState.Attack);
+            attackStep = 1;
+            diveRoutine = StartCoroutine(DiveRoutine(b.crowCruiseHeight, b.crowDiveHeight, b.crowDiveSeconds));
+        }
+
+        private IEnumerator DiveRoutine(float cruise, float dive, float seconds)
+        {
+            // Turun ke crowDiveHeight dalam crowDiveSeconds. Tafsiran: naik kembali memakai durasi yang sama.
+            float dur = Mathf.Max(0.05f, seconds);
+            for (float t = 0f; t < dur; t += Time.deltaTime) { agent.baseOffset = Mathf.Lerp(cruise, dive, t / dur); yield return null; }
+            agent.baseOffset = dive;
+            // Mematuk lewat EnemyAttack (#109). Melee pemain hanya mengenai Gagak saat rendah; peluru selalu bisa.
+            var target = Target;
+            if (target != null && attack != null && attack.TryStartAttack(target))
+                while (attack.Phase != AttackPhase.None) yield return null;
+            for (float t = 0f; t < dur; t += Time.deltaTime) { agent.baseOffset = Mathf.Lerp(dive, cruise, t / dur); yield return null; }
+            agent.baseOffset = cruise;
+            diveRoutine = null;
+            ReleaseDiveToken();
+            if (dead) yield break;
+            attackStep = 0;
+            if (State == AnimalState.Attack) SetState(AnimalState.Chase);
+        }
+
+        /// <summary>Hentikan tukikan. restoreCruise = kembali ke ketinggian terbang (tidak dipakai saat mati).</summary>
+        private void StopDive(bool restoreCruise)
+        {
+            if (diveRoutine != null) { StopCoroutine(diveRoutine); diveRoutine = null; }
+            ReleaseDiveToken();
+            var b = Bal;
+            if (restoreCruise && data != null && data.attackKind == AnimalAttackKind.FlockDive && b != null) agent.baseOffset = b.crowCruiseHeight;
+        }
+
+        private void ReleaseDiveToken()
+        {
+            if (!holdsDiveToken) return;
+            CrowFlock.Release(groupId, GetInstanceID());
+            holdsDiveToken = false;
         }
 
         // Serudukan Babi: tujuan terkunci di garis lurus, pemain bisa menghindar ke samping.
@@ -462,6 +689,9 @@ namespace SurvivalIsland
         /// <summary>GDD bagian 3: hewan kembali ke sarang saat malam.</summary>
         private void EnterFlee()
         {
+            // WildlifeAI.md "Malam hari" langkah 1: lepaskan AmbushPerch dan token tukikan.
+            if (IsOnPerch || perch != null) DropFromPerch();
+            StopDive(true);
             attackStep = 0;
             if (attack != null) attack.CancelAttack();
             if (isPinning && PlayerPinnedState.Instance != null) PlayerPinnedState.Instance.ReleaseByAttacker(this, PinReleaseReason.AttackerGone);
@@ -498,6 +728,9 @@ namespace SurvivalIsland
                     PlayerPinnedState.Instance.ReleaseByAttacker(this, PinReleaseReason.AttackerDamaged);
                 return;
             }
+            // Tafsiran: Jaguar di perch yang dilukai pemain turun ke kaki pohon, lalu bereaksi seperti di tanah.
+            if (onPerch) DropFromPerch();
+            if (leapRoutine != null) return;   // Sedang melompat: pendaratan yang menentukan
             // Anti-eksploit: dilukai saat TargetUnreachable langsung kembali dengan kecepatan kejar.
             if (State == AnimalState.TargetUnreachable)
             {
@@ -517,6 +750,11 @@ namespace SurvivalIsland
             if (isPinning && PlayerPinnedState.Instance != null) PlayerPinnedState.Instance.ReleaseByAttacker(this, PinReleaseReason.AttackerGone);
             isPinning = false;
             if (fsm != null) { StopCoroutine(fsm); fsm = null; }
+            // Perch dan token tukikan dilepas; tubuh jatuh lewat ragdoll (#95).
+            if (leapRoutine != null) { StopCoroutine(leapRoutine); leapRoutine = null; }
+            ReleasePerch();
+            onPerch = false;
+            StopDive(false);
             // Mayat, bangkai, dan pengembalian ke pool milik EnemyHitReaction dan AnimalCarcass (#95, #61).
         }
 
@@ -558,6 +796,13 @@ namespace SurvivalIsland
             homePoint = transform.position;
             reaggroUntil = 0f;
             specialCooldownUntil = 0f;
+            perch = null;
+            onPerch = false;
+            perchTelegraph = false;
+            holdsDiveToken = false;
+            // agent.baseOffset ke nilai prefab, lalu Gagak terbang setinggi crowCruiseHeight (usulan disetujui developer).
+            agent.baseOffset = defaultBaseOffset;
+            if (data != null && data.attackKind == AnimalAttackKind.FlockDive && bal != null) agent.baseOffset = bal.wildlife.crowCruiseHeight;
             if (!NavMesh.SamplePosition(transform.position, out var hit, bal != null ? bal.spawn.sampleRadius : 6f, NavMesh.AllAreas))
             {
                 Despawn(DespawnReason.OffNavMesh);
@@ -581,6 +826,12 @@ namespace SurvivalIsland
             if (fsm != null) { StopCoroutine(fsm); fsm = null; }
             if (isPinning && PlayerPinnedState.Instance != null) PlayerPinnedState.Instance.ReleaseByAttacker(this, PinReleaseReason.AttackerGone);
             isPinning = false;
+            // Perch dan token Gagak dikosongkan (WildlifeAI.md "Objek pool").
+            if (leapRoutine != null) { StopCoroutine(leapRoutine); leapRoutine = null; }
+            ReleasePerch();
+            onPerch = false;
+            perchTelegraph = false;
+            StopDive(false);
             if (ThreatSystem.Instance != null) ThreatSystem.Instance.Unregister(this);
             if (agent.enabled) agent.enabled = false;
             groupId = 0;
